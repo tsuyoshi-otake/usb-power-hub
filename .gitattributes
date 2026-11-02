@@ -1,0 +1,16 @@
+# Design sources, documentation, BOM/CPL and QA records are portable text.
+# Keep checkout bytes identical on every platform so SHA256SUMS.txt in a
+# manufacturing release (CLAUDE.md Section 2) stays meaningful. The system
+# gitconfig on this box sets core.autocrlf=true; this file overrides it.
+* text=auto eol=lf
+
+# Binary manufacturing, mechanical and preview artifacts: never convert.
+*.zip  binary
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.stl  binary
+*.3mf  binary
+*.step binary
+*.stp  binary
+*.glb  binary

@@ -1,0 +1,31 @@
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+
+# KiCad generated and local-state files (ECAD tool fixed by Rev0.1 D2)
+*-backups/
+*.bak
+*.lck
+~*.lck
+*.kicad_prl
+fp-info-cache
+_autosave-*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Python bytecode from verification tools
+__pycache__/
+*.py[cod]
+
+# Firmware build output
+firmware/build/
+
+# Disposable candidate exports (CLAUDE.md Section 2: never orderable).
+# Approved releases live under manufacturing/releases/ and stay tracked.
+manufacturing/working/*
