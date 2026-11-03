@@ -107,7 +107,8 @@ usb-power-hub/
 │  ├─ parts.md                  # per-part selection and sourcing record
 │  └─ verification.md           # how each requirement is proven
 ├─ design/
-│  ├─ circuit/                  # CIRCUIT_DESIGN_Rev<X.Y>.md — the schematic, as a document
+│  ├─ circuit/                  # CIRCUIT_DESIGN_Rev<X.Y>.md — the schematic, as a document,
+│  │                            #   and its _calc.py, which reproduces the document's numbers
 │  ├─ ecad/                     # captured schematic + PCB
 │  │  ├─ source/                #   exported source snapshots
 │  │  ├─ libraries/             #   project-only symbols and footprints
@@ -281,8 +282,9 @@ Place parts to minimize crossings before drawing traces.
 - Decouplers go at the supply pins, not wherever space remains.
 - Keep USB parts close to their receptacle.
 - **Keep the analog front end (shunts, range FETs, amps, ADC, Vref) in one
-  contiguous block, away from the buck converter, the hub, and LED switching.**
-- Keep the buck converter's switching loop small and away from the ADC.
+  contiguous block, away from the MAU104 DC-DC module, the hub, and LED switching.**
+- Keep the MAU104's input and output loops (≈ 100 kHz switching) small and away from
+  the ADC.
 - Leave optical inspection access to Pin 1 and polarity marks.
 - Every mounted body and paste aperture on Top.
 
@@ -316,7 +318,7 @@ USB 2.0 high-speed:
   layer where practical.
 - **Never split the reference plane under a pair.** Stitch GND at every layer
   transition near the pair.
-- Keep pairs away from the buck switch node, the shunt ladder, and LED drive.
+- Keep pairs away from the MAU104, the shunt ladder, and LED drive.
 - No stubs. No test points on the pairs.
 
 Power:
@@ -364,8 +366,8 @@ This board is an instrument. These are functional requirements, not polish.
   guarantees this, because each amplifier senses only its own shunt (Rev0.3 §5).
 - Zero-point calibration is a **functional requirement**, not a feature. Without
   it, the OP07 offset and the deliberate pedestal current that keeps the current
-  mirror out of its dead zone (Rev0.3 §4.1) exceed the 0.1 µA resolution by tens of
-  LSB.
+  mirror out of its dead zone (Rev0.3 §4.1) put up to 8 LSB (LOW, MID) or 13 LSB (HIGH)
+  on the zero reading, against a 0.1 µA resolution of 1 LSB.
 
 ---
 
@@ -523,7 +525,8 @@ summary; where the two differ, `product.md` wins and this list is the defect.
   (D13, REQ-MFG-01).
 - **Sourcing (D13, user):** machine-placed parts are JLCPCB Basic and in stock;
   hand-soldered parts are in stock at Akizuki; never an Extended-only PCBA
-  (REQ-MFG-05). Two Preferred Extended parts await the user (OI-30).
+  (REQ-MFG-05). Avoid special or hard-to-source parts; keep part types and count low.
+  Two Preferred Extended parts await the user (OI-30).
 - Port power comes from **J4, a power-only 5 V USB-C input**. J1 carries data and
   logic power only, and there is no USB-PD (D14, superseding D1).
 - Downstream presents Rp on both CC pins only while its port is ON, so the DUT

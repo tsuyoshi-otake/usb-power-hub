@@ -23,6 +23,17 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   (e.g. `TMUX6109`, 2026-11-03) is "not stocked", not "stocked under another
   name".
 
+## Akizuki (akizukidenshi.com)
+
+- **Search:** `https://akizukidenshi.com/catalog/goods/search.aspx?keyword=<kw>&search=x`.
+  Each hit is a `<dl class="block-cart-i--goods ...">` block; the product link is
+  `/catalog/g/g<digits>/` with the name in `title=`, price in `block-cart-i--price`, and the
+  purchasable quantity in `block-cart-i--available_purchase` (the page's 通販購入可能数).
+  **Product page:** `/catalog/g/g<digits>/`; its documents are under `/goodsaffix/*.pdf`.
+  Space requests >= 2 s apart and back off on errors. Verified 2026-11-03 on the five
+  Akizuki rows of `requirements/parts.md`. No committed tool reads Akizuki yet, so stock is
+  rechecked by hand at order time (V-MFG-02).
+
 ## Datasheet text extraction
 
 - Some vendor PDFs are encrypted (CH224Q, USB2514B on 2026-11-03). `pypdf` then
@@ -49,3 +60,30 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   ("two crystals, a consequence of D11") was withdrawn after an independent
   verifier showed D11 forces only a 24 MHz hub clock; it is now P13 and OI-2 is
   open again.
+
+## Shell and Python on this box
+
+- **`python -I` ignores `PYTHONIOENCODING`.** Non-ASCII output then comes out in the console
+  code page and is garbled (`§` printed as mojibake on 2026-11-03). Call
+  `sys.stdout.reconfigure(encoding="utf-8")` in the script, or keep a script's output ASCII,
+  as `design/circuit/CIRCUIT_DESIGN_Rev0.3_calc.py` does.
+- **Pass multi-line Python through a quoted heredoc (`python -I - <<'EOF'`) or a file written
+  with the Write tool, never through `-c` with mixed quotes.** A `-c` string holding both quote
+  kinds failed with "unexpected EOF while looking for matching `''" (2026-11-03); the
+  quoted-heredoc form ran every non-ASCII edit of this session correctly.
+- **In that heredoc, a doubled backslash arrives as one.** A Python literal written as
+  `"<bs><bs>n"` reached Python as `"<bs>n"` and put a real newline into the generated file
+  (SyntaxError, 2026-11-03). Build a literal backslash with `chr(92)`, or write the script with
+  the Write tool. (`<bs>` stands for a backslash here, so this rule does not depend on how it
+  is itself pasted.)
+
+## Design documents
+
+- **Every derived number in a design document comes from one committed script, and every
+  column uses one basis.** Verified 2026-11-03: writing `CIRCUIT_DESIGN_Rev0.3_calc.py`
+  exposed full-scale currents computed with the pedestal and thresholds without it (366 µA
+  vs 365 µA), which no reviewer of the document alone had flagged.
+- **Quote the user verbatim, typos included, and quote every message that set the rule.**
+  Verified 2026-11-03: the Rev0.3 header had "corrected" 「デカくい」 to 「デカい」 and dropped one
+  line of the user's message; an independent verifier caught it.
+

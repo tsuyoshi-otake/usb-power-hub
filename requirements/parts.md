@@ -16,6 +16,9 @@ parts meet them.
   (akizukidenshi.com).
 - **Never** an Extended-only PCBA. Where no allowed part does a job, the function is reduced
   (circuit Rev0.3 §7.4).
+- **Avoid special or hard-to-source parts**, and **reduce part types and count** (the user's
+  restated list, 2026-11-03; quoted in circuit Rev0.3's header). One part per value and one
+  voltage rating per value: 38 machine-placed types.
 - **Pending the user (OI-30):** two **Preferred Extended** parts, marked ◆ below. Preferred
   Extended parts have no feeder setup fee in JLCPCB Economic PCBA, but they are labelled
   Extended. If the user rejects them, circuit Rev0.3 §9 gives the fallback.
@@ -36,10 +39,18 @@ parts meet them.
   - Recheck it by hand at order time (V-MFG-02).
 - **Datasheet facts:** text extracted from the manufacturer PDF, 2026-11-03. Only parameters
   marked *verified* were read; a part's other properties are unconfirmed.
+  - JLCPCB part-library copies (fetched through the assembly-parts API; the signed URLs
+    expire): OP07CDR TI SLOS099F (Jan 2014); AO3401A AOS Rev 3.1 (Dec 2023); AO3400A AOS
+    Rev 3 (Dec 2011); STM32F103C8T6 ST DS5319 Rev 18 (Mar 2022); LM393DR2G onsemi LM393/D
+    Rev 25; SRV05-4 and SMBJ6.5CA Zhuhai Hongjiacheng Rev 2.1; AMS1117-3.3 AMS (no revision
+    marking); CJ431 JSCJ "M, Oct 2017".
+  - Other sources: CH334/CH335 datasheet V2.5 (WCH; copy at
+    `https://akizukidenshi.com/goodsaffix/CH334_335.pdf`); MAU104 Minmax REV:0 2005/04; the
+    Akizuki product pages for the module and shunt facts.
 - **Recheck** immediately before upload and again before payment (CLAUDE.md §4.1):
 
 ```
-python tools/jlc_stock.py C8734 C7420376 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25123 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25756 C26083 C25076 C25077 C25765 C1664 C1530 C1562 C15850 C45783 C19702 C307331 C1525 C52923 C1523 C15195
+python tools/jlc_stock.py C8734 C7420376 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25756 C26083 C25076 C25077 C1664 C1530 C1562 C15850 C45783 C307331 C52923 C1523 C15195
 ```
 
 Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it, or **Akizuki**
@@ -164,6 +175,8 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`.
 - *Verified (AMS1117):*
   - Dropout 1.1 / 1.3 V at 800 mA; 90 °C/W.
   - Minimum load 5 / 10 mA; I<sub>q</sub> 5 / 11 mA; output 3.251–3.349 V.
+  - *To confirm:* the output-capacitor stability requirement (capacitance and ESR range) in
+    the datasheet, against the 22 µF ceramic on V3V3.
 - *Verified (CJ431):*
   - 2.475 / 2.5 / 2.525 V; catalogue lists the ±0.5 % rank.
   - I<sub>K(min)</sub> 0.45 / 1 mA.
@@ -178,15 +191,13 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`.
 
 | Value | Use | LCSC | Package | Stock | Note |
 |---|---|---|---|---:|---|
-| 510 Ω ±1 % ±100 ppm | R_L shunt | C17734 | 0805 | 2,198,725 | 0.125 W; stuck-LOW 47 mW |
-| 510 Ω | U3 CJ431 feed from V3V3 | C25123 | 0402 | 3,044,511 | — |
+| 510 Ω ±1 % ±100 ppm | R_L shunt; U3 CJ431 feed from V3V3 | C17734 | 0805 | 2,198,725 | 0.125 W; stuck-LOW 47 mW |
 | 100 Ω ±1 % ±100 ppm | Mirror R1 (×6) | C25076 | 0402 | 6,307,501 | — |
 | 1.5 kΩ ±1 % ±100 ppm | R_OUT LOW, MID (×4); D+ pull-up; U4 feed | C25867 | 0402 | 1,516,858 | — |
 | 2.4 kΩ ±1 % ±100 ppm | R_OUT HIGH (×2) | C22940 | 0603 | 1,117,935 | — |
-| 10 kΩ | +IN guard (×6), EN series, DIS pull-up, V_J4 divider | C25744 | 0402 | 16,208,659 | — |
-| 15 kΩ | U4 divider (33 k / 15 k → 8.0 V) | C25756 | 0402 | 2,494,056 | — |
-| 20 kΩ | V_J4 divider top | C25765 | 0402 | 2,746,653 | — |
-| 33 kΩ | Rp (×4); U4 divider | C25779 | 0402 | 2,369,774 | No 36 kΩ is Basic |
+| 10 kΩ | +IN guard (×6), EN series, DIS pull-up | C25744 | 0402 | 16,208,659 | — |
+| 15 kΩ | U4 divider (33 k / 15 k → 8.0 V); V_J4 divider bottom | C25756 | 0402 | 2,494,056 | — |
+| 33 kΩ | Rp (×4); U4 divider; V_J4 divider top (5.5 V → 1.72 V) | C25779 | 0402 | 2,369,774 | No 36 kΩ is Basic |
 | 5.1 kΩ | Rd on J1, J4 CC (×4) | C25905 | 0402 | 4,938,551 | — |
 | 100 kΩ | EN_G pull-down, hold pull-ups, event series | C25741 | 0402 | 7,841,979 | — |
 | 1 MΩ | Bypass gate return (×4), pedestal R_INJ (×6) | C26083 | 0402 | 2,794,209 | — |
@@ -195,11 +206,9 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`.
 | 330 pF C0G | C_N on R_OUT LOW, MID | C1664 | 0603 | 691,081 | — |
 | 220 pF X7R | C_N on R_OUT HIGH | C1530 | 0402 | 1,340,537 | No Basic C0G 220 pF found |
 | 33 pF C0G | Y1 load capacitors | C1562 | 0402 | 1,442,028 | Adjust at capture |
-| 10 µF 25 V X5R | Port capacitor (×2); bulk | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
-| 22 µF 25 V | VBUS_IN bulk; V12F filter (2 ×) | C45783 | 0805 | 3,579,516 | — |
-| 10 µF 10 V | VDDA, V3V3 | C19702 | 0603 | 11,556,274 | — |
-| 100 nF 50 V | Decoupling on V12F rail | C307331 | 0402 | 20,893,452 | — |
-| 100 nF 16 V | Decoupling ≤ 5 V | C1525 | 0402 | 35,080,432 | — |
+| 10 µF 25 V X5R | Port capacitor (×2); VDDA; bulk | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
+| 22 µF 25 V | VBUS_IN bulk; V12F filter (2 ×); V3V3 (AMS1117 output) | C45783 | 0805 | 3,579,516 | — |
+| 100 nF 50 V | All decoupling (one rating for every rail) | C307331 | 0402 | 20,893,452 | — |
 | 1 µF 25 V | Regulator, CJ431 | C52923 | 0402 | 10,715,829 | — |
 | 1 nF / 10 nF | Comparator hysteresis, soft-start Miller | C1523 / C15195 | 0402 | 2,345,349 / 5,868,443 | Values set at capture |
 

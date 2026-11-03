@@ -84,3 +84,54 @@ Section 13 (board) only once verified.
   vendor data. Nothing is built or measured; the stock figures will drift; the
   P13 note "whether RP2040 USB boot accepts another XOSC frequency" is
   unconfirmed because the RP2040 datasheet was not fetched in this session.
+
+## 2026-11-03 - Rev0.3 independent verification, round 1: two failures
+
+- **Symptom.** A fresh-context rubric verifier (`.claude/goal-loop/rev03-consistency/rubric.md`,
+  8 criteria, run on the working tree after `1452cb8`) passed C1, C2, C4, C6, C7 and C8.
+  Live recheck: all 42 LCSC codes returned their recorded class, Basic or Preferred Extended,
+  and none returned plain Extended. It failed two criteria:
+  - C3: CLAUDE.md §5.2/§5.3 (lines 285, 286, 320) still told the layout to keep away from
+    "the buck converter" / "buck switch node"; Rev0.3 has no buck (D14).
+  - C5: Rev0.3 §4 said "the ratio of 13,000 between full scale and the LSB"; 1.37 A /
+    0.105 µA is 1.3 × 10^7.
+  - Side note (C6): the header quote of the user read 「デカいパーツ」; the user wrote
+    「デカくいパーツ」, and the quote also dropped the line 「秋月で購入できるパーツに限って」.
+- **Earlier in the same pass (before the verifier).** Writing the calculation script
+  exposed a basis mismatch: full-scale figures included the pedestal, but the up-range
+  thresholds did not (366 µA vs 365 µA, 18.7 vs 18.6 mA; HIGH's 1.16 A already included it).
+  Every threshold-derived figure now includes it: bottoms 292 µA / 14.9 mA, 5.5 % / 6.8 %,
+  ≤ 7.8 %, MID burden 0.189 V. The script is committed beside the document as
+  `design/circuit/CIRCUIT_DESIGN_Rev0.3_calc.py`.
+
+## 2026-11-03 - Rev0.3 verification, round 2: pass; type pooling; the user's restated rule
+
+- **Fix for round 1.** CLAUDE.md §5.2/§5.3 now name the MAU104 instead of a buck. The
+  §4 dynamic-range sentence now gives 1.3 × 10^7 = 4096 × 51 × 62.5. The header quotes the
+  user verbatim: 「秋月で購入できるパーツに限って」 and 「デカくいパーツ」.
+- **New input from the user.** Mid-loop, the user pasted a six-point rule list
+  (「部品はBasic Partsのみ」 … 「パーツの種類や点数は減らすこと」) and asked whether the design
+  follows it. Answer given: rule 1 is broken by the two Preferred Extended parts (OI-30),
+  rules 2 and 3 are met, and rules 4–6 only partly. The list is recorded in the Rev0.3 header,
+  D13, REQ-MFG-05, parts.md and CLAUDE.md §10.3. OI-30 is put to the user again.
+- **Type pooling (rule 6).** Machine-placed types went from 42 to 38:
+  - 510 Ω 0402 was replaced by the 0805 R_L part.
+  - The 20 kΩ was dropped, and the V_J4 divider is now 33 k / 15 k.
+  - 10 µF 10 V moved to 25 V.
+  - 100 nF 16 V moved to 50 V.
+  V3V3 now has 22 µF. The AMS1117 output-capacitor stability needs a datasheet check, which is
+  added as a to-confirm in parts.md.
+- **Verification.** A new fresh-context verifier, run on the rubric extended to 9 criteria
+  (C6 now checks the verbatim quote, C9 the pooling), passed all 9. It ran a live
+  recheck of the 38 codes (36 Basic, 2 Preferred Extended, none Extended), read the
+  Akizuki pages again (stock unchanged), and recomputed every listed figure.
+- **Its non-blocking observations, fixed afterwards; a third, narrow verifier passed 5/5:**
+  - "~7 LSB" without U4 was really 1.3 LSB; the figure was left over from the 15 kΩ R_OUT
+    draft.
+  - "Gain 12 balances the ratios" was wrong: equal ratios need gain 13.5.
+  - CLAUDE.md's "tens of LSB" was really up to 8 and 13 LSB.
+  All three figures are now printed by the calc script. The datasheet revisions from the
+  datasheet pass are recorded in parts.md.
+- **Learning.** Promoted to rules.md: Akizuki URLs and markers; `python -I` and UTF-8 output;
+  heredoc backslashes; one script and one basis for derived numbers; quote the user
+  verbatim.

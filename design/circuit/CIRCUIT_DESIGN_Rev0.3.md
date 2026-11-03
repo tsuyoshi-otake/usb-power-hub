@@ -16,8 +16,24 @@ Read this with CLAUDE.md Section 11 (Open Issues) open. Companion documents:
 design choices to Claude's recommendation:
 
 > 推奨で任せるよ、JLCPCBでExtendedでしか製造できないPCBAにはしないでね
-> JLCPCBでExtendedは無しLSCSパーツで在庫があるやつか、秋月で在庫があるやつ。
-> 小さいパーツは実装大変なのでPCBA前提で、デカいパーツだけね
+
+and, in a following message:
+
+> 秋月で購入できるパーツに限って
+> JLCPCBでExtendedは無しLSCSパーツで在庫があるやつか、秋月で在庫があるやつ。小さいパーツは実装大変なのでPCBA前提で、デカくいパーツだけね
+
+Later the same day the user restated the rule as a list:
+
+> 【部品選定・実装ルール】
+> ・実装はJLCPCB。部品はBasic Partsのみ
+> ・PCBAに載せる部品はLCSCで豊富な在庫があるもの
+> ・手はんだ部品は秋月電子で在庫があるもの
+> ・小さい部品はPCBAに任せること
+> ・特殊な部品や調達しにくい部品は極力避ける
+> ・パーツの種類や点数は減らすこと
+
+"Basic Parts only" reads against the two Preferred Extended parts, so OI-30 was put to the
+user again; until the user answers, those parts stay marked ◆ and conditional.
 
 Most of the Rev0.2 design needed Extended parts: RP2040, CH224Q, USB2514B, ADS131M02, INA190,
 the TMUX mux, the 4-terminal shunt, and the TPD4E05 ESD array. Rev0.3 therefore redesigns the
@@ -52,6 +68,8 @@ them; each row names what reverting it would reopen. Two parts in this design ar
 | 14 | Akizuki stock, part numbers and specifications | akizukidenshi.com product pages, 2026-11-03 | High as of that date; stock changes daily |
 
 Everything else below is derived by calculation in this document, or is explicitly marked OPEN.
+The arithmetic is reproduced by `CIRCUIT_DESIGN_Rev0.3_calc.py` beside this file
+(`python design/circuit/CIRCUIT_DESIGN_Rev0.3_calc.py`); change a value there and here together.
 
 ---
 
@@ -83,7 +101,7 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
  J4 (Akizuki USB-C module, power only)
    CC1,CC2 ── Rd 5.1 kΩ ×2 to GND ── 1 kΩ ── ADC IN8, IN9    (read J4's advertisement)
    CC1,CC2 ── D4 PSM712 (ESD)
-   VBUS ── D6 SMBJ6.5CA ── 22 µF ── VBUS_IN ──┬── divider 20k/10k ── ADC IN7  (V_J4)
+   VBUS ── D6 SMBJ6.5CA ── 22 µF ── VBUS_IN ──┬── divider 33k/15k ── ADC IN7  (V_J4)
                                               ├── port A path (below)
                                               └── port B path
 
@@ -99,7 +117,7 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
                                              ├── U13, U23, U30 LM393 (comparators)
                                              ├── U5 MAU104 ── V12 ── 10 Ω / 2×22 µF ── V12F ──┬── U10–U12, U20–U22 OP07 V+
                                              │                                             └── U4 CJ431 shunt reg ── V_INJ (8 V)
-                                             └── U2 AMS1117-3.3 ── V3V3 ── ferrite + 10 µF ── VDDA
+                                             └── U2 AMS1117-3.3 ── V3V3 (22 µF) ── ferrite + 10 µF ── VDDA
 ```
 
 **Why the switch sits upstream of the ladder.** Any current that leaves the circuit
@@ -152,13 +170,14 @@ mirror current is drawn from the supply side of the shunt and is not measured.
 
 | Range | R_s | R1 | R_OUT | C_N | Gain | V/A | Full scale (3.3 V) | Up-range at 2.80 V |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| LOW | 510 Ω (0805, Basic) | 100 Ω | 1.5 kΩ | 330 pF C0G | 15 | 7650 | 431 µA | 366 µA |
-| MID | 10 Ω (1 W axial, Akizuki) | 100 Ω | 1.5 kΩ | 330 pF C0G | 15 | 150 | 22.0 mA | 18.7 mA |
+| LOW | 510 Ω (0805, Basic) | 100 Ω | 1.5 kΩ | 330 pF C0G | 15 | 7650 | 431 µA | 365 µA |
+| MID | 10 Ω (1 W axial, Akizuki) | 100 Ω | 1.5 kΩ | 330 pF C0G | 15 | 150 | 22.0 mA | 18.6 mA |
 | HIGH | 0.1 Ω (1 W chip, Akizuki) | 100 Ω | 2.4 kΩ | 220 pF | 24 | 2.4 | 1.37 A | OC trip 1.16 A |
 
-The R1, R_OUT and C_N values are all Basic. Basic has no 1.2 kΩ, so the MID gain is 15
-rather than the 12 that would balance the two range ratios. The ratios are 51 (MID/LOW)
-and 62.5 (HIGH/MID).
+The R1, R_OUT and C_N values are all Basic. Equal range ratios (≈ 56 each) would need a MID
+gain of about 13.5 (R_OUT ≈ 1.36 kΩ). The MID gain is 15 instead, which reuses the 1.5 kΩ
+part already fitted for LOW (one part type fewer). The ratios are 51 (MID/LOW) and 62.5
+(HIGH/MID).
 
 **Supplies and margins.** The OP07s run from V12F (MAU104 output, isolated, −V_out tied to
 GND), with the inputs at the ~5 V port common mode:
@@ -319,16 +338,18 @@ is that DUTs enumerate at FS. This is OI-26, verified at bring-up (V-HOST-01).
 
 | Range | Used from (after down-range) | Up-range at | LSB | Floor = 3 LSB | Burden at up-range | Bandwidth (10 µF port C) |
 |---|---:|---:|---:|---:|---:|---:|
-| LOW | 0 | 366 µA | 0.105 µA | 0.32 µA | 0.190 V (whole ladder, 520 Ω) | 31 Hz (τ 5.2 ms) |
-| MID | 293 µA | 18.7 mA | 5.37 µA | 16 µA | 0.190 V (10.2 Ω) | 1.6 kHz (τ 102 µs) |
+| LOW | 0 | 365 µA | 0.105 µA | 0.32 µA | 0.190 V (whole ladder, 520 Ω) | 31 Hz (τ 5.2 ms) |
+| MID | 292 µA | 18.6 mA | 5.37 µA | 16 µA | 0.189 V (10.2 Ω) | 1.6 kHz (τ 102 µs) |
 | HIGH | 14.9 mA | OC 1.16 A | 0.336 mA | 1.0 mA | 0.16 V at 1 A | ~100 kHz (τ 1.6 µs) |
 
 **Resolution 0.1 µA** is 1 LSB on LOW (0.105 µA). It is resolved, though at the floor of the
 accuracy specification. **Range to 1 A** is HIGH at 2.4 V, below both the OC trip and the
-ADC clip. The bottom of MID and HIGH is the weak spot: at 293 µA on MID, 3 LSB is 5.5 % of
-the reading, and at 14.9 mA on HIGH it is 6.7 %. A 12-bit converter covering 0.1 µA – 1.37 A
-in three ranges cannot do better. The ratio of 13,000 between full scale and the LSB is
-fixed, so each range spans about 50–60× and the overlap region sits ~50 LSB above the bottom.
+ADC clip. The bottom of MID and HIGH is the weak spot: at 292 µA on MID, 3 LSB is 5.5 % of
+the reading, and at 14.9 mA on HIGH it is 6.8 %. A 12-bit converter covering 0.1 µA – 1.37 A
+in three ranges cannot do better. The span from the top of HIGH to one LOW LSB is fixed at
+1.37 A / 0.105 µA ≈ 1.3 × 10⁷. Each range has 4096 codes, so the two range ratios must
+multiply to ≈ 3,200 (51 × 62.5). Each range therefore spans about 50–60×, and the overlap
+region sits ~50 LSB above the bottom.
 
 **Ride-through.** While on LOW, a DUT step is supplied by the 10 µF port capacitor during the
 two ranging stages, so the port sags by I · t / C:
@@ -374,8 +395,10 @@ from V12F) through 1 MΩ.
   volt. Firmware corrects it from V_J4 (IN7). After correction, ±2 % resistor tolerance
   leaves < 0.04 LSB per volt.
 
-Without V_INJ regulation, the MAU104 output would track J1 (line regulation ±1.2 % per 1 %),
-and a ±5 % J1 change would move the LOW pedestal by ~7 LSB. That is why U4 exists.
+Without V_INJ regulation, the MAU104 output would track J1 (line regulation ±1.2 % per 1 %):
+a ±5 % J1 change would move the LOW pedestal by 1.3 LSB. Its load regulation below 20 % load
+is not specified and would add to that. Either drift happens after zero calibration and
+would use up part of the 3-LSB accuracy floor. That is why U4 exists.
 
 **Zero calibration stays mandatory** (REQ-MEAS-03). Zero-cal is per range, with the port ON
 and nothing attached. It also absorbs these constant offsets, which are all well under 1
@@ -566,7 +589,7 @@ starves the DUT and dissipates in a 0805.
 | Regulated port voltage | 5.10 V | J4 voltage minus ≤ 0.32 V | product.md §9 |
 | Power from the host alone | PD 9 V from J1 | A second cable (J4) is required for port power | REQ-PWR-01 |
 | Port voltage measurement and back-feed detection | ADC on VBUS_A/B | None (would be measured as load current); CYCLE discharge is timed | REQ-PORT-03, REQ-PORT-04 |
-| Accuracy at the bottom of MID/HIGH | 24-bit | 12-bit: ≤ 7.7 % of reading at 14.9 mA | REQ-MEAS-05 |
+| Accuracy at the bottom of MID/HIGH | 24-bit | 12-bit: ≤ 7.8 % of reading at 14.9 mA | REQ-MEAS-05 |
 | Sample rate | 31.25 kSPS | 18.5 kSPS | REQ-HOST-05 |
 | Hardware-only range latch | D4 | Firmware hold within 100 µs | D17 |
 | ROM USB bootloader | RP2040 BOOTSEL | A DFU bootloader in flash (written once over SWD) | REQ-BOOT-01 |
@@ -616,6 +639,12 @@ dated stock (JLCPCB assembly pool or Akizuki), datasheet facts and remaining che
    Extended** parts, STM32F103C8T6 (C8734, 265,735 pcs) and SRV05-4 (C7420376, 113,727 pcs).
    Preferred Extended parts carry no feeder setup fee in JLCPCB Economic PCBA, which is the
    cost that "no Extended" avoids. They are still labelled Extended.
+4. Special or hard-to-source parts are avoided where an allowed alternative exists. The
+   remaining single-source parts are the Akizuki modules and shunts (thinnest stock: MAU104).
+5. Part types are pooled: one part per value, and one voltage rating per value. On
+   2026-11-03 this removed four machine-placed types (42 → 38): 510 Ω 0402 (U3 feed now uses
+   the 0805 R_L part), 20 kΩ (the V_J4 divider is now 33 k / 15 k, the U4 values), 10 µF 10 V
+   (the 25 V part) and 100 nF 16 V (the 50 V part).
 
 **Strictly-Basic fallback, if the user rejects OI-30:**
 - *MCU:* an Akizuki RP2040 module (g117542 kit, 180 pcs, or Raspberry Pi Pico g116132,
@@ -646,7 +675,7 @@ appear here.
 | D9 | Bypass FETs default ON (fail-safe to HIGH range) | 2026-08-16 | Rev0.1 design | — |
 | D10 | Board outline **85 × 35 mm, 4 layers** | 2026-11-03 | User | OI-13, OI-10 (fit re-checked by OI-23) |
 | D11 | ~~USB hub is USB2514B~~ **SUPERSEDED by D15** — every variant is Extended (D13) | 2026-11-03 | User | — |
-| D13 | **Sourcing rule:** JLCPCB Basic parts in stock for machine-placed small parts; Akizuki parts in stock for large hand-soldered parts; never an Extended-only PCBA. Functions that cannot be built this way are reduced | 2026-11-03 | **User** | — |
+| D13 | **Sourcing rule:** JLCPCB Basic parts in stock for machine-placed small parts; Akizuki parts in stock for large hand-soldered parts; never an Extended-only PCBA. Functions that cannot be built this way are reduced. Restated the same day as a list that adds: avoid special or hard-to-source parts, and reduce part types and count | 2026-11-03 | **User** | — |
 | D14 | Port power from **J4, a power-only 5 V USB-C input** (Rd 5.1 kΩ, advertisement read by ADC); J1 = data + logic power; no PD, no buck. *Revert → reopens OI-4, OI-17* | 2026-11-03 | Claude (delegated) | OI-4, OI-17, OI-18 |
 | D15 | Hub = **CH335F** on the Akizuki module, port 1 → MCU, 2 → J2, 3 → J3. *Revert → no allowed hub remains* | 2026-11-03 | Claude (delegated) | — |
 | D16 | MCU = **STM32F103C8T6**. *Conditional on OI-30*; fallback in §9 | 2026-11-03 | Claude (delegated) | — |
