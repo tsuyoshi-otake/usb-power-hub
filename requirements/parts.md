@@ -1,229 +1,243 @@
 # USB Power-Control Hub — Parts Selection and Sourcing Record
 
-**State: WIP. No part is chosen.** First pass 2026-11-03. Every row is a *candidate* until a
-reviewer marks it confirmed against the actual PCBA order (CLAUDE.md Section 4.1).
+**State: WIP. No part is chosen.** First pass 2026-11-03 (Rev0.2). Reworked the same day for
+circuit Rev0.3 under the user's sourcing rule D13. Every row is a *candidate* until a reviewer
+marks it confirmed against the actual PCBA order (CLAUDE.md Section 4.1).
 
-This is the single place for candidates, assembly-pool stock and datasheet facts. The circuit
-document (`design/circuit/CIRCUIT_DESIGN_Rev0.2.md`) derives the constraints; this file records
-which parts meet them.
+This is the single place for candidates, stock and datasheet facts. The circuit document
+(`design/circuit/CIRCUIT_DESIGN_Rev0.3.md`) derives the constraints; this file records which
+parts meet them.
+
+## The sourcing rule (D13, user, 2026-11-03)
+
+- **Machine-placed by JLCPCB:** small parts, which MUST be JLCPCB **Basic** with assembly-pool
+  stock ≥ 500.
+- **Hand-soldered by the user:** large parts, which MUST be **in stock at Akizuki**
+  (akizukidenshi.com).
+- **Never** an Extended-only PCBA. Where no allowed part does a job, the function is reduced
+  (circuit Rev0.3 §7.4).
+- **Pending the user (OI-30):** two **Preferred Extended** parts, marked ◆ below. Preferred
+  Extended parts have no feeder setup fee in JLCPCB Economic PCBA, but they are labelled
+  Extended. If the user rejects them, circuit Rev0.3 §9 gives the fallback.
 
 ## How the numbers were obtained
 
-- **Stock and class:** `python tools/jlc_stock.py <LCSC numbers or MPNs>` on 2026-11-03 (UTC).
-  The tool queries the JLCPCB **assembly-parts** pool, which is the authoritative one; LCSC
-  retail stock is a different pool (CLAUDE.md §4.1, easy-stick lesson 14.8). Its docstring
-  lists what it cannot see — chiefly: electrical suitability, stock at order time, footprints.
-- **Datasheet facts:** text extracted from the manufacturer PDF that the same API links
-  (`dataManualFileAccessIdUrl`), 2026-11-03. Only parameters marked *verified* were read; a
-  part's other properties are unconfirmed.
+- **JLCPCB stock and class:** `python tools/jlc_stock.py <LCSC numbers>` on 2026-11-03 (UTC).
+  - The tool queries the JLCPCB **assembly-parts** pool. That is the authoritative pool; LCSC
+    retail stock is a different one (CLAUDE.md §4.1, easy-stick lesson 14.8).
+  - Its docstring lists what it cannot see — chiefly electrical suitability, stock at order
+    time, and footprints.
+- **The Basic catalogue (fact 13 in the circuit document)** was enumerated from the same API on
+  2026-11-03: 351 Basic parts — 182 resistors, 88 MLCCs and 81 others. Among the 81 there is no
+  microcontroller, USB hub, USB-C receptacle, USB D± ESD array, current-sense amplifier,
+  analog mux, multi-channel ADC or fuse.
+- **Akizuki stock:** the product page's 通販購入可能数 field, read on 2026-11-03.
+  - Akizuki stock changes daily, and no checked tool reads it.
+  - Recheck it by hand at order time (V-MFG-02).
+- **Datasheet facts:** text extracted from the manufacturer PDF, 2026-11-03. Only parameters
+  marked *verified* were read; a part's other properties are unconfirmed.
 - **Recheck** immediately before upload and again before payment (CLAUDE.md §4.1):
 
 ```
-python tools/jlc_stock.py C46061833 C42459160 C970725 C43590 C3200405 C111875 C109322 C2864583 C78988 C6186 C485517 C2862740 C80670 C2040 C2843335 C2999380 C97521 C58940 C16251 C220679 C2922448 C5215160 C5121509 C5215171 C3658008 C654763 C2673338 C2870223 C1852074 C2869854 C478075 C48618 C55136 C55266 C2864845 C111356 C2865523 C1517429 C3985410 C105360 C3997408 C865287 C9002 C70590 C138714 C7519
+python tools/jlc_stock.py C8734 C7420376 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25123 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25756 C26083 C25076 C25077 C25765 C1664 C1530 C1562 C15850 C45783 C19702 C307331 C1525 C52923 C1523 C15195
 ```
 
-Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it. Stock below
-**500** is flagged ⚠ (CLAUDE.md §4.1 floor for commodity passives, applied here to every part
-as a warning level).
+Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it, or **Akizuki**
+(hand-soldered). Stock below **500** on a JLCPCB row is flagged ⚠.
 
 ---
 
-## Power
+## Hand-soldered parts (Akizuki)
 
-### U1 — USB-PD sink
+| Ref | Part | Akizuki code | Model | Stock | Price (tax incl.) | Checked |
+|---|---|---|---|---:|---:|---|
+| J1–J4 | USB Type-C receptacle DIP kit (simple), 4 per board | g113080 | AE-USB2.0-TYPE-C | 711 | ¥350 | 2026-11-03 |
+| U6 | CH335F 4-port USB hub breakout module kit | g129556 | AE-QFN28-DIP(CH335F) | 453 | ¥420 | 2026-11-03 |
+| U5 | 1 W isolated DC-DC, 12 V 84 mA | g104132 | MAU104 (Minmax) | 178 | ¥520 | 2026-11-03 |
+| RS10, RS20 | Current-sense chip resistor 0.1 Ω 1 W ±0.5 % | g109588 | TSL1TTER100D (KOA) | 374 | ¥130 | 2026-11-03 |
+| RS11, RS21 | Metal-film resistor 10 Ω 1 W ±1 % (1/4 W size) | g108805 | MFU100F10RB (Faithful Link) | 175 bags of 100 | ¥600 / bag | 2026-11-03 |
 
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| CH224Q | C46061833 | DFN-10-EP (2 × 2) | 16,744 | Extended | 2026-11-03 | **Candidate** (P1) |
-| CH224A | C42459160 | ESSOP-10 | 9,106 | Extended | 2026-11-03 | Alternate, same I2C map |
-| CH224K | C970725 | ESSOP-10 | 0 ⚠ | Extended | 2026-11-03 | **Rejected** — no stock; no current readback |
+The thinnest is the MAU104, at 178 pcs: enough for many boards, but check it first.
 
-- *Verified (CH224Q/CH224A datasheet):* 400 kHz I2C, 7-bit address 0x22 or 0x23; enabled when
-  the part is in single-resistor configuration. Registers: 0x09 protocol status, 0x0A voltage
-  request, **0x50 maximum available current at the current PD level (50 mA units, valid only
-  after a PD handshake)**, 0x60–0x8F full source capability data.
-- *To confirm:* CC and VBUS pin voltage ratings; what the part reports for a non-PD source
-  (REQ-PWR-02 needs the Type-C current level then).
+- *Verified (AE-USB2.0-TYPE-C page, schematic, drawing):*
+  - Pins on one 1 × 7 row, 2.54 mm pitch: VBUS, D−, D+, GND, CC1, CC2, GND.
+  - Plus mechanical pins beside the receptacle.
+  - **No CC resistors are fitted**, so the same kit serves as host (J1, J4: add Rd) and as
+    downstream port (J2, J3: add Rp).
+  - Rated 48 V, 5 A. Board ≈ 20 mm wide, the dimension that makes the J2–J3 pitch ≥ 20 mm.
+  - SBU is not brought out.
+- *Verified (CH335F module page; CH335 datasheet):*
+  - DIP30, 3.3–5 V; HS upstream and downstream, MTT.
+  - **Needs an external 12 MHz crystal** (load capacitors built into the chip).
+  - V5 4.5–5.25 V, 85 mA typical.
+  - PSELF strap on pin 1/LED1 (pulled up = self-powered by default); PGANG on pin 3/LED2.
+  - PWREN1–4# on pins 4, 2, 10, 5; OVCUR1–4# on pins 24, 23, 19, 18.
+  - EEPROM-configurable descriptor; default MaxPower 0x32 (100 mA).
+  - *To confirm (OI-24):* the module's outline, its pin-to-function map, and whether the
+    QFN28 comes mounted. Akizuki publishes no module drawing.
+- *Verified (MAU104 datasheet, Minmax REV:0 2005/04):*
+  - Output 12 V, 84 mA max, 1.5 mA min load. Accuracy ±1 % typ / ±3 % max.
+  - Line regulation ±1.2 % per 1 % V<sub>in</sub>; load regulation 7 % max (20–100 % load).
+  - Ripple 50 mVpp typ / 75 mVpp max; switching ~100 kHz.
+  - Input 4.5–5.5 V, 30 mA typ no-load input current; efficiency 78 %.
+  - Isolation capacitance 60 pF typ; output short circuit 0.5 s max.
+  - Used at ≈ 15 mA typ / 30 mA max load (6 × OP07), which is **below the 20 % point where load
+    regulation is specified**. Its output is not trusted as a reference; U4 regulates V_INJ.
+- *Verified (TSL1TTER100D page):* 0.1 Ω, 1 W, ±0.5 %, ±100 ppm/°C, 6.3 × 3.1 × 1 mm, metal
+  terminals, −55 to 180 °C.
+  - It is a 2-terminal part. The Kelvin connection is made by the 4-pad land pattern
+    (CLAUDE.md §5.4, G2).
+  - *To confirm:* KOA's recommended land, and a land split for Kelvin sense.
+- *Verified (MFU100F10RB page):* 10 Ω, 1 W, ±1 %, ±100 ppm/°C, 6 mm × 2.3 mm axial,
+  −55 to 155 °C.
+  - *To confirm (OI-28):* short-time overload — it must survive 2.35 W for 10 ms in the
+    stuck-MID fault.
 
-### U2 — V5P1 regulator (topology depends on OI-17, rating on OI-16)
+**Rejected at Akizuki:**
+- g110697 0.1 Ω 5 W metal plate: ±350 ppm/°C.
+- g108798 0.1 Ω 1 W metal film: axial, so a Kelvin land is less clean than on the KOA chip.
+- g104134 MAU108 ±12 V: the mirror FET gate would see −17 V.
+- g116132 Pico / g117542 RP2040 kit: the OI-30 fallback only.
 
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| TPS62130RGTR | C43590 | QFN-16-EP (3 × 3) | 23,099 | Extended | 2026-11-03 | Buck candidate |
-| TPS62933DRLR | C3200405 | SOT-583 | 23,878 | Extended | 2026-11-03 | Rev0.1 candidate — not recommended |
-| SY8205FCC | C111875 | SOIC-8-EP | 13,406 | Extended | 2026-11-03 | Rev0.1 candidate — not checked |
-| TPS63070RNMR | C109322 | VQFN-15-HR (2.5 × 3) | 24,738 | Extended | 2026-11-03 | Buck-boost candidate (OI-17) |
-| TPS55288RPMR | C2864583 | VQFN-26-HR (3.5 × 4) | 4,270 | Extended | 2026-11-03 | Buck-boost alternate (OI-17) |
+---
 
-- *Verified:* TPS62130 — up to 3 A continuous, **100 % duty-cycle mode** (datasheet §9.4.3).
-  TPS62933 — no 100 % duty-cycle mode found in the datasheet text. TPS63070 — V<sub>IN</sub>
-  2.0–16 V once started (V<sub>OUT</sub> ≥ 3 V); **I<sub>OUT</sub> 2 A** when V<sub>IN</sub> or
-  V<sub>OUT</sub> ≥ 4.5 V and V<sub>OUT</sub>/V<sub>IN</sub> ≤ 1; 3.6 A switch. TPS55288 — 36 V,
-  16 A buck-boost with I2C.
-- *Constraint (Rev0.2 §7.1):* ≥ 2.2 A at V5P1 for 2 × 1 A plus rails; ≥ 3.2 A if both ports may
-  draw 1.5 A (OI-16). TPS63070's 2 A is short of 2.2 A. *To confirm:* efficiency at the actual
-  operating point; inductor size and saturation current.
+## Machine-placed parts (JLCPCB)
 
-### U3 — V3P3 digital (OI-18)
+All rows checked 2026-11-03 with `tools/jlc_stock.py`.
 
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| SY8089AAAC | C78988 | SOT-23-5 | 20,137 | Extended | 2026-11-03 | Buck option (P5) — not checked |
-| AMS1117-3.3 | C6186 | SOT-223 | 1,747,814 | Basic | 2026-11-03 | LDO option (P5) — not checked |
-| TLV75733PDBVR | C485517 | SOT-23-5 | 27,169 | Extended | 2026-11-03 | Not recommended: SOT-23-5 from V5P1 at 190 mA |
+### Active parts
 
-- *Constraint (Rev0.2 §3.1):* 190 mA from V5P1. A linear regulator dissipates 0.34 W; at
-  ~187 °C/W (SOT-23-5) that is a 64 °C rise. *To confirm for each option:* θ<sub>JA</sub>,
-  dropout at 5.10 V, stability with ceramic output capacitors.
+| Ref | MPN | LCSC | Package | Stock | Class | Role |
+|---|---|---|---|---:|---|---|
+| U1 | STM32F103C8T6 | C8734 | LQFP-48 (7 × 7) | 265,735 | ◆ Preferred Extended | MCU |
+| D1–D3 | SRV05-4 (hongjiacheng) | C7420376 | SOT-23-6L | 113,727 | ◆ Preferred Extended | D±/CC ESD on J1–J3 |
+| U10–U12, U20–U22 | OP07CDR | C7433 | SOIC-8 | 248,598 | Basic | Mirror amplifiers |
+| U13, U23, U30 | LM393DR2G | C7955 | SOIC-8 | 357,235 | Basic | Range and OC comparators |
+| U2 | AMS1117-3.3 | C6186 | SOT-223 | 1,742,729 | Basic | V3V3 |
+| U3, U4 | CJ431 | C3113 | SOT-23 | 689,130 | Basic | VREF_CHK 2.5 V; V_INJ 8 V shunt regulator |
+| Q10, Q11, Q17, Q18, Q21–Q23 (+20) | AO3401A | C15127 | SOT-23 | 1,705,924 | Basic | Port switch, bypass, mirror P-FETs (14) |
+| Q13 (+20) | AO3400A | C20917 | SOT-23 | 956,538 | Basic | VBUS discharge |
+| Q12, Q14, Q15, Q19, Q20 (+20) | 2N7002 | C8545 | SOT-23 | 3,305,126 | Basic | Drivers, inverters, holds (10) |
+| Q16 (+20) | S9012 | C8543 | SOT-23 | 167,918 | Basic | Fast-off clamp PNP |
+| D4 | PSM712-LF-T7 | C32677 | SOT-23 | 130,193 | Basic | J4 CC ESD |
+| D5, D6 | SMBJ6.5CA | C7420377 | DO-214AA (SMB) | 1,186,104 | Basic | J1, J4 VBUS TVS |
+| Y1, Y2 | X322512MSB4SI (12 MHz) | C9002 | SMD3225-4P | 303,806 | Basic | STM32 HSE; CH335F |
+| D10, D12 | KT-0805G (green) | C2297 | 0805 | 2,184,199 | Basic | Port ON |
+| D11, D13 | NCD0805R1 (red) | C84256 | 0805 | 2,416,659 | Basic | Port fault |
+| SW1–SW3 | TS-1187A-B-A-B | C318884 | SMD 5.1 × 5.1 | 1,054,631 | Basic | Port buttons; BOOT |
+| FB1 | BLM18PG121SN1D | C14709 | 0603 | 2,198,407 | Basic | VDDA ferrite |
 
-### U3B — V3P3A analog
+- *Verified (STM32F103C8T6, DS5319 Rev 18):*
+  - VREF+ is tied to VDDA inside the LQFP48.
+  - Two 12-bit ADCs with simultaneous sample-and-hold; f<sub>ADC</sub> 0.6–14 MHz.
+  - ADC pins PA0–PA7 (IN0–7) and PB0/PB1 (IN8/9).
+  - Total error ±1.3 / ±2 LSB (limited conditions), ±2 / ±5 LSB (full); INL ±1.5 / ±3 LSB.
+  - HSE 4–16 MHz.
+  - USB FS needs an external 1.5 kΩ D+ pull-up; USB VDD 3.0–3.6 V.
+  - 96-bit unique ID.
+  - The ROM bootloader is USART1 only (no USB), which is why REQ-BOOT-02 uses a flash DFU
+    bootloader. AN2606 was not fetched.
+  - *To confirm:* the R<sub>AIN</sub> table for 41.5 cycles against R_OUT ≤ 2.4 kΩ, and the
+    FT pin list.
+- *Verified (SRV05-4):*
+  - 0.5 pF I/O–I/O, 1.0 pF I/O–GND; V<sub>RWM</sub> 5.0 V; leakage 5 µA max.
+  - Pins 1, 3, 4, 6 I/O; 5 positive rail; 2 GND.
+  - Pin 5 goes to V3V3, never VBUS_x: its leakage would be measured (G10).
+- *Verified (OP07C, TI):*
+  - V<sub>OS</sub> 60 µV typ, **no maximum given for the C grade** (OP07D max 150 µV is used
+    as the planning bound); drift 0.5 µV/°C typ.
+  - I<sub>B</sub> ±1.8 nA typ; noise 10.5 nV/√Hz.
+  - Supply ±3 to ±18 V (≥ 6 V total); common mode ±13 V min at ±15 V; output ±12 V into
+    10 kΩ at ±15 V.
+  - GBW 0.4 min / 0.6 typ MHz; slew 0.3 V/µs.
+  - *Assumed, to verify (OI-27):* common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V.
+- *Verified (LM393):*
+  - 1.3 µs response at 5 mV overdrive, 300 ns large-signal.
+  - Supply 2–36 V; common mode 0 to V<sub>CC</sub> − 1.5 V; V<sub>OS</sub> ±5 mV max.
+  - Open-collector output, sink ≥ 6 mA (16 typ).
+- *Verified (AO3401A):*
+  - R<sub>DS(on)</sub> 47 / 60 mΩ at −4.5 V, 60 / 85 mΩ at −2.5 V.
+  - V<sub>GS(th)</sub> −0.5 / −0.9 / −1.3 V; Q<sub>g</sub> 7 nC at 4.5 V; C<sub>iss</sub> 645 pF.
+  - −30 V; V<sub>GS</sub> ±12 V; I<sub>D</sub> −4 A.
+- *Verified (AO3400A):* R<sub>DS(on)</sub> 19 / 32 mΩ at 4.5 V; V<sub>GS(th)</sub> 0.65 / 1.05 /
+  1.45 V.
+- *Verified (AMS1117):*
+  - Dropout 1.1 / 1.3 V at 800 mA; 90 °C/W.
+  - Minimum load 5 / 10 mA; I<sub>q</sub> 5 / 11 mA; output 3.251–3.349 V.
+- *Verified (CJ431):*
+  - 2.475 / 2.5 / 2.525 V; catalogue lists the ±0.5 % rank.
+  - I<sub>K(min)</sub> 0.45 / 1 mA.
+  - Deviation over −25 to 85 °C: 4.5 typ / 17 max mV.
+- *Verified (SMBJ6.5CA):* V<sub>RWM</sub> 6.5 V, V<sub>BR</sub> 7.22–7.98 V, clamp 11.2 V,
+  I<sub>R</sub> 500 µA max. It sits only on non-measured rails (J1, J4 VBUS) because of that
+  leakage.
+- *Verified (C9002):* 12 MHz, C<sub>L</sub> 20 pF, ±10 ppm / ±20 ppm, ESR 80 Ω.
+  - *To confirm (G9):* Y2 against the CH335F's built-in load capacitors.
 
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| TPS7A2033PDBVR | C2862740 | SOT-23-5 | 133,199 | Extended | 2026-11-03 | **Candidate** |
-| LP5907MFX-3.3/NOPB | C80670 | SOT-23-5 | 61,765 | Extended | 2026-11-03 | Alternate — not checked |
+### Passives (Basic, by value)
 
-- *Verified:* TPS7A20 R<sub>θJA</sub> 187.1 °C/W (DBV). At ≤ 10 mA from V5P1: 18 mW, 3.4 °C rise.
-- *To confirm:* output noise; PSRR at the U2 switching frequency.
+| Value | Use | LCSC | Package | Stock | Note |
+|---|---|---|---|---:|---|
+| 510 Ω ±1 % ±100 ppm | R_L shunt | C17734 | 0805 | 2,198,725 | 0.125 W; stuck-LOW 47 mW |
+| 510 Ω | U3 CJ431 feed from V3V3 | C25123 | 0402 | 3,044,511 | — |
+| 100 Ω ±1 % ±100 ppm | Mirror R1 (×6) | C25076 | 0402 | 6,307,501 | — |
+| 1.5 kΩ ±1 % ±100 ppm | R_OUT LOW, MID (×4); D+ pull-up; U4 feed | C25867 | 0402 | 1,516,858 | — |
+| 2.4 kΩ ±1 % ±100 ppm | R_OUT HIGH (×2) | C22940 | 0603 | 1,117,935 | — |
+| 10 kΩ | +IN guard (×6), EN series, DIS pull-up, V_J4 divider | C25744 | 0402 | 16,208,659 | — |
+| 15 kΩ | U4 divider (33 k / 15 k → 8.0 V) | C25756 | 0402 | 2,494,056 | — |
+| 20 kΩ | V_J4 divider top | C25765 | 0402 | 2,746,653 | — |
+| 33 kΩ | Rp (×4); U4 divider | C25779 | 0402 | 2,369,774 | No 36 kΩ is Basic |
+| 5.1 kΩ | Rd on J1, J4 CC (×4) | C25905 | 0402 | 4,938,551 | — |
+| 100 kΩ | EN_G pull-down, hold pull-ups, event series | C25741 | 0402 | 7,841,979 | — |
+| 1 MΩ | Bypass gate return (×4), pedestal R_INJ (×6) | C26083 | 0402 | 2,794,209 | — |
+| 1 kΩ | ADC series, discharge, gate resistors, LEDs | C11702 | 0402 | 21,568,761 | — |
+| 10 Ω | V12 filter | C25077 | 0402 | 3,068,120 | ±5 % (MPN …100J…); not in a measured path |
+| 330 pF C0G | C_N on R_OUT LOW, MID | C1664 | 0603 | 691,081 | — |
+| 220 pF X7R | C_N on R_OUT HIGH | C1530 | 0402 | 1,340,537 | No Basic C0G 220 pF found |
+| 33 pF C0G | Y1 load capacitors | C1562 | 0402 | 1,442,028 | Adjust at capture |
+| 10 µF 25 V X5R | Port capacitor (×2); bulk | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
+| 22 µF 25 V | VBUS_IN bulk; V12F filter (2 ×) | C45783 | 0805 | 3,579,516 | — |
+| 10 µF 10 V | VDDA, V3V3 | C19702 | 0603 | 11,556,274 | — |
+| 100 nF 50 V | Decoupling on V12F rail | C307331 | 0402 | 20,893,452 | — |
+| 100 nF 16 V | Decoupling ≤ 5 V | C1525 | 0402 | 35,080,432 | — |
+| 1 µF 25 V | Regulator, CJ431 | C52923 | 0402 | 10,715,829 | — |
+| 1 nF / 10 nF | Comparator hysteresis, soft-start Miller | C1523 / C15195 | 0402 | 2,345,349 / 5,868,443 | Values set at capture |
 
-## Digital
 
-| Ref | MPN | LCSC | Package | Stock | Class | Checked | Role / note |
-|---|---|---|---|---:|---|---|---|
-| U4 | RP2040 | C2040 | LQFN-56 (7 × 7) | 7,060 | Extended | 2026-11-03 | MCU (fixed by architecture) |
-| U5 | W25Q16JVUXIQ | C2843335 | USON-8-EP (2 × 3) | 450 ⚠ | Extended | 2026-11-03 | Rev0.1 size; thin stock |
-| U5 | W25Q32JVUUIQ | C2999380 | USON-8 (3 × 4) | 2,151 | Extended | 2026-11-03 | Alternate |
-| U5 | W25Q128JVSIQ | C97521 | SOIC-8-208mil | 76,583 | Basic | 2026-11-03 | Alternate; larger footprint |
+**Rejected in the Basic catalogue:**
+- C25334 0.1 Ω 1206: **±800 ppm/°C**, which alone would use 0.8 % of the 1 % budget over
+  10 °C.
+- C17903 / C22859 10 Ω: ±400 ppm/°C, and 0.25 W against a 2.35 W fault.
+- OP07 is the only precision op-amp in Basic. LM358 / LM324 have 7 mV / 30 µV/°C offset, and
+  TL072 3 mV.
 
-### U6 — USB hub (D11)
+---
 
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| USB2514BI-AEZG-TR | C58940 | TQFN-36-EP (6 × 6) | 6,527 | Extended | 2026-11-03 | **Candidate** (−40 to +85 °C) |
-| USB2514B-AEZC-TR | C16251 | VQFN-36-EP (6 × 6) | 11,727 | Extended | 2026-11-03 | Alternate (0 to +85 °C) |
-| USB2514B-I/M2 | C220679 | SQFN-36-EP (6 × 6) | 2,287 | Extended | 2026-11-03 | Alternate |
+## Rev0.2 candidates rejected by D13
 
-- *Verified (DS00001692A):* 24 MHz crystal or external 24 MHz clock. Configured Hi-Speed supply
-  current 70 mA typ / 85 mA max (USB2514Bi, base current with one downstream port), plus an
-  increment per additional port. Individual or ganged port power. **PRTPWR is asserted as soon
-  as hardware configuration completes**, and PRTPWR[x]/BC_EN[x] pins are sampled as
-  battery-charging straps — hence G13/G14 and P3.
-- *To confirm:* the per-additional-port increment; strap levels; RBIAS value.
+All Extended. The full Rev0.2 rows, with stock and datasheet notes, are in Git history
+(commit `4e59607`).
 
-### Clocks (P13, proposed — OI-2)
+| Function | Rev0.2 candidate(s) | Replaced by |
+|---|---|---|
+| PD sink | CH224Q / CH224A / CH224K | J4 power-only input (D14) |
+| Buck / buck-boost | TPS62130, TPS62933, TPS63070 class | None needed |
+| 3.3 V regulators | TPS7A20 class, SY8089 class | AMS1117-3.3 |
+| MCU + flash | RP2040 + W25Q | STM32F103C8T6 ◆ |
+| USB hub + 24 MHz crystal | USB2514B variants + X322524MOB4SI | CH335F module (Akizuki) + C9002 |
+| ADC | ADS131M02 / M04 / M06 | STM32 ADC |
+| Current-sense amplifier | INA190A2 | OP07CDR + AO3401A mirror |
+| Sense mux | TMUX6209, ADG1209, TMUX1109 | Not needed (topology C) |
+| Window comparator | TLV3202, TLV3502 | LM393DR2G |
+| Bypass FET | CSD25402Q3A | AO3401A |
+| Shunts | WSK2512 (20 mΩ, 10 mΩ, 2 Ω), RT0805 200 Ω | TSL1TTER100D, MFU100F10RB (Akizuki), 510 Ω C17734 |
+| Load switch | SY6280AAC, TPS2553, TPS25947 | Back-to-back AO3401A |
+| ESD | TPD4E05U06, USBLC6-2SC6 | SRV05-4 ◆, PSM712 |
 
-| Ref | MPN | LCSC | Package | Stock | Class | Checked | Note |
-|---|---|---|---|---:|---|---|---|
-| Y1 | X322512MSB4SI (12 MHz) | C9002 | SMD3225-4P | 302,846 | Basic | 2026-11-03 | RP2040 XOSC. *To confirm:* C<sub>L</sub>, ESR against the RP2040 hardware design guide |
-| Y2 | X322524MOB4SI (24 MHz) | C70590 | SMD3225-4P | 168,790 | Extended | 2026-11-03 | USB2514B. *To confirm:* C<sub>L</sub>, total tolerance inside USB's ±500 ppm |
+## Not yet selected
 
-## Analog front end
-
-### U7 — ADC
-
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| ADS131M02IPWR | C2922448 | TSSOP-20 | 8,840 | Extended | 2026-11-03 | **Candidate** |
-| ADS131M02IRUKR | C5215160 | WQFN-20 (3 × 3) | 6,398 | Extended | 2026-11-03 | Smaller alternate |
-| ADS131M04IRUKR | C5121509 | WQFN-20 (3 × 3) | 8,102 | Extended | 2026-11-03 | 4-channel, not proposed |
-| ADS131M06IRSNR | C5215171 | QFN-32 (4 × 4) | 1,362 | Extended | 2026-11-03 | Needed if OI-19 chooses topology C |
-
-- *Verified (ADS131M02):* **external CLKIN required**, 0.3 – 8.4 MHz in high-resolution mode
-  (8.192 MHz nominal), data rate up to 64 kSPS; internal reference 1.2 V, drift 7.5 typ /
-  **20 max ppm/°C**. Rev0.1's "QFN-24" package was wrong — the parts are TSSOP-20 / WQFN-20.
-
-### U11 / U21 — current-sense amplifier
-
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| INA190A2IDCKR | C2870223 | SC-70-6 | 3,136 | Extended | 2026-11-03 | **Candidate** (G = 50) |
-| INA190A2IDDFR | C1852074 | TSOT-23-8 | 631 | Extended | 2026-11-03 | Alternate package |
-| INA186A2IDDFR | C2869854 | TSOT-23-8 | 37,724 | Extended | 2026-11-03 | **Rejected** — drift |
-
-- *Requirements (Rev0.1 §4, Rev0.2 §5):* offset ≤ 25 µV, drift ≤ 0.1 µV/°C, I<sub>IB</sub> ≤ 3 nA,
-  common mode covering 5.1 V.
-- *Verified (INA190):* V<sub>OS</sub> ±15 µV max; drift 10 typ / **80 max nV/°C**;
-  I<sub>IB</sub> 0.5 typ / **3 max nA**; V<sub>CM</sub> −0.2 to 40 V; gain-error drift 7 ppm/°C max;
-  noise 75 nV/√Hz RTI. Meets all four.
-- *Verified (INA186):* drift 0.05 typ / **0.5 max µV/°C** — fails the 0.1 µV/°C requirement.
-
-### U10 / U20 — sense mux (only if topology B is kept, OI-19)
-
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| TMUX6209PWR | C3658008 | TSSOP-16 | 225 ⚠ | Extended | 2026-11-03 | 36 V-class; thin stock — not checked |
-| ADG1209YRZ-REEL7 | C654763 | SOIC-16 | 919 | Extended | 2026-11-03 | 12 V-class dual 4:1; large package — not checked |
-| TMUX1109PWR | C2673338 | TSSOP-16 | 31 ⚠ | Extended | 2026-11-03 | Rejected on stock |
-
-- *Constraint (Rev0.2 §5):* analog range must include V5P1, so VDD from VPD and a ≥ 10 V-class
-  part; leakage and charge injection small against 100 nA. No candidate found with both
-  adequate stock and a small package — one of the two reasons for OI-19.
-
-### U12 / U22 — window comparator
-
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| TLV3202AIDGKR | C478075 | VSSOP-8 | 2,341 | Extended | 2026-11-03 | Candidate (dual → window) — not checked |
-| TLV3502AIDCNR | C48618 | SOT-23-8 | 3,235 | Extended | 2026-11-03 | Faster alternate — not checked |
-
-- *To confirm:* propagation delay; the whole comparator → gate path must fit 2 µs (§4, P8).
-
-### Q100/Q101, Q200/Q201 — bypass FETs
-
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| CSD25402Q3A | C111356 | VSONP-8 (3.3 × 3.3) | 15,148 | Extended | 2026-11-03 | **Candidate** |
-| CSD25404Q3 | C2865523 | VSON-CLIP-8 (3.3 × 3.3) | 2,627 | Extended | 2026-11-03 | Alternate — not checked |
-
-- *Verified (CSD25402Q3A):* P-channel, V<sub>DS</sub> −20 V; R<sub>DS(on)</sub> 7.7 typ / **8.9 max mΩ**
-  at V<sub>GS</sub> −4.5 V (13.3 / 15.9 mΩ at −2.5 V); Q<sub>g</sub> 7.5 typ / **9.7 max nC**.
-  Used in Rev0.2 §3.1 (port voltage), §3.2 (TC), P8 (gate drive).
-
-### Shunts
-
-| Ref | MPN | LCSC | Package | Stock | Class | Checked | Role / note |
-|---|---|---|---|---:|---|---|---|
-| R100/R200 (20 mΩ) | WSK2512R0200FEA | C1517429 | 2512, 4-terminal | 14 ⚠ | Extended | 2026-11-03 | **Blocked — OI-20**: stock, and TCR ±35 ppm/°C > ≤ 25 |
-| R100/R200 option | WSK2512R0100FEA (10 mΩ) | C3985410 | 2512, 4-terminal | 822 | Extended | 2026-11-03 | OI-20 option; ±35 ppm/°C |
-| reference only | FMF25FPJR020-LH (20 mΩ) | C105360 | 2512, 2-terminal | 41,815 | Extended | 2026-11-03 | Not acceptable: D5 requires a 4-terminal part |
-| R101/R201 (2 Ω) | WSK25122L000FEA | C3997408 | 2512, 4-terminal | 164 ⚠ | Extended | 2026-11-03 | Option; thin stock; TCR above 0.2 Ω not extracted. No 1206 candidate found yet |
-| R102/R202 (200 Ω) | RT0805BRD07200RL | C865287 | 0805 | 129,254 | Extended | 2026-11-03 | Thin film, 0.1 %. *To confirm:* TCR (code "D"), power rating against the 0.13 W stuck case (§7.3) — may need the 1206 size |
-
-- *Verified (Vishay WSK2512):* TCR **±35 ppm/°C for 0.005 – 0.2 Ω** (±75 for 3 – 4.9 mΩ). So the only
-  stocked 4-terminal 20 mΩ part misses Rev0.1's ≤ 25 ppm/°C requirement *and* has 14 pcs.
-- *Requirements (Rev0.1 §4, Rev0.2 §7.3):* HIGH ≤ 25 ppm/°C, 4-terminal; MID ≤ 50 ppm/°C and
-  survives 8 W for 10 ms (80 mJ); LOW ≤ 50 ppm/°C and ≥ 0.25 W continuous.
-
-## Port path and protection
-
-### U13 / U23 — load switch
-
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| SY6280AAC | C55136 | SOT-23-5 | 81,756 | Extended | 2026-11-03 | **Candidate** (P2) |
-| TPS2553DBVR | C55266 | SOT-23-6 | 45,331 | Extended | 2026-11-03 | Alternate |
-| TPS259474LRPWR | C2864845 | VQFN-10-HR (2 × 2) | 3,537 | Extended | 2026-11-03 | eFuse alternate — not checked |
-
-- *Verified (SY6280):* IN 2.4 – 5.5 V (6 V abs max); R<sub>DS(on)</sub> 80 mΩ typ;
-  I<sub>lim</sub> = 6800 / R<sub>set</sub>, 0.75 / 1.0 / 1.25 A min/typ/max at 6.8 kΩ, settable
-  0.4 – 2 A; EN active high, "do not float"; **reverse blocking at shutdown (no body diode)**;
-  **150 Ω output discharge at shutdown**; thermal shutdown 130 °C, auto-restart at 110 °C;
-  short-circuit foldback to 50 %; θ<sub>JA</sub> 200 °C/W; **no fault output**.
-- *Verified (TPS2553):* 2.5 – 6.5 V; current limit set by R<sub>ILIM</sub> 15 – 232 kΩ; FAULT
-  output for over-current and reverse voltage; turns off when OUT exceeds IN by 135 mV for 4 ms;
-  reverse leakage ≤ 1 µA at V<sub>OUT</sub> 6.5 V, V<sub>IN</sub> 0 V. No output discharge found
-  in the text, so REQ-PORT-03 would need an added discharge path.
-
-### ESD
-
-| MPN | LCSC | Package | Stock | Class | Checked | Role |
-|---|---|---|---:|---|---|---|
-| TPD4E05U06DQAR | C138714 | USON-10 (1 × 2.5) | 120,539 | Extended | 2026-11-03 | 4-line array per connector (D+, D−, CC1, CC2) — not checked |
-| USBLC6-2SC6 | C7519 | SOT-23-6L | 40,130 | Extended | 2026-11-03 | Alternate — not checked |
-
-- VBUS TVS (J1 at up to 9 V, J2/J3 at 5 V): **not yet selected** (OI-7).
-
-## Not yet searched
-
-Buck inductor L1; CC Rp switch FET; status LEDs; tactile switches; USB-C receptacles J1–J3
-(their footprints drive OI-1); passives. Each needs a row here before capture.
+- **J4 input fuse (OI-29).** No fuse or PTC is Basic. Akizuki resettable fuses are the
+  candidates, and must be checked for hold current ≥ 2.5 A at 5 V.
+- **Pin headers and sockets for the modules (OI-23).** These are Akizuki parts; their height
+  decides what SMD fits underneath.
+- **Heat-set M2 inserts** (mechanical; not under D13).

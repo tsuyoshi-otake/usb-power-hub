@@ -1,23 +1,34 @@
-# USB Power-Control Hub — Circuit Design Rev0.2
+# USB Power-Control Hub — Circuit Design Rev0.3
 
 **State: WIP — MANUFACTURING PROHIBITED**
-Date opened: 2026-08-16 (Rev0.1). Revised: 2026-11-03 (Rev0.2).
+Date opened: 2026-08-16 (Rev0.1). Revised: 2026-11-03 (Rev0.2, then Rev0.3 the same day).
 
 This document *is* the schematic at this stage. KiCad capture transcribes what is settled
 here; it is not where the design happens (CLAUDE.md Section 2). Nothing in this file has been
 built or measured. Every part number below is a *candidate* until `requirements/parts.md`
-records a confirmed JLCPCB assembly-pool figure against it.
+records it as confirmed against the actual PCBA order.
 
 Read this with CLAUDE.md Section 11 (Open Issues) open. Companion documents:
 `requirements/product.md` (what the product must do — authority), `requirements/verification.md`
 (how each requirement is proven), `requirements/parts.md` (candidates, stock, datasheet facts).
 
-Rev0.1 closed OI-2, OI-3 and OI-4 by decision and opened OI-13. **Rev0.2** records the user's
-2026-11-03 decisions D10 (85 × 35 mm, 4 layers) and D11 (USB2514B) with their consequences
-(D6 superseded and OI-2 reopened; the replacement clocks are proposal P13), corrects three Rev0.1 calculations (§3.1 port voltage, §7.1 power budget,
-§7.3 stuck-range dissipation), adds the noise budget (§4.1) and the clock tree (§6.3), and opens
-OI-16 – OI-22. Items Claude proposes but the user has not approved are in Section 14 and are
-**not** decisions.
+**What Rev0.3 is.** On 2026-11-03 the user set a sourcing rule (D13) and delegated the open
+design choices to Claude's recommendation:
+
+> 推奨で任せるよ、JLCPCBでExtendedでしか製造できないPCBAにはしないでね
+> JLCPCBでExtendedは無しLSCSパーツで在庫があるやつか、秋月で在庫があるやつ。
+> 小さいパーツは実装大変なのでPCBA前提で、デカいパーツだけね
+
+Most of the Rev0.2 design needed Extended parts: RP2040, CH224Q, USB2514B, ADS131M02, INA190,
+the TMUX mux, the 4-terminal shunt, and the TPD4E05 ESD array. Rev0.3 therefore redesigns the
+board from the parts that D13 allows. Where no allowed part can do a job, the function is
+reduced, and Section 7.4 and `requirements/product.md` §9 say what was lost.
+
+Decisions made under the delegation are recorded in Section 10 as **"Claude (delegated)"**.
+They are decisions, because the user handed them over, but the user can revert any one of
+them; each row names what reverting it would reopen. Two parts in this design are JLCPCB
+**Preferred Extended**, not Basic. Whether they are allowed under D13 is the user's call
+(OI-30). Section 9 gives the strictly-Basic fallback and what it costs.
 
 ---
 
@@ -25,34 +36,42 @@ OI-16 – OI-22. Items Claude proposes but the user has not approved are in Sect
 
 | # | Fact | Source | Confidence |
 |---|---|---|---|
-| 1 | Product is a *measurement instrument* that also happens to be a hub | User, this thread | Settled |
-| 2 | Upstream power is USB-PD sink | User decision, 2026-08-16 | Settled |
-| 3 | ECAD tool is KiCad | User decision, 2026-08-16 | Settled |
-| 4 | Measurement range target 0.1 µA – 1 A | User request, 2026-08-16 | Settled as a *target*; see Section 4 |
+| 1 | Product is a *measurement instrument* that also happens to be a hub | User, 2026-08-16 | Settled |
+| 2 | ~~Upstream power is USB-PD sink~~ | User decision, 2026-08-16 (D1) | **Superseded** by D13 → D14: CH224x is Extended |
+| 3 | ECAD tool is KiCad | User decision, 2026-08-16 (D2) | Settled |
+| 4 | Measurement range target 0.1 µA – 1 A | User request, 2026-08-16 | Settled as a *target*; Section 4 |
 | 5 | Upstream must enumerate as a COM port and be controllable from it | User request, 2026-08-16 | Settled |
-| 6 | RP2040 USB is Full-Speed (12 Mbps) device only — no High-Speed | RP2040 datasheet, well established | High |
-| 7 | ~~Board outline 60 × 24 mm~~ (historical, from `mockup/board-model.js`) | — | **Superseded by fact 9** |
+| 6 | STM32F103 USB is Full-Speed (12 Mbps) device only | DS5319 Rev 18 | High |
+| 7 | ~~Board outline 60 × 24 mm~~ | `mockup/board-model.js` | **Superseded by fact 9** |
 | 8 | All designators/values in `mockup/` are placeholders | CLAUDE.md §0 | Settled |
-| 9 | Board outline 85 × 35 mm, 4 layers | User decision, 2026-11-03 (D10) | Settled |
-| 10 | USB hub is USB2514B | User decision, 2026-11-03 (D11) | Settled |
-| 11 | Part parameters quoted in Rev0.2 | Manufacturer datasheets fetched 2026-11-03, cited per part in `requirements/parts.md` | High for the parameters cited; nothing else about those parts is confirmed |
+| 9 | Board outline 85 × 35 mm, 4 layers | User decision, 2026-11-03 (D10) | Settled; fit is OI-23 |
+| 10 | ~~USB hub is USB2514B~~ | User decision, 2026-11-03 (D11) | **Superseded** by D13 → D15: every USB2514B variant is Extended |
+| 11 | Part parameters quoted here | Manufacturer datasheets fetched 2026-11-03, cited per part in `requirements/parts.md` | High for the parameters cited; nothing else about those parts is confirmed |
+| 12 | Sourcing rule: JLCPCB **Basic** parts in assembly stock for machine-placed parts; **Akizuki** parts in stock for large hand-soldered parts; no Extended-only PCBA | User decision, 2026-11-03 (D13) | Settled |
+| 13 | JLCPCB Basic holds 351 parts: 182 resistors, 88 MLCCs, 81 others. None of the 81 is a microcontroller, a USB hub, a USB-C receptacle, a USB D± ESD array, a current-sense amplifier, a multi-channel ADC or a fuse | JLCPCB assembly-parts list, 2026-11-03 (`requirements/parts.md`) | High as of that date |
+| 14 | Akizuki stock, part numbers and specifications | akizukidenshi.com product pages, 2026-11-03 | High as of that date; stock changes daily |
 
 Everything else below is derived by calculation in this document, or is explicitly marked OPEN.
 
 ---
 
-## 2. What this changes versus the mockup
+## 2. What Rev0.3 changes versus Rev0.2
 
-| Mockup showed | Rev0.1 says | Why |
+| Rev0.2 had | Rev0.3 has | Why |
 |---|---|---|
-| Rd-only upstream, no PD | CH224K-class PD sink, request 9 V | Closes OI-4. 2 × 1 A at 5 V is 10 W; you cannot get that from a 5 V/500 mA contract |
-| 4 shunts (10 mΩ / 1 Ω / 100 Ω / 1 k), 1 FET per channel | 3 shunts (20 mΩ / 2 Ω / 200 Ω), 2 bypass FETs + sense mux per channel | Closes OI-3. 4 shunts with 1 switch is not a controllable ladder |
-| No comparator | Window comparator per channel, hardware range control | µs-scale ranging cannot be done by MCU polling |
-| 12 MHz crystal for MCU only, no hub clock | Rev0.1: one shared 12 MHz oscillator (D6). **Rev0.2: superseded by D11**; proposed replacement (P13): Y1 12 MHz → RP2040, Y2 24 MHz → USB2514B | D11 chose a 24 MHz hub, so sharing is impossible |
-| 2-terminal shunts | 4-terminal (Kelvin) for the 20 mΩ; Kelvin *land pattern* for the others | Closes OI-11 |
-| 6-layer stackup | 4 layers (D10) | OI-10 — no differential pair count justifies 6 |
-| 60 × 24 mm outline | 85 × 35 mm (D10) | OI-13 — 75 % component density is not routable; 36 % is comfortable |
-| `PPK2-COMPATIBLE µA→A` on silk | Removed | Third-party trademark used as a compatibility claim (CLAUDE.md §6) |
+| USB-PD sink (CH224Q) on J1, 9 V, buck to 5.10 V | **J4, a power-only 5 V USB-C input** for port power; J1 carries data and logic power only. No PD, no buck | CH224x and every buck candidate are Extended (D13). This also removes OI-17: port power no longer depends on what the host PC can grant |
+| RP2040 + QSPI flash | **STM32F103C8T6** (flash on chip) | No MCU is Basic. STM32F103C8T6 is Preferred Extended (OI-30). Its two ADCs replace the external ADC |
+| USB2514B (24 MHz) | **CH335F** on an Akizuki DIP module (12 MHz crystal on our board) | Every USB2514B variant is Extended; the CH335F module is a large hand-soldered part |
+| ADS131M02 24-bit ADC | STM32 12-bit ADC ×2, dual simultaneous mode | The 24-bit ADC is Extended. Resolution at the bottom of the MID and HIGH ranges is the cost (§4, §7.4) |
+| INA190 + 5 V-CM mux (topology B), or INA190 ×6 (topology C) | **Topology C with discrete high-side current mirrors**: OP07CDR + AO3401A per shunt, 6 per board | There is no Basic current-sense amplifier or mux. OP07CDR is Basic. The mirror needs a supply above the 5 V common mode, so a MAU104 isolated 12 V module (Akizuki) is added |
+| Shunts 20 mΩ / 2 Ω / 200 Ω | **0.1 Ω / 10 Ω / 510 Ω** | 12-bit ADC and Basic/Akizuki availability (§4). The Basic 0.1 Ω part has ±800 ppm/°C, so R_H is an Akizuki KOA part with ±100 ppm/°C |
+| SY6280AAC load switch | **Back-to-back AO3401A pair** + 2N7002 drive + fast turn-off | The load switch is Extended. The back-to-back pair blocks reverse current with the port off (OI-7) |
+| TPD4E05U06 ESD | **SRV05-4** | SRV05-4 is Preferred Extended (OI-30); no Basic part protects D± |
+| 32 kSPS | **18.5 kSPS** per channel | Set by the 12-bit ADC sampling time this source impedance needs (§3.3) |
+| Comparator loop, MCU observes only (D4) | Hardware up-ranging; **firmware holds the new range within 100 µs and does all down-ranging** | Holding the range in hardware needs a latch or one-shot that Basic does not offer. Firmware already owns down-ranging (§3.2, D17) |
+
+Rev0.2's other content still applies unless a section below replaces it: Kelvin sensing, the
+default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
 
 ---
 
@@ -61,274 +80,345 @@ Everything else below is derived by calculation in this document, or is explicit
 ### 3.1 Power path
 
 ```
-          J1 (USB-C, upstream / host)
-            │ VBUS_IN
-            ├── U1  PD sink (CC1/CC2)  ──► requests 9 V, falls back 5 V
-            │
-          VPD (9 V nom, 5 V fallback)
-            │
-            └── U2  regulator (buck; buck-boost if OI-17 says so) ──► V5P1 (5.10 V)
-                     L1
-          V5P1 ──┬── U3  3.3 V digital  ──► V3P3   (P5: small buck or SOT-223 LDO — OI-18)
-                 ├── U3B LDO, low-noise ──► V3P3A  (analog, separate)
-                 ├── [ ladder A ] ── U13 load switch ── VBUS_A ── J2
-                 └── [ ladder B ] ── U23 load switch ── VBUS_B ── J3
+ J4 (Akizuki USB-C module, power only)
+   CC1,CC2 ── Rd 5.1 kΩ ×2 to GND ── 1 kΩ ── ADC IN8, IN9    (read J4's advertisement)
+   CC1,CC2 ── D4 PSM712 (ESD)
+   VBUS ── D6 SMBJ6.5CA ── 22 µF ── VBUS_IN ──┬── divider 20k/10k ── ADC IN7  (V_J4)
+                                              ├── port A path (below)
+                                              └── port B path
+
+ port x path (x = A, B; designators shown for A — B: U/RS +10, Q +20):
+   VBUS_IN ── Q10 ─┐┌─ Q11 ── VSUP_A ── RS10 R_H ── RS11 R_M ── RS12 R_L ── VBUS_A ── 10 µF ── J2 VBUS
+       (AO3401A back-to-back,       0.1 Ω       10 Ω        510 Ω       │
+        common source, gates tied)   └─ Q17 bypasses R_M+R_L ┘           ├── Q13 AO3400A + 1 kΩ to GND (discharge)
+                                                 └─ Q18 bypasses R_L ┘   └── nothing else (no divider, no TVS)
+
+ J1 (Akizuki USB-C module, host data + logic power)
+   CC1,CC2 ── Rd 5.1 kΩ ×2 to GND;  D1 SRV05-4 on D+, D−, CC1, CC2 (pin 5 to V3V3)
+   VBUS ── D5 SMBJ6.5CA ── V5L (logic 5 V) ──┬── U6 CH335F module V5
+                                             ├── U13, U23, U30 LM393 (comparators)
+                                             ├── U5 MAU104 ── V12 ── 10 Ω / 2×22 µF ── V12F ──┬── U10–U12, U20–U22 OP07 V+
+                                             │                                             └── U4 CJ431 shunt reg ── V_INJ (8 V)
+                                             └── U2 AMS1117-3.3 ── V3V3 ── ferrite + 10 µF ── VDDA
 ```
 
-**Rev0.2 correction — where the 3.3 V rails come from.** The Rev0.1 drawing hung U3 (and,
-ambiguously, U3B) on VPD. At the ~200 mA board load (§7.1), a 9 V → 3.3 V linear regulator
-dissipates (9 − 3.3) × 0.2 = **1.14 W**; at the 187 °C/W of a SOT-23-5 (TPS7A20 DBV datasheet
-figure) that is a **213 °C** junction rise. Not buildable. Rev0.2 draws both rails from V5P1;
-how the digital rail is made is OI-18 (Section 14, P5). The analog rail carries ≤ 10 mA, so a
-low-noise LDO from V5P1 dissipates ≤ 18 mW.
+**Why the switch sits upstream of the ladder.** Any current that leaves the circuit
+between a shunt and the DUT is measured as load current. The switch's gate network, the
+bypass FETs' gate networks, and the mirror amplifiers' R1 connections are therefore all on
+the supply side of the shunt they would disturb. The only things on VBUS_x are the port
+capacitor, the discharge FET, and the LOW amplifier's +IN through 10 kΩ. That is why VBUS_x
+has no voltage divider and no TVS: either would add a leakage that the LOW range measures.
 
-The buck sets **5.10 V**, not 5.00 V, to leave headroom for the series drop between V5P1 and
-the DUT. This is a decision, not an accident — record it in the KiCad schematic as a note next
-to U2's feedback divider.
+**Port voltage at the DUT.** The path has the switch (2 × 60 mΩ max), R_H (0.1 Ω), the
+MID-bypass FET (60 mΩ max) and about 40 mΩ of copper and module wiring, 0.32 Ω in total:
 
-**Rev0.2 correction — what the DUT actually sees.** Rev0.1 claimed ≥ 5.05 V at the DUT,
-assuming a 20 mV ladder and a ~30 mV load switch. With the candidate parts, the HIGH-range path
-at 1 A is:
+| Load | Drop | Port, J4 = 5.00 V | Port, J4 = 4.75 V |
+|---:|---:|---:|---:|
+| 0.5 A | 0.16 V | 4.84 V | 4.59 V |
+| 1.0 A | 0.32 V | 4.68 V | 4.43 V |
 
-| Element | Resistance | Drop at 1 A | Drop at 1.5 A | Source |
-|---|---:|---:|---:|---|
-| RS1 shunt | 20 mΩ | 20 mV | 30 mV | §4 |
-| Q100 + Q101 bypass FETs, in series | 2 × 8.9 mΩ (max) | 17.8 mV | 26.7 mV | CSD25402Q3A, V<sub>GS</sub> = −4.5 V |
-| U13 load switch | 80 mΩ (typ) | 80 mV | 120 mV | SY6280AAC |
-| **Total** | **117.8 mΩ** | **118 mV** | **177 mV** | |
+USB 2.0 asks for ≥ 4.75 V at a downstream port. This board meets that only at 0.5 A from a
+source at ≥ 4.91 V. It is an instrument port, not a compliant hub port, and
+`requirements/product.md` §9 states this as a limitation. Rev0.2 regulated the port to
+5.10 V and avoided this, but its buck is Extended.
 
-So the DUT sees **4.98 V** typical at 1 A (4.93 V with the buck at −1 %), and 4.92 V / 4.87 V at
-1.5 A — inside the 4.75 V vSafe5V minimum, but not the 5.05 V Rev0.1 promised. Copper and the
-connector add more. Whether to raise the setpoint is tied to the regulator choice (OI-17).
-
-**Why buck from 9 V instead of passing 5 V straight through.** A pass-through rail inherits
-every millivolt of upstream cable IR drop and every wart of the charger's regulation, and
-those land directly on the DUT. An instrument should present a rail it controls. It also
-decouples us from what a given source offers at 5 V — 9 V/2 A sources are far more common
-than 5 V/3 A ones.
-
-**Rev0.2 caveat — OI-17.** That last sentence is true of *chargers*. J1 is the only power input,
-and J1 is also the data upstream, so in normal use it is plugged into the **host PC**. PC USB-C
-ports commonly offer only 5 V (vSafe5V, with 1.5 A or 3 A Type-C current). If so, the 9 V
-request fails, VPD is ~5 V, and a buck **cannot** produce 5.10 V from it. TPS62130, the
-shortlisted buck with a 100 % duty-cycle mode, then passes VPD through minus its own drop;
-TPS62933 has no 100 % mode in its datasheet. Whether the intended host offers 9 V is a fact
-about the user's PCs, not something this document can settle — see OI-17.
+**J4 advertisement.** J4 presents Rd on both CC pins, so any USB-C source supplies 5 V. The
+active CC pin's voltage across 5.1 kΩ shows the advertised current: Default 0.25–0.61 V,
+1.5 A 0.70–1.16 V, 3.0 A 1.31–2.04 V (USB Type-C vRd ranges). The ADC resolves this
+trivially. Firmware uses it for the budget rule in §7.2. **J4 MUST be 5 V.** A source that
+puts more than 5.5 V on VBUS without a PD contract is out of specification. D6 (SMBJ6.5CA,
+clamping at 11.2 V) protects against transients, not against a wrong supply. An input fuse
+is OI-29.
 
 ### 3.2 Measurement front end (one channel shown; ×2)
 
+Each shunt has its own amplifier: a high-side current mirror built from an OP07CDR and an
+AO3401A P-FET.
+
 ```
-   V5P1 ──┬─ RS1 20 mΩ ─┬─ RS2 2 Ω ─┬─ RS3 200 Ω ─┬─→ U13 load switch → VBUS_A
-          │             │           │             │
-          │            Q100        Q101           │      Q100/Q101 = bypass FETs
-          │        (bypass RS2) (bypass RS3)      │      default ON = HIGH range = safe
-          │                                       │
-          └──────────── U10 sense mux ────────────┘   selects ONE shunt's Kelvin pair
-                              │
-                        U11 current-sense amp (G = 50, zero-drift)
-                              │
-                     ┌────────┴────────┐
-                     │                 │
-              U7 ADC channel      U12 window comparator
-                                        │
-                                  range control logic → Q100/Q101
+ supply side of shunt ──┬─────────── R1 100 Ω ──── X ──── Q (AO3401A) source
+                        │                          │      Q gate ── 1 kΩ ── OP07 out
+                      R_s (Kelvin)          OP07 −IN ── X
+                        │                   OP07 +IN ── 10 kΩ ── load side of shunt (Kelvin)
+ load side of shunt ────┘                   V_INJ ── 1 MΩ ── X            (pedestal, §4.1)
+                                            Q drain ── AMP_r_x ── R_OUT ∥ C_N ── GND
+                                                         ├── 1 kΩ ── STM32 ADC pin
+                                                         └── LM393 + input (comparator)
 ```
 
-Three things about this arrangement are load-bearing:
+The loop forces X to the load-side voltage, so the current in R1 is I · R_s / R1. That
+current flows out of the FET drain into R_OUT, so **V_out = I · R_s · R_OUT / R1**. The
+mirror current is drawn from the supply side of the shunt and is not measured.
 
-1. **The mux selects the sense taps, not the current path.** On the HIGH range the amp sees
-   only RS1's Kelvin pair; the bypass FETs' R<sub>DS(on)</sub> sits outside the sensed span.
-   If instead you sense across the whole ladder, two R<sub>DS(on)</sub> (8.9 mΩ max each for
-   CSD25402Q3A, TC ≈ +4000 ppm/°C) are in series with a 20 mΩ shunt (TC ≤ 25 ppm/°C) and
-   dominate the temperature error — (2 × 8.9 × 4000 + 20 × 25) / 37.8 ≈ **1900 ppm/°C** on the
-   total, i.e. ~3.8 % over a 20 °C swing. That is not an instrument. Section 5 records the
-   alternatives considered. *(Rev0.1 quoted ~1300 ppm/°C using 5 mΩ FETs and a 15 ppm/°C
-   shunt; Rev0.2 uses the candidate FET's datasheet maximum and the shunt requirement.)*
+| Range | R_s | R1 | R_OUT | C_N | Gain | V/A | Full scale (3.3 V) | Up-range at 2.80 V |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| LOW | 510 Ω (0805, Basic) | 100 Ω | 1.5 kΩ | 330 pF C0G | 15 | 7650 | 431 µA | 366 µA |
+| MID | 10 Ω (1 W axial, Akizuki) | 100 Ω | 1.5 kΩ | 330 pF C0G | 15 | 150 | 22.0 mA | 18.7 mA |
+| HIGH | 0.1 Ω (1 W chip, Akizuki) | 100 Ω | 2.4 kΩ | 220 pF | 24 | 2.4 | 1.37 A | OC trip 1.16 A |
 
-2. **Every range is scaled to the same 20 mV full-scale**, so one amplifier gain and one ADC
-   input range serve all three. Range switching changes only the scale factor applied in
-   software, never the analog gain.
+The R1, R_OUT and C_N values are all Basic. Basic has no 1.2 kΩ, so the MID gain is 15
+rather than the 12 that would balance the two range ratios. The ratios are 51 (MID/LOW)
+and 62.5 (HIGH/MID).
 
-3. **The bypass FETs default ON** (gate pull-to-ON resistors). A firmware crash, a brownout,
-   or an unprogrammed board leaves the ladder at 20 mΩ. Section 7.3 shows why the opposite
-   default destroys the board. **Rev0.2:** the pull resistor sets the *default*, not the
-   *speed*. Turning a CSD25402Q3A on moves Q<sub>g</sub> = 9.7 nC (max); doing it in 0.5 µs,
-   a quarter of the 2 µs budget, needs ≈ 20 mA of active gate drive. A 100 kΩ pull-down
-   alone takes milliseconds. The up-range edge must be actively driven (P8).
+**Supplies and margins.** The OP07s run from V12F (MAU104 output, isolated, −V_out tied to
+GND), with the inputs at the ~5 V port common mode:
+
+- *Common mode:* OP07 is specified at ±15 V with ±13 V minimum common-mode range, i.e. 2 V
+  from each rail. Applied to 0 / 12 V, that gives 2–10 V. The 4.4–5.25 V inputs sit inside it.
+  **This rail-relative extrapolation is an assumption**: OI-27.
+- *Mirror FET gate:* the gate has to sit about |V<sub>GS(th)</sub>| (≤ 1.3 V) below the
+  source. At HIGH full scale (1 A) the source is at 4.74 V (J4 = 5.00 V), so the gate is
+  ≈ 3.44 V. With J4 = 4.75 V it is ≈ 3.19 V. The OP07 output low limit is extrapolated as
+  3.0 V (±12 V into 10 kΩ at ±15 V), which leaves 0.19–0.44 V of headroom. This is tight
+  and is part of OI-27.
+- *Gate safety:* on a 0 / 12 V supply the gate-source voltage stays between about −5 V and
+  +7 V, inside AO3401A's ±12 V rating. A ±12 V supply (MAU108) was rejected because the
+  gate could then see −17 V.
+- *Unpowered inputs:* the 10 kΩ at +IN limits current into an unpowered OP07. Because the
+  switch is upstream, the ladder is unpowered whenever the port is off. The only case left
+  is J1 unplugged with the port on, which cannot happen: the MCU is off, so the port is off.
+
+**Nested bypass ladder and default state (D9 kept).** In series per channel: R_H → R_M → R_L.
+
+| FET | Bypasses | Gate network |
+|---|---|---|
+| Q17 (FET_M) | R_M + R_L | 1 MΩ gate→source (OFF bias); Q19 2N7002 gate→GND; LM393 CMP_M output gate→GND |
+| Q18 (FET_L) | R_L | 1 MΩ gate→source; Q20 2N7002 gate→GND; LM393 CMP_L output gate→GND |
+
+- Q19 and Q20 have their gates pulled up to V3V3 by 100 kΩ. At reset both bypasses are
+  therefore ON and the ladder is in **HIGH** (D9).
+- The MCU's HOLD_M_x / HOLD_L_x pins drive Q19 / Q20 gates. Driving one low releases that
+  bypass, which is a down-range.
+- Ranges: HIGH = Q17 ON. MID = Q17 OFF, Q18 ON. LOW = both OFF.
+- Each amplifier sees only its own shunt, so no FET R<sub>DS(on)</sub> is inside a sensed span.
+
+**Up-ranging is hardware; holding is firmware.** CMP_L watches the LOW amplifier and CMP_M
+the MID amplifier, each against 2.80 V from a VDDA divider with hysteresis.
+
+1. When an output exceeds 2.80 V, the LM393 open-collector output pulls that bypass gate
+   low. No MCU is in this path (G11).
+2. The bypassed amplifier's input then collapses, and the comparator releases.
+3. The 1 MΩ then starts returning the gate to OFF, with τ ≈ 1 ms at ~1 nF gate
+   capacitance. The FET would leave conduction about 1.35 ms later.
+4. Before that, firmware sees the comparator edge on EVT_L_x / EVT_M_x and asserts the
+   matching HOLD pin. EVT is an FT pin reading the gate node through 100 kΩ, with a unique
+   EXTI line. The requirement is to assert HOLD within 100 µs, a 13× margin.
+
+If firmware is hung, the range hiccups between two states about every millisecond.
+Measurements are then wrong, but nothing is stressed. The IWDG (hardware option bytes)
+resets the MCU, which returns ports OFF and the ladder to HIGH.
+
+**Down-ranging is firmware.** Firmware releases one stage when the current has been below
+0.8 × the lower range's up-range threshold for 1 ms. The 1 MΩ gate return makes the
+transition take about 1–2 ms, and those samples are flagged as settling.
+
+**Ranging time per stage.** Three contributions:
+- the comparator node's τ = R_OUT · C_N ≈ 0.5 µs;
+- LM393 response, 1.3 µs at 5 mV overdrive (300 ns at large overdrive);
+- AO3401A gate charge, 7 nC at 4.5 V, at the LM393's minimum 6 mA sink: 1.2 µs.
+
+That is **≤ 3.0 µs worst case per stage**, which replaces Rev0.2's 2 µs. LOW → HIGH needs two
+stages in sequence: in LOW the whole ladder is 520 Ω, so the MID amplifier cannot reach its
+threshold until the LOW stage has bypassed R_L.
+
+**Why C_N sits across R_OUT and not at the ADC pin.** Putting the anti-alias capacitor at the
+pin behind a series resistor would add a slow pole to the comparator's node. With 1 kΩ + 10 nF,
+the LOW node's response becomes τ ≈ 25 µs, and the ranging budget fails. Instead:
+- C_N sets one ~0.5 µs pole that the comparator and the ADC share.
+- The port capacitor band-limits the current itself: 31 Hz on LOW, 1.6 kHz on MID (§4).
+- The ADC uses a long sampling time, so that charge sharing with C_N settles. The S/H kick is
+  2.4–3.5 %, and after 41.5 cycles the residual is < 0.2 LSB for a 3 V step between
+  successive channels.
+- The 1 kΩ in series limits overrange injection to ≈ 1.4 mA (STM32 limit 5 mA per pin).
+  Samples taken during a range change are flagged in any case.
 
 ### 3.3 Data path — and the COM port
 
 ```
-   J1 D+/D- ── U6 USB 2.0 hub (4-port, HS) ─┬─ port 1 ── U4 RP2040   (USB FS device)
-                                            ├─ port 2 ── J2 D+/D-    (DUT A passthrough)
-                                            └─ port 3 ── J3 D+/D-    (DUT B passthrough)
+   J1 D+/D- ── U6 CH335F module (HS hub, 4 downstream) ─┬─ port 1 ── U1 STM32F103 (USB FS device)
+                                                        ├─ port 2 ── J2 D+/D-   (DUT A passthrough)
+                                                        ├─ port 3 ── J3 D+/D-   (DUT B passthrough)
+                                                        └─ port 4    unused
 ```
 
-The upstream PC sees a hub, and behind it a composite device on port 1. **That composite
-device is what appears as a COM port.**
+The host sees a hub, and behind it a composite device on port 1. That device has two
+CDC-ACM functions (D7, unchanged):
 
 | Interface | Class | Appears on the PC as | Carries |
 |---|---|---|---|
-| 0 + 1 | CDC-ACM | `COMn` (Windows) / `/dev/ttyACM0` | Control. ASCII line protocol — open TeraTerm and type |
+| 0 + 1 | CDC-ACM | `COMn` / `/dev/ttyACM0` | Control. ASCII line protocol |
 | 2 + 3 | CDC-ACM #2 | `COMn+1` / `/dev/ttyACM1` | Binary sample stream, framed |
 
-Both are CDC-ACM, so both are driverless on Windows 10/11, macOS and Linux — no WinUSB, no
-INF, no Zadig. Control by hand from a terminal is then a first-class use, not an afterthought.
+STM32F103 has 512 B of USB packet memory, and two CDC-ACM functions need about 450 B of it.
+That is enough, but there is no room for a third function.
 
-**Design rules this forces (all verifiable, all easy to get wrong):**
+Rev0.2's design rules all carry over:
+- The unique serial number now comes from the STM32 96-bit UID.
+- The control interface stays usable while the stream runs.
+- The stream is binary.
+- VID/PID is still OPEN (REQ-HOST-06); pid.codes is the candidate for an open-hardware ID.
 
-- **Every unit must report a unique USB serial number string.** Windows keys COM-number
-  assignment on (VID, PID, serial). With a unique serial each board keeps a stable `COMn`
-  across replugs; with a missing or duplicated serial the numbers churn and the user's saved
-  terminal profile breaks. Derive it from the RP2040 flash unique ID at boot.
-- **The control interface must remain usable while the stream interface is running.** Do not
-  share a single endpoint pair.
-- **The stream is binary and framed.** ASCII would multiply the byte count by ~3.
-- VID/PID: **OPEN.** Do not ship a squatted VID. Candidates: a PID under Raspberry Pi's
-  RP2040 allocation programme, or pid.codes for open hardware. → `requirements/product.md`.
+The STM32 needs an external 1.5 kΩ D+ pull-up. It is switched from a GPIO so that firmware
+decides when to attach.
 
-**The sample-rate ceiling is set here, not by the ADC.** RP2040's USB is Full-Speed only
-(Source of Fact 6). Full-Speed bulk tops out near 1188 kB/s theoretical, and a real host
-sustains meaningfully less:
+**Sample rate (replaces D8).**
+- ADCCLK = 72 MHz / 6 = 12 MHz.
+- Sampling 41.5 + conversion 12.5 cycles = 4.5 µs per channel.
+- ADC1 scans port A's three amplifiers while ADC2 scans port B's (dual regular simultaneous
+  mode), one 13.5 µs scan → 74.1 kHz.
+- The average of 4 scans → **18.5 kSPS per channel**.
+- Aux channels (IN6–IN9) are read in the injected group every 1 ms.
 
-| Sample rate | 2 ch × 3 B packed | % of FS bulk |
-|---|---:|---:|
-| 10 kSPS | 59 kB/s | 5 % |
-| 32 kSPS | 188 kB/s | 16 % |
-| 100 kSPS | 586 kB/s | 49 % |
+| Output | Bytes per sample pair | Rate | % of FS bulk (1188 kB/s) |
+|---|---:|---:|---:|
+| 18.5 kSPS, 2 ch | 5 (2 × u16 sum-of-4 + 1 B ranges/flags) | 92.6 kB/s | 7.8 % |
 
-32 kSPS is comfortable. 100 kSPS is possible but leaves little headroom and depends on host
-behaviour. **Rev0.1 targets 32 kSPS**; anything faster is an explicit future decision that
-requires either an MCU with High-Speed USB or on-board buffering with burst readout.
+The host interface is no longer the ceiling: the ADC sampling time is (OI-14).
 
-**Rev0.2 — the exact rate follows the ADC clock (§6.3).** ADS131M02 has no internal oscillator
-for its modulator: it needs CLKIN, 0.3 – 8.4 MHz in high-resolution mode (8.192 MHz nominal,
-64 kSPS maximum). With CLKIN = 8.000 MHz from RP2040 (P6), OSR = 128 gives **31.25 kSPS** —
-D8's "32 kSPS" in practice. With the per-sample range code and flags the stream needs
-(`requirements/product.md` REQ-HOST-05): 2 ch × 3 B + 1 B flags = 7 B per sample pair,
-31.25 k × 7 B = 219 kB/s ≈ **18 %** of Full-Speed bulk.
+**HS through the modules.** The CH335F hub is High-Speed upstream and downstream (MTT), so a
+DUT on J2/J3 can run at HS. The D± pairs, however, pass through Akizuki breakout modules,
+2.54 mm headers and an unknown module layout. HS eye margin is unverified, and the fallback
+is that DUTs enumerate at FS. This is OI-26, verified at bring-up (V-HOST-01).
 
-The hub (U6) enumerates with Microchip's own VID/PID; only the RP2040 function behind port 1
-needs an ID of ours (VID/PID still OPEN — `requirements/product.md` REQ-HOST-06).
+### 3.4 Port switching, Rp, over-current and discharge (per port)
+
+```
+ MCU EN_x ──┬── 33 kΩ ── J2 CC1     (Rp, present only while EN_x is high)
+            ├── 33 kΩ ── J2 CC2
+            └── 10 kΩ ── EN_G_x ──┬── 100 kΩ to GND
+                                  ├── LM393 CMP_OC_x output (open collector)
+                                  ├── Q12 2N7002 gate → pulls switch gate low via R_on  (port ON, soft start)
+                                  └── Q14 2N7002 inverter → DIS_x (10 kΩ pull-up to V3V3)
+                                          DIS_x ── Q13 AO3400A gate (discharge VBUS_A via 1 kΩ)
+                                          DIS_x ── Q15 2N7002 → Q16 S9012 PNP: switch gate to common source (fast OFF)
+```
+
+- **Rp = 33 kΩ to 3.3 V on both CC pins, sourced from the EN_x pin itself.** No 36 kΩ is
+  Basic. With a DUT's Rd = 5.1 kΩ ± 10 %, the DUT sees 0.35–0.48 V, inside the Default
+  window (0.25–0.61 V). Rp disappears whenever EN_x is low or the MCU is in reset, so the
+  DUT sees a clean detach (REQ-PORT-07). The board advertises **Default USB power only**
+  (§7.2).
+- **Soft start ≥ 1 ms:** turn-on goes through R_on with a gate–drain Miller capacitor; the
+  values are set at capture against the 10 µF port capacitor. **Turn-off ≤ 10 µs:** Q16
+  clamps the gate to the common source as soon as DIS_x rises. The OC comparator therefore
+  opens the port fast even though turn-on is slow.
+- **Over-current:** CMP_OC_x compares the HIGH amplifier against 2.80 V, which is 1.16 A
+  (±3 %). It pulls EN_G_x low directly, and the port opens in hardware. Firmware sees the
+  edge (OC_x, EXTI), drives EN_x low, and latches `FAULT:OVERCURRENT`.
+  - If firmware does not respond, the port retries with a ≥ 1 ms soft start and trips again,
+    a bounded hiccup, until the IWDG resets the MCU.
+- **Reset state:** EN_x pins are Hi-Z at reset, so the 100 kΩ holds EN_G_x low. Result:
+  switch OFF, discharge ON, Rp absent, ladder in HIGH.
+- **Back-feed:** with the port off, the back-to-back pair blocks a DUT that drives VBUS_x,
+  and the DUT sees the 1 kΩ discharge load. VBUS_x is not measured (§3.1), so back-feed is
+  **blocked but not detected**. This is a reduction against Rev0.2 (REQ-PORT-04).
 
 ---
 
 ## 4. The range ladder — can it actually do 0.1 µA to 1 A?
 
-Yes, with three ranges — but the answer has three conditions attached, and they are the
-real design content.
+| Range | Used from (after down-range) | Up-range at | LSB | Floor = 3 LSB | Burden at up-range | Bandwidth (10 µF port C) |
+|---|---:|---:|---:|---:|---:|---:|
+| LOW | 0 | 366 µA | 0.105 µA | 0.32 µA | 0.190 V (whole ladder, 520 Ω) | 31 Hz (τ 5.2 ms) |
+| MID | 293 µA | 18.7 mA | 5.37 µA | 16 µA | 0.190 V (10.2 Ω) | 1.6 kHz (τ 102 µs) |
+| HIGH | 14.9 mA | OC 1.16 A | 0.336 mA | 1.0 mA | 0.16 V at 1 A | ~100 kHz (τ 1.6 µs) |
 
-Full-scale shunt voltage is fixed at **20 mV** for every range (amp G = 50 → 1.0 V at the
-ADC, against a ±1.2 V ADC full scale — 20 % headroom).
+**Resolution 0.1 µA** is 1 LSB on LOW (0.105 µA). It is resolved, though at the floor of the
+accuracy specification. **Range to 1 A** is HIGH at 2.4 V, below both the OC trip and the
+ADC clip. The bottom of MID and HIGH is the weak spot: at 293 µA on MID, 3 LSB is 5.5 % of
+the reading, and at 14.9 mA on HIGH it is 6.7 %. A 12-bit converter covering 0.1 µA – 1.37 A
+in three ranges cannot do better. The ratio of 13,000 between full scale and the LSB is
+fixed, so each range spans about 50–60× and the overlap region sits ~50 LSB above the bottom.
 
-| Range | Shunt | Full scale | Burden at FS | Dissipation at FS | Package |
-|---|---:|---:|---:|---:|---|
-| HIGH | 20 mΩ | 1 A | 20 mV | 20 mW | 2512, 4-terminal, ≤ 25 ppm/°C |
-| MID | 2 Ω | 10 mA | 20 mV | 200 µW | 1206, Kelvin land, ≤ 50 ppm/°C |
-| LOW | 200 Ω | 100 µA | 20 mV | 2 µW | 0805, Kelvin land, ≤ 50 ppm/°C; Rev0.2: rated ≥ 0.25 W for the stuck case (§7.3), which may force 1206 |
+**Ride-through.** While on LOW, a DUT step is supplied by the 10 µF port capacitor during the
+two ranging stages, so the port sags by I · t / C:
 
-Three ranges at 100× steps span 10⁶ of full scale. The requested 10⁷ is reached because the
-LOW range must resolve well below its own full scale:
+| Step from LOW | Two stages at 3 µs | If a stage takes 4 µs |
+|---:|---:|---:|
+| 1 A | 0.60 V | 0.80 V |
+| 0.3 A | 0.18 V | 0.24 V |
 
-**0.1 µA on the LOW range = 100 nA × 200 Ω = 20 µV at the shunt = 1.0 mV at the ADC.**
+A DUT that wakes from deep sleep straight into 1 A therefore sees a ~0.6 V dip. Most MCUs
+ride through this. Radios with brown-out at 4.3 V on a 5 V input may not. This is stated as a
+limitation, not hidden.
 
-A 24-bit ADC on a ±1.2 V scale has an LSB of 143 nV, which referred back through G = 50 and
-200 Ω is **14 pA**. So quantisation is nowhere near the limit — noise and offset are. Which
-gives the three conditions:
+**Stuck range** (a bypass FET fails OFF, or firmware holds the wrong range) into a short at
+the port:
 
-**Condition 1 — zero-point calibration is mandatory, not a convenience feature.**
-A ±25 µV amplifier input offset is, on the LOW range, **125 nA of error** — larger than the
-entire target resolution. Calibrated out, what remains is *drift*: at 0.1 µV/°C over a 20 °C
-swing that is 2 µV → **10 nA**. Comfortably inside target. So:
-- The amplifier must be zero-drift/chopper. A general-purpose op-amp will not do.
-- The firmware must zero with the load switch open, and re-zero on temperature change.
-- The mockup's `DOUBLE · ゼロ点校正` legend was right for the wrong reason. It is not a nicety.
+| Stuck in | Current | Shunt dissipation | What stops it |
+|---|---:|---:|---|
+| LOW | 9.6 mA | 47 mW in 510 Ω 0805 (0.125 W) | Nothing needed |
+| MID | 0.48 A | **2.35 W in R_M (1 W part)** | Below the OC trip. Firmware sees the MID amplifier saturated with the bypass commanded ON, and opens the port within 10 ms. IWDG is the backstop. R_M's short-time overload rating is OI-28 |
+| HIGH | Limited by J4's source | R_H 1 W | OC trip at 1.16 A |
 
-**Condition 2 — auto-ranging must be hardware, and the output capacitor is part of the
-measurement circuit.**
-On the LOW range the ladder is ~202 Ω. If the DUT wakes and demands 1 A, the rail collapses
-until the bypass FETs close. Riding through that needs charge at the DUT:
+### 4.1 Noise and offset
 
-| Transition time | C needed to hold ΔV ≤ 200 mV at 1 A |
-|---|---|
-| 1 µs | 5 µF |
-| 2 µs | 10 µF |
-| 5 µs | 25 µF |
+**Noise is not the limit.** OP07 input noise is 10.5 nV/√Hz. Over the ~0.3 MHz C_N pole,
+or over the much narrower band of the averaged output, it is ≪ 1 LSB on every range: about
+2.5 nA rms on LOW against a 105 nA LSB. The 12-bit quantization and the converter's INL
+dominate.
 
-10 µF at the port is the working number, which sets the comparator+logic budget at ≈ 2 µs.
-An MCU interrupt loop cannot meet that; the range decision must be a comparator driving the
-FET gates directly, with the MCU only observing and setting limits.
+**Offset is a dead zone unless it is biased.** A current mirror conducts in one direction
+only. If the op-amp offset is negative, currents below |V<sub>OS</sub>| / R_s read as zero.
+OP07C has no published maximum. OP07D's 150 µV maximum, used as the planning bound, gives
+0.29 µA of dead zone on LOW, larger than the 0.1 µA target.
 
-**That same capacitor costs measurement bandwidth**, and this is an honest limitation of the
-architecture rather than something to engineer away:
+**Fix: a pedestal current injected into node X** from V_INJ (CJ431 shunt regulator at 8 V
+from V12F) through 1 MΩ.
+- The mirror then always conducts at zero load.
+- The injection is 2.75–3.6 µA over a 4.4–5.25 V port supply. That is ≥ 1.8× the 1.5 µA
+  needed to cancel 150 µV across R1 = 100 Ω.
+- The pedestal is 4.5 mV (5.6 LSB) on LOW and MID, and 7.2 mV (8.9 LSB) on HIGH. Zero
+  calibration removes it.
+- It moves with the port supply by R_OUT / R_INJ = 1.5 mV/V on LOW, which is 0.20 µA per
+  volt. Firmware corrects it from V_J4 (IN7). After correction, ±2 % resistor tolerance
+  leaves < 0.04 LSB per volt.
 
-| Range | τ = R × 10 µF | −3 dB |
-|---|---:|---:|
-| HIGH (20 mΩ) | 0.2 µs | 796 kHz |
-| MID (2 Ω) | 20 µs | 7.96 kHz |
-| LOW (200 Ω) | 2 ms | 80 Hz |
+Without V_INJ regulation, the MAU104 output would track J1 (line regulation ±1.2 % per 1 %),
+and a ±5 % J1 change would move the LOW pedestal by ~7 LSB. That is why U4 exists.
 
-**On the LOW range you are measuring the capacitor's charging current, not the DUT's
-instantaneous current.** Sub-millisecond detail in the sub-100 µA region is not observable.
-This must appear in the product documentation; it is the kind of specification that, left
-implicit, gets discovered as a "bug" by the first user.
+**Zero calibration stays mandatory** (REQ-MEAS-03). Zero-cal is per range, with the port ON
+and nothing attached. It also absorbs these constant offsets, which are all well under 1
+LSB of the range that sees them:
+- the discharge FET's I<sub>DSS</sub> (port on, gate low);
+- port-capacitor leakage;
+- OP07 I<sub>B</sub> through the +IN 10 kΩ (1.8 nA typical);
+- the 5 µA of the held bypass's 1 MΩ: it flows through R_H, or through R_H + R_M for FET_L.
 
-**Condition 3 — the ladder must fail safe.** See Section 7.3.
+Capacitor leakage can rise with voltage and temperature. MLCC insulation resistance at
+10 µF is the largest unknown on LOW, and it is measured at bring-up (V-MEAS-01).
 
-### 4.1 Noise — Rev0.2 addition
+### 4.2 Accuracy target (D20; closes OI-21)
 
-Rev0.1 argued the 0.1 µA floor from offset and drift only. Noise decides it per bandwidth.
-INA190 input-referred voltage noise density is **75 nV/√Hz** (datasheet); referred to current
-it is 75 nV/√Hz ÷ R<sub>shunt</sub>. Shunt Johnson noise (1.8 nV/√Hz for 200 Ω) is negligible
-beside it. The 15.6 kHz column is the Nyquist bound at 31.25 kSPS — an upper bound, since the
-ADC's sinc filter is narrower.
+**±(1 % of reading + 3 LSB of the active range)** within ±10 °C of the calibration
+temperature, after per-unit gain calibration and zero-cal. The floors are LOW 0.32 µA,
+MID 16 µA and HIGH 1.0 mA.
 
-| Range | Current noise density | rms at 500 Hz (≈ 1 kSPS output) | rms at 15.6 kHz (raw 31.25 kSPS) |
-|---|---:|---:|---:|
-| HIGH (20 mΩ) | 3.75 µA/√Hz | 84 µA | 469 µA |
-| MID (2 Ω) | 37.5 nA/√Hz | 0.84 µA | 4.7 µA |
-| LOW (200 Ω) | 0.375 nA/√Hz | 8.4 nA | 47 nA |
+| Contributor (±10 °C) | Size |
+|---|---:|
+| Shunt TCR (±100 ppm/°C) | 0.10 % |
+| R_OUT / R1 ratio, two ±100 ppm/°C thick-film parts | 0.20 % |
+| CJ431 used to measure VDDA (IN6) — ratiometric correction | 0.12 % |
+| OP07 drift 0.5 µV/°C typ × 10 °C, referred to input | 0.01 µA LOW, 0.5 µA MID, 50 µA HIGH |
+| ADC INL (±1.5 / ±3 LSB typ / max) | inside the 3 LSB floor |
+| Gain calibration residual | ≤ 0.3 % (against a reference meter, V-MEAS-02) |
 
-**Consequence:** 0.1 µA is resolved with margin (12 σ) at output rates up to ~1 kSPS. A single
-raw 31.25 kSPS LOW-range sample has ~47 nA rms noise, so 0.1 µA is only ~2 σ there. The
-resolution requirement must therefore name its bandwidth — it does in
-`requirements/product.md` REQ-MEAS-04. This is a property of the amplifier, not of the ADC.
-
-**What was rejected and why.** A fourth range (20 kΩ, 1 µA FS) would put 2 mV at the shunt
-for 100 nA and make the low end trivially comfortable. It was not taken because it adds a
-third bypass FET and a third mux input per channel, worsens the worst-case transient by two
-decades (20 kΩ against a 1 A demand), and the board is already over area (Section 11). Three
-ranges plus zero-calibration meets the requirement with margin; a fourth range buys precision
-we have no way to verify without reference instrumentation we do not own.
+The total is ≤ 0.7 % plus the floor, which leaves 0.3 % of margin to the 1 % target. The
+target was set to what this part set can meet. Rev0.2's ±0.5 % proposal needed the 24-bit
+ADC and the ≤ 25 ppm/°C shunt, both Extended.
 
 ---
 
 ## 5. Sense topology — decision record
 
-| Option | Description | Verdict |
+| Topology | What it needs | Verdict |
 |---|---|---|
-| A | One amp across the whole ladder; bypass FETs inside the sensed span | **Rejected.** FET R<sub>DS(on)</sub> TC ≈ 4000 ppm/°C swamps a ≤ 25 ppm/°C shunt on the HIGH range; ≈ 1900 ppm/°C on the total, ~3.8 % error over 20 °C (§3.2; Rev0.1 said 2.6 %), and it self-heats at 1 A |
-| B | One amp, analog mux selects which shunt's Kelvin pair is sensed | **Selected.** Switch resistance is outside the sensed span and irrelevant into a high-Z amp input. Cost: one dual mux per channel |
-| C | One amp permanently across each shunt (3 amps/channel), mux the low-voltage outputs | Metrologically cleanest, allows per-range gain optimisation. **Rejected on area** — 6 amps total, and Section 11 is already the binding constraint. Recorded as the fallback if B shows mux leakage or charge-injection problems in Rev0.2. **Rev0.2: the rejection reason no longer holds** — D10 took the board from 75 % to 36 % density. Re-evaluation is OI-19 |
+| A — one amp, sense across the whole ladder | FET R<sub>DS(on)</sub> inside the span (≈ 1900 ppm/°C) | Rejected in Rev0.1 |
+| B — one amp + mux selecting Kelvin taps | ≥ 10 V-class analog mux | Rejected in Rev0.3: no mux is Basic or at Akizuki in SMD |
+| C — one amp per shunt | 6 current-sense amplifiers | **Adopted** (D17), with discrete OP07 + P-FET mirrors because no current-sense amplifier is Basic |
 
-The mux (U10/U20) must tolerate a ~5 V common mode, and its leakage must be small against
-the smallest sense current. Note the mux sits at the *amplifier input*, where current is
-picoamps, so its on-resistance does not matter — only its leakage and charge injection do.
-
-**Rev0.2 — constraints Rev0.1 left implicit.**
-
-- *Mux supply.* "Tolerate ~5 V common mode" means the mux's analog range must include V5P1
-  (5.10 V nominal). A mux powered from V3P3A cannot pass it; its input clamps would conduct
-  straight into the sense node. The mux must be powered from a rail above V5P1 — VPD — and so
-  must be a ≥ 10 V-class part. In the 5 V fallback V5P1 ≤ VPD still holds. The two such
-  candidates found have thin assembly stock (TMUX6209PWR 225, ADG1209YRZ-REEL7 919 in SOIC-16;
-  `requirements/parts.md`). This is half of OI-19.
-- *Amplifier input bias current.* The bias current drawn by the amp's IN− terminal comes from
-  the load-side node, so it flows through the sensed shunt and reads as load current. On the
-  LOW range, every nanoamp of I<sub>IB</sub> is a nanoamp of error, and its drift is not removed
-  by zero calibration. **Requirement: I<sub>IB</sub> ≤ 3 nA (max).** INA190 meets it (0.5 nA
-  typ, 3 nA max). An ordinary current-sense amplifier biased from its inputs can draw tens of
-  µA — larger than the whole LOW range — so this is a selection constraint, not a footnote.
+C also removes mux leakage and charge injection from the sensed path, which made it the
+better choice even in Rev0.2 once D10 removed the area objection (OI-19).
 
 ---
 
@@ -336,330 +426,269 @@ picoamps, so its on-resistance does not matter — only its leakage and charge i
 
 ### 6.1 Power nets
 
-| Net | Nominal | Source | Notes |
+| Net | From | Voltage | Feeds |
 |---|---|---|---|
-| `VBUS_IN` | 5 V or PD | J1 | Before PD negotiation this is 5 V |
-| `VPD` | 9 V (5 V fallback) | after PD sink | Firmware must be able to read which contract was granted |
-| `V5P1` | 5.10 V | U2 buck | Port rail. Sized for 2.5 A |
-| `V3P3` | 3.3 V | U3, fed from V5P1 (Rev0.2) | Digital: RP2040, hub, flash. ≤ 190 mA |
-| `V3P3A` | 3.3 V | U3B, fed from V5P1 (Rev0.2) | Analog: amps, comparators, ADC AVDD. ≤ 10 mA. Separate regulator, single-point tie. (The sense mux, if topology B stays, is powered from VPD — §5) |
-| `VBUS_A` / `VBUS_B` | 4.98 V typ at 1 A (Rev0.2, §3.1) | after ladder + load switch | What the DUT actually sees. Also sensed by RP2040 ADC (P7) |
-| `EN_A` / `EN_B` | 3.3 V logic | RP2040 GPIO only | Load-switch enable; resistor to GND, so OFF whenever RP2040 is not driving it (P2, P3) |
+| VBUS_IN | J4 VBUS via D6 | 5 V (source) | Port switches, V_J4 divider |
+| VSUP_A / VSUP_B | Port switch output | ≈ VBUS_IN | Ladder supply side, mirror R1s |
+| VBUS_A / VBUS_B | Ladder load side | ≈ VBUS_IN − 0.32 V at 1 A | J2 / J3 VBUS, port C, discharge |
+| V5L | J1 VBUS via D5 | 5 V (host) | CH335F, LM393 ×3, MAU104, AMS1117 |
+| V12 / V12F | MAU104 / after 10 Ω + 2 × 22 µF 25 V | ≈ 12 V / ≈ 11.7 V | OP07 ×6, U4 |
+| V_INJ | U4 CJ431 shunt regulator | 8.0 V | Six 1 MΩ pedestal resistors |
+| V3V3 | AMS1117-3.3 | 3.3 V | STM32 VDD, pull-ups, Rp (via EN pins), LEDs |
+| VDDA | V3V3 via ferrite + RC | 3.3 V | STM32 VDDA (= VREF+ on LQFP48), comparator threshold dividers |
+| VREF_CHK | U3 CJ431 | 2.5 V | ADC IN6 only (measures VDDA) |
 
 ### 6.2 Designators
 
-| Ref | Part | Notes |
-|---|---|---|
-| J1 | USB-C receptacle, upstream | CC1/CC2 to U1 |
-| J2, J3 | USB-C receptacle, DUT A/B | Rp on CC, gated by that port's VBUS |
-| U1 | PD sink controller | Candidate: **CH224Q** (Rev0.2, P1). CH224K had 0 assembly stock on 2026-11-03 and cannot report the granted current |
-| U2 | V5P1 regulator, ≥ 2.5 A | 9 V → 5.10 V. Buck vs buck-boost is OI-17; rating depends on OI-16 |
-| U3, U3B | V3P3 digital, V3P3A analog | Both from V5P1. U3 topology is OI-18 |
-| U4 | RP2040 | QFN-56 |
-| U5 | QSPI flash | USON-8, ≥ 2 MB |
-| U6 | USB 2.0 HS hub, 4-port | **USB2514B** (D11). 24 MHz clock from Y2 |
-| U7 | ADC, 24-bit, 2 ch simultaneous | Candidate: ADS131M02 (TSSOP-20 or WQFN-20 3 × 3; Rev0.1's "QFN-24" was wrong). Needs CLKIN — §6.3 |
-| U8 | Voltage reference | Only if U7's internal ref proves insufficient — OPEN |
-| U10 / U20 | Sense mux, ch A / ch B | Dual, 3:1 or 2× SPDT |
-| U11 / U21 | Current-sense amp, G = 50, zero-drift | Ch A / ch B |
-| U12 / U22 | Window comparator + range logic | Ch A / ch B |
-| U13 / U23 | Load switch, current-limited, reverse-blocking, output discharge | Ch A / ch B. Candidate SY6280AAC (P2) |
-| Y1 | 12 MHz crystal | RP2040 XOSC only (P13, proposed) |
-| Y2 | 24 MHz crystal | USB2514B XTALIN/CLKIN only (P13, proposed) |
-| L1 | Buck inductor | Value with U2 |
-| F1 | Upstream protection | eFuse or PTC — OPEN, see OI-7 |
-| R100 / R200 | 20 mΩ, 2512, 4-terminal | HIGH shunt, ch A / ch B |
-| R101 / R201 | 2 Ω, 1206, Kelvin land | MID shunt |
-| R102 / R202 | 200 Ω, 0805, Kelvin land | LOW shunt |
-| Q100, Q101 / Q200, Q201 | Bypass FETs | Default ON |
-| D1–D3 | USB ESD arrays | One per connector, must cover D+/D−/CC/SBU |
-| SW1 | BOOTSEL | Must be reachable with the lid fitted — OI-9 |
-| SW2 | User button | |
+Channel A uses the numbers below. **Channel B is the same circuit with U and RS numbers + 10
+and Q numbers + 20** (U10 → U20, RS10 → RS20, Q10 → Q30). U30 is shared. Passives are
+numbered at capture.
 
-**The shared oscillator — historical (Rev0.1), superseded by D11.** Rev0.1 noted that RP2040
-accepts an external clock on XIN and that FE1.1s runs from 12 MHz, so one 12 MHz CMOS
-oscillator could serve both (D6). That only worked with a 12 MHz hub. The trade as it stood:
-
-| | FE1.1s (rejected) | USB2514B (chosen, D11) |
-|---|---|---|
-| Crystal | 12 MHz — could have shared Y1 | 24 MHz — needs its own (Y2) |
-| Cost | Low | Higher |
-| USB compliance / reputation | Adequate, widely used, less rigorous | Better characterised |
-| Area | Smaller | Larger — affordable after D10 |
-
-**Closed 2026-11-03 by D11** (user): the board's job is to be trusted about what it measures,
-so the hub's signal quality outweighs one extra crystal. USB2514B has assembly stock in three
-variants (`requirements/parts.md`).
-
-### 6.3 Clock tree — Rev0.2
-
-| Clock | Source | Load | Basis |
+| Ref | Function | Part (source) | Class |
 |---|---|---|---|
-| 12 MHz | Y1 crystal on RP2040 XIN/XOUT | RP2040 XOSC only | P13 (proposed); RP2040 PLLs derive 48 MHz USB and the system clock from it |
-| 24 MHz | Y2 crystal on USB2514B XTALIN/CLKIN | USB2514B only | P13 (proposed); datasheet DS00001692A: "24 MHz crystal or external 24 MHz clock" |
-| 8.000 MHz | RP2040 GPOUT pin, clk_usb (48 MHz) ÷ 6 | ADS131M02 CLKIN | P6 (proposed). An integer divide, so no fractional-divider jitter; within the 0.3 – 8.4 MHz high-resolution range |
+| J1 | USB-C host (data + logic power) | AE-USB2.0-TYPE-C (Akizuki g113080) | Hand |
+| J2, J3 | USB-C OUT A / OUT B | AE-USB2.0-TYPE-C (Akizuki g113080) | Hand |
+| J4 | USB-C PWR IN (power only) | AE-USB2.0-TYPE-C (Akizuki g113080) | Hand |
+| U1 | MCU | STM32F103C8T6 (C8734) | **Preferred Ext.** (OI-30) |
+| U2 | 3.3 V LDO | AMS1117-3.3 (C6186) | Basic |
+| U3 | VDDA check reference, 2.5 V | CJ431 (C3113) | Basic |
+| U4 | V_INJ shunt regulator, 8 V | CJ431 (C3113) | Basic |
+| U5 | Isolated 12 V for the op-amps | MAU104 (Akizuki g104132) | Hand |
+| U6 | USB 2.0 HS hub | AE-QFN28-DIP(CH335F) (Akizuki g129556) | Hand |
+| U10, U11, U12 | Mirror amp HIGH / MID / LOW | OP07CDR (C7433) | Basic |
+| U13 | CMP_L_A, CMP_M_A | LM393DR2G (C7955) | Basic |
+| U30 | CMP_OC_A, CMP_OC_B (shared) | LM393DR2G (C7955) | Basic |
+| RS10 | R_H 0.1 Ω 1 W ±0.5 % ±100 ppm/°C, Kelvin land | TSL1TTER100D (Akizuki g109588) | Hand (SMD 6.3 × 3.1 mm) |
+| RS11 | R_M 10 Ω 1 W ±1 % ±100 ppm/°C | MFU100F10RB (Akizuki g108805) | Hand (axial) |
+| RS12 | R_L 510 Ω ±1 % ±100 ppm/°C, 0805 | C17734 | Basic |
+| Q10, Q11 | Port switch, back-to-back | AO3401A (C15127) | Basic |
+| Q12 | EN driver | 2N7002 (C8545) | Basic |
+| Q13 | VBUS discharge (with 1 kΩ) | AO3400A (C20917) | Basic |
+| Q14, Q15 | EN inverter, fast-off driver | 2N7002 (C8545) | Basic |
+| Q16 | Fast-off clamp | S9012 (C8543) | Basic |
+| Q17, Q18 | Bypass FET_M, FET_L | AO3401A (C15127) | Basic |
+| Q19, Q20 | Bypass hold (default ON) | 2N7002 (C8545) | Basic |
+| Q21, Q22, Q23 | Mirror FET HIGH / MID / LOW | AO3401A (C15127) | Basic |
+| D1, D2, D3 | ESD on J1 / J2 / J3 D+, D−, CC1, CC2 | SRV05-4 (C7420376) | **Preferred Ext.** (OI-30) |
+| D4 | ESD on J4 CC1, CC2 | PSM712-LF-T7 (C32677) | Basic |
+| D5, D6 | TVS on J1 / J4 VBUS | SMBJ6.5CA (C7420377) | Basic |
+| D10, D11 | Port A LED green / red | KT-0805G (C2297) / NCD0805R1 (C84256) | Basic |
+| D12, D13 | Port B LED green / red | same | Basic |
+| Y1 | 12 MHz → STM32 HSE | X322512MSB4SI (C9002) | Basic |
+| Y2 | 12 MHz → CH335F | X322512MSB4SI (C9002) | Basic |
+| SW1, SW2 | Port A / B button | TS-1187A-B-A-B (C318884) | Basic |
+| SW3 | BOOT button behind a lid pinhole | TS-1187A-B-A-B (C318884) | Basic |
+| FB1 | VDDA ferrite | BLM18PG121SN1D (C14709) | Basic |
+| — | SWD | Tag-Connect TC2030-NL footprint (no part) | — |
 
-Under P13 each oscillator has exactly one load, so G9's fan-out check reduces to "one load each".
-Until the user accepts P13 (or another arrangement), the clock tree is open — OI-2.
-The ADC clock was missing in Rev0.1 entirely (OI-22).
+"Hand" means a large part bought from Akizuki and soldered by the user. The modules go on
+pin headers, and their through-hole pins are soldered from the Bottom side. That changes
+CLAUDE.md §1's "Top-side assembly": JLCPCB places only Top SMD, and the user adds the
+through-hole and large parts afterwards (REQ-MFG-01).
+
+### 6.3 Clock tree
+
+| Clock | Source | Consumer | Notes |
+|---|---|---|---|
+| Y1 12 MHz | C9002, C<sub>L</sub> 20 pF, ±10 ppm | STM32 HSE (4–16 MHz) | PLL × 6 = 72 MHz; USB = 72 / 1.5 = 48 MHz. Load capacitors 2 × 33 pF C0G (C1562), adjusted at capture for board stray capacitance |
+| Y2 12 MHz | C9002 | CH335F XI/XO | CH335F has built-in crystal load capacitors; C9002's 20 pF C<sub>L</sub> may not match them. Measure the frequency against USB's ±500 ppm at bring-up (G9) |
+| ADCCLK | PCLK2 / 6 | STM32 ADC1, ADC2 | 12 MHz (≤ 14 MHz limit) |
+
+The two crystals are independent, so the hub does not depend on MCU firmware to run.
+This closes OI-2 (D19).
+
+### 6.4 MCU pin budget (STM32F103C8T6, LQFP48, 37 I/O)
+
+| Group | Pins | Count |
+|---|---|---:|
+| ADC | PA0–PA7, PB0, PB1 (IN0–IN9): amps A H/M/L, amps B H/M/L, VREF_CHK, V_J4, J4 CC1, J4 CC2 | 10 |
+| USB, SWD, HSE | PA11/PA12, PA13/PA14, PD0/PD1 | 6 |
+| Per port × 2 | EN, OC event, HOLD_L, HOLD_M, EVT_L, EVT_M | 12 |
+| LEDs, buttons, D+ pull-up | 4 + 3 + 1 | 8 |
+| **Total** | | **36 of 37** |
+
+The six event inputs (OC_x, EVT_L_x, EVT_M_x) MUST be 5 V-tolerant (FT) pins, read through
+100 kΩ, each on a distinct EXTI line number. Buttons go on PC13–PC15, which have weak drive
+and are fine as inputs. BOOT0 is a dedicated pin: 10 kΩ to GND plus a test pad.
 
 ---
 
 ## 7. Budgets and calculations
 
-### 7.1 Upstream power
+### 7.1 J1 (logic) power
 
-**Rev0.2 correction.** Rev0.1 counted the board rails at 3.3 V × 200 mA = 0.66 W. A linear
-regulator draws its *output* current at its *input* voltage, so the rails cost what they draw
-from their source rail. With both rails on V5P1 (§3.1):
+| Load | Typical |
+|---|---:|
+| CH335F | 85 mA |
+| STM32F103 at 72 MHz with USB | 40 mA |
+| MAU104 input (6 × OP07 ≈ 15 mA out; 30 mA no-load input) | 70 mA |
+| LM393 × 3, LEDs, AMS1117 I<sub>q</sub>, CJ431 × 2 | 15 mA |
+| **Total** | **≈ 0.21 A** |
 
-| Item | Value |
-|---|---|
-| Port load, both channels at 1 A, drawn from V5P1 | 2 × 1 A × 5.10 V = 10.20 W |
-| Board rails, ~200 mA drawn from V5P1 (190 mA digital + 10 mA analog) | 0.2 A × 5.10 V = 1.02 W |
-| Regulator output total | 11.22 W |
-| **Regulator input at 90 % efficiency** | **12.47 W → 1.39 A at 9 V** |
+AMS1117 dissipates (5.0 − 3.3) V × 55 mA = 0.094 W, an 8 °C rise at 90 °C/W. This closes
+OI-18 on this rail.
 
-For comparison, the Rev0.1 drawing (rails on VPD) costs 10.20 W / 0.9 + 9 V × 0.2 A = 13.13 W.
+The CH335F's default configuration descriptor declares 100 mA (MaxPower 0x32) and
+self-powered (PSELF strap default). The board actually draws ≈ 0.21 A from J1. This is a
+**USB power-accounting non-compliance**: physically within a USB 2.0 port's 500 mA, but
+misdeclared. It is OI-25, with its options listed there.
 
-**Therefore: full 2 × 1 A still fits a PD source offering 9 V / 1.5 A (13.5 W), with 1.0 W
-(8 %) margin.** A 9 V/2 A (18 W) source gives comfortable margin. If both ports may draw
-**1.5 A** (what a 22 kΩ Rp advertises), the input is (2 × 1.5 × 5.10 + 1.02) / 0.9 = **18.1 W**,
-more than a 9 V/2 A source and more than the 2.5 A U2 rating (3.0 A + 0.2 A). That conflict is
-OI-16. A source that grants only 5 V must derate the ports, and firmware must enforce that
-rather than browning out; the derating rule is in `requirements/product.md` REQ-PWR-04.
+### 7.2 J4 (port) power and the port policy (D18; closes OI-16)
 
-### 7.2 Downstream advertisement
+- Each port advertises **Default USB power** via Rp = 33 kΩ, which promises the DUT 500 mA.
+- The hardware OC trip is at 1.16 A per port, and the measurement range is 1 A.
+- **Advertisement rule (firmware, REQ-PWR-04):** a port is enabled only if (ports already
+  ON + 1) × 0.5 A ≤ J4's advertised current (Default 0.5 A / 1.5 A / 3.0 A, read from
+  IN8/IN9). Otherwise `PORT x ON` returns `ERR 04`. A Default-only J4 therefore runs one
+  port at a time, and the two ports together never advertise more than J4 can deliver
+  (REQ-PWR-03).
+- **Budget rule (firmware, REQ-PWR-05):** if the two ports' measured currents together exceed
+  J4's advertised current for > 50 ms, the port drawing more is switched OFF and latched as
+  `FAULT:BUDGET`. This catches a DUT that draws more than the 500 mA it was offered.
+- `STATUS?` reports which advertisement J4 shows.
 
-The ports advertise via Rp on CC. 56 kΩ = USB default (500 mA), 22 kΩ = 1.5 A, 10 kΩ = 3.0 A.
-Advertising more than the board can deliver is a defect, so Rp must track the granted
-upstream contract:
+### 7.3 Fail-safe
 
-- ~~9 V contract granted → advertise **22 kΩ (1.5 A)**.~~
-- ~~5 V fallback → advertise **56 kΩ (default)**.~~
+| Condition | Ports | Ladder | Rp | Discharge |
+|---|---|---|---|---|
+| MCU in reset / unprogrammed / J1 unplugged | OFF (EN_G pulled down) | HIGH (Q19/Q20 pulled up) or unpowered | Absent | ON (or unpowered) |
+| J4 unplugged | No port power | — | Per EN | — |
+| Firmware hung | Hold state, until IWDG reset → as row 1 | Hiccup between ranges | Per EN | Per EN |
+| OC trip | OFF in hardware ≤ 10 µs | — | Until firmware drops EN | ON |
 
-**Rev0.2: the two rules above are withdrawn pending OI-16.** "9 V granted" says nothing about
-*how much* current was granted. A 9 V / 1 A source is a valid PD source, and two ports
-advertising 1.5 A need ≈ 18 W (§7.1). Rp must be chosen from the granted *power* — which CH224Q
-reports (register 0x50, maximum current at the negotiated level, 50 mA units; P1) — and from
-how that power is shared between two ports. Even "Default" Rp promises USB 2.0 default current
-(500 mA) per port; two ports behind a 5 V / 500 mA upstream cannot honour that either.
+The bypass FETs default ON for the reason Rev0.2 gave: a stuck LOW range against a real load
+starves the DUT and dissipates in a 0805.
 
-Implementation (unchanged): 56 kΩ fixed, plus 36 kΩ switched in parallel by a FET
-(56 ∥ 36 = 21.9 kΩ). Rev0.1 gated Rp by that port's own VBUS. **Rev0.2 proposes gating it by
-EN_x instead** (P3): a DUT that back-feeds VBUS while the port is OFF would otherwise keep Rp
-present, so it never sees a detach. This is 4 resistors + 1 FET per port either way.
+### 7.4 What Rev0.3 gave up to meet D13
 
-### 7.3 Fail-safe — why the bypass FETs default ON
-
-If a bypass FET fails open, or the ladder is left in a low range while the DUT demands full
-current.
-
-**Rev0.2 correction.** Rev0.1 tabulated "1 A through it" for every range, including 200 W in
-the 200 Ω shunt. A 5.10 V rail cannot drive 1 A through 200 Ω; that would need 200 V. The
-current through a stuck shunt is bounded twice: by the rail across the remaining ladder,
-V5P1 / R<sub>ladder</sub>, and by the load switch's current limit. Worst case is a shorted DUT:
-I = min(V5P1 / R<sub>ladder</sub>, I<sub>lim</sub>), P = I² × R<sub>shunt</sub>. With SY6280AAC
-set for 1.6 A nominal, I<sub>lim</sub> ≤ 2.0 A (its device maximum, and the +25 % tolerance
-bound):
-
-| Stuck range | R<sub>ladder</sub> | V5P1 / R<sub>ladder</sub> | I (limited to 2.0 A) | P in that shunt | Outcome |
-|---|---:|---:|---:|---:|---|
-| HIGH (20 mΩ) | ≈ 38 mΩ | 134 A | 2.0 A | 0.08 W | Fine (2512) |
-| MID (2 Ω) | ≈ 2.03 Ω (20 mΩ + 2 Ω + Q101) | 2.51 A | 2.0 A | **8.0 W** (12.6 W if the limit fails) | 1206 destroyed |
-| LOW (200 Ω) | ≈ 202 Ω | 25.2 mA | 25.2 mA | **0.13 W**, continuous | Above a typical 0805 rating (0.125 W) — specify ≥ 0.25 W or 1206 |
-
-The MID row is the real hazard and Rev0.1's conclusion stands: a stuck MID range destroys its
-shunt. The LOW row is not an "instantaneous failure": its dissipation is capped near 0.13 W by
-physics, and the DUT simply browns out at 25 mA.
-
-During a *normal* range transition the port capacitor holds the shunt voltage at ≤ 200 mV for
-≤ 2 µs (Condition 2): (0.2 V)² / 2 Ω × 2 µs = 40 nJ on MID. Even a hard short arriving while on
-MID costs 8 W × 2 µs = 16 µJ before the comparator up-ranges. *(Rev0.1's "~400 µJ" was derived
-from the impossible 200 W.)* The danger is a *stuck* state. Hence:
-
-- Gate pull-to-ON resistors on Q100/Q101/Q200/Q201, so the unpowered and the crashed states
-  both sit at 20 mΩ.
-- The window comparator forces the ladder up on over-range **without** MCU involvement.
-- The MID and LOW shunts are specified for pulse energy, not just average power. This is a
-  parts-selection constraint that must be carried into `requirements/parts.md` — an ordinary
-  thick-film chip resistor's pulse rating is not automatic.
-- **Rev0.2:** the comparator cannot help if a bypass FET has *failed open* — it can only
-  command the FET. Firmware covers that case: while the range state reads HIGH, a VBUS_x more
-  than 300 mV below V5P1 means current is flowing through a shunt that should be bypassed, and
-  the port is switched OFF within 10 ms. The MID shunt must survive that window:
-  8 W × 10 ms = 80 mJ (G12).
-  The check has a floor: a stuck MID ladder (≈ 2.11 Ω including the 80 mΩ load switch) drops
-  300 mV only above ≈ 142 mA. Below that the fault goes undetected but is harmless — the MID
-  shunt dissipates ≈ 0.04 W at most, and the reading stays right because the series current is
-  unchanged and the amplifier still senses RS1's taps; the DUT sees up to 0.3 V less. A stuck
-  LOW range (≈ 202 Ω) crosses 300 mV above ≈ 1.5 mA. Normal HIGH-range drop at 1 A is 118 mV
-  (§3.1), so the threshold leaves 182 mV of margin against false trips.
-
-### 7.4 Resolution summary
-
-| | Value |
-|---|---|
-| ADC LSB referred to current, LOW range | 14 pA (quantisation is not the limit) |
-| Uncalibrated amp offset (±25 µV) referred to current, LOW range | 125 nA — **exceeds the 100 nA target** |
-| Post-calibration drift (0.1 µV/°C × 20 °C) | 10 nA |
-| Amplifier input bias current, INA190, max (Rev0.2, §5) | 3 nA |
-| Noise, LOW range, at ≈ 1 kSPS output (Rev0.2, §4.1) | 8.4 nA rms |
-| Noise, LOW range, raw 31.25 kSPS (Rev0.2, §4.1) | 47 nA rms |
-| Target floor | 100 nA |
-
-The margin exists only because of zero-calibration. Any design change that removes it
-invalidates the 0.1 µA claim. Rev0.2 adds a second condition: the 0.1 µA claim holds at
-output rates up to ~1 kSPS, not per raw sample.
+| Lost or reduced | Rev0.2 | Rev0.3 | Recorded as |
+|---|---|---|---|
+| Regulated port voltage | 5.10 V | J4 voltage minus ≤ 0.32 V | product.md §9 |
+| Power from the host alone | PD 9 V from J1 | A second cable (J4) is required for port power | REQ-PWR-01 |
+| Port voltage measurement and back-feed detection | ADC on VBUS_A/B | None (would be measured as load current); CYCLE discharge is timed | REQ-PORT-03, REQ-PORT-04 |
+| Accuracy at the bottom of MID/HIGH | 24-bit | 12-bit: ≤ 7.7 % of reading at 14.9 mA | REQ-MEAS-05 |
+| Sample rate | 31.25 kSPS | 18.5 kSPS | REQ-HOST-05 |
+| Hardware-only range latch | D4 | Firmware hold within 100 µs | D17 |
+| ROM USB bootloader | RP2040 BOOTSEL | A DFU bootloader in flash (written once over SWD) | REQ-BOOT-01 |
+| Top-only assembly | All SMD by JLCPCB | Modules, R_H and R_M hand-soldered | REQ-MFG-01 |
 
 ---
 
 ## 8. Manual gates that ERC cannot cover
 
-ERC will not catch any of these. They are checked by a human against the schematic, and the
-check is recorded in the release notes with a name and a date.
+Checked by a human against the schematic; recorded in the release notes with a name and date.
 
 | # | Gate | Verify | Expect |
 |---|---|---|---|
-| G1 | Bypass FET default state | Trace each gate net with power removed | Pulled to the ON side; ladder = 20 mΩ |
-| G2 | Kelvin sense taps | Inspect each shunt's four connections | Force and sense taps separate at the pad, not joined on a plane |
-| G3 | Sense pair routing | Inspect ISENSE_x_P/N | Routed as a tight pair, over quiet ground, not across the buck |
-| G4 | Analog/digital ground | Inspect ground topology | Single tie point; no digital return current under the shunts or amp |
-| G5 | Rp gating | Trace J2/J3 CC networks | Rp present only when that port's EN_x is high (Rev0.2 P3; Rev0.1 said "VBUS is present") |
-| G6 | Rp value vs. contract | Trace the 36 kΩ switch | Cannot present 22 kΩ unless the rule chosen in OI-16 allows it |
-| G7 | Buck output setpoint | Check feedback divider arithmetic | 5.10 V ±1 %, and a schematic note saying why |
-| G8 | USB serial number | Inspect firmware descriptor path | Derived per-unit from flash UID; never a constant |
-| G9 | Oscillator fan-out | Check Y1 and Y2 loading and any series termination | Y1 drives only RP2040 XIN, Y2 only USB2514B XTALIN; load capacitors match each crystal's C<sub>L</sub> (Rev0.2, §6.3) |
-| G10 | ESD coverage | Count protected lines per connector | D+, D−, CC1, CC2, SBU1, SBU2, VBUS all covered (or SBU left unconnected and stated) |
-| G11 | Comparator loop | Trace comparator → gate path | No MCU in the path; MCU can only observe and set thresholds |
-| G12 | Shunt pulse rating | Read the datasheet pulse curve | Rev0.2: MID shunt survives 8 W for 10 ms (80 mJ, §7.3); LOW shunt rated ≥ 0.25 W continuous. *(Rev0.1 said "1 A for 10 µs", which the LOW range cannot carry.)* |
-| G13 | Port-enable ownership (Rev0.2) | Trace EN_A/EN_B | Driven only by RP2040 GPIO, resistor to GND; USB2514B PRTPWR pins not connected to it |
-| G14 | Hub straps (Rev0.2) | Inspect USB2514B PRTPWR[x]/BC_EN[x] | Strapped to the battery-charging-disabled level; the hub asserts PRTPWR as soon as configuration completes, so it must never drive a load switch here |
-| G15 | Mux supply (Rev0.2, if topology B is kept) | Trace U10/U20 VDD | Powered from VPD, not V3P3A; part rated ≥ 10 V |
+| G1 | Bypass FET default state | Trace each gate net with MCU unpowered and J4 present | Q19/Q20 gates pulled to V3V3; with V3V3 absent the port switch is also off |
+| G2 | Kelvin sense taps | Inspect R_H (4-pad land), R_M (sense at each lead pad), R_L | Force and sense joined only at the pad; sense traces carry no load current |
+| G3 | Sense pair routing | Inspect each amp's +IN / R1 pair | Tight pair, over L2 GND, away from MAU104 and the hub module |
+| G4 | Analog ground | Inspect ground topology | ADC, amp outputs and VDDA return on a quiet region; no port load current under them |
+| G5 | Rp gating | Trace J2/J3 CC | Rp sourced from EN_x only; no other path to V3V3 or VBUS |
+| G6 | Rp value | Read the CC resistors | 33 kΩ (Default); no 22 kΩ or 10 kΩ anywhere on J2/J3 CC |
+| G7 | Leakage on VBUS_x | List every net connection on VBUS_A/B | Port C, discharge FET drain path, LOW amp +IN via 10 kΩ, connector — nothing else |
+| G8 | USB serial number | Inspect firmware descriptor path | From the 96-bit UID; never a constant |
+| G9 | Crystals | Y1 load capacitors vs C<sub>L</sub>; Y2 against CH335F built-in capacitors | Y1 per C<sub>L</sub>; Y2 frequency inside ±500 ppm on a built board |
+| G10 | ESD coverage | Count protected lines | J1/J2/J3: D+, D−, CC1, CC2 on SRV05-4, pin 5 to V3V3 (never to VBUS_x); J4 CC on PSM712; J1/J4 VBUS on SMBJ6.5CA; SBU not connected (modules do not bring it out) |
+| G11 | Comparator loop | Trace comparator → gate | No MCU in the up-range path; MCU only holds and releases |
+| G12 | Shunt ratings | Datasheets | R_L ≥ 0.125 W for 47 mW stuck-LOW; R_M short-time overload ≥ 2.35 W for 10 ms (OI-28) |
+| G13 | Port-enable ownership | Trace EN_x | Driven only by STM32 GPIO; CH335F PWREN# not connected; OVCUR# tied inactive per datasheet |
+| G14 | Hub straps | CH335F PSELF, PGANG | PSELF matches the decision in OI-25; ganged mode is irrelevant (PWREN# unused) |
+| G15 | Event pins | STM32 pin table | All six events on FT pins with distinct EXTI numbers, 100 kΩ series |
+| G16 | Op-amp supply and pedestal | Trace V12F, V_INJ | V_INJ = 8 V from U4; six 1 MΩ to the six X nodes; no op-amp on V5L or V3V3 |
+| G17 | Fast turn-off | Trace DIS_x → Q15 → Q16 | Q16 clamps gate to common source when EN_G_x is low |
+| G18 | Through-hole side | Inspect footprints | Every Akizuki module and axial part is through-hole, soldered from Bottom; no SMD on Bottom |
 
 ---
 
-## 9. Part shortlist — moved
+## 9. Parts — moved, and the sourcing rule
 
-**Rev0.2: the shortlist now lives in `requirements/parts.md`**, the single place where a
-candidate's assembly-pool stock (2026-11-03), part class, datasheet-verified parameters, and
-remaining checks are recorded. Keeping a second copy here would let the two drift. The
-selection constraints this document derives — I<sub>IB</sub> ≤ 3 nA (§5), mux supply above
-V5P1 (§5), Q<sub>g</sub> versus gate drive (§3.2), 100 % duty or buck-boost (§3.1, OI-17),
-stuck-range ratings (§7.3) — are stated there per part, with a pointer back to the section
-that derives them.
+The shortlist lives in `requirements/parts.md`. It is the single place for each part's class,
+dated stock (JLCPCB assembly pool or Akizuki), datasheet facts and remaining checks.
+
+**The D13 rule as applied:**
+
+1. Small parts are machine-placed by JLCPCB and MUST be **Basic**, with assembly stock
+   ≥ 500. All Basic parts here had ≥ 130,000 on 2026-11-03.
+2. Large parts are hand-soldered by the user and MUST be **in stock at Akizuki**. The
+   thinnest is the MAU104, at 178 pcs.
+3. No Extended-only part. **Exception pending the user (OI-30):** two **Preferred
+   Extended** parts, STM32F103C8T6 (C8734, 265,735 pcs) and SRV05-4 (C7420376, 113,727 pcs).
+   Preferred Extended parts carry no feeder setup fee in JLCPCB Economic PCBA, which is the
+   cost that "no Extended" avoids. They are still labelled Extended.
+
+**Strictly-Basic fallback, if the user rejects OI-30:**
+- *MCU:* an Akizuki RP2040 module (g117542 kit, 180 pcs, or Raspberry Pi Pico g116132,
+  1,648 pcs) on headers, plus an Akizuki DIP SPI ADC.
+  - Losses: dual simultaneous sampling, and about half the sample rate.
+  - Gains: the RP2040 ROM USB bootloader.
+- *D± ESD:* nothing allowed would remain, so J1–J3 D+/D− would be unprotected. That breaks
+  CLAUDE.md §9 ("do not remove ESD protection"), and Claude does not recommend it. The CC
+  lines could still use PSM712 (Basic, 12 V standoff, too much capacitance for D±).
 
 ---
 
-## 10. Decisions closed
+## 10. Decisions
 
-Only decisions the user has made, or their unavoidable consequences, appear here. Proposals
-are in Section 14.
+Only decisions the user has made, the delegated ones, and their unavoidable consequences
+appear here.
 
 | # | Decision | Date | By | Closes |
 |---|---|---|---|---|
-| D1 | Upstream is a USB-PD sink requesting 9 V, 5 V fallback | 2026-08-16 | User | OI-4 (see OI-17) |
+| D1 | ~~Upstream is a USB-PD sink requesting 9 V~~ **SUPERSEDED by D14** — every PD sink part is Extended (D13) | 2026-08-16 | User | ~~OI-4~~ |
 | D2 | ECAD tool is KiCad | 2026-08-16 | User | CLAUDE.md §10.4 |
-| D3 | Range = 0.1 µA – 1 A via 3 ranges (20 mΩ / 2 Ω / 200 Ω) + mandatory zero-calibration | 2026-08-16 | Rev0.1 design | OI-3 |
-| D4 | Auto-ranging is hardware (comparator → gate), MCU observes only | 2026-08-16 | Rev0.1 design | OI-3 |
-| D5 | Sense topology B — mux selects Kelvin taps | 2026-08-16 | Rev0.1 design | OI-11 (re-evaluation: OI-19) |
-| D6 | ~~One 12 MHz CMOS oscillator shared by RP2040 and hub, conditional on a 12 MHz hub~~ **SUPERSEDED 2026-11-03 by D11** — the condition failed; the replacement is proposal P13 | 2026-08-16 | Rev0.1 design | ~~OI-2~~ |
-| D7 | Upstream control interface is CDC-ACM ×2 (control + stream), driverless | 2026-08-16 | User | new |
-| D8 | Rev0.1 sample rate target 32 kSPS | 2026-08-16 | Rev0.1 design | new |
-| D9 | Bypass FETs default ON (fail-safe to HIGH range) | 2026-08-16 | Rev0.1 design | new |
-| D10 | Board outline **85 × 35 mm, 4 layers** (Rev0.1 §11 option 2, "the low-risk choice") | 2026-11-03 | User | OI-13, OI-10 |
-| D11 | USB hub is **USB2514B** | 2026-11-03 | User | CLAUDE.md §10.5 hub choice; supersedes D6 |
+| D3 | ~~3 ranges 20 mΩ / 2 Ω / 200 Ω~~ **SUPERSEDED by D17** (0.1 / 10 / 510 Ω) | 2026-08-16 | Rev0.1 design | OI-3 |
+| D4 | Up-ranging is hardware (comparator → gate). **Amended by D17:** firmware holds the new range and does all down-ranging | 2026-08-16 | Rev0.1 design | OI-3 |
+| D5 | ~~Sense topology B~~ **SUPERSEDED by D17** (topology C) | 2026-08-16 | Rev0.1 design | ~~OI-11~~ |
+| D6 | ~~One shared 12 MHz oscillator~~ **SUPERSEDED** 2026-11-03 by D11, now by D19 | 2026-08-16 | Rev0.1 design | ~~OI-2~~ |
+| D7 | Upstream control interface is CDC-ACM ×2 (control + stream), driverless | 2026-08-16 | User | — |
+| D8 | ~~32 kSPS~~ **SUPERSEDED by D17**: 18.5 kSPS | 2026-08-16 | Rev0.1 design | — |
+| D9 | Bypass FETs default ON (fail-safe to HIGH range) | 2026-08-16 | Rev0.1 design | — |
+| D10 | Board outline **85 × 35 mm, 4 layers** | 2026-11-03 | User | OI-13, OI-10 (fit re-checked by OI-23) |
+| D11 | ~~USB hub is USB2514B~~ **SUPERSEDED by D15** — every variant is Extended (D13) | 2026-11-03 | User | — |
+| D13 | **Sourcing rule:** JLCPCB Basic parts in stock for machine-placed small parts; Akizuki parts in stock for large hand-soldered parts; never an Extended-only PCBA. Functions that cannot be built this way are reduced | 2026-11-03 | **User** | — |
+| D14 | Port power from **J4, a power-only 5 V USB-C input** (Rd 5.1 kΩ, advertisement read by ADC); J1 = data + logic power; no PD, no buck. *Revert → reopens OI-4, OI-17* | 2026-11-03 | Claude (delegated) | OI-4, OI-17, OI-18 |
+| D15 | Hub = **CH335F** on the Akizuki module, port 1 → MCU, 2 → J2, 3 → J3. *Revert → no allowed hub remains* | 2026-11-03 | Claude (delegated) | — |
+| D16 | MCU = **STM32F103C8T6**. *Conditional on OI-30*; fallback in §9 | 2026-11-03 | Claude (delegated) | — |
+| D17 | Measurement = topology C with OP07 + AO3401A current mirrors; ladder 0.1 / 10 / 510 Ω nested bypass; LM393 up-ranging; firmware hold ≤ 100 µs and down-ranging; STM32 dual 12-bit ADC, 18.5 kSPS; pedestal injection. Supersedes D3, D5, D8; amends D4 | 2026-11-03 | Claude (delegated) | OI-19, OI-20, OI-22, OI-3 (re-closed) |
+| D18 | Port path = back-to-back AO3401A, EN-sourced Rp 33 kΩ (Default), hardware OC at 1.16 A with fast turn-off, discharge at reset, firmware budget rule against J4's advertisement | 2026-11-03 | Claude (delegated) | OI-16, OI-7 (in part) |
+| D19 | Clocks = two 12 MHz Basic crystals: Y1 → STM32, Y2 → CH335F | 2026-11-03 | Claude (delegated) | OI-2 |
+| D20 | Accuracy target ±(1 % + 3 LSB of the active range), ±10 °C of calibration, after gain and zero calibration | 2026-11-03 | Claude (delegated) | OI-21 |
+| D21 | Rev0.2 proposals adopted: P9 (≥ 18 mm port pitch; the 20 mm-wide modules side by side meet it), P10 (BOOT command + lid pinhole, now with a flash DFU bootloader), P11 (TC2030-NL + test pads), P12 (heat-set M2 inserts, 4 corners) | 2026-11-03 | Claude (delegated) | OI-9 (design); OI-1, OI-5, OI-8 still need physical checks |
 
-D12 was recorded here on 2026-11-03 as "a consequence of D11" and **withdrawn the same day**:
-D11 forces only a 24 MHz hub clock; using a second crystal rather than an oscillator or an
-RP2040-derived clock is a design choice, and the user has not made it. It is now proposal P13.
-The number D12 is not reused.
+D12 was withdrawn on 2026-11-03 and is not reused.
 
 ---
 
 ## 11. OI-13 — Board area. **CLOSED by D10 (2026-11-03): 85 × 35 mm, 4 layers.**
 
-Kept as the record of why the outline changed. The user chose option 2 below. At 85 × 35 mm the
-Rev0.1 component area is 36 % of the board, leaving room for the extra Y2 crystal and, if
-OI-19 goes that way, four more amplifiers.
+Rev0.2's option study (in Git history, commit `4e59607`) assumed an all-SMD board at 36 %
+density. Rev0.3 changes the area mix:
 
-The 60 × 24 mm outline in the mockup (historical) does not hold. Component area for the
-Rev0.1 design:
+- The Akizuki modules take about 2,000 mm² of the 2,975 mm² board: four USB-C modules at
+  ~300 mm² each, the CH335F module (outline not published, OI-24), the MAU104, R_H and R_M.
+- The SMD content needs about 1,200 mm².
 
-| Block | Area |
-|---|---:|
-| USB-C receptacles ×3 | 203 mm² |
-| RP2040 + flash + oscillator + decoupling | 130 mm² |
-| USB hub + decoupling | 75 mm² |
-| PD sink + caps | 30 mm² |
-| Buck + inductor + caps | 110 mm² |
-| LDOs ×2 | 30 mm² |
-| ADC + reference + anti-alias | 60 mm² |
-| Analog channel ×2 | 300 mm² |
-| ESD ×3, CC networks, output caps | 90 mm² |
-| LEDs, switches, test points | 55 mm² |
-| **Total component area** | **1083 mm²** |
-
-Against candidate outlines:
-
-| Outline | Area | Density | Verdict |
-|---|---:|---:|---|
-| 60 × 24 | 1440 mm² | 75 % | **Not routable** |
-| 70 × 30 | 2100 mm² | 52 % | Tight |
-| 80 × 30 | 2400 mm² | 45 % | Tight — viable on 4 layers with discipline |
-| 85 × 35 | 2975 mm² | 36 % | Comfortable |
-| 90 × 40 | 3600 mm² | 30 % | Comfortable |
-
-45 % is roughly the ceiling for a routable 4-layer board carrying fine-pitch QFNs, three
-USB-C connectors, differential pairs and a quiet analog section. 75 % is not a matter of
-trying harder.
-
-**Options, in the order I would take them:**
-
-1. **Grow the board to 80 × 30 mm** (4-layer). Keeps both measured channels and the full
-   range. The enclosure grows with it; the mockup's case model becomes obsolete.
-2. **85 × 35 mm** if the analog section wants more separation from the buck than 80 × 30
-   allows. This is the low-risk choice.
-3. **Keep 60 × 24 mm and measure only one channel** — port B becomes switch-only, no shunt
-   ladder. Saves ~150 mm² and an ADC channel. Still ~65 % density; probably still too dense.
-4. **Two boards** (hub+power / meter) stacked. Solves area, roughly doubles mechanical and
-   assembly cost and adds a connector in the current path — which is exactly where you least
-   want a connector.
-
-*Historical:* Rev0.1 recommended option 1 (80 × 30 mm, 4 layers) as the smallest outline that
-keeps everything the product is supposed to do. **The user chose option 2 (85 × 35 mm, 4
-layers) — D10, 2026-11-03.**
-
-**Consequences to follow past this decision** (CLAUDE.md §3, easy-stick 14.4): the enclosure
-model, the mounting-hole pattern, the lid PCB outline, the port pitch, and every dimension in
-`mockup/` are invalidated by a new outline. OI-1 (two USB-C plugs cannot be inserted at once,
-10.8 mm pitch vs 12–14 mm overmoulds) is *not* solved by growing the board — it is solved by
-moving J2 and J3 apart, which the extra length now makes possible. Re-check it explicitly.
+The board fits only if low-profile SMD parts sit under modules raised on pin headers. Whether
+that works, or whether D10 must be revisited, is **OI-23**, a placement study before capture.
+D10 stands until that study says otherwise.
 
 ---
 
 ## 12. What must happen before KiCad capture
 
-Status as of Rev0.2 (2026-11-03):
+Status as of Rev0.3 (2026-11-03):
 
-1. ~~Resolve OI-13.~~ **Done** — D10.
-2. ~~Choose the hub.~~ **Done** — D11. D6 is superseded; the replacement clock arrangement
-   is proposal P13 and needs the user's acceptance (OI-2).
-3. Confirm every part against the JLCPCB assembly pool — **first pass done** in
-   `requirements/parts.md` (2026-11-03). Two functions have no adequate candidate yet: the
-   20 mΩ HIGH shunt (OI-20) and the 5 V-CM sense mux (OI-19). Recheck all stock before upload.
-4. ~~Write `requirements/product.md`.~~ **Done** — derating rule (REQ-PWR-04), LOW-range bandwidth
-   (REQ-MEAS-07), COM-port contract (REQ-HOST-04), VID/PID (REQ-HOST-06, still OPEN).
-5. Decide whether U7's internal reference suffices. Its drift is 20 ppm/°C max (datasheet),
-   comparable to the shunt TCR, so it suffices for any accuracy target looser than ~0.1 % over
-   20 °C. Blocked on the accuracy target itself (OI-21).
-6. Decide the comparator + range-logic implementation. The 2 µs budget in §4 is the acceptance
-   criterion; Rev0.2 adds the gate-drive constraint (§3.2, P8). Still OPEN.
-7. ~~Settle whether `usb-power-hub` becomes its own Git repository.~~ **Done** — commit
-   `4dd10fb` (2026-11-03) closes OI-15.
-8. **New in Rev0.2:** resolve OI-16 (port current policy), OI-17 (5 V host power), OI-18
-   (3.3 V digital rail), OI-19 (sense topology), OI-20 (HIGH shunt), OI-21 (accuracy target),
-   OI-22 (ADC clock), or accept the Section 14 proposals that close them.
+1. **User: decide OI-30** (Preferred Extended parts). Everything else in this list can
+   proceed either way, but the MCU footprint cannot.
+2. **OI-23 placement study** with real module outlines. Measure a purchased CH335F module
+   (OI-24); Akizuki publishes no drawing for it.
+3. **OI-25**: decide how J1's 0.21 A is declared.
+4. **OI-29**: choose the J4 input fuse.
+5. Bench-check the two assumptions this design rests on, before layout:
+   - OP07CDR on 0 / 12 V with a 5 V common mode and the mirror FET's gate headroom (OI-27);
+   - R_M's short-time overload (OI-28).
+6. Recheck all stock immediately before upload and again before payment (CLAUDE.md §4.1).
 
 ---
 
@@ -668,28 +697,28 @@ Status as of Rev0.2 (2026-11-03):
 | Rev | Date | Change |
 |---|---|---|
 | 0.1 | 2026-08-16 | Opened. D1–D9 closed. OI-2/3/4/11 closed by decision. OI-13 (board area) opened as blocking. No part confirmed; no capture started. |
-| 0.2 | 2026-11-03 | D10 (85 × 35 mm, 4 L) and D11 (USB2514B) by the user; D6 superseded, replacement clocks proposed (P13). OI-13, OI-10 closed; OI-2 reopened. Corrected §3.1 (LDO supply, DUT voltage), §3.2 (TC figure), §7.1 (rails at input voltage), §7.3 (stuck-range physics), G12. Added §4.1 noise, §6.3 clocks, I<sub>IB</sub> and mux-supply constraints, G13–G15, Section 14 proposals. Shortlist moved to `requirements/parts.md` with assembly-pool stock. OI-16 – OI-22 opened. Still no capture. |
+| 0.2 | 2026-11-03 | D10 (85 × 35 mm, 4 L) and D11 (USB2514B) by the user; D6 superseded, replacement clocks proposed (P13). OI-13, OI-10 closed; OI-2 reopened. Corrected §3.1, §3.2, §7.1, §7.3, G12. Added §4.1 noise, §6.3 clocks, G13–G15, Section 14 proposals. Shortlist moved to `requirements/parts.md`. OI-16 – OI-22 opened. |
+| 0.3 | 2026-11-03 | D13 (sourcing rule) by the user, with the open choices delegated. Redesigned from Basic and Akizuki parts: J4 power-only input (D14), CH335F (D15), STM32F103C8T6 (D16), discrete current-mirror topology C with 0.1 / 10 / 510 Ω and pedestal injection (D17), back-to-back port switch (D18), two 12 MHz crystals (D19), accuracy target (D20), proposals P9–P12 adopted (D21). D1, D3, D5, D8, D11 superseded; D4 amended. OI-2, 4, 7 (part), 9, 16–22 closed by decision; OI-23 – OI-30 opened. Still no capture. |
 
 ---
 
-## 14. Proposed — not decided
+## 14. Rev0.2 proposals — resolution
 
-Claude's proposals from the 2026-11-03 review. **None is a decision until the user accepts
-it**; on acceptance, move it to Section 10 with a D number. Each one names the issue it would
-close.
+Rev0.3 opens no new proposals: under the delegation, Claude's choices are recorded in
+Section 10 instead.
 
-| # | Proposal | Why | Closes |
-|---|---|---|---|
-| P1 | U1 = **CH224Q** (I2C, 0x22/0x23) instead of CH224K | CH224K: 0 assembly stock (2026-11-03). CH224Q: 16,744; register 0x50 reports the granted current, 0x60–0x8F the full source capability list — what OI-16 needs | Part of OI-16 |
-| P2 | U13/U23 = **SY6280AAC** class load switch; EN to GND through a resistor | Datasheet: reverse blocking when disabled (no body diode), 150 Ω output discharge at shutdown, I<sub>lim</sub> = 6800 / R<sub>set</sub> (0.4 – 2 A), thermal shutdown with auto-retry. No fault pin, so firmware supervises from its own current and VBUS measurements | OI-7 (reverse current), part of REQ-PORT |
-| P3 | RP2040 is the **only** owner of EN_A/EN_B; Rp gated by EN_x; USB2514B PRTPWR not connected to EN | The hub asserts PRTPWR as soon as its configuration completes, which would power ports at boot, against REQ-PORT-01. Gating Rp by EN rather than VBUS gives a clean detach even if a DUT back-feeds | REQ-PORT-06 |
-| P4 | Re-evaluate D5: topology **C** (INA190A2 per shunt, 6 total) + ADS131M06, or a 3.3 V mux on amp outputs | D10 removed the area objection; the 5 V-CM mux must run from VPD, ≥ 10 V class, and both candidates have thin stock; C has no mux leakage or charge injection in the sense path | OI-19 |
-| P5 | V3P3 from V5P1 via a small synchronous buck (SY8089 class) or a SOT-223 LDO; V3P3A from V5P1 via a low-noise LDO (TPS7A20 / LP5907 class) | Rev0.1's VPD-fed LDO burns 1.14 W in SOT-23-5. From V5P1 a SOT-23-5 still sees 0.34 W → 64 °C rise at 187 °C/W | OI-18 |
-| P6 | ADS131M02 CLKIN = 8.000 MHz from RP2040 GPOUT (clk_usb ÷ 6); 31.25 kSPS | ADC needs an external clock (0.3 – 8.4 MHz); Rev0.1 had none. Integer division keeps jitter low | OI-22 |
-| P7 | RP2040 ADC (GPIO26–29) senses VBUS_A, VBUS_B, VPD, V5P1 via dividers | Needed for CYCLE discharge confirmation, back-feed detection, under-voltage fault, and the open-FET check (§7.3) | REQ-PORT-03/04/05 |
-| P8 | Active bypass-FET gate drive: ≥ 20 mA turn-ON (gate to GND); level-shifted turn-OFF to V5P1 | Q<sub>g</sub> 9.7 nC max must move in ≤ 0.5 µs; a 3.3 V GPIO cannot hold a P-FET at 5.1 V source OFF | Part of §12 item 6 |
-| P9 | J2–J3 centre pitch ≥ **18 mm** | Overmoulds are 12–14 mm (OI-1); 18 mm leaves ≥ 4 mm between the widest pair. Verify with real cables | OI-1 (design input; still needs the cable check) |
-| P10 | BOOTSEL: SW1 reachable through a lid pinhole **and** a `BOOT` command | Pinhole recovers a bricked board; the command avoids opening anything in normal updates | OI-9 |
-| P11 | SWD on a Tag-Connect TC2030-NL footprint; test pads on VBUS_IN, VPD, V5P1, V3P3, V3P3A, VBUS_A, VBUS_B, GND | The footprint's alignment holes are the fixture datums OI-8 asks for | OI-8 |
-| P12 | Heat-set M2 inserts in the printed tub, 4 points (one per corner) | Meets the ≥ 4 mm engagement and ≥ 3-point rules of CLAUDE.md §7 on an 85 × 35 mm board | OI-5 |
-| P13 | Two independent clocks: Y1 12 MHz crystal → RP2040 XOSC only; Y2 24 MHz crystal → USB2514B XTALIN only | D11 needs a 24 MHz hub clock and the RP2040 reference design runs from 12 MHz, so no shared frequency remains. Alternatives: a 24 MHz CMOS oscillator for the hub (more cost, no load-capacitor tuning); or an RP2040 GPOUT 24 MHz into the hub's CLKIN (one crystal fewer, but the hub — and with it the RP2040's own upstream USB — would depend on firmware having started the clock, which a blank or bricked RP2040 has not). *To confirm before acceptance:* whether RP2040 USB boot accepts any XOSC other than 12 MHz | OI-2 |
+| # | Rev0.2 proposal | Rev0.3 outcome |
+|---|---|---|
+| P1 | CH224Q PD sink | Withdrawn — Extended; no PD (D14) |
+| P2 | SY6280AAC load switch | Withdrawn — Extended; back-to-back AO3401A (D18) |
+| P3 | MCU sole owner of EN; Rp gated by EN; hub PRTPWR not connected | **Adopted** in D18 (Rp is now *sourced* from EN; CH335F PWREN# not connected) |
+| P4 | Topology C | **Adopted** in D17, with discrete mirrors instead of INA190 |
+| P5 | 3.3 V rail from a buck or SOT-223 LDO | Superseded — AMS1117-3.3 (SOT-223) from 5 V J1 (§7.1) |
+| P6 | ADS131M02 CLKIN from RP2040 | Withdrawn — no external ADC |
+| P7 | RP2040 ADC on VBUS_A/B, VPD, V5P1 | Withdrawn — VBUS_x is not measured (§3.1); V_J4 is (IN7) |
+| P8 | Active bypass gate drive | Superseded — LM393 sink + 1 MΩ return + firmware hold (§3.2) |
+| P9 | J2–J3 pitch ≥ 18 mm | **Adopted** (D21) |
+| P10 | BOOTSEL via pinhole + `BOOT` command | **Adopted** (D21), as a flash DFU bootloader |
+| P11 | TC2030-NL SWD + test pads | **Adopted** (D21); test pads now on VBUS_IN, VSUP_A/B, VBUS_A/B, V5L, V12F, V_INJ, V3V3, VDDA, GND |
+| P12 | Heat-set M2 inserts, 4 corners | **Adopted** (D21) |
+| P13 | Y1 12 MHz + Y2 24 MHz | Replaced — two 12 MHz crystals (D19) |
