@@ -17,7 +17,9 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   about 30 minutes). Fetch it immediately after the search and check that the
   body starts with `%PDF` before trusting it. Verified 2026-11-03. This changes
   the route described in easy-stick lesson 14.7, which used the `...AccessId`
-  field.
+  field. It is also the route when the manufacturer and Mouser refuse scripted
+  fetches: onsemi's NCP115 (Rev. 4) came this way, by searching C603503.
+  Verified 2026-11-04.
 - **The search is fuzzy.** A query returns near-matches; only an exact LCSC-code
   or case-insensitive MPN match counts as found. A search with no exact hit
   (e.g. `TMUX6109`, 2026-11-03) is "not stocked", not "stocked under another
@@ -59,7 +61,9 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   gives mojibake, and a cp932-encoded keyword returns no hits (`金属皮膜抵抗 470Ω` found
   g108532 only when UTF-8-encoded).
 - **Fields on a product page:**
-  - name: `<h1 ... block-goods-name ...>`;
+  - name: `<h1 ... block-goods-name ...>`. Its text starts with a `[<code>]` prefix
+    (e.g. `[108805]`), so strip `^\[\d+\]\s*` before comparing titles. Verified 2026-11-04:
+    every one of 43 titles compared NG until stripped, then all matched;
   - pack: `block-goods-price--qty` (e.g. 1袋100本入);
   - tax-included price: `block-goods-price--price`;
   - purchasable stock: the one `<div class="block-goods-detail-available_purchase">`.
@@ -76,6 +80,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   `stockNumber`, `minBuyNumber` and `productPriceList` (`ladder`, `usdPrice`, `extPrice`).
   Read figures from that JSON, not from the page's FAQ prose, which was stale. Verified
   2026-11-03 on C7433 and C15127, and again by a verifier.
+- **TI datasheets come from the product page's `pdfUrl`.** ti.com answered scripted fetches
+  with 404. The `pdfUrl` in C7433's page JSON (`datasheet.lcsc.com/datasheet/pdf/...`)
+  served TI's SLOS099F. Verified 2026-11-04, and again by two verifiers' downloads. The LCSC
+  search API answered "Access Denied" to the same session.
 - **No public page read gave the shipping charge to Japan.** The shipping page lists only
   promotions, so LCSC's charge is known only at checkout (2026-11-03).
 
@@ -87,6 +95,16 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - Text extraction is fine for parameter tables. Pin numbers come from the
   package drawing, not from extracted text (easy-stick lesson 14.26, in its
   "Extends 14.12" paragraph: `pdftotext -layout` scrambles pin tables).
+- **When a parameter table's conditions come out scrambled, render the page and read the
+  image.** `page.get_pixmap(dpi=...)` with PyMuPDF in a task venv. Verified 2026-11-04 on
+  SLOS099F page 4: the single-supply A<sub>VD</sub> row's conditions (V<sub>O</sub> 1.4–11.4 V,
+  R<sub>L</sub> ≥ 500 kΩ) were legible only in the rendered page.
+- **Read a plotted value from the figure's vector paths, not from a rendered image.**
+  `page.get_drawings()` gives the curve's line segments. Calibrate the axes from the tick
+  labels' positions in `page.get_text("words")`, then interpolate. Verified 2026-11-04 on
+  MCP3208 DS21298E Figure 2-2 at V<sub>REF</sub> 3.3 V: the image was read as −0.5 LSB, the
+  vector paths give −0.37 LSB. An independent verifier caught the difference, and the main
+  session's own path extraction reproduced it.
 
 ## Git
 
@@ -146,6 +164,16 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
     which weakened a bound meant as a proof;
   - an independent verifier recomputed the printed terms and caught it.
   A test now asserts that the printed terms add up.
+- **Check a fault-injection step against what drives the node in hardware.** V-SAFE-01 asked
+  firmware to hold a bypass FET off to simulate a stuck range. Rev0.4 §3.2 has the LM393 turn
+  the bypass on in hardware whenever its amplifier overranges, so the step could not produce
+  the fault. It now removes Q17 / Q18 on one board. Found 2026-11-04 by reading the gate
+  network; fixed in `1d43f4d`.
+- **A verification entry's pass items are numbers with units, and each names what its
+  failure reopens.** Verified 2026-11-04: an independent verifier, grading against that
+  criterion, found three gaps. "No sustained oscillation" is now ±1 % within 100 µs. "The
+  flash is a W25Q64JV" is now JEDEC ID EFh 4017h. A LOW sweep to 430 µA could not run past the
+  365 µA hardware up-range.
 - **Quote the user verbatim, typos included, and quote every message that set the rule.**
   Verified 2026-11-03: the Rev0.3 header had "corrected" 「デカくい」 to 「デカい」 and dropped one
   line of the user's message; an independent verifier caught it.
@@ -177,6 +205,14 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   The main session's review against V-MEAS-00/06 and the design found all three.
 
 ## Devin CLI
+
+- **Give Devin only simple tasks, and review its output yourself.** The user, 2026-11-04:
+  「devinには簡単な作業だけさせてね。君がしっかりレビューしてね」. Simple means bounded,
+  mechanical work with an observable result: fetch and tabulate, run a given script,
+  reformat. Design judgement, test plans and numeric models stay with the main session.
+  Every Devin result is reviewed by the main session against the issue's question. The
+  backing is the two 2026-11-03 judgement delegations (the stackup model and the bench kit).
+  Both needed the main session's review to find their defects (see "Delegated verifiers").
 
 - **Invocation that worked (2026-11-03):** `devin --config <cfg.json> --permission-mode
   dangerous --model swe-2-max --respect-workspace-trust false --export <transcript.json>

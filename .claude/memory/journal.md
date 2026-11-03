@@ -427,3 +427,55 @@ Section 13 (board) only once verified.
   - TL431 and AZ1117 stand in for supply-role parts.
   - No bench firmware exists, and nothing is built.
 - **Commit.** `7b25e24`.
+
+## 2026-11-04 - D28: desk checks replace the pre-layout bench (issue #2)
+
+- **Symptom / request.** The user decided not to buy the issue #1 bench kit:
+  「試験キットは買わない、基板で確かめる。君が机上で確認すればいい」. OI-24, OI-27, OI-28 and
+  OI-31 were waiting on that bench.
+- **What the datasheets settled (D28, user).**
+  - OI-27: TI SLOS099F specifies the OP07 gain on a single 15 V supply, V_O 1.4–11.4 V into
+    R_L ≥ 500 kΩ. The AO3401A gate is a ≥ 52 MΩ load, so the row applies, and the HIGH
+    mirror's gate headroom at 1 A is 1.63–1.96 V. The old figure, 0.03–0.36 V, was against a
+    3.0 V output-low limit that had been extrapolated.
+  - OI-28: the MFU rates 6.25 W for 5 s. The stuck-MID fault puts 2.35 W in R_M for ≤ 10 ms,
+    so the watchdog timeout must be ≤ 5 s.
+  - OI-31, from Pimoroni's schematic: the VBUS pad feeds an on-module NCP115, so on V3V3 the
+    3V3 pad is ≥ 3.208 V (USB_VDD minimum 3.135 V). The 27 Ω pair is on the module. The
+    W25Q64JV has a 64-bit unique ID (4Bh). The hold gates sit at 2.705–2.887 V against the
+    2N7002's 2.5 V maximum threshold.
+  - Closed by decision. Each closure names what paper does not settle, and V-MEAS-00 /
+    V-MEAS-06 now check it on the first PCBA board: loop stability, R_M's shift after faults,
+    MCP3208 INL at 3.3 V, and the stretched sample.
+  - OI-24 stays open. The CH335F module bought for the board is measured before layout.
+- **Root-cause finds along the way.**
+  - V-SAFE-01 could not inject its fault: firmware cannot hold a bypass FET off against the
+    LM393. It now removes Q17 / Q18.
+  - The MCP3208 Figure 2-2 value was misread from a raster image as −0.5 LSB. The vector
+    paths give −0.37.
+- **Verification.** Rubric `.claude/goal-loop/desk-checks/rubric.md` (C1–C7), graded by three
+  fresh sonnet rubric-verifiers. Each one downloaded the OP07 and MFU datasheets itself.
+  - Round 1 failed C1, C2, C4 and C6. The causes: G1 still said ≥ 2.75 V, the INL misread,
+    non-numeric pass items, and the AO3401A / 2N7002 entries had no board check.
+  - Round 2 failed C4 and C6:
+    - V-MEAS-00 cited V-MEAS-02 for a MID gain point that it does not have;
+    - the LOW sweep ran to 430 µA, past the 365 µA hardware up-range;
+    - the flash check was a marking, not a JEDEC ID;
+    - two source dates were missing.
+  - Round 3 passed C1–C7. After the pass, CLAUDE.md's stale "D1–D21" was fixed and the V_J4
+    tap was added to the §12 test pads. The verifiers' directories are kept:
+    `~/tmp/usb-power-hub/verify-desk-1`, `-2` and `-3`.
+- **Learning.** Recorded in rules.md:
+  - plot values come from vector paths;
+  - render scrambled tables;
+  - TI datasheets via LCSC `pdfUrl`, onsemi via the JLCPCB API;
+  - Akizuki's `[code]` h1 prefix;
+  - check fault injection against the hardware;
+  - numeric pass items;
+  - the user's Devin rule.
+- **Residual risks.**
+  - The OP07 mirror loop's stability into the 645 pF gate is unknown until bring-up.
+  - MCP3208 INL at 3.3 V is typical only.
+  - The CH335F outline and pin map are unknown (OI-24).
+  - KiCad is not installed on this box.
+- **Commit.** `1d43f4d`.
