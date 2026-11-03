@@ -5,7 +5,7 @@ Desktop.ini
 .idea/
 .vscode/
 
-# KiCad generated and local-state files (ECAD tool fixed by Rev0.1 D2)
+# KiCad generated and local-state files (ECAD tool = KiCad, decision D2)
 *-backups/
 *.bak
 *.lck
@@ -29,3 +29,7 @@ firmware/build/
 # Disposable candidate exports (CLAUDE.md Section 2: never orderable).
 # Approved releases live under manufacturing/releases/ and stay tracked.
 manufacturing/working/*
+
+# Goal-loop working files (rubric, verdicts) are session artifacts, as in the
+# sibling repositories. Distilled learnings live in .claude/memory/, which is tracked.
+.claude/goal-loop/

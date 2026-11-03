@@ -1,10 +1,13 @@
 # USB Power-Control Hub — Hardware Engineering Guide
 
 Ported from [`../easy-stick/CLAUDE.md`](../easy-stick/CLAUDE.md), reduced to what
-this board actually needs. That file stays the fuller reference; read its
-**Section 14 (Verified Practices)** before reusing a footprint, before trusting
-an automated check, and before recording a change as cost-neutral. Those
-incidents happened on a sibling board with the same vendor chain and apply here.
+this board actually needs. That file stays the fuller reference. Its verified
+incident record now lives in
+[`../easy-stick/docs/engineering-lessons/README.md`](../easy-stick/docs/engineering-lessons/README.md)
+(lessons 14.1–14.26; "easy-stick 14.n" below cites one of them). Read the relevant
+lesson before reusing a footprint, before trusting an automated check, and before
+recording a change as cost-neutral. Those incidents happened on a sibling board
+with the same vendor chain and apply here.
 
 Written in English so that CAD data, manufacturing files, Git history, and
 supplier communication use one unambiguous vocabulary.
@@ -19,15 +22,22 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > **WIP — MANUFACTURING PROHIBITED.**
 >
 > The circuit design exists as a document —
-> `design/circuit/CIRCUIT_DESIGN_Rev0.1.md` — and that is currently the whole of
+> `design/circuit/CIRCUIT_DESIGN_Rev0.2.md` (revised 2026-11-03; Rev0.1 is in Git
+> history) — together with the requirements set in `requirements/`
+> (`product.md`, `verification.md`, `parts.md`). That is currently the whole of
 > the design. There is **no netlist, no schematic capture, no layout, no
-> manufacturing output**. No part has been confirmed against the JLCPCB assembly
-> pool. Nothing has been built or measured.
+> manufacturing output**. Candidate parts have been looked up in the JLCPCB
+> assembly pool (`requirements/parts.md`, dated stock), but **none is confirmed**:
+> no footprint is verified and no order-time stock check has been done. Nothing
+> has been built or measured.
 >
 > The other thing that exists is a three.js appearance mockup
 > (`mockup/`). Component names such as `U2_usb_hub` in it are placeholders, not
-> procurement specifications, and Rev0.1 has already superseded much of it.
-> Section 11 lists the blocking issues.
+> procurement specifications, and Rev0.2 (85 × 35 mm, 4 layers, D10) supersedes
+> its outline and layer count. Section 11 lists the blocking issues.
+>
+> The repository is under Git since 2026-11-03 (commit `4dd10fb` is the design
+> as it was paused on 2026-08-16). There is no remote.
 
 The mockup is a **mechanical and layout intent reference only**. Per easy-stick
 14.15/14.19: an artifact kept as a reference is evidence for the thing it is
@@ -40,8 +50,8 @@ stackup, pad shapes, and part sizes are **not** design data.
 
 Product architecture:
 
-- FR-4 PCB, 1.6 mm, outline **not yet decided** (OI-13 — 60 × 24 mm is ruled
-  out; 80 × 30 mm proposed), 4 layers proposed (OI-10).
+- FR-4 PCB, 1.6 mm, **85 × 35 mm, 4 layers** (D10, decided by the user
+  2026-11-03; closes OI-13 and OI-10).
 - Surface-mount, Top-side assembly. Bottom reserved for copper, vias, and mask.
 - USB-C receptacles ×3 (1 upstream host, 2 switched downstream).
 - USB-PD sink upstream, 9 V requested, bucked to a regulated 5.10 V port rail.
@@ -82,6 +92,7 @@ appearance is a defect, not organization.
 usb-power-hub/
 ├─ CLAUDE.md                    # this file — policy + product requirements + open issues
 ├─ README.md                    # what the product is, how to build and program it
+├─ tools/                       # repo scripts (jlc_stock.py — JLCPCB assembly-pool lookup)
 ├─ requirements/
 │  ├─ product.md                # what the product must do (authority)
 │  ├─ parts.md                  # per-part selection and sourcing record
@@ -104,14 +115,16 @@ usb-power-hub/
 │  └─ releases/<rev>/<rNN>/     # immutable approved or ordered releases
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
-│  └─ decisions/                # one file per closed architectural decision
+│  └─ decisions/                # one file per closed architectural decision (until
+│                               #   created, decisions D1–D12 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
 Two deliberate differences from `easy-stick`:
 
-- `design/ecad/` replaces its `design/easyeda/`. The tool is not yet chosen
-  (Section 10.4), and the directory name must not pre-commit the decision.
+- `design/ecad/` replaces its `design/easyeda/`. The directory was named before
+  the tool was chosen; KiCad was then chosen (D2, Section 10.4). The name stays
+  tool-neutral so a later tool change does not rename the tree.
 - Its `projects/<slug>/mechanical/` sibling of `design/mechanical/` is drift,
   not intent. Mechanical data lives under `design/mechanical/` only.
 
@@ -245,9 +258,11 @@ MUST NOT be used.
   JLCPCB's impedance calculator, before routing.
 - Order with the impedance-control option if HS eye margin depends on it.
 
-Layer assignment (6-layer case; adapt if OI-10 selects 4):
-L1 signal + parts / L2 solid GND / L3 signal / L4 GND / L5 power / L6 GND +
-low-speed. **L2 MUST remain unbroken under every USB pair.**
+Layer assignment (4 layers, D10): L1 signal + parts / L2 solid GND / L3 power
+pours + low-speed signals / L4 GND + low-speed. **L2 MUST remain unbroken under
+every USB pair**, and every L1 USB pair references L2 only. L3 signals that cross
+under the analog block or a USB pair need a GND reference on L4 directly below.
+Confirm against the chosen JLCPCB 4-layer stackup before routing (Section 5.1).
 
 ### 5.2 Placement
 
@@ -322,18 +337,20 @@ This board is an instrument. These are functional requirements, not polish.
   main plane. Do not route load-return current under the ADC.
 - Vref MUST have its own decoupling at its pins and a short path to the ADC
   reference pin.
-- Shunt resistors MUST specify tolerance **and** TCR. A ±1 % / 200 ppm/°C part
-  is not equivalent to ±0.1 % / 15 ppm/°C for this application.
+- Shunt resistors MUST specify tolerance **and** TCR. A 200 ppm/°C part is not
+  equivalent to the HIGH-shunt specification of ≤ 25 ppm/°C (Rev0.2 §4; no
+  stocked part meets it yet — OI-20). Tolerance is removed by per-unit gain
+  calibration; TCR is not.
 - Range switching MUST be verified for both settling time and over-range
-  survival. The architecture is fixed by Rev0.1 D3/D4/D9; what is *not* yet
-  established is that a built board meets the 2 µs ranging budget or survives a
-  stuck low range. Both are bring-up measurements, not review items.
+  survival. The architecture is fixed by D3/D4/D9 (Rev0.2 §10); what is *not*
+  yet established is that a built board meets the 2 µs ranging budget or
+  survives a stuck low range. Both are bring-up measurements, not review items.
 - The bypass FETs' R<sub>DS(on)</sub> MUST stay outside the sensed span. Its
-  temperature coefficient is ~4000 ppm/°C against a 15 ppm/°C shunt; inside the
-  span it dominates the error budget (Rev0.1 §5).
+  temperature coefficient is ~4000 ppm/°C against a ≤ 25 ppm/°C shunt; inside
+  the span it makes the total ≈ 1900 ppm/°C (Rev0.2 §3.2, §5).
 - Zero-point calibration is a **functional requirement**, not a feature. Without
   it the amplifier's input offset alone exceeds the 0.1 µA resolution target by
-  more than a factor of one (Rev0.1 §4, Condition 1).
+  more than a factor of one (Rev0.2 §4, Condition 1).
 
 ---
 
@@ -455,7 +472,7 @@ power-cycled from the host.
 
 ### 10.2 Functional blocks (from the mockup — historical)
 
-**Superseded by `design/circuit/CIRCUIT_DESIGN_Rev0.1.md` §6.2, which is the
+**Superseded by `design/circuit/CIRCUIT_DESIGN_Rev0.2.md` §6.2, which is the
 authoritative designator and block list.** This table is kept only as the record
 of what the mockup claimed and what was wrong with it; do not design from it.
 
@@ -482,12 +499,18 @@ of what the mockup claimed and what was wrong with it; do not design from it.
 
 ### 10.3 Fixed requirements
 
-- Board thickness 1.6 mm, Top-side assembly, ENIG. **Outline is under review —
-  60 × 24 mm does not fit the Rev0.1 circuit (OI-13).**
-- Upstream is a **USB-PD sink** requesting 9 V with 5 V fallback (D1).
-- Downstream presents Rp on both CC pins, **gated by port VBUS** so the DUT
-  detaches cleanly when its port is switched off. The Rp *value* must track the
-  granted upstream contract — never advertise more than can be delivered.
+`requirements/product.md` is the authority for requirements (REQ-* IDs, each
+traced to a V-* entry in `requirements/verification.md`). This list is the
+summary; where the two differ, `product.md` wins and this list is the defect.
+
+- Board thickness 1.6 mm, Top-side assembly, ENIG. **Outline 85 × 35 mm, 4
+  layers (D10).**
+- Upstream is a **USB-PD sink** requesting 9 V with 5 V fallback (D1). Whether
+  the intended host can grant 9 V at all is OI-17.
+- Downstream presents Rp on both CC pins and removes it when its port is switched
+  off, so the DUT detaches cleanly. Rev0.1 gated Rp by port VBUS; P3 proposes
+  gating it by the port's EN signal instead (REQ-PORT-07). The Rp *value* must
+  never advertise more than can be delivered; the rule that sets it is OI-16.
 - Each downstream port MUST be independently switchable under firmware control.
 - The board MUST enumerate on the upstream PC as a **CDC-ACM COM port** and be
   fully controllable from a plain terminal — driverless on Windows, macOS and
@@ -501,46 +524,61 @@ of what the mockup claimed and what was wrong with it; do not design from it.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.1.md` Section 10 (D1–D9).
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.2.md` Section 10 (D1–D12).
 ECAD tool = **KiCad** (D2). Upstream power contract, measurement range, ranging
-architecture, sense topology, oscillator sharing, host interface, and ladder
-fail-safe state are all closed there.
+architecture, sense topology, host interface, and ladder fail-safe state are
+closed there. D6 (one shared 12 MHz oscillator) is **superseded**: D10 (85 × 35
+mm, 4 layers) and D11 (USB2514B hub) were decided by the user on 2026-11-03, and
+D12 follows from D11 — separate 12 MHz (RP2040) and 24 MHz (hub) crystals.
 
 ### 10.5 Still undecided — record the decision before layout starts
 
-- **Board outline** (OI-13). Blocking; it is an input to schematic capture.
-- Layer count (OI-10) — Rev0.1 proposes 4, pending the outline.
-- Hub part: FE1.1s (12 MHz, shares the oscillator) vs USB2514B (24 MHz, better
-  characterised). D6 is conditional on this.
+- **Power:** downstream current policy (OI-16) and what happens on a 5 V-only
+  host (OI-17). Both change the power-path topology, so they block capture.
+- **Measurement:** sense topology B vs C (OI-19), the HIGH shunt (OI-20), and
+  the accuracy target (OI-21), which also decides whether the ADC's internal
+  reference suffices or a discrete reference is needed.
+- **Proposals P1–P12** in Rev0.2 §14 — each is a candidate decision awaiting
+  the user, not a decision.
 - USB VID/PID. Do not ship a squatted VID.
-- Whether the ADC's internal reference suffices, or a discrete reference is needed.
 - Whether the mockup's placement is kept at all. Assume not.
 
 ---
 
-## 11. Open Issues — all blocking
+## 11. Open Issues
 
-Found by review of the mockup on 2026-08-16. Numbers are stable; close them in
-Git with evidence, do not renumber. "Closed by decision" means the design intent
-is settled but nothing is built or measured — reopen if the built board disagrees.
+OI-1 – OI-15 were found by review of the mockup on 2026-08-16; OI-16 – OI-22 by the
+review that produced Rev0.2 on 2026-11-03. Every issue not struck through is
+**blocking**. Numbers are stable; close them in Git with evidence, do not renumber.
+"Closed by decision" means the design intent is settled but nothing is built or
+measured — reopen if the built board disagrees. "Rev0.2 §n" refers to
+`design/circuit/CIRCUIT_DESIGN_Rev0.2.md`; "P n" to its Section 14 proposals, which
+are **not** decisions until the user accepts them.
 
 | ID | Issue | Evidence |
 |---|---|---|
-| OI-1 | **Two USB-C plugs cannot be inserted at once.** Downstream receptacle pitch is 10.8 mm (shell gap 1.86 mm); plug overmolds are 12–14 mm. Growing the board (OI-13) makes a fix possible but does not itself fix it — J2/J3 must actually be moved apart, and the new pitch re-checked against a real overmould. | `PORT_Z = 5.4` in the mockup |
-| OI-2 | ~~No crystal for the USB hub.~~ **Closed by decision** (D6): one 12 MHz CMOS oscillator feeds both RP2040 XIN and the hub. *Conditional* on selecting a 12 MHz hub; if USB2514B is chosen this reopens. | Rev0.1 §6.2 |
-| OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D3/D4/D9): 3 ranges 20 mΩ / 2 Ω / 200 Ω, 2 bypass FETs + sense mux per channel, hardware comparator loop with a 2 µs budget, FETs default ON. | Rev0.1 §4, §7.3 |
-| OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D1): PD sink requests 9 V; buck to 5.10 V; 2 × 1 A needs ≥ 13.5 W upstream; downstream Rp tracks the granted contract. | Rev0.1 §7.1, §7.2 |
-| OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. | boss height = `GAP` = 1.6 |
+| OI-1 | **Two USB-C plugs cannot be inserted at once.** Downstream receptacle pitch is 10.8 mm (shell gap 1.86 mm); plug overmolds are 12–14 mm. Growing the board (OI-13) makes a fix possible but does not itself fix it — J2/J3 must actually be moved apart, and the new pitch re-checked against a real overmould. *2026-11-03:* D10 provides the length; P9 proposes ≥ 18 mm centre pitch (REQ-MECH-02). Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.2 §14 P9 |
+| OI-2 | ~~No crystal for the USB hub.~~ Closed by decision (D6), **reopened 2026-11-03** when D11 chose the 24 MHz USB2514B, and **closed again by decision (D12)**: Y1 12 MHz crystal → RP2040 only, Y2 24 MHz crystal → USB2514B only. | Rev0.2 §6.3, §10 |
+| OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D3/D4/D9): 3 ranges 20 mΩ / 2 Ω / 200 Ω, 2 bypass FETs + sense mux per channel, hardware comparator loop with a 2 µs budget, FETs default ON. *2026-11-03:* the stuck-range dissipation figures were corrected; the conclusion stands. | Rev0.2 §4, §7.3 |
+| OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D1): PD sink requests 9 V; buck to 5.10 V; 2 × 1 A needs ≥ 13.5 W upstream. *2026-11-03:* rails recounted at V5P1 (1.02 W, not 0.66 W) — 2 × 1 A still fits 13.5 W with 8 % margin. The Rp rule moved to OI-16, the 9 V assumption to OI-17. | Rev0.2 §7.1 |
+| OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *2026-11-03:* P12 proposes heat-set M2 inserts at 4 corners. | boss height = `GAP` = 1.6 |
 | OI-6 | **Silkscreen below fab minimum.** Reference designators 0.80 mm; user-facing kanji 0.81 mm. | canvas px/mm scale |
-| OI-7 | **Protection incomplete.** 2-terminal footprint for a 4-terminal common-mode choke; ESD channel count short of USB-C's D±/CC/SBU; no VBUS TVS; no reverse-current blocking on the outputs. | `FB1_cmc`, `D1`–`D3` |
-| OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. | — |
-| OI-9 | **BOOTSEL unreachable with the lid fitted.** | `BOOT_pad_*` |
-| OI-10 | **6 layers may be unjustified.** Rev0.1 proposes 4. Confirm against real signal/EMC need once the outline (OI-13) is settled. | — |
-| OI-11 | ~~Shunts are 2-terminal.~~ **Closed by decision** (D5): 20 mΩ is a 4-terminal part; 2 Ω and 200 Ω get Kelvin land patterns; an analog mux selects which Kelvin pair the amp sees, keeping FET R<sub>DS(on)</sub> outside the sensed span. | Rev0.1 §5 |
-| OI-12 | **Documentation disagrees with itself.** Page `<title>` says 60 × 22 mm; the model is 60 × 24 mm. Both are superseded once OI-13 lands, but the mockup must not be left claiming a dimension it does not have. | `usb-power-hub-board.html` |
-| OI-13 | **Board area. 60 × 24 mm is not routable for the Rev0.1 circuit.** Component area totals 1083 mm² against 1440 mm² of board — 75 % density, where ~45 % is the practical ceiling for a 4-layer board with fine-pitch QFNs, three USB-C connectors, differential pairs and a quiet analog section. Recommendation: 80 × 30 mm. Blocking — the outline is an input to capture, and it invalidates the entire enclosure model. | Rev0.1 §11 |
-| OI-14 | **Sample rate is capped by the host interface, not the ADC.** RP2040's USB is Full-Speed only; 32 kSPS × 2 ch uses ~16 % of FS bulk, 100 kSPS uses ~49 %. Rev0.1 targets 32 kSPS (D8). If faster profiling is a real requirement, it needs an MCU with High-Speed USB or burst-buffered readout — that is an architecture change, not a firmware tweak. | Rev0.1 §3.3 |
-| OI-15 | **The repository is not under version control.** `usb-power-hub` sits inside `C:\Codes`, where `tsuyoshi-otake/**` is gitignored. Sections 2 and 3 assume Git-tracked change control and evidence-backed issue closure; none of that is possible today, and nothing here is recoverable. | `git status` |
+| OI-7 | **Protection incomplete.** 2-terminal footprint for a 4-terminal common-mode choke; ESD channel count short of USB-C's D±/CC/SBU; no VBUS TVS; no reverse-current blocking on the outputs. *2026-11-03:* reverse blocking is covered by the SY6280AAC candidate (P2; datasheet: no body diode, blocks when disabled); TPD4E05U06 is the D±/CC ESD candidate. VBUS TVS and the CMC footprint remain open. | `FB1_cmc`, `D1`–`D3`; `requirements/parts.md` |
+| OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. *2026-11-03:* P11 proposes a TC2030-NL SWD footprint and test pads (REQ-MFG-02/03/04). Panelization still undefined. | — |
+| OI-9 | **BOOTSEL unreachable with the lid fitted.** *2026-11-03:* P10 proposes a `BOOT` command plus a lid pinhole (REQ-BOOT-02). | `BOOT_pad_*` |
+| OI-10 | ~~6 layers may be unjustified.~~ **Closed by decision** (D10, user, 2026-11-03): 4 layers. Reopen if signal-integrity or EMC review of the routed board disagrees. | Rev0.2 §10 |
+| OI-11 | ~~Shunts are 2-terminal.~~ **Closed by decision** (D5): 20 mΩ is a 4-terminal part; 2 Ω and 200 Ω get Kelvin land patterns; an analog mux selects which Kelvin pair the amp sees, keeping FET R<sub>DS(on)</sub> outside the sensed span. Re-evaluation of the mux: OI-19. | Rev0.2 §5 |
+| OI-12 | ~~Documentation disagrees with itself.~~ **Closed 2026-11-03:** the mockup's `<title>` and caption now state the 60 × 24 mm its model actually has, and that the mockup is superseded by D10. | `mockup/usb-power-hub-board.html` |
+| OI-13 | ~~Board area — 60 × 24 mm is not routable (75 % density).~~ **Closed by decision** (D10, user, 2026-11-03): **85 × 35 mm, 4 layers**, 36 % density. Every mockup dimension and the enclosure model are invalidated by it; OI-1 and OI-5 follow from that. | Rev0.2 §11 |
+| OI-14 | **Sample rate is capped by the host interface, not the ADC.** RP2040's USB is Full-Speed only; 32 kSPS × 2 ch uses ~16 % of FS bulk, 100 kSPS uses ~49 %. D8 targets 32 kSPS — 31.25 kSPS with the 8 MHz ADC clock, ~18 % of FS bulk including per-sample flags. If faster profiling is a real requirement, it needs an MCU with High-Speed USB or burst-buffered readout — that is an architecture change, not a firmware tweak. | Rev0.2 §3.3 |
+| OI-15 | ~~The repository is not under version control.~~ **Closed 2026-11-03:** `usb-power-hub` is its own Git repository on branch `main`, no remote; commit `4dd10fb` is the unmodified snapshot of the design as it was paused. | `git log` |
+| OI-16 | **Downstream current policy is undefined.** Rev0.1 advertised 1.5 A (22 kΩ Rp) on any 9 V contract, but "9 V granted" does not say how much current was granted. Two ports at 1.5 A need 18.1 W at the input (more than a 9 V / 2 A source) and 3.2 A from U2 (rated 2.5 A), while the measurement full scale is 1 A (ADC clips ≈ 1.2 A). Decide each port's allotted current (1.0 or 1.5 A) and the rule from granted power to Rp. CH224Q makes the granted current readable (P1). | Rev0.2 §7.1, §7.2; REQ-PWR-05 |
+| OI-17 | **The 9 V request (D1) assumes an upstream that may not exist.** J1 is the only power input and also the data upstream, so it normally connects to the host PC — and PC USB-C ports commonly offer only 5 V. A buck cannot make 5.10 V from 5 V (TPS62933 has no 100 % duty mode; TPS62130 can only pass VPD through), and a non-PD source does not report its current. Decide which host(s) the product must work from (measure them with V-PWR-01), then: buck-boost (TPS63070, 2 A; TPS55288), a second power-only input, or an accepted unregulated 5 V mode. | Rev0.2 §3.1; `requirements/parts.md` U2 |
+| OI-18 | **The 3.3 V rails as drawn overheat.** Rev0.1 fed the LDOs from VPD: (9 − 3.3) V × 0.2 A = 1.14 W in SOT-23-5, ≈ 213 °C junction rise. Fed from V5P1, a SOT-23-5 LDO still rises ≈ 64 °C at 190 mA. P5: digital rail from a small buck (SY8089 class) or a SOT-223 LDO; analog rail from a low-noise LDO on V5P1. | Rev0.2 §3.1; TPS7A20 R<sub>θJA</sub> 187.1 °C/W |
+| OI-19 | **Sense topology D5 needs re-evaluation.** Its alternative C (one amplifier per shunt) was rejected only on area, which D10 removed. Meanwhile the 5 V-common-mode mux of topology B must be powered from VPD as a ≥ 10 V-class part, and the two candidates found have 225 pcs (TMUX6209PWR) and 919 pcs (ADG1209, SOIC-16). Decide B vs C (P4). | Rev0.2 §5; `requirements/parts.md` U10/U20 |
+| OI-20 | **No stocked HIGH shunt meets the specification** (20 mΩ, 4-terminal, ≤ 25 ppm/°C). The only candidate found, Vishay WSK2512R0200FEA, had 14 pcs on 2026-11-03 and is specified ±35 ppm/°C. Options: relax to ≤ 50 ppm/°C (≈ 0.07 % over 20 °C — needs OI-21 first); 10 mΩ WSK2512R0100FEA (822 pcs) at G = 100 (topology C) or at half scale with G = 50; another vendor's 4-terminal part. | `requirements/parts.md` shunts |
+| OI-21 | **No accuracy requirement exists.** Range and resolution are specified; accuracy is not. Without it the HIGH-shunt TCR (OI-20), the internal-versus-external reference question (U8; internal drift is 20 ppm/°C max), and the calibration procedure cannot be closed. Proposed: ±0.5 % of reading after per-unit gain calibration. | REQ-MEAS-05 |
+| OI-22 | **The ADC has no clock.** ADS131M02 requires an external CLKIN (0.3 – 8.4 MHz in high-resolution mode); Rev0.1 gave it none. P6: 8.000 MHz from an RP2040 GPOUT pin (clk_usb ÷ 6), giving 31.25 kSPS. | Rev0.2 §6.3; ADS131M02 datasheet |
 
 ---
 
@@ -579,5 +617,7 @@ Update an entry in place rather than appending a second copy, and delete one
 later shown to be wrong. A plausible-sounding rule with no incident behind it
 belongs in Sections 1–12 as policy, not here.
 
-Until this section has content, `../easy-stick/CLAUDE.md` Section 14 is the
-incident record to read.
+Until this section has content, the easy-stick lesson index
+(`../easy-stick/docs/engineering-lessons/README.md`) is the incident record to
+read. Process learnings from working this repository (tooling, Git) are kept in
+`.claude/memory/rules.md`, not here — this section is for the board.
