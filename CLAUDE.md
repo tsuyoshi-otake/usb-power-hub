@@ -40,7 +40,9 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > outline and layer count. Section 11 lists the blocking issues.
 >
 > The repository is under Git since 2026-11-03 (commit `4dd10fb` is the design
-> as it was paused on 2026-08-16). There is no remote.
+> as it was paused on 2026-08-16). Its one remote, `origin`, is the **private**
+> GitHub repository `tsuyoshi-otake/usb-power-hub`, created on 2026-11-03 at the
+> user's request 「一旦コミットプッシュしちゃいなよ」. It stays private (Section 2).
 
 The mockup is a **mechanical and layout intent reference only**. Per easy-stick
 14.15/14.19: an artifact kept as a reference is evidence for the thing it is
@@ -626,7 +628,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-12 | ~~Documentation disagrees with itself.~~ **Closed 2026-11-03:** the mockup's `<title>` and caption now state the 60 × 24 mm its model actually has, and that the mockup is superseded by D10 (now D24). | `mockup/usb-power-hub-board.html` |
 | OI-13 | ~~Board area — 60 × 24 mm is not routable (75 % density).~~ **Closed by decision** (D10, user, 2026-11-03): **85 × 35 mm, 4 layers**. Every mockup dimension and the enclosure model are invalidated by it. The module-heavy part mix of Rev0.3 and Rev0.4 did not fit, so D24 enlarged the outline to **100 × 72 mm** (OI-23). | Rev0.4 §10, §11 |
 | OI-14 | ~~Sample rate capped by the host interface.~~ **Closed by decision** (D17 as amended by D23): the rate is 14.0 kSPS per channel, set by two MCP3208 at a 1 MHz clock with a stretched sample phase, and the stream uses 5.9 % of Full-Speed bulk. Faster profiling would need a faster ADC: that is a new decision, not a defect. | Rev0.4 §3.3 |
-| OI-15 | ~~The repository is not under version control.~~ **Closed 2026-11-03:** `usb-power-hub` is its own Git repository on branch `main`, no remote; commit `4dd10fb` is the unmodified snapshot of the design as it was paused. | `git log` |
+| OI-15 | ~~The repository is not under version control.~~ **Closed 2026-11-03:** `usb-power-hub` is its own Git repository on branch `main` (no remote then; a private one was added later that day, §0); commit `4dd10fb` is the unmodified snapshot of the design as it was paused. | `git log` |
 | OI-16 | ~~Downstream current policy is undefined.~~ **Closed by decision** (D18): each port advertises Default (Rp 33 kΩ, 500 mA). A port is enabled only while J4's advertisement covers all ON ports. Measured over-budget opens the larger port (`FAULT:BUDGET`). Hardware OC trips at 1.16 A. | Rev0.4 §7.2; REQ-PWR-04/05 |
 | OI-17 | ~~The 9 V request (D1) assumes an upstream that may not exist.~~ **Closed by decision** (D14): no PD; port power comes from J4, so it no longer depends on the host PC. The cost is a second cable and an unregulated port voltage (product.md §9). | Rev0.4 §3.1 |
 | OI-18 | ~~The 3.3 V rails as drawn overheat.~~ **Closed by decision** (D14): AMS1117-3.3 (SOT-223) from J1 5 V dissipates 0.079 W, a 7 °C rise (47 mA in Rev0.4). The op-amps run from the MAU104, not from a 3.3 V rail. | Rev0.4 §7.1 |

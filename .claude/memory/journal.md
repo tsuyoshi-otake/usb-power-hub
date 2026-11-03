@@ -360,3 +360,14 @@ Section 13 (board) only once verified.
     unseen.
   - HS through the modules and headers is still OI-26.
 - **Commit.** `6980850`.
+
+## 2026-11-03 - Private GitHub remote
+
+- **Request.** 「一旦コミットプッシュしちゃいなよ」. The tree was already committed (`4a03ca2`), but
+  there was no remote and no GitHub repository. The user chose "private で作成して push" when
+  asked.
+- **Done.** A secret scan of the 27 tracked files found nothing. Then
+  `gh repo create tsuyoshi-otake/usb-power-hub --private --source . --remote origin --push`.
+  `gh repo view` reports `PRIVATE`, and `main` tracks `origin/main`.
+- **Docs.** CLAUDE.md §0, the OI-15 row and the README's Repository section said "no remote".
+  They now name the private remote.

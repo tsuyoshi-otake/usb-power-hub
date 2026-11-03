@@ -95,5 +95,6 @@ modules, OI-24 and OI-31, and re-running the OI-23 placement study with them). F
 
 - Git since 2026-11-03. Commit `4dd10fb` is the design exactly as it was paused
   on 2026-08-16; later commits are the 2026-11-03 revision.
-- **No remote.** Do not create a public remote (`CLAUDE.md` Section 2).
+- **Remote:** `origin` is the private GitHub repository `tsuyoshi-otake/usb-power-hub`
+  (2026-11-03). Keep it private; do not create a public remote (`CLAUDE.md` Section 2).
 - Commit messages are English and describe the change in detail.
