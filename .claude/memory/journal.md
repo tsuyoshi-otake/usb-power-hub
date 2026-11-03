@@ -135,3 +135,5 @@ Section 13 (board) only once verified.
 - **Learning.** Promoted to rules.md: Akizuki URLs and markers; `python -I` and UTF-8 output;
   heredoc backslashes; one script and one basis for derived numbers; quote the user
   verbatim.
+- **Commits.** `1452cb8` (Rev0.3 content), `673f6c1` (verification fixes, calc script,
+  type pooling, the user's restated rule, memory).
