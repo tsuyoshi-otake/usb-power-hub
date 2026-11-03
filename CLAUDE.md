@@ -552,7 +552,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D25; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D26; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -566,7 +566,7 @@ withdrawn and not reused).
   and the adoption of P9–P12. After D22, Claude recorded D23: the PGA2040 RP2040
   module and two MCP3208 ADCs, superseding D16's STM32F103. Within D24's limit, Claude
   chose the 100 × 72 mm outline from the OI-23 study, and D25 put the MF-R300 input fuse
-  on J4 (OI-29). Each is labelled
+  on J4 (OI-29), and D26 set how J1's current is declared (OI-25). Each is labelled
   "Claude (delegated)", and the user may revert any one.
 
 ### 10.5 Still undecided — record the decision before layout starts
@@ -575,7 +575,6 @@ withdrawn and not reused).
   MCP3208 sampling assumptions. U1's footprint and power wiring depend on it.
 - **OI-23 (remainder):** re-run the placement study with the measured CH335F outline
   (OI-24) and the chosen header height. The board area itself is settled by D24.
-- **OI-25:** how J1's ≈ 0.21 A is declared to the host.
 - **OI-27, OI-28:** bench-check the OP07 single-supply margins and R_M's overload
   before layout.
 - USB VID/PID. Do not ship a squatted VID.
@@ -628,7 +627,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D23, replacing D17's on-chip ADC): two external MCP3208, clocked at 1 MHz by the RP2040 PIO. | Rev0.4 §3.3 |
 | OI-23 | **Board fit: area settled, outlines not measured.** The placement study (`design/experiments/oi-23-placement/`, 15 tests) proved that 85 × 35 mm cannot hold Rev0.4: even with no routing space and every low part credited under a module, it needs 3,780 mm² (F1 included, D25) against 2,975 mm². D24 set 100 × 72 mm, where a block placement passes every check at routing factor K = 1.6 (headroom to K = 1.74). Still open: the CH335F outline is measured off a product photo (OI-24), and the header height behind the study's 1.5 mm under-module rule is not chosen. Re-run the study with both; it must still exit 0. | Rev0.4 §11; study README |
 | OI-24 | **CH335F module outline and pin map unknown.** Akizuki publishes no drawing for AE-QFN28-DIP(CH335F). Measure a purchased module, and confirm that the QFN comes mounted and how DIP30 maps to the chip's pins. | `requirements/parts.md` U6 |
-| OI-25 | **J1 current is misdeclared.** The board draws ≈ 0.21 A from J1, but the CH335F's default descriptor declares self-powered and 100 mA. Options: (a) declare honestly via the CH335F EEPROM (an EEPROM part is not yet sourced) plus the MCU function's own MaxPower; (b) power the MCU and analog from J4, which loses control without J4; (c) accept and document. | Rev0.4 §7.1 |
+| OI-25 | ~~J1 current is misdeclared.~~ **Closed by decision** (D26, Claude delegated, 2026-11-03): the CH335F stays self-powered at its default 100 mA, and the RP2040 function declares bMaxPower 200 mA. That covers its 126 mA typical share of J1's ≈ 0.21 A (172 mA with every OP07 at its maximum). USB still charges the upstream port only 100 mA, so the board is specified for 500 mA upstream ports and not for bus-powered hubs. Options (a) and (b) are recorded as rejected in D26. Reopen if V-HOST-01 measures more than 0.30 A from J1. | Rev0.4 §7.1, §10 |
 | OI-26 | **HS signal integrity through the modules is unverified.** D± pass through 2.54 mm headers and Akizuki module layouts. The fallback is that DUTs enumerate at FS. | Rev0.4 §3.3; V-HOST-01 |
 | OI-27 | **OP07 single-supply operation is extrapolated.** Unverified: common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V (extrapolated from ±15 V specs); the mirror gate's headroom at 1 A, which F1 (D25) cuts to 0.11–0.36 V with one port loaded and to 0.03 V at J4 = 4.75 V with both ports at 1 A; loop stability into a 645 pF gate. Bench-check before layout (V-MEAS-00). | Rev0.4 §3.2 |
 | OI-28 | **R_M short-time overload is unverified.** A stuck-MID short puts 2.35 W into a 1 W axial resistor for up to 10 ms. | Rev0.4 §4; V-MEAS-00 |

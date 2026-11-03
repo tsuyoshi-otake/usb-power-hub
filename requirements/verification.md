@@ -268,7 +268,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
 ## Host interface
 
 ### V-HOST-01 — Enumeration, identity, hub passthrough
-- **Covers:** REQ-HOST-01, REQ-HOST-02, REQ-HOST-06, REQ-HOST-07
+- **Covers:** REQ-HOST-01, REQ-HOST-02, REQ-HOST-06, REQ-HOST-07, REQ-HOST-08
 - **When:** Bring-up (three OSes) + Production (serial uniqueness)
 - **Method:**
   - Plug into Windows 11, macOS and Linux, and inspect the device tree.
@@ -276,6 +276,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Plug a High-Speed USB device (a USB 2.0 flash drive) into J2 and J3, and run a 1 GB
     read/verify on each.
   - Compare the MCU's USB VID/PID with the allocation record.
+  - Read the descriptors (USB Tree View on Windows, `lsusb -v` on Linux). Measure J1's
+    current with both ports ON, the stream running and all LEDs lit.
 - **Pass:**
   - A CH335F hub plus one composite device with two CDC-ACM interfaces; no driver install on
     any OS.
@@ -283,6 +285,9 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - The DUT enumerates at High-Speed and the transfer verifies with no errors. If it falls
     back to FS, record it against OI-26.
   - VID/PID matches an allocation we hold.
+  - The hub reports self-powered with MaxPower 100 mA. The control function reports
+    bus-powered with MaxPower 200 mA.
+  - J1 current ≤ 0.30 A, the sum of the two declarations.
 
 ### V-HOST-02 — Control during streaming
 - **Covers:** REQ-HOST-03

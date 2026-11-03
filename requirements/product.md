@@ -70,6 +70,7 @@ This section answers "can firmware stop power to a port?": yes, and this is the 
 | REQ-HOST-05 | The stream is binary and framed per Section 4.2. | Settled (binary, framed) / Delegated (frame layout) | Rev0.1 §3.3 |
 | REQ-HOST-06 | The MCU's USB function uses a VID/PID we are entitled to (pid.codes for open hardware, or a purchased VID), never a squatted one. Value not yet chosen. | Settled (rule) / Open (value) | CLAUDE.md §10.5 |
 | REQ-HOST-07 | DUT data passes through a USB 2.0 High-Speed hub (CH335F) on each downstream port. HS through the Akizuki modules and headers is unverified (OI-26); if HS fails at bring-up, FS operation is the documented fallback. | Delegated | D15 (D11 superseded by D13) |
+| REQ-HOST-08 | **Power declaration.** The MCU function's configuration descriptor declares bus-powered with bMaxPower 200 mA. The CH335F stays self-powered (PSELF default) and declares its default 100 mA. | Delegated | D26 |
 
 ### 4.1 Control protocol v0 — Delegated
 
@@ -177,4 +178,7 @@ REQ-PORT-04) and are not reused.
 - **No ESD protection on D+/D− of J1, J2 and J3** (D22). Only the hub chip's own protection
   remains. Discharge yourself and the cable before plugging in, as with a bare development
   board.
-- **J1 draws ≈ 0.21 A** while the hub declares 100 mA (OI-25).
+- **Plug J1 into a port that supplies 500 mA** (a PC port or a self-powered hub), not into a
+  bus-powered hub. J1 draws ≈ 0.21 A typical, ≈ 0.26 A with every OP07 at its maximum. The
+  hub declares 100 mA and the control function 200 mA, but USB charges the upstream port
+  only the hub's 100 mA (D26).

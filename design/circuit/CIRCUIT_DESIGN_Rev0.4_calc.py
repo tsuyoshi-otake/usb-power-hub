@@ -190,6 +190,12 @@ loads = {"CH335F": 85, "RP2040 (PGA2040) + USB, estimate": 30, "MAU104 input": 7
          "LM393 x3": 3, "LEDs": 5, "AMS1117 Iq": 5, "CJ431 x2 + dividers": 2,
          "MCP3208 x2 (0.4 mA max each)": 1, "SPI level shifters, 3 x 5 V / 1.5 kohm": 10}
 print(f"total {sum(loads.values())} mA")
+hub = loads["CH335F"]
+func = sum(loads.values()) - hub
+mau_extra = 6 * 2.5 * 12.0 / 0.78 / 5.0     # every OP07 at 5 mA max instead of 2.5 typ; MAU104 78 %
+print(f"hub {hub} mA (declares 100 mA); MCU function {func} mA typ, {func + mau_extra:.0f} mA with"
+      f" every OP07 at max (J1 then {hub + func + mau_extra:.0f} mA) -> function declares 200 mA (D26),"
+      f" declarations total {100 + 200} mA")
 v3v3 = {"RP2040 (PGA2040), estimate": 30, "LEDs, Rp, pull-ups, VDDA, CJ431 U3 (as Rev0.3)": 15,
         "HOLD pull-ups 4 x 3.3 V / 10 kohm": 1.3, "MCP3208 V_REF x2": 0.3}
 i3 = sum(v3v3.values())

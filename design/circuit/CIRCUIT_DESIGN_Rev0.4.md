@@ -627,10 +627,21 @@ V3V3 carries ≈ 47 mA, so AMS1117 dissipates (5.0 − 3.3) V × 47 mA = 0.079 W
 90 °C/W. This closes OI-18 on this rail. If the PGA2040 takes 5 V and regulates for itself
 (OI-31), its share moves off the AMS1117.
 
-The CH335F's default configuration descriptor declares 100 mA (MaxPower 0x32) and
-self-powered (PSELF strap default). The board actually draws ≈ 0.21 A from J1. This is a
-**USB power-accounting non-compliance**: physically within a USB 2.0 port's 500 mA, but
-misdeclared. It is OI-25, with its options listed there.
+**How J1's current is declared (D26, closes OI-25).**
+
+- The CH335F stays **self-powered** (PSELF at its default) and declares its default 100 mA
+  (MaxPower 0x32). It takes 85 mA, inside the one unit load a self-powered hub may draw
+  from upstream.
+- It has to be self-powered: J2 and J3 are powered from J4. A bus-powered hub would offer
+  its DUTs only 100 mA, so a host would refuse a DUT whose configuration asks for 500 mA.
+- The RP2040 function takes the other 126 mA, or 172 mA with every OP07 at its maximum. It
+  declares **bMaxPower 200 mA, bus-powered** (REQ-HOST-08).
+- The declarations add up to 300 mA, against ≈ 0.21 A typical and ≈ 0.26 A with every OP07
+  at its maximum supply current. But USB charges the upstream port only the hub's 100 mA:
+  it counts the function's power against the self-powered hub's own supply.
+- The board therefore needs an upstream port that supplies 500 mA, such as a PC port or a
+  self-powered hub. It is not supported behind a bus-powered hub (`requirements/product.md`
+  §9).
 
 ### 7.2 J4 (port) power and the port policy (D18; closes OI-16)
 
@@ -698,7 +709,7 @@ Checked by a human against the schematic; recorded in the release notes with a n
 | G11 | Comparator loop | Trace comparator → gate | No MCU in the up-range path; MCU only holds and releases |
 | G12 | Shunt ratings | Datasheets | R_L ≥ 0.125 W for 47 mW stuck-LOW; R_M short-time overload ≥ 2.35 W for 10 ms (OI-28) |
 | G13 | Port-enable ownership | Trace EN_x | Driven only by an RP2040 GPIO; CH335F PWREN# not connected; OVCUR# tied inactive per datasheet |
-| G14 | Hub straps | CH335F PSELF, PGANG | PSELF matches the decision in OI-25; ganged mode is irrelevant (PWREN# unused) |
+| G14 | Hub straps | CH335F PSELF, PGANG | PSELF left at its default, self-powered (D26); ganged mode is irrelevant (PWREN# unused) |
 | G15 | 5 V signals into the MCU | RP2040 pin table and every net on a GPIO | No GPIO net can exceed 3.3 V: EVT through Q24/Q25 (Q44/Q45), DOUT through 10 kΩ / 15 kΩ, OC_x from EN_G_x through 100 kΩ, SCLK/CS/DIN driven through Q50–Q52 |
 | G16 | Op-amp supply and pedestal | Trace V12F, V_INJ | V_INJ = 8 V from U4; six 1 MΩ to the six X nodes; no op-amp on V5L or V3V3 |
 | G17 | Fast turn-off | Trace DIS_x → Q15 → Q16 | Q16 clamps gate to common source when EN_G_x is low |
@@ -775,6 +786,7 @@ appear here.
 | D23 | MCU = **PGA2040** (RP2040 module, Akizuki); ADC = **2 × MCP3208-CI/P** (Akizuki DIP16) at V<sub>DD</sub> 5 V, sharing CLK/CS/DIN, sample phase stretched by the PIO, 14.0 kSPS with both ports sampled at once; PSM712 on J1–J3 CC, D± unprotected; RP2040 ROM USB bootloader; hold pull-ups 10 kΩ; level shifters on EVT and the ADC bus. Supersedes D16; amends D17, D19, D21. *Revert → no Basic-only MCU remains; reverting D22 instead restores Rev0.3* | 2026-11-03 | Claude (delegated) | — (opens OI-31) |
 | D24 | Board outline **100 × 72 mm**, 4 layers; amends D10's 85 × 35 mm. The OI-23 study (`design/experiments/oi-23-placement/`) shows that Rev0.4 needs at least 3,715 mm² (no routing space, every low part credited under a module; 3,780 mm² once D25 added F1), against 2,975 mm². The user's condition, 「100x100未満ならいいんだっけ」, is that the outline stays within JLCPCB's 100 × 100 mm base price tier. JLCPCB instant quote, 2026-11-03, 4 layers, 5 pcs, default options: $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; $30.80 at 130 × 72 mm (a $25 engineering fee appears). ENIG adds $16.90 at 85 × 35 and $17.40 at 100 × 72 mm. The size inside the tier is Claude's choice. *Revert → no 85 × 35 layout exists; a smaller outline needs a new study run* | 2026-11-03 | **User** (condition) + Claude (delegated, size) | OI-23 (area only; outlines still open) |
 | D25 | **J4 input fuse F1 = Bourns MF-R300** (Akizuki g112630), ahead of D6. 3.00 A hold (2.49 A at 40 °C) against the 2.33 A the OC trips allow; 6.00 A trip; 30 V, so a wrong supply up to 30 V that D6 crowbars trips F1. Cost: R1max 0.08 Ω adds up to 0.16 V of drop with both ports at 1 A, which cuts the HIGH mirror's gate headroom to 0.03 V in the J4 = 4.75 V corner (OI-27, V-MEAS-00). Fallbacks if the bench check fails: firmware flags HIGH readings while V_J4 (measured after F1) is below the measured limit, or revert D25. Rejected: relying on the source's own protection, because a hand-soldered board can short upstream of the port OC. *Revert → OI-29 reopens; no other Akizuki PTC has a datasheet with resistance figures at hand* | 2026-11-03 | Claude (delegated) | OI-29 |
+| D26 | **J1 power declaration.** The CH335F stays self-powered (PSELF default, 100 mA), because J2 and J3 are powered from J4: as a bus-powered hub it would offer DUTs only 100 mA. The RP2040 function declares bMaxPower 200 mA, bus-powered, against its 126 mA typical, 172 mA with every OP07 at its maximum. The board is specified for upstream ports that supply 500 mA, not for bus-powered hubs. Rejected: (a) raising the hub's MaxPower through the CH335F EEPROM, since a self-powered hub may draw only one unit load from upstream, so a larger figure is itself non-compliant, and it adds a part; (b) feeding the MCU and analog from J4. That is compliant, but it removes the COM port whenever J4 is absent. It also takes ≈ 0.13 A out of J4's advertisement, so a Default-only J4 could run no port (REQ-PWR-04), and it cuts F1's 40 °C hold margin from 0.16 A to ≈ 0.03 A. *Revert → OI-25 reopens with (a) and (b)* | 2026-11-03 | Claude (delegated) | OI-25 |
 
 D12 was withdrawn on 2026-11-03 and is not reused.
 
@@ -819,7 +831,7 @@ Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
    still exit 0.
 2. **OI-31**: confirm the PGA2040's supply input, USB series resistors and flash from the
    module itself, because they decide U1's footprint and power wiring.
-3. **OI-25**: decide how J1's 0.21 A is declared.
+3. ~~**OI-25**: decide how J1's 0.21 A is declared.~~ Closed by D26.
 4. ~~**OI-29**: choose the J4 input fuse.~~ Closed by D25 (F1 = MF-R300).
 5. Bench-check the assumptions this design rests on, before layout:
    - OP07CDR on 0 / 12 V with a 5 V common mode and the mirror FET's gate headroom (OI-27);
@@ -840,6 +852,7 @@ Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
 | 0.4 | 2026-11-03 | D22 (Basic parts only, no Preferred Extended) by the user closes OI-30. MCU and ADC redesigned (D23): PGA2040 RP2040 module and two MCP3208 DIP16 ADCs at V<sub>DD</sub> 5 V, 14.0 kSPS; SRV05-4 removed, PSM712 on J1–J3 CC, D± unprotected; Y1 removed; ROM USB bootloader; hold pull-ups 10 kΩ; EVT and ADC-bus level shifters. D16 superseded; D8, D17, D19, D21 amended. OI-31 opened. Machine-placed part types 38 → 35. Still no capture. |
 | 0.4 | 2026-11-03 | Amended: D24 (user condition, Claude's size) sets the board outline to 100 × 72 mm, 4 layers, amending D10, from the OI-23 placement study. §11 rewritten with counted areas; §12 item 1 and fact 9/17 updated. No circuit change. |
 | 0.4 | 2026-11-03 | Amended: D25 (Claude, delegated) adds F1, an MF-R300 resettable fuse ahead of D6, and closes OI-29. §3.1 path and port-voltage table, §3.2 gate headroom, §6.2, §7.2 and §12 updated; F1 added to the OI-23 study. Machine-placed types unchanged (35). |
+| 0.4 | 2026-11-03 | Amended: D26 (Claude, delegated) sets how J1's current is declared and closes OI-25: the hub stays self-powered at 100 mA, the RP2040 function declares 200 mA, and bus-powered upstream hubs are unsupported. §7.1, G14 and §12 updated. No circuit change. |
 
 ---
 
