@@ -33,6 +33,17 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   `/blog/reduce-pcb-assembly-cost-prototype`, 2026-11-03), so a verifier can check fee
   constants without a browser. The quote calculator at `cart.jlcpcb.com/quote` is not: it
   needs the browser, and its PCBA section requires a Gerber upload before it shows a price.
+- **Stackups:** `jlcpcb.com/impedance` is curl-readable too: every stackup table and the Dk
+  table come back in the HTML. Verified 2026-11-03 by the main session and again by a
+  verifier's fresh download. The impedance calculator `/pcb-impedance-calculator` needs the
+  browser. On 2026-11-03 its single-ended mode answered after a page reload. Its
+  differential mode returned no width in two attempts: the result stayed a spinner and
+  the page threw `TypeError: e.some is not a function`.
+- **Economic eligibility of a stackup is the quote page's per-stackup note, not the
+  calculator's tab label.** The quote page marks each excluded stackup "This is a special
+  stackup, and it doesn't support economic PCB assembly". The calculator labels only some
+  tabs "Special": 3313, 1080 and 7628G have no label there, yet all three carry the note.
+  Verified 2026-11-03 on all 18 named 4-layer 1.6 mm stackups.
 
 ## Akizuki (akizukidenshi.com)
 
@@ -123,6 +134,28 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   the `pdfx` venv among them. Deletes of those same directories from the main session had
   been denied. `ls` before and after showed the loss. Give the verifier one new directory of
   its own, forbid every delete, and have it report the path. The main session cleans up.
+  Forbid git commands that write to the index as well: a verifier told only "edit, move or
+  delete nothing" ran `git add -N` on the graded directory on 2026-11-03. It undid this with
+  `git reset` and disclosed it.
+- **Check delegated numeric work against an independent implementation and a hand-worked
+  value, not only against the reference it was fitted to.** A fitted parameter can absorb a
+  formula bug. Verified 2026-11-03: Devin's Hammerstad–Jensen thickness correction gave
+  48.1 Ω where the formula gives 50.57 Ω. A fitted Dk of 4.04, against the published 4.4,
+  still made its single-ended width match JLCPCB's. The main session's own implementation
+  exposed it. The fix was to forbid the fit and pin the hand-worked value in a test.
+
+## Devin CLI
+
+- **Invocation that worked (2026-11-03):** `devin --config <cfg.json> --permission-mode
+  dangerous --model swe-2-max --respect-workspace-trust false --export <transcript.json>
+  --prompt-file <brief.md> -p`. Continue the same session with `-r <session-name>`.
+  `devin list` is an interactive TUI, not scriptable output.
+- **In print mode a denied tool call ends the run without a message.** Deny rules still apply
+  under `--permission-mode dangerous`. Read the `--export` transcript to see which call was
+  refused. Verified 2026-11-03 with a permission test whose denied `rm` cancelled the run.
+- **Devin also loads `~/.claude/skills`.** A brief's rules therefore compete with the global
+  skills, so a brief states its file scope, its no-delete and no-commit rules, and the
+  interpreter flags (`python -I -B`, LF) explicitly. Observed 2026-11-03.
 - **Keep memory edits out of the tree while a verifier grades a scoped change set.** A
   "only the files in scope changed" criterion failed twice on 2026-11-03, once for a journal
   entry and once for rules.md, both written while the verifier ran. Commit the graded files

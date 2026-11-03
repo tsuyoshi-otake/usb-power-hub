@@ -312,3 +312,51 @@ Section 13 (board) only once verified.
   - 38 of the 138 0402 positions are unattributed.
   - PCBA parcel shipping and import tax are not priced.
 - **Commit.** `0d0eae0`.
+
+## 2026-11-03 - D27: stackup JLC04161H-7628 and the USB 2.0 pair geometry (Devin, SWE-2 Max)
+
+- **Request.** 「じゃあ、続けて。Devin」, then 「を使って。SWE-2 Maxね」: continue with the next
+  paper item, the JLCPCB stackup and impedance calculation, with the Devin CLI on swe-2-max.
+- **Result.** `design/experiments/stackup-impedance/`: 19 stackups, an HJ + KJ model, and
+  25 tests. D27 (Claude, delegated) names JLC04161H-7628 and sets the provisional pair
+  W 0.31 / S 0.15 mm on L1 over L2. The pair reads 90.4 Ω in the bare model, and
+  99.7 / 82.8 Ω at W −/+20 %. Impedance control is not ordered for the prototype
+  ($33.08 + $1.05).
+- **Devin rounds.**
+  1. Run 1 used IPC-2141A (−9.1 % against JLCPCB's single-ended datum) and quoted an
+     unsourced EEVblog figure. Brief fix1.
+  2. Run 2 got the HJ thickness correction wrong. It fed du1 into both Z01 and Eeff, which
+     gives 48.1 Ω at the datum instead of 50.57 Ω. A fitted Dk 4.04 hid the error. Found by
+     the main session's independent implementation and a hand calculation. Brief fix2
+     carried the exact formulas and the hand-check value.
+  3. Run 3 was correct, but `impedance.py` exited 1 on the real data, because 7628C/F
+     cannot reach 90 Ω. The main session rebuilt the exit status around the recommended pair
+     and added 5 exit-status tests.
+- **Incidents.**
+  - A denied `rm` ended a Devin print-mode run with no message. `--export` showed the
+    refused call. The denied `rm` of `devin-permtest` was not retried.
+  - JLCPCB's differential calculator failed twice (spinner, `TypeError`). Its single-ended
+    mode worked after a page reload. No order was placed.
+  - The main session's own brief had wrongly told Devin that only 3313 and 1080 lack the
+    "Special" label in the calculator. 7628G lacks it too. Corrected in the study README.
+- **Verification.** Rubric `.claude/goal-loop/stackup-d27/rubric.md`, sonnet
+  rubric-verifier.
+  - Round 1: C1–C6 pass. The verifier recomputed the figures, re-downloaded
+    `jlcpcb.com/impedance` and matched all 18 named stackups.
+  - It disclosed that it had run `git add -N` and then `git reset`. `git status` matched the
+    starting state. Its directory `~/tmp/usb-power-hub/verify-d27-1` is left in place.
+  - After the pass, the HandCheck docstring rounding was corrected as the verifier noted
+    (du1 0.2486, Eeff0 3.3374, Eeff 3.1790). The 25 tests were rerun and pass.
+- **Learning.** Promoted to rules.md:
+  - JLCPCB stackup pages and the calculator's behaviour.
+  - Economic eligibility is the quote page's per-stackup note, not the tab label.
+  - Check delegated numeric work against an independent implementation.
+  - Forbid verifiers git index writes.
+  - Devin CLI invocation and permission behaviour.
+- **Residual risks.**
+  - JLCPCB's own pair width is not confirmed; rerun the calculator before routing.
+  - The pair's solder-mask effect is unquantified, so the widths are an upper bound.
+  - The ENIG / Economic combination and impedance control's effect on the PCBA class are
+    unseen.
+  - HS through the modules and headers is still OI-26.
+- **Commit.** `6980850`.
