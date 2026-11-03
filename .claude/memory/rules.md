@@ -88,6 +88,13 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   column uses one basis.** Verified 2026-11-03: writing `CIRCUIT_DESIGN_Rev0.3_calc.py`
   exposed full-scale currents computed with the pedestal and thresholds without it (366 µA
   vs 365 µA), which no reviewer of the document alone had flagged.
+- **A printed sum shows the terms the code actually used, and a lower bound takes the most
+  favourable value at every step.** Verified 2026-11-03:
+  - `placement_study.py` printed "under-module 704" while subtracting min(704, 442);
+  - its credit was per block, so one tall part removed a block's low parts from the credit,
+    which weakened a bound meant as a proof;
+  - an independent verifier recomputed the printed terms and caught it.
+  A test now asserts that the printed terms add up.
 - **Quote the user verbatim, typos included, and quote every message that set the rule.**
   Verified 2026-11-03: the Rev0.3 header had "corrected" 「デカくい」 to 「デカい」 and dropped one
   line of the user's message; an independent verifier caught it.

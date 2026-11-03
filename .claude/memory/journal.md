@@ -181,3 +181,38 @@ Section 13 (board) only once verified.
     0.18 V; only the 1 kΩ limits the current.
   - D± have no ESD protection.
 - **Commit.** `2b30b9f`.
+
+## 2026-11-03 - OI-23 placement study; D24 board outline 100 x 72 mm
+
+- **Symptom.** Rev0.4 put ≈ 2,800 mm² of hand-soldered parts on the 2,975 mm² board that D10
+  had fixed at 85 × 35 mm. OI-23 asked for a placement study before capture.
+- **Investigation.**
+  - Counted every courtyard: hand parts 2,574 mm², SMD 1,649 mm² (Rev0.4 §11 had guessed
+    1,100–1,200 mm² for the SMD without counting).
+  - The space under raised modules is 704 mm².
+  - The lower bound with no routing space is 3,715 mm², so no 85 × 35 layout exists.
+  - A block placement at 100 × 72 mm passes all checks at K = 1.6, with headroom to K = 1.74.
+  - JLCPCB instant quote, read by hand on 2026-11-03 (4 layers, 5 pcs, default options):
+    $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; $30.80 at 130 × 72 mm.
+- **Decision.** The user wrote 「100x100未満ならいいんだっけ」, setting the condition. D24 records
+  100 × 72 mm: the condition is the user's, the size is Claude's (delegated).
+- **Verification.**
+  - Rubric: `.claude/goal-loop/oi-23-d24/rubric.md`, graded by a sonnet rubric-verifier.
+  - Round 1 failed C4, C5 and C8:
+    - the printed bound showed the space (704) while the code subtracted 442;
+    - 1,515 should round to 1,516;
+    - README.md carried an undated price claim.
+  - Root cause of C4: the credit was taken per block (a block with one tall part lost all
+    of its low parts) and the print showed the wrong term.
+  - Fix: the credit now counts per part, so the bound is the most favourable one, and a test
+    asserts that the printed terms add up.
+  - Round 2 passed C1–C9. It also noted that a block placed twice went undetected; a
+    duplicate check and its negative test were added (15 tests, all pass).
+- **Learning.** Promoted to rules.md under "Design documents": a printed sum shows the terms
+  the code used, and a lower bound takes the most favourable value at every step.
+- **Residual risks.**
+  - The CH335F outline is a photo estimate (OI-24).
+  - The header height behind the 1.5 mm under-module rule is not chosen.
+  - The study does not route.
+  - The mockup and the enclosure must be redrawn for 100 × 72 mm.
+- **Commit.** `c1aec4f`.
