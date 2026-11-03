@@ -29,7 +29,8 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   fails with "cryptography>=3.1 is required"; install `cryptography` into the
   same **task venv** (never the global interpreter, never `~/tmp/pdfvenv`).
 - Text extraction is fine for parameter tables. Pin numbers come from the
-  package drawing, not from extracted text (easy-stick lesson 14.26).
+  package drawing, not from extracted text (easy-stick lesson 14.26, in its
+  "Extends 14.12" paragraph: `pdftotext -layout` scrambles pin tables).
 
 ## Git
 
