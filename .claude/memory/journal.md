@@ -137,3 +137,47 @@ Section 13 (board) only once verified.
   verbatim.
 - **Commits.** `1452cb8` (Rev0.3 content), `673f6c1` (verification fixes, calc script,
   type pooling, the user's restated rule, memory).
+
+## 2026-11-03 - Rev0.4: Basic parts only (D22), PGA2040 + 2 x MCP3208 (D23)
+
+- **Symptom.** The user's restated rule says 「部品はBasic Partsのみ」. Rev0.3 still had two
+  Preferred Extended parts, STM32F103C8T6 and SRV05-4 (OI-30). The user answered 「うん、okだよ」,
+  then chose 「外して Basic のみにする」 when asked.
+- **Root cause.** Rev0.3 read D13 as "never an Extended-only PCBA". A Preferred Extended
+  part has no feeder fee, but it is still labelled Extended, so it breaks the literal rule.
+- **Fix.**
+  - MCU: PGA2040 (Akizuki RP2040 module, D± on its pins).
+  - ADC: two MCP3208 DIP16, one per port, at V_DD 5 V and V_REF 3.3 V. They share
+    CLK/CS/DIN, and the PIO stretches the sample phase to 4.5 µs. The result is 14.0 kSPS.
+  - Other circuit changes:
+    - level shifters from pooled types;
+    - hold pull-ups changed to 10 kΩ;
+    - ROM UF2 bootloader;
+    - PSM712 on CC of J1–J4;
+    - D± left unprotected.
+  - Part types 38 → 35.
+  - Decisions: D22 (user), D23 (delegated), new OI-31 / V-MEAS-06 / G19.
+- **Investigated on the way.**
+  - The MCP3208 rates its inputs only to V_DD + 0.6 V and gives no input-current rating.
+    At V_DD = 3.3 V an overranged HIGH node would push 1.1 mA into it. That is why V_DD is
+    5 V.
+  - The native 1.5 µs sample phase leaves 17 / 31 LSB of residual from the 1.5–2.4 kΩ
+    source. That is why the sample phase is stretched.
+  - The RP2040 reset pull-down (50–80 kΩ) would hold Rev0.3's 100 kΩ hold pull-ups near
+    1 V. That is why they are 10 kΩ.
+- **Verification.**
+  - The calc script exits 0, and its figures match the documents.
+  - A live JLCPCB recheck shows 35 / 35 Basic.
+  - A fresh rubric-verifier (sonnet) passed C1–C9 in its first round. The rubric is
+    `.claude/goal-loop/rev04-basic-only/rubric.md`.
+- **Failure on the way.** The edit script's `Path.write_text` saved seven files as CRLF.
+  Git normalized them, but the working copy did not match `eol=lf`. They were converted back
+  to LF before commit, and the rule was promoted to rules.md.
+- **Residual risks.**
+  - Board fit: hand-soldered parts take ≈ 2,800 of 2,975 mm² (OI-23).
+  - The PGA2040's supply input and USB resistors are unconfirmed (OI-31).
+  - Akizuki has only 41 PGA2040 in stock.
+  - At the J4 5.5 V / V5A 4.5 V corner, the HIGH node exceeds the MCP3208 input rating by
+    0.18 V; only the 1 kΩ limits the current.
+  - D± have no ESD protection.
+- **Commit.** `2b30b9f`.
