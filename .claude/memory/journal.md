@@ -480,3 +480,31 @@ Section 13 (board) only once verified.
   - The CH335F outline and pin map are unknown (OI-24).
   - KiCad is not installed on this box.
 - **Commit.** `1d43f4d`.
+
+## 2026-11-04 - MCU alternatives survey (issue #3)
+
+- **Request.** The user asked 「このPGAてさ生のRP2040より高くない?」, then 「別のマイコンにしようかな」,
+  「候補を5つ出して」 and 「Issueにしといて」.
+- **Finding.**
+  - Price: the PGA2040 is ¥1,680; a bare RP2040 is ¥160 at Akizuki and $1.10 at LCSC.
+  - Every USB MCU queried is Extended at JLCPCB: RP2040, RP2350A, CH32V203C8/K8, STM32F072CB,
+    STM32G431CB, CH552T, ATmega32U4 and CH32V305RB. The bare RP2040 is therefore blocked by
+    D22, not by price.
+  - The flash W25Q128JVSIQ (C97521) and the crystal C9002 are Basic.
+  - The RP2350's core regulator needs a polarity-marked inductor. The recommended part,
+    AOTA-B201610S3R3-101-T (C42411119), is Extended with JLCPCB stock 1, and Akizuki has
+    none. Its "Hardware design with RP2350" guide warns that the inductor's orientation
+    matters.
+  - Akizuki's RP2350A 実装基板 (131106, ¥450) brings every pin to 2.54 mm.
+  - Within D13/D22, only the ESP32-S3-WROOM-1 module (117256, ¥800) remains, and it has no
+    PIO.
+- **Recommendation.** A bare RP2040 with one exception to D22, otherwise keep the PGA2040.
+  The user decides in issue #3. The PGA2040 is not to be bought before that.
+- **Verification.** Data read on 2026-11-04 with `tools/jlc_stock.py`, Akizuki product and
+  search pages, and the LCSC C2040 page. Nothing in the design changed.
+- **Incident.**
+  - Clicking Akizuki's 「かごに入れる」 in Chrome was refused by the permission classifier
+    (real-world transaction). The user adds items to the cart.
+  - An `rm -rf` of the task's `~/tmp/usb-power-hub/rp2040-price` was denied. It is left for
+    the user.
+- **Commit.** This journal entry only.
