@@ -248,3 +248,29 @@ Section 13 (board) only once verified.
   - The enclosure must clear F1's 18.3 mm height.
   - D6 may not survive a sustained over-voltage.
 - **Commit.** `d6d7c3d`.
+
+## 2026-11-03 - D26: how J1's current is declared (closes OI-25)
+
+- **Symptom.** The board draws about 0.21 A from J1, but the CH335F's default descriptor
+  declares self-powered, 100 mA (OI-25).
+- **Investigation.**
+  - The hub must stay self-powered. J2 and J3 are powered from J4, and as a bus-powered hub it
+    would offer DUTs only 100 mA.
+  - A self-powered hub may draw only one unit load from upstream. Raising its MaxPower
+    through the EEPROM (option a) would therefore be non-compliant in itself, and it adds a
+    part.
+  - Option (b) was feeding the logic from J4. It costs the COM port without J4. It takes
+    0.13 A from J4's advertisement, so a Default-only J4 could run no port. It also cuts F1's
+    40 °C margin from 0.16 A to 0.03 A.
+- **Decision.** D26 (Claude, delegated):
+  - The hub stays at its defaults.
+  - The RP2040 function declares bMaxPower 200 mA, bus-powered (REQ-HOST-08). Its share is
+    126 mA typical, 172 mA with every OP07 at its maximum.
+  - The board is specified for 500 mA upstream ports, not bus-powered hubs (product.md §9).
+  - V-HOST-01 reads the descriptors and requires J1 ≤ 0.30 A.
+- **Verification.** Rubric `.claude/goal-loop/oi-25-d26/rubric.md`, graded by a sonnet
+  rubric-verifier: 6 of 6 passed in round 1.
+- **Learning.** None new: the bare-number sweep rule was applied, and it found nothing stale.
+- **Residual risk.** The RP2040 share rests on a 30 mA estimate for the PGA2040 (OI-31). The
+  0.30 A pass limit in V-HOST-01 catches a larger draw.
+- **Commit.** `8f18bb2`.
