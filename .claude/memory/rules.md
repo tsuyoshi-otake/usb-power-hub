@@ -40,3 +40,12 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   the content. Verified 2026-11-03: `2a83480` (rename only) keeps
   `git log --follow -- design/circuit/CIRCUIT_DESIGN_Rev0.2.md` reaching
   `4dd10fb`.
+
+## Decision records
+
+- **"A consequence of decision Dn" is a claim to check, not a label.** List the
+  alternatives Dn still leaves open; if any remain, the item is a proposal
+  (Rev0.2 §14), and it must not close an open issue. Verified 2026-11-03: D12
+  ("two crystals, a consequence of D11") was withdrawn after an independent
+  verifier showed D11 forces only a 24 MHz hub clock; it is now P13 and OI-2 is
+  open again.

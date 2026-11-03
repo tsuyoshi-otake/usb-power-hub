@@ -35,7 +35,7 @@ This section answers "can firmware stop power to a port?": yes, and this is the 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
 | REQ-PORT-01 | **Default state OFF.** Each port is OFF at power-up, after any reset (power-on, brown-out, watchdog, `BOOT`), while the RP2040 is unprogrammed, and whenever firmware is not actively driving the enable. Implementation: EN_x has a resistor to GND, so an undriven GPIO means OFF. A firmware hang is turned into a reset by the RP2040 watchdog (timeout ≤ 500 ms, fed only from the main loop), so a hang also ends OFF. | Proposed | Gap in Rev0.1; P2 |
-| REQ-PORT-02 | **ON / OFF / CYCLE commands** on the control port, per Section 4.1. Every command returns exactly one terminal line: `OK` or `ERR <nn> <TEXT>`. `OFF` always succeeds. `ON` and `CYCLE` leave the port OFF whenever they return `ERR`. | Proposed | CLAUDE.md §10.3 "independently switchable under firmware control" (Settled); command set is new |
+| REQ-PORT-02 | **ON / OFF / CYCLE commands** on the control port, per Section 4.1. Every command returns exactly one terminal line: `OK` or `ERR <nn> <TEXT>`. `OFF` always succeeds. A command rejected for its form (`ERR 01`, `ERR 02`, `ERR 08`) is refused before any action and leaves both ports unchanged. `ON` and `CYCLE` that fail after validation (`ERR 04`, `ERR 06`, `ERR 07`) leave the port OFF. | Proposed | CLAUDE.md §10.3 "independently switchable under firmware control" (Settled); command set is new |
 | REQ-PORT-03 | **CYCLE discharge.** `PORT x CYCLE [ms]` switches OFF, waits until VBUS_x < **0.8 V** (vSafe0V), then holds OFF for `ms` (100 – 60000, default 1000), then switches ON. If VBUS_x has not fallen below 0.8 V within **1000 ms** of switching OFF, the port stays OFF and the command returns `ERR 06 DISCHARGE TIMEOUT`. The load switch's output discharge (150 Ω on the SY6280 candidate) does the discharging. | Proposed | P2, P7 |
 | REQ-PORT-04 | **Back-feed.** While a port is OFF its load switch blocks reverse current from the DUT. If VBUS_x stays above 0.8 V for more than 100 ms while OFF, the port reports `OFF:BACKFEED`, and `ON` / `CYCLE` are refused with `ERR 07 BACKFEED` until VBUS_x falls below 0.8 V. Enabling into a back-feeding DUT would let current flow backwards through the switch. | Proposed | OI-7, P2 |
 | REQ-PORT-05 | **Over-current and under-voltage.** The load switch limits current in hardware. In addition, firmware switches the port OFF and latches `FAULT:OVERCURRENT` if the measured port current exceeds its allotted current for more than 10 ms, and `FAULT:UNDERVOLTAGE` if VBUS_x is below 4.4 V for more than 10 ms while ON. Firmware never retries automatically. A fault is cleared only by `PORT x OFF` (acknowledge, port stays OFF) or `PORT x ON` (acknowledge and retry). | Proposed | P2, P7 |
@@ -85,7 +85,7 @@ Line-based ASCII, so a plain terminal (TeraTerm, PuTTY, `screen`) is a complete 
 |---|---|---|
 | `*IDN?` | `OK USB-POWER-HUB,<pcb rev>,<serial>,<fw version>` | — |
 | `STATUS?` | `OK CONTRACT=<9V\|5V\|NONE> IMAX=<mA> A=<state> B=<state> RESET=<POR\|BOD\|WDT\|BOOT>` | — |
-| `PORT <A\|B> ON` | `OK` | `ERR 04 INSUFFICIENT POWER` (OFF) · `ERR 07 BACKFEED` (OFF) |
+| `PORT <A\|B> ON` | `OK` | `ERR 02 BAD ARGUMENT` (unchanged) · `ERR 04 INSUFFICIENT POWER` (OFF) · `ERR 07 BACKFEED` (OFF) |
 | `PORT <A\|B> OFF` | `OK` (always; clears a FAULT) | — |
 | `PORT <A\|B> CYCLE [ms]` | `OK` once ON again | `ERR 02 BAD ARGUMENT` (unchanged) · `ERR 04` / `ERR 07` (OFF) · `ERR 06 DISCHARGE TIMEOUT` (OFF) |
 | `PORT <A\|B>?` | `OK ON` · `OK OFF` · `OK OFF:BACKFEED` · `OK FAULT:OVERCURRENT` · `OK FAULT:UNDERVOLTAGE` | — |
@@ -138,7 +138,7 @@ Line-based ASCII, so a plain terminal (TeraTerm, PuTTY, `screen`) is a complete 
 |---|---|---|---|
 | REQ-SAFE-01 | The shunt-bypass FETs are ON whenever nothing drives them, so the ladder sits at the HIGH range. | Settled | D9 |
 | REQ-SAFE-02 | Over-range forces the HIGH range in hardware, with no MCU in the path. | Settled | D4, G11 |
-| REQ-SAFE-03 | A bypass FET that fails open is detected by firmware (VBUS_x > 300 mV below V5P1 while the range state is HIGH) and the port is switched OFF within 10 ms; the MID shunt survives that window (80 mJ). | Proposed | Rev0.2 §7.3 |
+| REQ-SAFE-03 | A bypass FET that fails open is detected by firmware (VBUS_x > 300 mV below V5P1 while the range state is HIGH) and the port is switched OFF within 10 ms; the MID shunt survives that window (80 mJ). Detection floor: a stuck MID is detected above ≈ 142 mA; below that the fault is harmless (≈ 0.04 W at most, reading unaffected) and is documented, not detected (Rev0.2 §7.3). | Proposed | Rev0.2 §7.3 |
 
 ## 9. Documented limitations (for the user manual)
 

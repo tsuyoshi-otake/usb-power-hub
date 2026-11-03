@@ -116,7 +116,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D12 live in circuit §10)
+│                               #   created, decisions D1–D11 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -524,12 +524,12 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.2.md` Section 10 (D1–D12).
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.2.md` Section 10 (D1–D11).
 ECAD tool = **KiCad** (D2). Upstream power contract, measurement range, ranging
 architecture, sense topology, host interface, and ladder fail-safe state are
 closed there. D6 (one shared 12 MHz oscillator) is **superseded**: D10 (85 × 35
-mm, 4 layers) and D11 (USB2514B hub) were decided by the user on 2026-11-03, and
-D12 follows from D11 — separate 12 MHz (RP2040) and 24 MHz (hub) crystals.
+mm, 4 layers) and D11 (USB2514B hub) were decided by the user on 2026-11-03. The
+replacement clock arrangement is proposal P13, not a decision — OI-2 is open.
 
 ### 10.5 Still undecided — record the decision before layout starts
 
@@ -538,7 +538,8 @@ D12 follows from D11 — separate 12 MHz (RP2040) and 24 MHz (hub) crystals.
 - **Measurement:** sense topology B vs C (OI-19), the HIGH shunt (OI-20), and
   the accuracy target (OI-21), which also decides whether the ADC's internal
   reference suffices or a discrete reference is needed.
-- **Proposals P1–P12** in Rev0.2 §14 — each is a candidate decision awaiting
+- **Clocks** (OI-2): accept or replace P13 (separate 12 MHz and 24 MHz crystals).
+- **Proposals P1–P13** in Rev0.2 §14 — each is a candidate decision awaiting
   the user, not a decision.
 - USB VID/PID. Do not ship a squatted VID.
 - Whether the mockup's placement is kept at all. Assume not.
@@ -558,7 +559,7 @@ are **not** decisions until the user accepts them.
 | ID | Issue | Evidence |
 |---|---|---|
 | OI-1 | **Two USB-C plugs cannot be inserted at once.** Downstream receptacle pitch is 10.8 mm (shell gap 1.86 mm); plug overmolds are 12–14 mm. Growing the board (OI-13) makes a fix possible but does not itself fix it — J2/J3 must actually be moved apart, and the new pitch re-checked against a real overmould. *2026-11-03:* D10 provides the length; P9 proposes ≥ 18 mm centre pitch (REQ-MECH-02). Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.2 §14 P9 |
-| OI-2 | ~~No crystal for the USB hub.~~ Closed by decision (D6), **reopened 2026-11-03** when D11 chose the 24 MHz USB2514B, and **closed again by decision (D12)**: Y1 12 MHz crystal → RP2040 only, Y2 24 MHz crystal → USB2514B only. | Rev0.2 §6.3, §10 |
+| OI-2 | **No crystal for the USB hub.** Closed by decision (D6) on 2026-08-16 with one shared 12 MHz oscillator; **reopened 2026-11-03** because D11 chose the 24 MHz USB2514B, so the shared oscillator no longer works. P13 proposes Y1 12 MHz crystal → RP2040 only and Y2 24 MHz crystal → USB2514B only. Open until the user accepts a clock arrangement. | Rev0.2 §6.3, §10, §14 P13 |
 | OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D3/D4/D9): 3 ranges 20 mΩ / 2 Ω / 200 Ω, 2 bypass FETs + sense mux per channel, hardware comparator loop with a 2 µs budget, FETs default ON. *2026-11-03:* the stuck-range dissipation figures were corrected; the conclusion stands. | Rev0.2 §4, §7.3 |
 | OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D1): PD sink requests 9 V; buck to 5.10 V; 2 × 1 A needs ≥ 13.5 W upstream. *2026-11-03:* rails recounted at V5P1 (1.02 W, not 0.66 W) — 2 × 1 A still fits 13.5 W with 8 % margin. The Rp rule moved to OI-16, the 9 V assumption to OI-17. | Rev0.2 §7.1 |
 | OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *2026-11-03:* P12 proposes heat-set M2 inserts at 4 corners. | boss height = `GAP` = 1.6 |

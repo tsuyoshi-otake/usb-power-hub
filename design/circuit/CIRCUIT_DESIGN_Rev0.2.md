@@ -14,7 +14,7 @@ Read this with CLAUDE.md Section 11 (Open Issues) open. Companion documents:
 
 Rev0.1 closed OI-2, OI-3 and OI-4 by decision and opened OI-13. **Rev0.2** records the user's
 2026-11-03 decisions D10 (85 × 35 mm, 4 layers) and D11 (USB2514B) with their consequences
-(D6 superseded, D12), corrects three Rev0.1 calculations (§3.1 port voltage, §7.1 power budget,
+(D6 superseded and OI-2 reopened; the replacement clocks are proposal P13), corrects three Rev0.1 calculations (§3.1 port voltage, §7.1 power budget,
 §7.3 stuck-range dissipation), adds the noise budget (§4.1) and the clock tree (§6.3), and opens
 OI-16 – OI-22. Items Claude proposes but the user has not approved are in Section 14 and are
 **not** decisions.
@@ -48,7 +48,7 @@ Everything else below is derived by calculation in this document, or is explicit
 | Rd-only upstream, no PD | CH224K-class PD sink, request 9 V | Closes OI-4. 2 × 1 A at 5 V is 10 W; you cannot get that from a 5 V/500 mA contract |
 | 4 shunts (10 mΩ / 1 Ω / 100 Ω / 1 k), 1 FET per channel | 3 shunts (20 mΩ / 2 Ω / 200 Ω), 2 bypass FETs + sense mux per channel | Closes OI-3. 4 shunts with 1 switch is not a controllable ladder |
 | No comparator | Window comparator per channel, hardware range control | µs-scale ranging cannot be done by MCU polling |
-| 12 MHz crystal for MCU only, no hub clock | Rev0.1: one shared 12 MHz oscillator (D6). **Rev0.2: superseded by D11/D12** — Y1 12 MHz → RP2040, Y2 24 MHz → USB2514B | D11 chose a 24 MHz hub, so sharing is impossible |
+| 12 MHz crystal for MCU only, no hub clock | Rev0.1: one shared 12 MHz oscillator (D6). **Rev0.2: superseded by D11**; proposed replacement (P13): Y1 12 MHz → RP2040, Y2 24 MHz → USB2514B | D11 chose a 24 MHz hub, so sharing is impossible |
 | 2-terminal shunts | 4-terminal (Kelvin) for the 20 mΩ; Kelvin *land pattern* for the others | Closes OI-11 |
 | 6-layer stackup | 4 layers (D10) | OI-10 — no differential pair count justifies 6 |
 | 60 × 24 mm outline | 85 × 35 mm (D10) | OI-13 — 75 % component density is not routable; 36 % is comfortable |
@@ -364,8 +364,8 @@ picoamps, so its on-resistance does not matter — only its leakage and charge i
 | U11 / U21 | Current-sense amp, G = 50, zero-drift | Ch A / ch B |
 | U12 / U22 | Window comparator + range logic | Ch A / ch B |
 | U13 / U23 | Load switch, current-limited, reverse-blocking, output discharge | Ch A / ch B. Candidate SY6280AAC (P2) |
-| Y1 | 12 MHz crystal | RP2040 XOSC only (D12) |
-| Y2 | 24 MHz crystal | USB2514B XTALIN/CLKIN only (D12) |
+| Y1 | 12 MHz crystal | RP2040 XOSC only (P13, proposed) |
+| Y2 | 24 MHz crystal | USB2514B XTALIN/CLKIN only (P13, proposed) |
 | L1 | Buck inductor | Value with U2 |
 | F1 | Upstream protection | eFuse or PTC — OPEN, see OI-7 |
 | R100 / R200 | 20 mΩ, 2512, 4-terminal | HIGH shunt, ch A / ch B |
@@ -395,11 +395,12 @@ variants (`requirements/parts.md`).
 
 | Clock | Source | Load | Basis |
 |---|---|---|---|
-| 12 MHz | Y1 crystal on RP2040 XIN/XOUT | RP2040 XOSC only | D12; RP2040 PLLs derive 48 MHz USB and the system clock from it |
-| 24 MHz | Y2 crystal on USB2514B XTALIN/CLKIN | USB2514B only | D12; datasheet DS00001692A: "24 MHz crystal or external 24 MHz clock" |
+| 12 MHz | Y1 crystal on RP2040 XIN/XOUT | RP2040 XOSC only | P13 (proposed); RP2040 PLLs derive 48 MHz USB and the system clock from it |
+| 24 MHz | Y2 crystal on USB2514B XTALIN/CLKIN | USB2514B only | P13 (proposed); datasheet DS00001692A: "24 MHz crystal or external 24 MHz clock" |
 | 8.000 MHz | RP2040 GPOUT pin, clk_usb (48 MHz) ÷ 6 | ADS131M02 CLKIN | P6 (proposed). An integer divide, so no fractional-divider jitter; within the 0.3 – 8.4 MHz high-resolution range |
 
-Each oscillator now has exactly one load, so G9's fan-out check reduces to "one load each".
+Under P13 each oscillator has exactly one load, so G9's fan-out check reduces to "one load each".
+Until the user accepts P13 (or another arrangement), the clock tree is open — OI-2.
 The ADC clock was missing in Rev0.1 entirely (OI-22).
 
 ---
@@ -488,6 +489,12 @@ from the impossible 200 W.)* The danger is a *stuck* state. Hence:
   than 300 mV below V5P1 means current is flowing through a shunt that should be bypassed, and
   the port is switched OFF within 10 ms. The MID shunt must survive that window:
   8 W × 10 ms = 80 mJ (G12).
+  The check has a floor: a stuck MID ladder (≈ 2.11 Ω including the 80 mΩ load switch) drops
+  300 mV only above ≈ 142 mA. Below that the fault goes undetected but is harmless — the MID
+  shunt dissipates ≈ 0.04 W at most, and the reading stays right because the series current is
+  unchanged and the amplifier still senses RS1's taps; the DUT sees up to 0.3 V less. A stuck
+  LOW range (≈ 202 Ω) crosses 300 mV above ≈ 1.5 mA. Normal HIGH-range drop at 1 A is 118 mV
+  (§3.1), so the threshold leaves 182 mV of margin against false trips.
 
 ### 7.4 Resolution summary
 
@@ -556,13 +563,17 @@ are in Section 14.
 | D3 | Range = 0.1 µA – 1 A via 3 ranges (20 mΩ / 2 Ω / 200 Ω) + mandatory zero-calibration | 2026-08-16 | Rev0.1 design | OI-3 |
 | D4 | Auto-ranging is hardware (comparator → gate), MCU observes only | 2026-08-16 | Rev0.1 design | OI-3 |
 | D5 | Sense topology B — mux selects Kelvin taps | 2026-08-16 | Rev0.1 design | OI-11 (re-evaluation: OI-19) |
-| D6 | ~~One 12 MHz CMOS oscillator shared by RP2040 and hub, conditional on a 12 MHz hub~~ **SUPERSEDED 2026-11-03 by D11/D12** — the condition failed | 2026-08-16 | Rev0.1 design | ~~OI-2~~ |
+| D6 | ~~One 12 MHz CMOS oscillator shared by RP2040 and hub, conditional on a 12 MHz hub~~ **SUPERSEDED 2026-11-03 by D11** — the condition failed; the replacement is proposal P13 | 2026-08-16 | Rev0.1 design | ~~OI-2~~ |
 | D7 | Upstream control interface is CDC-ACM ×2 (control + stream), driverless | 2026-08-16 | User | new |
 | D8 | Rev0.1 sample rate target 32 kSPS | 2026-08-16 | Rev0.1 design | new |
 | D9 | Bypass FETs default ON (fail-safe to HIGH range) | 2026-08-16 | Rev0.1 design | new |
 | D10 | Board outline **85 × 35 mm, 4 layers** (Rev0.1 §11 option 2, "the low-risk choice") | 2026-11-03 | User | OI-13, OI-10 |
 | D11 | USB hub is **USB2514B** | 2026-11-03 | User | CLAUDE.md §10.5 hub choice; supersedes D6 |
-| D12 | Two independent clocks: Y1 12 MHz crystal → RP2040; Y2 24 MHz crystal → USB2514B. Consequence of D11, not a free choice: the hub accepts only 24 MHz | 2026-11-03 | Consequence of D11 | OI-2 (reopened by D11, closed by D12) |
+
+D12 was recorded here on 2026-11-03 as "a consequence of D11" and **withdrawn the same day**:
+D11 forces only a 24 MHz hub clock; using a second crystal rather than an oscillator or an
+RP2040-derived clock is a design choice, and the user has not made it. It is now proposal P13.
+The number D12 is not reused.
 
 ---
 
@@ -631,7 +642,8 @@ moving J2 and J3 apart, which the extra length now makes possible. Re-check it e
 Status as of Rev0.2 (2026-11-03):
 
 1. ~~Resolve OI-13.~~ **Done** — D10.
-2. ~~Choose the hub.~~ **Done** — D11; D6 superseded by D12.
+2. ~~Choose the hub.~~ **Done** — D11. D6 is superseded; the replacement clock arrangement
+   is proposal P13 and needs the user's acceptance (OI-2).
 3. Confirm every part against the JLCPCB assembly pool — **first pass done** in
    `requirements/parts.md` (2026-11-03). Two functions have no adequate candidate yet: the
    20 mΩ HIGH shunt (OI-20) and the 5 V-CM sense mux (OI-19). Recheck all stock before upload.
@@ -655,7 +667,7 @@ Status as of Rev0.2 (2026-11-03):
 | Rev | Date | Change |
 |---|---|---|
 | 0.1 | 2026-08-16 | Opened. D1–D9 closed. OI-2/3/4/11 closed by decision. OI-13 (board area) opened as blocking. No part confirmed; no capture started. |
-| 0.2 | 2026-11-03 | D10 (85 × 35 mm, 4 L) and D11 (USB2514B) by the user; D6 superseded; D12. OI-13, OI-10 closed; OI-2 reopened and closed. Corrected §3.1 (LDO supply, DUT voltage), §3.2 (TC figure), §7.1 (rails at input voltage), §7.3 (stuck-range physics), G12. Added §4.1 noise, §6.3 clocks, I<sub>IB</sub> and mux-supply constraints, G13–G15, Section 14 proposals. Shortlist moved to `requirements/parts.md` with assembly-pool stock. OI-16 – OI-22 opened. Still no capture. |
+| 0.2 | 2026-11-03 | D10 (85 × 35 mm, 4 L) and D11 (USB2514B) by the user; D6 superseded, replacement clocks proposed (P13). OI-13, OI-10 closed; OI-2 reopened. Corrected §3.1 (LDO supply, DUT voltage), §3.2 (TC figure), §7.1 (rails at input voltage), §7.3 (stuck-range physics), G12. Added §4.1 noise, §6.3 clocks, I<sub>IB</sub> and mux-supply constraints, G13–G15, Section 14 proposals. Shortlist moved to `requirements/parts.md` with assembly-pool stock. OI-16 – OI-22 opened. Still no capture. |
 
 ---
 
@@ -679,3 +691,4 @@ close.
 | P10 | BOOTSEL: SW1 reachable through a lid pinhole **and** a `BOOT` command | Pinhole recovers a bricked board; the command avoids opening anything in normal updates | OI-9 |
 | P11 | SWD on a Tag-Connect TC2030-NL footprint; test pads on VBUS_IN, VPD, V5P1, V3P3, V3P3A, VBUS_A, VBUS_B, GND | The footprint's alignment holes are the fixture datums OI-8 asks for | OI-8 |
 | P12 | Heat-set M2 inserts in the printed tub, 4 points (one per corner) | Meets the ≥ 4 mm engagement and ≥ 3-point rules of CLAUDE.md §7 on an 85 × 35 mm board | OI-5 |
+| P13 | Two independent clocks: Y1 12 MHz crystal → RP2040 XOSC only; Y2 24 MHz crystal → USB2514B XTALIN only | D11 needs a 24 MHz hub clock and the RP2040 reference design runs from 12 MHz, so no shared frequency remains. Alternatives: a 24 MHz CMOS oscillator for the hub (more cost, no load-capacitor tuning); or an RP2040 GPOUT 24 MHz into the hub's CLKIN (one crystal fewer, but the hub — and with it the RP2040's own upstream USB — would depend on firmware having started the clock, which a blank or bricked RP2040 has not). *To confirm before acceptance:* whether RP2040 USB boot accepts any XOSC other than 12 MHz | OI-2 |

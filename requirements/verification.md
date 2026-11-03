@@ -64,7 +64,8 @@ the widest overmould on hand.
   case, plus 10,000 random lines (random tokens, lengths 0 – 120, mixed terminators). It counts
   response lines and checks port state with `PORT x?` after each.
 - **Pass:** Exactly one response line per command line; each response matches the table;
-  after every `ERR` from `ON`/`CYCLE` the port is OFF.
+  after every `ERR 04` / `ERR 06` / `ERR 07` from `ON`/`CYCLE` the port is OFF; after every
+  `ERR 01` / `ERR 02` / `ERR 08` both ports are in the state they had before the command.
 - **Limits:** The script sees only the control port. It cannot see VBUS — V-PORT-03 does. It
   must first be run against a firmware build with a deliberately duplicated response line and
   shown to fail.
@@ -213,7 +214,9 @@ the widest overmould on hand.
 - **When:** Design review (G1, G12) + Bring-up
 - **Method:** Unpowered board: 4-wire resistance from V5P1 to the load-switch input of each
   channel. Then a fault-injection build that holds one bypass FET OFF while the range logic
-  reports HIGH, with a 100 mA load.
+  reports HIGH, run twice: with a 250 mA load (≈ 0.53 V drop, above the 300 mV threshold)
+  and with a 100 mA load (≈ 0.21 V, below it — the documented undetected region).
 - **Pass:** Unpowered ladder ≈ 38 mΩ (HIGH range: shunt + two FETs), not 2 Ω or 202 Ω;
-  in the fault-injection case the port switches OFF within 10 ms and the MID shunt is
-  undamaged (resistance unchanged within its tolerance).
+  at 250 mA the port switches OFF within 10 ms and the MID shunt is undamaged (resistance
+  unchanged within its tolerance); at 100 mA the port stays ON and the reported current
+  agrees with a reference meter within the REQ-MEAS-05 target.

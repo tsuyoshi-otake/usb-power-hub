@@ -110,7 +110,7 @@ as a warning level).
   battery-charging straps — hence G13/G14 and P3.
 - *To confirm:* the per-additional-port increment; strap levels; RBIAS value.
 
-### Clocks (D12)
+### Clocks (P13, proposed — OI-2)
 
 | Ref | MPN | LCSC | Package | Stock | Class | Checked | Note |
 |---|---|---|---|---:|---|---|---|
