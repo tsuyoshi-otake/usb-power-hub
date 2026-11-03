@@ -1,0 +1,997 @@
+{
+  "meta": {
+    "title": "JLCPCB 4-layer, 1.6 mm impedance-control stackups (outer 1 oz, inner 0.5 oz)",
+    "retrieved_utc": "2026-11-03",
+    "page_state": "https://jlcpcb.com/impedance renders the 4-Layer tables with the 1.6mm / outer 1oz / inner 0.5oz tab combination selected (the 'checked' buttons in the fetched HTML). Other thickness and copper-weight tabs exist on the page but their tables are not in the fetched HTML.",
+    "board_context": "usb-power-hub board: 100 x 72 mm, 4 layers, 1.6 mm, ENIG, green; quote page on 2026-11-03 showed 1 oz outer / 0.5 oz inner copper.",
+    "sources": [
+      {
+        "url": "https://jlcpcb.com/impedance",
+        "page_last_updated": null,
+        "retrieved": "2026-11-03",
+        "used_for": "all stackup layer tables; prepreg and core dielectric constants; solder-mask parameters"
+      },
+      {
+        "url": "https://jlcpcb.com/help/article/user-guide-to-the-jlcpcb-impedance-calculator",
+        "page_last_updated": "Sep 16, 2026",
+        "retrieved": "2026-11-03",
+        "used_for": "calculator parameters (plated copper thickness, etch delta), calculator impedance ranges"
+      },
+      {
+        "url": "https://jlcpcb.com/capabilities/pcb-capabilities",
+        "page_last_updated": null,
+        "retrieved": "2026-11-03",
+        "used_for": "board thickness tolerance (+/-10% >=1.0mm), impedance tolerance (+/-10% standard, +/-5% on request), default inner copper 0.5oz, track width tolerance +/-20%"
+      }
+    ],
+    "dielectric_constants": {
+      "prepreg": {
+        "7628": 4.4,
+        "3313": 4.1,
+        "1080": 3.91,
+        "2116": 4.16
+      },
+      "core": 4.6,
+      "source": "https://jlcpcb.com/impedance (table '1.Prepreg dielectric constant' and '3. Core dielectric constant')"
+    },
+    "solder_mask": {
+      "coating_above_substrate_mil": 1.2,
+      "coating_above_trace_mil": 0.6,
+      "coating_between_traces_mil": 1.2,
+      "dk": 3.8,
+      "source": "https://jlcpcb.com/impedance (table '2.Solder mask Parameters')",
+      "note": "Published for reference; NOT modelled by impedance.py."
+    },
+    "calculator_parameters": {
+      "external_copper_1oz_mil": 1.6,
+      "internal_copper_05oz_mil": 0.6,
+      "internal_copper_1oz_mil": 1.2,
+      "trace_top_width": "trace base width - 0.7 mil",
+      "impedance_range_single_ended_ohm": [
+        20,
+        90
+      ],
+      "impedance_range_differential_ohm": [
+        50,
+        150
+      ],
+      "core_material": "Nan Ya Plastics NP-155F (4 to 8 layers)",
+      "source": "user guide, Sep 16, 2026"
+    },
+    "default_stackup": {
+      "quote": "No requirement Stackup",
+      "source": "https://jlcpcb.com/impedance",
+      "note": "The first entry in the 4-layer 1.6 mm list is literally labelled 'No requirement Stackup'; its build-up is identical to JLC04161H-7628 (7628 0.21040 mm prepreg, 1.065 mm core)."
+    },
+    "thickness_tolerance": "+/-10% for board thickness >= 1.0 mm; for 1.6 mm the page gives a finished range 1.44-1.76 mm (capabilities page).",
+    "impedance_tolerance": "+/-10% standard; +/-5% on special request (capabilities page).",
+    "track_width_tolerance": "+/-20% (capabilities page).",
+    "derivations": "prepreg_*.dk values are the page's per-glass-style dielectric constants applied to each ply. *_mm and oz numbers are the page's own table values, not estimates."
+  },
+  "stackups": [
+    {
+      "id": "No requirement",
+      "ordinal_on_page": 1,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.065,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.1mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-7628",
+      "ordinal_on_page": 2,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.065,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.1mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-3313",
+      "ordinal_on_page": 3,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "3313",
+          "plies": 1,
+          "thickness_mm": 0.0994,
+          "dk": 4.1
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.265,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.3mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "3313",
+          "plies": 1,
+          "thickness_mm": 0.0994,
+          "dk": 4.1
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-1080",
+      "ordinal_on_page": 4,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.265,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.3mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-7628A",
+      "ordinal_on_page": 5,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.865,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.9mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-3313A",
+      "ordinal_on_page": 6,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "3313",
+          "plies": 1,
+          "thickness_mm": 0.107,
+          "dk": 4.1
+        },
+        {
+          "style": "3313",
+          "plies": 1,
+          "thickness_mm": 0.0994,
+          "dk": 4.1
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.065,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.1mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "3313",
+          "plies": 1,
+          "thickness_mm": 0.0994,
+          "dk": 4.1
+        },
+        {
+          "style": "3313",
+          "plies": 1,
+          "thickness_mm": 0.107,
+          "dk": 4.1
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-1080A",
+      "ordinal_on_page": 7,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.084,
+          "dk": 3.91
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.065,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.1mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.084,
+          "dk": 3.91
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-7628B",
+      "ordinal_on_page": 8,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.4,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.4mm H/HOZ without copper",
+        "core_supplied_with_copper": false
+      },
+      "prepreg_bottom": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-2116A",
+      "ordinal_on_page": 9,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.6,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.6mm H/HOZ without copper",
+        "core_supplied_with_copper": false
+      },
+      "prepreg_bottom": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-2116B",
+      "ordinal_on_page": 10,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.865,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.9mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-2116C",
+      "ordinal_on_page": 11,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.065,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.1mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-1080B",
+      "ordinal_on_page": 12,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.084,
+          "dk": 3.91
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.084,
+          "dk": 3.91
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.065,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.1mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.084,
+          "dk": 3.91
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.084,
+          "dk": 3.91
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-7628G",
+      "ordinal_on_page": 13,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.5,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.5mm H/HOZ without copper",
+        "core_supplied_with_copper": false
+      },
+      "prepreg_bottom": [
+        {
+          "style": "1080",
+          "plies": 1,
+          "thickness_mm": 0.0764,
+          "dk": 3.91
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-2116",
+      "ordinal_on_page": 14,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 1.265,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "1.3mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-7628E",
+      "ordinal_on_page": 15,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.6,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.6mm H/HOZ without copper",
+        "core_supplied_with_copper": false
+      },
+      "prepreg_bottom": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-2116D",
+      "ordinal_on_page": 16,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.7,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.7mm H/HOZ without copper",
+        "core_supplied_with_copper": false
+      },
+      "prepreg_bottom": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-7628F",
+      "ordinal_on_page": 17,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.25,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.25mm H/HOZ without copper",
+        "core_supplied_with_copper": false
+      },
+      "prepreg_bottom": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-2116E",
+      "ordinal_on_page": 18,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.865,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.9mm H/HOZ with copper",
+        "core_supplied_with_copper": true
+      },
+      "prepreg_bottom": [
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.1164,
+          "dk": 4.16
+        },
+        {
+          "style": "2116",
+          "plies": 1,
+          "thickness_mm": 0.124,
+          "dk": 4.16
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    },
+    {
+      "id": "JLC04161H-7628C",
+      "ordinal_on_page": 19,
+      "copper": {
+        "outer_mm": 0.035,
+        "outer_oz": 1,
+        "inner_mm": 0.0152,
+        "inner_oz": 0.5,
+        "bottom_mm": 0.035
+      },
+      "prepreg_top": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        }
+      ],
+      "inner": {
+        "l2_copper_mm": 0.0152,
+        "core_mm": 0.15,
+        "core_dk": 4.6,
+        "l3_copper_mm": 0.0152,
+        "core_label_on_page": "0.15mm H/HOZ without copper",
+        "core_supplied_with_copper": false
+      },
+      "prepreg_bottom": [
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.2104,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        },
+        {
+          "style": "7628",
+          "plies": 1,
+          "thickness_mm": 0.218,
+          "dk": 4.4
+        }
+      ],
+      "source_url": "https://jlcpcb.com/impedance"
+    }
+  ]
+}

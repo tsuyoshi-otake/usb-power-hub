@@ -269,9 +269,16 @@ hand-invented layer table. The mockup's dielectric thicknesses are fictional and
 MUST NOT be used.
 
 - Choose the JLCPCB stackup ID at design start and record it in the manifest.
+  **Chosen: JLC04161H-7628** (D27, 2026-11-03), named on the order. It was the only
+  named 4-layer stackup on the quote page without JLCPCB's special-stackup note,
+  which excludes Economic PCBA. Study: `design/experiments/stackup-impedance/`.
 - Compute USB 2.0 differential geometry **against that stackup**, using
-  JLCPCB's impedance calculator, before routing.
-- Order with the impedance-control option if HS eye margin depends on it.
+  JLCPCB's impedance calculator, before routing. Its differential calculation
+  returned no result on 2026-11-03, so D27's W 0.31 / S 0.15 mm is a model
+  value and stays provisional until that rerun.
+- Order with the impedance-control option if HS eye margin depends on it. D27
+  does not order it for the prototype: the D± path also runs through modules
+  and headers that it cannot control (OI-26), and FS is the fallback.
 
 Layer assignment (4 layers, D10): L1 signal + parts / L2 solid GND / L3 power
 pours + low-speed signals / L4 GND + low-speed. **L2 MUST remain unbroken under
@@ -310,7 +317,7 @@ current, impedance, creepage, or thermal calculation:
 |---|---:|
 | Signal trace width | 0.15–0.20 mm |
 | Trace spacing | ≥ 0.15 mm |
-| USB 2.0 differential | per JLCPCB calc for 90 Ω ±10 % |
+| USB 2.0 differential | 90 Ω ±10 %: W 0.31 / S 0.15 mm on L1 over L2 of JLC04161H-7628 (D27; model 90.4 Ω, provisional until JLCPCB's differential calc is rerun) |
 | VBUS trunk | sized for target current + margin; see OI-4 |
 | Via diameter / drill | 0.45 / 0.25 mm (0.60 / 0.30 mm where space allows) |
 | Copper to routed edge | ≥ 0.30 mm |
@@ -526,7 +533,7 @@ traced to a V-* entry in `requirements/verification.md`). This list is the
 summary; where the two differ, `product.md` wins and this list is the defect.
 
 - Board thickness 1.6 mm, ENIG. **Outline 100 × 72 mm, 4 layers (D10, D24),** inside
-  100 × 100 mm.
+  100 × 100 mm. Stackup JLC04161H-7628, no impedance control for the prototype (D27).
   JLCPCB machine-places Top SMD only; the large Akizuki parts are hand-soldered
   (D13, REQ-MFG-01).
 - **Sourcing (D13, user):** machine-placed parts are JLCPCB Basic and in stock;
@@ -552,7 +559,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D26; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D27; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -566,7 +573,9 @@ withdrawn and not reused).
   and the adoption of P9–P12. After D22, Claude recorded D23: the PGA2040 RP2040
   module and two MCP3208 ADCs, superseding D16's STM32F103. Within D24's limit, Claude
   chose the 100 × 72 mm outline from the OI-23 study, and D25 put the MF-R300 input fuse
-  on J4 (OI-29), and D26 set how J1's current is declared (OI-25). Each is labelled
+  on J4 (OI-29), and D26 set how J1's current is declared (OI-25). D27 named the
+  JLC04161H-7628 stackup and the provisional USB pair geometry, without impedance
+  control for the prototype. Each is labelled
   "Claude (delegated)", and the user may revert any one.
 
 ### 10.5 Still undecided — record the decision before layout starts

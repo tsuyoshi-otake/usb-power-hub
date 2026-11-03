@@ -82,6 +82,10 @@ prices read on 2026-11-03. Below an 11,000 yen subtotal Akizuki charges 550 yen 
 - **JLCPCB PCB price and shipping:** `cart.jlcpcb.com/quote`, read on 2026-11-03. Settings: FR4
   TG135, 4 layers, 100 × 72 mm, 5 pcs, 1.6 mm, green, 1 oz outer / 0.5 oz inner, Industrial,
   3–4 day build, ship to Japan. No order was placed.
+- **Stackup and impedance control:** the same quote page, read in a browser on 2026-11-03 for
+  D27 (`design/experiments/stackup-impedance/`). "Specify Stackup: Yes" with JLC04161H-7628
+  named left the PCB at $25.40 ($8.00 + $17.40 ENIG). "Impedance Control ±10 %" added $33.08
+  and auto-selected "Confirm Production file" at $1.05: $59.53 in total.
 - **JLCPCB PCBA fees:** `jlcpcb.com/help/article/pcb-assembly-price`, "Last updated on Oct 22,
   2026", read on 2026-11-03.
 - **Component prices:** `jlc_prices.json`, fetched on 2026-11-03 (its `checked_utc`) from the
@@ -116,11 +120,16 @@ prices read on 2026-11-03. Below an 11,000 yen subtotal Akizuki charges 550 yen 
   - This board avoids most of them: parts on Top only, nothing below 0402, no IC pitch below
     0.4 mm, 2 boards (at most 50), a single board rather than a V-cut panel, 1.6 mm and 4
     layers, and no gold fingers, castellations or edge plating.
-  - Two items remain open:
-    - The post names "special stack-ups". CLAUDE.md §5.1 requires a named JLCPCB stackup and
-      possibly impedance control, and whether that counts is not known.
-    - Whether green mask, 1.6 mm and ENIG form an Economic combination is not confirmed.
-  - If either forces Standard, the order is the Standard case: about 15,100 yen more.
+  - The post names "special stack-ups". That item is settled by D27: on the quote page
+    (browser, 2026-11-03) JLC04161H-7628 was the only one of 18 named 4-layer stackups
+    without the note "This is a special stackup, and it doesn't support economic PCB
+    assembly", and naming it left the PCB price unchanged.
+  - Impedance control is **not included**. D27 does not order it for the prototype; it would
+    add $33.08 plus $1.05 for the auto-selected "Confirm Production file". Whether it would
+    change the assembly class is unseen.
+  - One item remains open: whether green mask, 1.6 mm and ENIG form an Economic combination
+    is not confirmed.
+  - If it forces Standard, the order is the Standard case: about 15,100 yen more.
 - **The real BOM.** The schematic is not captured. The 0402 count and the 27 Ω pair are
   estimates, and OI-31 may remove or add parts. The 0402 line is cents; an added active part
   is not.

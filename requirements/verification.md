@@ -325,7 +325,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Count mounting points and measure thread engagement or insert depth.
   - Insert and remove a cable 50 times per connector module.
 - **Pass:**
-  - 100.0 × 72.0 mm ± 0.2 mm, 4 layers per the fab drawing.
+  - 100.0 × 72.0 mm ± 0.2 mm, 4 layers, stackup JLC04161H-7628 per the fab drawing and the
+    order.
   - Both plugs seat fully together.
   - ≥ 3 mounting points, one near each connector end; ≥ 4 mm engagement or heat-set inserts.
   - After 50 cycles, no solder-joint cracking and no module movement.
