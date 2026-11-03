@@ -138,10 +138,12 @@ HAND = {  # name: (w, h, under-rects in local frame)
     "CH335F": (38.5, 10.2, CH335_UNDER),
     "DIP16": (9.8, 20.85, []),            # DIP-16_W7.62mm courtyard
     "MAU104": (20.0, 6.6, []),            # 19.5 x 6.1 SIP body, courtyard
+    "PTC": (13.0, 5.0, []),               # MF-R300 radial 12.0 x 3.0 body, leads 5.1 mm
 }
 HAND_PARTS = {  # designator: kind
     "J1": "USBC", "J2": "USBC", "J3": "USBC", "J4": "USBC",
     "U1": "PGA2040", "U6": "CH335F", "U7": "DIP16", "U17": "DIP16", "U5": "MAU104",
+    "F1": "PTC",
 }
 
 
@@ -177,6 +179,7 @@ PLACE = {
     "U6": (89.3, 19.0, 90),                            # CH335F, right edge, upstream end at J1
     "U5": (82.0, 30.0, 90),                            # MAU104, digital side
     "U1": (30.0, 50.0, 0),                             # PGA2040
+    "F1": (1.0, 50.5, 0),                              # J4 input fuse, ahead of D6 (D25)
 }
 KEEPOUT = {  # mounting holes (heat-set M2, D21) and the USB corridor
     "MH1": (0.0, 0.0, 7.0, 7.0), "MH2": (93.0, 0.0, 7.0, 7.0),
@@ -193,7 +196,7 @@ REGIONS = {  # top-side SMD regions: name -> ((x, y, w, h), [blocks])
     "R_ADCS": ((55.5, 40.5, 20.1, 7.0), ["ADCSUP"]),
     "R_V12": ((76.5, 19.0, 12.3, 10.5), ["V12"]),
     "R_TVS1": ((76.5, 50.5, 12.3, 6.0), ["TVS1"]),
-    "R_PWR4": ((7.5, 50.5, 20.0, 6.0), ["TVS4"]),
+    "R_PWR4": ((14.5, 50.5, 13.0, 6.0), ["TVS4"]),
     "R_LDO": ((51.5, 50.0, 14.0, 21.5), ["LDO", "PGASUP", "OC"]),
     "R_F1": ((1.0, 8.5, 3.0, 3.0), ["FID"]),
     "R_F2": ((96.0, 8.5, 3.0, 3.0), ["FID2"]),

@@ -35,18 +35,18 @@ a lower bound on the board area any layout would need.
 
 | K (region area per courtyard area) | Needed | Against 85 × 35 (2,975 mm²) |
 |---:|---:|---:|
-| 1.0 (no routing space at all) | 3,715 mm² | 1.25 × |
-| 1.4 | 4,364 mm² | 1.47 × |
-| 1.6 (planning value) | 4,689 mm² | 1.58 × |
-| 2.0 | 5,338 mm² | 1.79 × |
+| 1.0 (no routing space at all) | 3,780 mm² | 1.27 × |
+| 1.4 | 4,429 mm² | 1.49 × |
+| 1.6 (planning value) | 4,754 mm² | 1.60 × |
+| 2.0 | 5,403 mm² | 1.82 × |
 
-K = 1.0 is physically impossible to build, and it still needs 25 % more area than the board
+K = 1.0 is physically impossible to build, and it still needs 27 % more area than the board
 has. That makes the K = 1.0 row a proof, not an estimate.
 
 The inputs:
-- **Hand-soldered: 2,574 mm².** Four USB-C modules at 20 × 15 mm (Akizuki drawing), the
+- **Hand-soldered: 2,639 mm².** Four USB-C modules at 20 × 15 mm (Akizuki drawing), the
   PGA2040 at 21 × 21 mm, the CH335F module at 38.5 × 10.2 mm, two DIP16 at 9.8 × 20.85 mm,
-  and the MAU104 at 20 × 6.6 mm.
+  the MAU104 at 20 × 6.6 mm, and the F1 input fuse at 13 × 5 mm (MF-R300, D25).
 - **SMD courtyards: 1,649 mm².** This includes the four hand-soldered shunts (133 mm²). The
   count is 138 × 0402, 41 × SOT-23, 9 × SOIC-8, and the rest as listed in the script.
 - **Space under modules: 704 mm²,** all of it credited: the parts no taller than 1.5 mm would
@@ -79,7 +79,7 @@ gives 1,516 mm² excluding the shunts.
 - the MAU104, 6.4 mm from the nearest ADC.
 
 **Back edge:**
-- PWR IN (J4) at the left and HOST (J1) at the right;
+- PWR IN (J4) at the left, with the input fuse F1 in front of it, and HOST (J1) at the right;
 - the PGA2040 between them, with the LDO and the OC comparator next to it.
 
 Under the modules: the port-side parts (discharge FET, port capacitor, CC ESD, Rp) sit under

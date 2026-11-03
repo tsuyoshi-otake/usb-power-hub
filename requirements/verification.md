@@ -155,8 +155,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - **When:** Bench (one channel hand-built from the same parts)
 - **Method:**
   - Build one mirror (OP07CDR on 0/12 V, AO3401A, R1 100 Ω, R_OUT 2.4 kΩ, pedestal 1 MΩ from
-    8 V) on the 0.1 Ω shunt. Sweep 0 → 1.2 A at J4 = 4.75 V and 5.25 V, and measure the OP07
-    output and gate voltage.
+    8 V) on the 0.1 Ω shunt. Sweep 0 → 1.2 A from a supply at 4.59 V (J4 = 4.75 V less F1's
+    0.16 V at 2 A, D25) and at 5.25 V, and measure the OP07 output and gate voltage.
   - Apply a 0.1 → 1 A step and look for ringing.
   - Pulse R_M with 2.35 W for 10 ms, 100 times, and remeasure it.
 - **Pass:**
@@ -371,3 +371,18 @@ pass counts. Entries that rely on a script note this under *Limits*.
     its tolerance afterwards.
   - At 0.5 mA, which is below the 1 mA detection floor, the port may stay ON and the
     dissipation stays below 1 mW.
+
+### V-SAFE-02 — J4 input fuse
+- **Covers:** REQ-SAFE-04
+- **When:** Design review (F1 ahead of D6 in the schematic and layout) + Bring-up
+- **Method:**
+  1. Both ports ON into electronic loads at 1.1 A each (2.2 A through F1), J4 from a 3.0 A
+     source, for 30 min at room temperature. Log V_J4 and the voltage across F1.
+  2. Ports OFF. Feed J4 from a bench supply at 5.0 V limited to ≥ 6 A (F1's trip current)
+     and short VBUS_IN to GND. Record the current until it falls.
+  3. Let F1 cool for 1 h and measure its resistance.
+- **Pass:**
+  - Step 1: no trip; F1's drop ≤ 0.18 V (R1max 0.08 Ω at 2.2 A).
+  - Step 2: the current falls below 0.5 A within 60 s, and no copper, module or part is
+    discoloured.
+  - Step 3: ≤ 0.08 Ω.

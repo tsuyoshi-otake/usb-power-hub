@@ -15,8 +15,8 @@ the host PC over a plain COM port.
   - `HOST` (J1) carries data and logic power from the PC.
   - `PWR IN` (J4) is a power-only 5 V input that feeds the ports. Its USB-C current
     advertisement is read and enforced.
-  - There is no USB-PD and no port regulator: the port voltage is J4's minus up to 0.32 V
-    at 1 A.
+  - There is no USB-PD and no port regulator: the port voltage is J4's minus up to 0.40 V
+    at 1 A (0.48 V when the other port also draws 1 A; the input fuse is shared).
 - **Downstream:** two USB-C receptacles (`OUT A`, `OUT B`), each switched on and off
   independently by firmware. They are OFF at power-up and after any reset (REQ-PORT-01),
   and offer Default USB power (500 mA), with a hardware over-current trip at 1.16 A.
@@ -32,7 +32,8 @@ the host PC over a plain COM port.
   $17.40 at the two sizes. Recheck the live quote before ordering.
   - JLCPCB machine-places the small parts, all JLCPCB **Basic**.
   - You hand-solder the large parts, all bought from **Akizuki**: four USB-C modules,
-    the hub module, the RP2040 module, two DIP16 ADCs, the 12 V module and two shunts.
+    the hub module, the RP2040 module, two DIP16 ADCs, the 12 V module, two shunts per
+    port and the input fuse.
   - This is the sourcing rule D13. D22 excludes Preferred Extended parts too, so the
     D+/D− lines of J1–J3 have no ESD protection (`requirements/product.md` §9).
 

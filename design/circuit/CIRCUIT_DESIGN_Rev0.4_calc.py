@@ -33,6 +33,8 @@ CN = {"LOW": 330e-12, "MID": 330e-12, "HIGH": 220e-12}
 RDS = 0.060                   # AO3401A R_DS(on) max at -4.5 V
 RSW = 2 * RDS                 # back-to-back port switch
 RWIRE = 0.040                 # traces, headers and receptacle, estimate
+RF1 = 0.080                   # F1 MF-R300 R1max (1 h after reflow or trip); Rmin 0.020
+IHOLD_F1 = {23: 3.00, 40: 2.49, 50: 2.31}   # F1 hold current vs ambient (Bourns derating)
 VTH = 2.80                    # LM393 up-range / OC threshold at the amp output
 VINJ, RINJ = 8.0, 1e6         # pedestal injection (U4 CJ431 8 V through 1 Mohm)
 VOS = 150e-6                  # OP07D max V_os, used as a bound (OP07C has no max)
@@ -104,15 +106,29 @@ for r in ("LOW", "MID"):
     i = 5.0 / (SPAN[r] + RSW + RWIRE)
     print(f"stuck {r}: I={i:.4g} A  P({RS[r]:g} ohm)={i*i*RS[r]:.3g} W")
 
-print("\n== Sec. 4 / Sec. 7.2 DUT voltage at the port on HIGH")
-for i in (0.5, 1.0):
-    drop = i * (RSW + SPAN["HIGH"] + RWIRE)
-    print(f"I={i} A drop={drop:.3f} V  port at J4 5.00 V={5-drop:.3f}  at 4.75 V={4.75-drop:.3f}")
+print("\n== Sec. 3.1 / Sec. 7.2 DUT voltage at the port on HIGH (F1 shared, at R1max)")
+for i, other in ((0.5, 0.0), (1.0, 0.0), (1.0, 1.0)):
+    drop = i * (RSW + SPAN["HIGH"] + RWIRE) + (i + other) * RF1
+    print(f"I={i} A, other port {other} A: drop={drop:.3f} V  port at J4 5.00 V={5-drop:.3f}"
+          f"  at 4.75 V={4.75-drop:.3f}")
+print(f"4.75 V at the port at 0.5 A needs J4 >= {4.75 + 0.5*(RSW+SPAN['HIGH']+RWIRE+RF1):.3f} V")
 
 print("\n== Sec. 3.2 mirror FET gate headroom at HIGH full scale 1 A (|V_GS(th)| 1.3 V, OP07 V_OL 3.0 V)")
 for vj4 in (5.0, 4.75):
-    gate = vj4 - 1.0 * (RSW + RS["HIGH"] + RWIRE) - 1.3
-    print(f"J4={vj4}: gate~{gate:.3f} V  headroom={gate-3.0:.2f} V")
+    for other in (0.0, 1.0):
+        src = vj4 - (1.0 + other) * RF1 - 1.0 * (RSW + RS["HIGH"] + RWIRE)
+        gate = src - 1.3
+        print(f"J4={vj4}, other port {other} A: source {src:.3f} V gate~{gate:.3f} V"
+              f"  headroom={gate-3.0:.2f} V")
+print(f"without F1: headroom {5.0-1.0*(RSW+RS['HIGH']+RWIRE)-1.3-3.0:.2f} V at J4 5.0,"
+      f" {4.75-1.0*(RSW+RS['HIGH']+RWIRE)-1.3-3.0:.2f} V at J4 4.75")
+print(f"V-MEAS-00 low supply: J4 4.75 V less F1 at 2 A = {4.75-2*RF1:.2f} V")
+
+print("\n== Sec. 7.2 F1 hold margin and dissipation (both ports just below the OC trip)")
+i_f1 = 2 * IT["HIGH"]
+for t, ih in IHOLD_F1.items():
+    print(f"{t} C: I_hold {ih:.2f} A vs {i_f1:.2f} A -> margin {ih - i_f1:+.2f} A")
+print(f"F1 dissipation at {i_f1:.2f} A and R1max: {i_f1*i_f1*RF1:.2f} W")
 
 print("\n== Sec. 3.3 ADC timing and stream (2 x MCP3208, shared CLK/CS/DIN, one DOUT each)")
 t_conv = CLK_PER_CONV / FCLK + (T_SAMPLE - 1.5 / FCLK)

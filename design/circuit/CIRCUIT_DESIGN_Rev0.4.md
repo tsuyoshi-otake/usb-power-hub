@@ -112,9 +112,9 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
  J4 (Akizuki USB-C module, power only)
    CC1,CC2 ── Rd 5.1 kΩ ×2 to GND ── 1 kΩ ── U17 CH3, CH4    (read J4's advertisement)
    CC1,CC2 ── D4 PSM712 (ESD)
-   VBUS ── D6 SMBJ6.5CA ── 22 µF ── VBUS_IN ──┬── divider 33k/15k ── U7 CH4  (V_J4)
-                                              ├── port A path (below)
-                                              └── port B path
+   VBUS ── F1 MF-R300 ── D6 SMBJ6.5CA ── 22 µF ── VBUS_IN ──┬── divider 33k/15k ── U7 CH4  (V_J4)
+                                                            ├── port A path (below)
+                                                            └── port B path
 
  port x path (x = A, B; designators shown for A — B: U/RS +10, Q +20):
    VBUS_IN ── Q10 ─┐┌─ Q11 ── VSUP_A ── RS10 R_H ── RS11 R_M ── RS12 R_L ── VBUS_A ── 10 µF ── J2 VBUS
@@ -140,16 +140,18 @@ the supply side of the shunt they would disturb. The only things on VBUS_x are t
 capacitor, the discharge FET, and the LOW amplifier's +IN through 10 kΩ. That is why VBUS_x
 has no voltage divider and no TVS: either would add a leakage that the LOW range measures.
 
-**Port voltage at the DUT.** The path has the switch (2 × 60 mΩ max), R_H (0.1 Ω), the
-MID-bypass FET (60 mΩ max) and about 40 mΩ of copper and module wiring, 0.32 Ω in total:
+**Port voltage at the DUT.** Each port's path has the switch (2 × 60 mΩ max), R_H (0.1 Ω),
+the MID-bypass FET (60 mΩ max) and about 40 mΩ of copper and module wiring, 0.32 Ω in total.
+F1 (0.08 Ω at R1max, D25) is shared by both ports, so its drop depends on the sum:
 
 | Load | Drop | Port, J4 = 5.00 V | Port, J4 = 4.75 V |
 |---:|---:|---:|---:|
-| 0.5 A | 0.16 V | 4.84 V | 4.59 V |
-| 1.0 A | 0.32 V | 4.68 V | 4.43 V |
+| 0.5 A, other port off | 0.20 V | 4.80 V | 4.55 V |
+| 1.0 A, other port off | 0.40 V | 4.60 V | 4.35 V |
+| 1.0 A, other port at 1.0 A | 0.48 V | 4.52 V | 4.27 V |
 
 USB 2.0 asks for ≥ 4.75 V at a downstream port. This board meets that only at 0.5 A from a
-source at ≥ 4.91 V. It is an instrument port, not a compliant hub port, and
+source at ≥ 4.95 V (≥ 4.91 V without F1). It is an instrument port, not a compliant hub port, and
 `requirements/product.md` §9 states this as a limitation. Rev0.2 regulated the port to
 5.10 V and avoided this, but its buck is Extended.
 
@@ -158,8 +160,11 @@ active CC pin's voltage across 5.1 kΩ shows the advertised current: Default 0.2
 1.5 A 0.70–1.16 V, 3.0 A 1.31–2.04 V (USB Type-C vRd ranges). The ADC resolves this
 trivially. Firmware uses it for the budget rule in §7.2. **J4 MUST be 5 V.** A source that
 puts more than 5.5 V on VBUS without a PD contract is out of specification. D6 (SMBJ6.5CA,
-clamping at 11.2 V) protects against transients, not against a wrong supply. An input fuse
-is OI-29.
+clamping at 11.2 V) protects against transients, not against a wrong supply. **F1**
+(MF-R300: 3.00 A hold, 6.00 A trip, 30 V) sits ahead of D6 (D25). A short on VBUS_IN, or a
+source above D6's breakdown that D6 crowbars, then ends with F1 tripped rather than with
+burned copper. D6 itself may not survive a sustained over-voltage. V_J4 is measured after
+F1, so firmware sees F1's drop and its trip.
 
 ### 3.2 Measurement front end (one channel shown; ×2)
 
@@ -199,10 +204,13 @@ GND), with the inputs at the ~5 V port common mode:
   from each rail. Applied to 0 / 12 V, that gives 2–10 V. The 4.4–5.25 V inputs sit inside it.
   **This rail-relative extrapolation is an assumption**: OI-27.
 - *Mirror FET gate:* the gate has to sit about |V<sub>GS(th)</sub>| (≤ 1.3 V) below the
-  source. At HIGH full scale (1 A) the source is at 4.74 V (J4 = 5.00 V), so the gate is
-  ≈ 3.44 V. With J4 = 4.75 V it is ≈ 3.19 V. The OP07 output low limit is extrapolated as
-  3.0 V (±12 V into 10 kΩ at ±15 V), which leaves 0.19–0.44 V of headroom. This is tight
-  and is part of OI-27.
+  source. At HIGH full scale (1 A), with F1 at R1max and the other port off, the source is
+  at 4.66 V (J4 = 5.00 V), so the gate is ≈ 3.36 V. With J4 = 4.75 V it is ≈ 3.11 V, and
+  ≈ 3.03 V when the other port also draws 1 A through the shared F1. The OP07 output low
+  limit is extrapolated as 3.0 V (±12 V into 10 kΩ at ±15 V), which leaves 0.03–0.36 V of
+  headroom (0.19–0.44 V without F1). The 0.03 V corner is J4 at its 4.75 V minimum with
+  both ports at full scale. This is tight and is part of OI-27; V-MEAS-00 tests it at
+  4.59 V.
 - *Gate safety:* on a 0 / 12 V supply the gate-source voltage stays between about −5 V and
   +7 V, inside AO3401A's ±12 V rating. A ±12 V supply (MAU108) was rejected because the
   gate could then see −17 V.
@@ -503,7 +511,7 @@ better choice even in Rev0.2 once D10 removed the area objection (OI-19).
 
 | Net | From | Voltage | Feeds |
 |---|---|---|---|
-| VBUS_IN | J4 VBUS via D6 | 5 V (source) | Port switches, V_J4 divider |
+| VBUS_IN | J4 VBUS through F1 (D6 to GND) | 5 V (source) less F1's drop, ≤ 0.16 V at 2 A | Port switches, V_J4 divider |
 | VSUP_A / VSUP_B | Port switch output | ≈ VBUS_IN | Ladder supply side, mirror R1s |
 | VBUS_A / VBUS_B | Ladder load side | ≈ VBUS_IN − 0.32 V at 1 A | J2 / J3 VBUS, port C, discharge |
 | V5L | J1 VBUS via D5 | 5 V (host) | CH335F, LM393 ×3, MAU104, AMS1117, V5A, SPI level-shifter pull-ups |
@@ -552,6 +560,7 @@ numbered at capture.
 | D1, D2, D3 | ESD on J1 / J2 / J3 CC1, CC2 (D+/D− unprotected, D22) | PSM712-LF-T7 (C32677) | Basic |
 | D4 | ESD on J4 CC1, CC2 | PSM712-LF-T7 (C32677) | Basic |
 | D5, D6 | TVS on J1 / J4 VBUS | SMBJ6.5CA (C7420377) | Basic |
+| F1 | J4 input resettable fuse, ahead of D6 | MF-R300 (Akizuki g112630) | Hand (radial, 12.0 × 3.0 mm body, 18.3 mm tall) |
 | D10, D11 | Port A LED green / red | KT-0805G (C2297) / NCD0805R1 (C84256) | Basic |
 | D12, D13 | Port B LED green / red | same | Basic |
 | Y2 | 12 MHz → CH335F | X322512MSB4SI (C9002) | Basic |
@@ -636,6 +645,11 @@ misdeclared. It is OI-25, with its options listed there.
   J4's advertised current for > 50 ms, the port drawing more is switched OFF and latched as
   `FAULT:BUDGET`. This catches a DUT that draws more than the 500 mA it was offered.
 - `STATUS?` reports which advertisement J4 shows.
+- **F1 (D25).** The most current F1 carries below the two OC trips is 2 × 1.16 A ≈ 2.33 A.
+  F1 holds 3.00 A at 23 °C and 2.49 A at 40 °C ambient (Bourns derating chart), and it
+  dissipates 0.43 W at 2.33 A and R1max. At 50 °C (2.31 A) both ports held just below
+  their trips could trip F1. That failure is safe: both ports lose power, and firmware sees
+  V_J4 fall.
 
 ### 7.3 Fail-safe
 
@@ -653,7 +667,7 @@ starves the DUT and dissipates in a 0805.
 
 | Lost or reduced | Rev0.2 | Rev0.4 (Rev0.3 where different) | Recorded as |
 |---|---|---|---|
-| Regulated port voltage | 5.10 V | J4 voltage minus ≤ 0.32 V | product.md §9 |
+| Regulated port voltage | 5.10 V | J4 voltage minus ≤ 0.40 V at 1 A (≤ 0.48 V with both ports at 1 A, F1 shared) | product.md §9 |
 | Power from the host alone | PD 9 V from J1 | A second cable (J4) is required for port power | REQ-PWR-01 |
 | Port voltage measurement and back-feed detection | ADC on VBUS_A/B | None (would be measured as load current); CYCLE discharge is timed | REQ-PORT-03, REQ-PORT-04 |
 | Accuracy at the bottom of MID/HIGH | 24-bit | 12-bit: ≤ 7.8 % of reading at 14.9 mA | REQ-MEAS-05 |
@@ -759,7 +773,8 @@ appear here.
 | D21 | Rev0.2 proposals adopted: P9 (≥ 18 mm port pitch; the 20 mm-wide modules side by side meet it), P10 (BOOT command + lid pinhole; **amended by D23:** the RP2040 ROM USB bootloader, where Rev0.3 had a flash DFU bootloader), P11 (TC2030-NL + test pads; SWD is now for debug only), P12 (heat-set M2 inserts, 4 corners) | 2026-11-03 | Claude (delegated) | OI-9 (design); OI-1, OI-5, OI-8 still need physical checks |
 | D22 | **Basic parts only:** no Preferred Extended part either. STM32F103C8T6 and SRV05-4 are removed, accepting the costs Claude stated beforehand: an Akizuki RP2040 module plus a DIP ADC, a lower sample rate, and no D± ESD on J1–J3. The user answered 「うん、okだよ」 and then selected 「外して Basic のみにする」 | 2026-11-03 | **User** | OI-30 |
 | D23 | MCU = **PGA2040** (RP2040 module, Akizuki); ADC = **2 × MCP3208-CI/P** (Akizuki DIP16) at V<sub>DD</sub> 5 V, sharing CLK/CS/DIN, sample phase stretched by the PIO, 14.0 kSPS with both ports sampled at once; PSM712 on J1–J3 CC, D± unprotected; RP2040 ROM USB bootloader; hold pull-ups 10 kΩ; level shifters on EVT and the ADC bus. Supersedes D16; amends D17, D19, D21. *Revert → no Basic-only MCU remains; reverting D22 instead restores Rev0.3* | 2026-11-03 | Claude (delegated) | — (opens OI-31) |
-| D24 | Board outline **100 × 72 mm**, 4 layers; amends D10's 85 × 35 mm. The OI-23 study (`design/experiments/oi-23-placement/`) shows that Rev0.4 needs at least 3,715 mm² (no routing space, every low part credited under a module), against 2,975 mm². The user's condition, 「100x100未満ならいいんだっけ」, is that the outline stays within JLCPCB's 100 × 100 mm base price tier. JLCPCB instant quote, 2026-11-03, 4 layers, 5 pcs, default options: $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; $30.80 at 130 × 72 mm (a $25 engineering fee appears). ENIG adds $16.90 at 85 × 35 and $17.40 at 100 × 72 mm. The size inside the tier is Claude's choice. *Revert → no 85 × 35 layout exists; a smaller outline needs a new study run* | 2026-11-03 | **User** (condition) + Claude (delegated, size) | OI-23 (area only; outlines still open) |
+| D24 | Board outline **100 × 72 mm**, 4 layers; amends D10's 85 × 35 mm. The OI-23 study (`design/experiments/oi-23-placement/`) shows that Rev0.4 needs at least 3,715 mm² (no routing space, every low part credited under a module; 3,780 mm² once D25 added F1), against 2,975 mm². The user's condition, 「100x100未満ならいいんだっけ」, is that the outline stays within JLCPCB's 100 × 100 mm base price tier. JLCPCB instant quote, 2026-11-03, 4 layers, 5 pcs, default options: $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; $30.80 at 130 × 72 mm (a $25 engineering fee appears). ENIG adds $16.90 at 85 × 35 and $17.40 at 100 × 72 mm. The size inside the tier is Claude's choice. *Revert → no 85 × 35 layout exists; a smaller outline needs a new study run* | 2026-11-03 | **User** (condition) + Claude (delegated, size) | OI-23 (area only; outlines still open) |
+| D25 | **J4 input fuse F1 = Bourns MF-R300** (Akizuki g112630), ahead of D6. 3.00 A hold (2.49 A at 40 °C) against the 2.33 A the OC trips allow; 6.00 A trip; 30 V, so a wrong supply up to 30 V that D6 crowbars trips F1. Cost: R1max 0.08 Ω adds up to 0.16 V of drop with both ports at 1 A, which cuts the HIGH mirror's gate headroom to 0.03 V in the J4 = 4.75 V corner (OI-27, V-MEAS-00). Fallbacks if the bench check fails: firmware flags HIGH readings while V_J4 (measured after F1) is below the measured limit, or revert D25. Rejected: relying on the source's own protection, because a hand-soldered board can short upstream of the port OC. *Revert → OI-29 reopens; no other Akizuki PTC has a datasheet with resistance figures at hand* | 2026-11-03 | Claude (delegated) | OI-29 |
 
 D12 was withdrawn on 2026-11-03 and is not reused.
 
@@ -772,17 +787,17 @@ density. Rev0.3 and Rev0.4 moved the large parts onto Akizuki modules and DIP pa
 the OI-23 placement study (`design/experiments/oi-23-placement/`, run with `python -I`)
 counted the result:
 
-- **Hand-soldered parts: 2,574 mm².** Four USB-C modules at 20 × 15 mm, the PGA2040 at
+- **Hand-soldered parts: 2,639 mm².** Four USB-C modules at 20 × 15 mm, the PGA2040 at
   21 × 21 mm, the CH335F module at 38.5 × 10.2 mm (measured off a photo, OI-24), two DIP16
-  at 9.8 × 20.85 mm and the MAU104 at 20 × 6.6 mm.
+  at 9.8 × 20.85 mm, the MAU104 at 20 × 6.6 mm and the F1 fuse at 13 × 5 mm (D25).
 - **SMD courtyards: 1,649 mm²,** including the two hand-soldered shunts per port (133 mm²).
   Rev0.4 as first written had estimated 1,100–1,200 mm² without counting; the count gives
   1,516 mm² without the shunts.
 - **Space under raised modules: 704 mm²,** for parts up to 1.5 mm tall. The parts that low
   would fill 971 mm² even at K = 1.0, so the bound credits all 704 mm².
 
-With the four mounting-hole keepouts, the board needs at least 3,715 mm² with no routing
-space at all (K = 1.0), and 4,689 mm² at the planning value K = 1.6. The 85 × 35 mm board has
+With the four mounting-hole keepouts, the board needs at least 3,780 mm² with no routing
+space at all (K = 1.0), and 4,754 mm² at the planning value K = 1.6. The 85 × 35 mm board has
 2,975 mm², so no layout of it exists. D24 sets 100 × 72 mm (7,200 mm²), where the study's
 block placement passes every check: board bounds, clearances, region capacity at K = 1.6
 (headroom to K = 1.74), connector edges, a 28 mm J2–J3 pitch, the MAU104 ≥ 6 mm from the
@@ -805,7 +820,7 @@ Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
 2. **OI-31**: confirm the PGA2040's supply input, USB series resistors and flash from the
    module itself, because they decide U1's footprint and power wiring.
 3. **OI-25**: decide how J1's 0.21 A is declared.
-4. **OI-29**: choose the J4 input fuse.
+4. ~~**OI-29**: choose the J4 input fuse.~~ Closed by D25 (F1 = MF-R300).
 5. Bench-check the assumptions this design rests on, before layout:
    - OP07CDR on 0 / 12 V with a 5 V common mode and the mirror FET's gate headroom (OI-27);
    - R_M's short-time overload (OI-28);
@@ -824,6 +839,7 @@ Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
 | 0.3 | 2026-11-03 | D13 (sourcing rule) by the user, with the open choices delegated. Redesigned from Basic and Akizuki parts: J4 power-only input (D14), CH335F (D15), STM32F103C8T6 (D16), discrete current-mirror topology C with 0.1 / 10 / 510 Ω and pedestal injection (D17), back-to-back port switch (D18), two 12 MHz crystals (D19), accuracy target (D20), proposals P9–P12 adopted (D21). D1, D3, D5, D8, D11 superseded; D4 amended. OI-2, 4, 7 (part), 9, 16–22 closed by decision; OI-23 – OI-30 opened. Still no capture. |
 | 0.4 | 2026-11-03 | D22 (Basic parts only, no Preferred Extended) by the user closes OI-30. MCU and ADC redesigned (D23): PGA2040 RP2040 module and two MCP3208 DIP16 ADCs at V<sub>DD</sub> 5 V, 14.0 kSPS; SRV05-4 removed, PSM712 on J1–J3 CC, D± unprotected; Y1 removed; ROM USB bootloader; hold pull-ups 10 kΩ; EVT and ADC-bus level shifters. D16 superseded; D8, D17, D19, D21 amended. OI-31 opened. Machine-placed part types 38 → 35. Still no capture. |
 | 0.4 | 2026-11-03 | Amended: D24 (user condition, Claude's size) sets the board outline to 100 × 72 mm, 4 layers, amending D10, from the OI-23 placement study. §11 rewritten with counted areas; §12 item 1 and fact 9/17 updated. No circuit change. |
+| 0.4 | 2026-11-03 | Amended: D25 (Claude, delegated) adds F1, an MF-R300 resettable fuse ahead of D6, and closes OI-29. §3.1 path and port-voltage table, §3.2 gate headroom, §6.2, §7.2 and §12 updated; F1 added to the OI-23 study. Machine-placed types unchanged (35). |
 
 ---
 

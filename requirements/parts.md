@@ -69,6 +69,7 @@ Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it,
 | U5 | 1 W isolated DC-DC, 12 V 84 mA | g104132 | MAU104 (Minmax) | 178 | ¥520 | 2026-11-03 |
 | RS10, RS20 | Current-sense chip resistor 0.1 Ω 1 W ±0.5 % | g109588 | TSL1TTER100D (KOA) | 374 | ¥130 | 2026-11-03 |
 | RS11, RS21 | Metal-film resistor 10 Ω 1 W ±1 % (1/4 W size) | g108805 | MFU100F10RB (Faithful Link) | 175 bags of 100 | ¥600 / bag | 2026-11-03 |
+| F1 | Resettable fuse (PTC), 3.00 A hold / 6.00 A trip, 30 V, radial | g112630 | MF-R300 (Bourns) | 2,865 | ¥40 | 2026-11-03 |
 
 The thinnest is the PGA2040, at 41 pcs: enough for prototypes, but check it first. The next
 is the MAU104, at 178.
@@ -130,6 +131,20 @@ is the MAU104, at 178.
   −55 to 155 °C.
   - *To confirm (OI-28):* short-time overload — it must survive 2.35 W for 10 ms in the
     stuck-MID fault.
+- *Verified (MF-R300, Bourns MF-R series datasheet, Akizuki `/goodsaffix/mfr.pdf`,
+  fetched 2026-11-03):*
+  - V<sub>max</sub> 30 V, I<sub>max</sub> 40 A; I<sub>hold</sub> 3.00 A, I<sub>trip</sub>
+    6.00 A at 23 °C.
+  - R<sub>min</sub> 0.020 Ω, R<sub>max</sub> 0.05 Ω initial; R1<sub>max</sub> 0.08 Ω one
+    hour after reflow or a trip. The design uses R1max.
+  - Time to trip ≤ 10.8 s at 15 A; tripped dissipation 2.0 W.
+  - Hold / trip vs ambient: 2.49 / 4.98 A at 40 °C, 2.31 / 4.62 A at 50 °C.
+  - Body A ≤ 12.0 mm wide, B ≤ 18.3 mm tall, E ≤ 3.0 mm thick; leads 5.1 ± 0.7 mm apart,
+    ⌀0.81 mm.
+  - **18.3 mm is the tallest part on the board.** The enclosure must clear it, or F1 is
+    bent flat (then 12 × 18.3 mm of board).
+  - *To confirm:* the lead style (kinked or straight) on the parts Akizuki ships, for the
+    hole size and the courtyard.
 
 **Rejected at Akizuki:**
 - g110697 0.1 Ω 5 W metal plate: ±350 ppm/°C.
@@ -138,6 +153,9 @@ is the MAU104, at 178.
 - g116132 Raspberry Pi Pico and g117542 AE-RP2040 kit (and the XIAO RP2040): D+/D− are not
   on the module pins, so the module cannot sit behind the CH335F.
 - g117732 MCP3204-BI/P (¥770): 4 channels, and each ADC needs 5 (three amplifiers, two aux).
+- g100769 RGEF300 (3.0 A hold, 5.1 A trip, ¥30): rated 16 V, and only a selection guide is
+  at hand, with no resistance figures. g101344 VTP210GU (2.1 A) and g112629 MF-R185
+  (1.85 A): hold current below the 2.33 A that the OC trips allow.
 - Nucleo-32 boards: D± on pins, but too few free I/O. Nucleo-F303K8: no USB. Nucleo-64:
   82.5 × 70 mm.
 
@@ -267,8 +285,6 @@ All Extended. The full Rev0.2 rows, with stock and datasheet notes, are in Git h
 
 ## Not yet selected
 
-- **J4 input fuse (OI-29).** No fuse or PTC is Basic. Akizuki resettable fuses are the
-  candidates, and must be checked for hold current ≥ 2.5 A at 5 V.
 - **Pin headers and sockets for the modules and the DIP16 ADCs (OI-23).** These are Akizuki
   parts; their height decides what fits underneath. The OI-23 study assumes 2.5 mm header
   plastic and allows parts up to 1.5 mm tall under a module; the chosen header must keep that.

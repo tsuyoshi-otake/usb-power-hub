@@ -156,13 +156,15 @@ REQ-PORT-04) and are not reused.
 | REQ-SAFE-01 | The shunt-bypass FETs are ON whenever the MCU does not drive them (hold transistors pulled up), so the ladder sits at the HIGH range. | Settled | D9 |
 | REQ-SAFE-02 | Over-range up-ranges in hardware with no MCU in the path; over-current opens the port in hardware. | Settled | D4, G11 |
 | REQ-SAFE-03 | **Stuck range.** Firmware switches the port OFF within 10 ms and latches `FAULT:STUCKRANGE` when an amplifier whose shunt is commanded bypassed reads more than 10 % of the active range's current (and > 50 LSB), or sits at its own clip level, for 10 ms. Healthy parallel conduction through a bypassed shunt is ≤ 0.8 %. This covers a bypass FET that fails open and a hold that does not take. Detection floor: 1 mA. Below it a stuck range dissipates < 1 mW and is harmless. R_M must survive 2.35 W for that 10 ms window (OI-28). | Delegated | Circuit §4 stuck-range table |
+| REQ-SAFE-04 | **Input fuse.** J4's VBUS passes a resettable fuse ahead of the TVS. It holds the largest load the port OC trips allow (2 × 1.16 A) at 40 °C ambient, and it opens on a short of VBUS_IN or on a source above the TVS breakdown. | Delegated | D25 |
 
 ## 9. Documented limitations (for the user manual)
 
 - **Two cables:** J1 to the PC for data and control, and J4 to a 5 V USB-C supply for port
   power. Without J4 the ports cannot turn on.
-- **Port voltage is J4's voltage minus up to 0.32 V at 1 A** (0.16 V at 0.5 A). It is not
-  regulated, and below 4.75 V it is outside USB 2.0's downstream-port range (circuit §3.1).
+- **Port voltage is J4's voltage minus up to 0.40 V at 1 A** (0.20 V at 0.5 A, 0.48 V when
+  the other port also draws 1 A; the input fuse F1 is shared). It is not regulated, and
+  below 4.75 V it is outside USB 2.0's downstream-port range (circuit §3.1).
 - **Each port offers Default USB power (500 mA).** With a Default-only J4 supply, one port
   at a time (REQ-PWR-04).
 - **Bandwidth:** ~31 Hz on LOW, ~1.6 kHz on MID, ~100 kHz on HIGH (REQ-MEAS-07).

@@ -552,7 +552,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D24; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D25; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -565,7 +565,8 @@ withdrawn and not reused).
   topology C with current mirrors, the port path, the clocks, the accuracy target,
   and the adoption of P9–P12. After D22, Claude recorded D23: the PGA2040 RP2040
   module and two MCP3208 ADCs, superseding D16's STM32F103. Within D24's limit, Claude
-  chose the 100 × 72 mm outline from the OI-23 study. Each is labelled
+  chose the 100 × 72 mm outline from the OI-23 study, and D25 put the MF-R300 input fuse
+  on J4 (OI-29). Each is labelled
   "Claude (delegated)", and the user may revert any one.
 
 ### 10.5 Still undecided — record the decision before layout starts
@@ -575,7 +576,6 @@ withdrawn and not reused).
 - **OI-23 (remainder):** re-run the placement study with the measured CH335F outline
   (OI-24) and the chosen header height. The board area itself is settled by D24.
 - **OI-25:** how J1's ≈ 0.21 A is declared to the host.
-- **OI-29:** the J4 input fuse.
 - **OI-27, OI-28:** bench-check the OP07 single-supply margins and R_M's overload
   before layout.
 - USB VID/PID. Do not ship a squatted VID.
@@ -610,7 +610,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D14): D1's PD sink is superseded; port power comes from J4, a power-only 5 V input. Its USB-C advertisement drives the advertisement and budget rules (REQ-PWR-04/05). | Rev0.4 §3.1, §7.2 |
 | OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *Rev0.3:* heat-set M2 inserts at 4 corners adopted (D21). Open until built and checked (V-MECH-01). | boss height = `GAP` = 1.6 |
 | OI-6 | **Silkscreen below fab minimum.** Reference designators 0.80 mm; user-facing kanji 0.81 mm. | canvas px/mm scale |
-| OI-7 | ~~Protection incomplete.~~ **Closed by decision** (D18), with two residuals moved to their own issues. ESD: PSM712 on the CC pins of J1–J4; D+/D− of J1–J3 are unprotected since D22 removed SRV05-4 (product.md §9). TVS: SMBJ6.5CA on the J1 and J4 VBUS. Reverse blocking: back-to-back AO3401A. No TVS on VBUS_A/B, by design: its leakage would be measured, and the port capacitor absorbs ESD. No common-mode choke: not needed for USB 2.0, and none is Basic. Residual: the J4 fuse (OI-29). SRV05-4's class (OI-30) ended with its removal (D22). | Rev0.4 §3.1, §3.4, G10 |
+| OI-7 | ~~Protection incomplete.~~ **Closed by decision** (D18), with two residuals moved to their own issues. ESD: PSM712 on the CC pins of J1–J4; D+/D− of J1–J3 are unprotected since D22 removed SRV05-4 (product.md §9). TVS: SMBJ6.5CA on the J1 and J4 VBUS. Reverse blocking: back-to-back AO3401A. No TVS on VBUS_A/B, by design: its leakage would be measured, and the port capacitor absorbs ESD. No common-mode choke: not needed for USB 2.0, and none is Basic. Residual: the J4 fuse (OI-29, closed by D25). SRV05-4's class (OI-30) ended with its removal (D22). | Rev0.4 §3.1, §3.4, G10 |
 | OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. *Rev0.3:* TC2030-NL SWD footprint and test pads adopted (D21, REQ-MFG-03/04). Panelization still undefined. | — |
 | OI-9 | ~~BOOTSEL unreachable with the lid fitted.~~ **Closed by decision** (D21 as amended by D23): the RP2040 ROM USB bootloader (UF2 drive), entered by `BOOT` or by SW3 on BOOTSEL through a lid pinhole. It is in mask ROM, so no firmware state removes it; SWD is for debug only. Reopen if V-BOOT-01 fails. | REQ-BOOT-02 |
 | OI-10 | ~~6 layers may be unjustified.~~ **Closed by decision** (D10, user, 2026-11-03): 4 layers. Reopen if signal-integrity or EMC review of the routed board disagrees. | Rev0.4 §10 |
@@ -626,13 +626,13 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-20 | ~~No stocked HIGH shunt meets the specification.~~ **Closed by decision** (D17/D20): R_H = 0.1 Ω ±0.5 % ±100 ppm/°C KOA TSL1TTER100D (Akizuki, 374 pcs), inside the ±1 % budget. The Basic 0.1 Ω part (±800 ppm/°C) is rejected. | Rev0.4 §4.2; `requirements/parts.md` |
 | OI-21 | ~~No accuracy requirement exists.~~ **Closed by decision** (D20): ±(1 % of reading + 3 LSB of the active range) within ±10 °C of calibration, after gain and zero calibration. | REQ-MEAS-05; Rev0.4 §4.2 |
 | OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D23, replacing D17's on-chip ADC): two external MCP3208, clocked at 1 MHz by the RP2040 PIO. | Rev0.4 §3.3 |
-| OI-23 | **Board fit: area settled, outlines not measured.** The placement study (`design/experiments/oi-23-placement/`, 15 tests) proved that 85 × 35 mm cannot hold Rev0.4: even with no routing space and every low part credited under a module, it needs 3,715 mm² against 2,975 mm². D24 set 100 × 72 mm, where a block placement passes every check at routing factor K = 1.6 (headroom to K = 1.74). Still open: the CH335F outline is measured off a product photo (OI-24), and the header height behind the study's 1.5 mm under-module rule is not chosen. Re-run the study with both; it must still exit 0. | Rev0.4 §11; study README |
+| OI-23 | **Board fit: area settled, outlines not measured.** The placement study (`design/experiments/oi-23-placement/`, 15 tests) proved that 85 × 35 mm cannot hold Rev0.4: even with no routing space and every low part credited under a module, it needs 3,780 mm² (F1 included, D25) against 2,975 mm². D24 set 100 × 72 mm, where a block placement passes every check at routing factor K = 1.6 (headroom to K = 1.74). Still open: the CH335F outline is measured off a product photo (OI-24), and the header height behind the study's 1.5 mm under-module rule is not chosen. Re-run the study with both; it must still exit 0. | Rev0.4 §11; study README |
 | OI-24 | **CH335F module outline and pin map unknown.** Akizuki publishes no drawing for AE-QFN28-DIP(CH335F). Measure a purchased module, and confirm that the QFN comes mounted and how DIP30 maps to the chip's pins. | `requirements/parts.md` U6 |
 | OI-25 | **J1 current is misdeclared.** The board draws ≈ 0.21 A from J1, but the CH335F's default descriptor declares self-powered and 100 mA. Options: (a) declare honestly via the CH335F EEPROM (an EEPROM part is not yet sourced) plus the MCU function's own MaxPower; (b) power the MCU and analog from J4, which loses control without J4; (c) accept and document. | Rev0.4 §7.1 |
 | OI-26 | **HS signal integrity through the modules is unverified.** D± pass through 2.54 mm headers and Akizuki module layouts. The fallback is that DUTs enumerate at FS. | Rev0.4 §3.3; V-HOST-01 |
-| OI-27 | **OP07 single-supply operation is extrapolated.** Unverified: common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V (extrapolated from ±15 V specs); the mirror gate's 0.19–0.44 V headroom at 1 A; loop stability into a 645 pF gate. Bench-check before layout (V-MEAS-00). | Rev0.4 §3.2 |
+| OI-27 | **OP07 single-supply operation is extrapolated.** Unverified: common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V (extrapolated from ±15 V specs); the mirror gate's headroom at 1 A, which F1 (D25) cuts to 0.11–0.36 V with one port loaded and to 0.03 V at J4 = 4.75 V with both ports at 1 A; loop stability into a 645 pF gate. Bench-check before layout (V-MEAS-00). | Rev0.4 §3.2 |
 | OI-28 | **R_M short-time overload is unverified.** A stuck-MID short puts 2.35 W into a 1 W axial resistor for up to 10 ms. | Rev0.4 §4; V-MEAS-00 |
-| OI-29 | **No input fuse on J4.** No fuse or PTC is Basic. Choose an Akizuki resettable fuse (hold ≥ 2.5 A at 5 V), or record the decision to rely on the source's own protection. | `requirements/parts.md` "Not yet selected" |
+| OI-29 | ~~No input fuse on J4.~~ **Closed by decision** (D25, Claude delegated, 2026-11-03): F1 = Bourns MF-R300 (Akizuki g112630; 3.00 A hold, 2.49 A at 40 °C; 6.00 A trip; 30 V), ahead of the J4 TVS. Its 0.08 Ω (R1max) costs up to 0.16 V at 2 A, which moves into OI-27 and V-MEAS-00. No fuse or PTC is Basic, so it is hand-soldered. Reopen if V-SAFE-02 fails. | Rev0.4 §3.1, §7.2; `requirements/parts.md` |
 | OI-30 | ~~Two Preferred Extended parts need the user's decision.~~ **Closed by decision** (D22, user, 2026-11-03): Basic parts only. STM32F103C8T6 (C8734) and SRV05-4 (C7420376) are removed; D23 replaces the MCU with the PGA2040 and two MCP3208, and D± of J1–J3 lose their ESD protection. | Rev0.4 §9, §10 D22/D23 |
 | OI-31 | **PGA2040 and MCP3208 assumptions unverified.** From a purchased PGA2040, confirm the supply input (3.3 V only, or 5 V through an on-module regulator), whether the 27 Ω USB series resistors are on the module, and that the flash reports a 64-bit unique ID. Bench-check the MCP3208's stretched sample phase (≤ 0.21 LSB computed), its INL at V<sub>REF</sub> = 3.3 V, and the RP2040's reset pull-down against the 10 kΩ hold pull-ups. The fallback for the sample phase is double conversion at 8 kSPS; a failure otherwise reopens D23. | Rev0.4 §3.2, §3.3, §6.2; V-MEAS-06 |
 
