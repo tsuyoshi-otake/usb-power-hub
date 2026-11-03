@@ -216,3 +216,35 @@ Section 13 (board) only once verified.
   - The study does not route.
   - The mockup and the enclosure must be redrawn for 100 × 72 mm.
 - **Commit.** `c1aec4f`.
+
+## 2026-11-03 - D25: J4 input fuse F1 = MF-R300 (closes OI-29)
+
+- **Symptom.** J4 VBUS had no fuse (OI-29). No fuse or PTC is a JLCPCB Basic part: MF-R300 is
+  C208487, Extended.
+- **Investigation.**
+  - Akizuki candidates at ≥ 2.5 A hold: MF-R300 (Bourns, g112630, 2,865 pcs, ¥40) and RGEF300
+    (g100769). Only the Bourns datasheet with resistance figures was at hand.
+  - MF-R300: 30 V; 3.00 A hold (2.49 A at 40 °C, 2.31 A at 50 °C); 6.00 A trip; R1max 0.08 Ω;
+    18.3 mm tall.
+  - The worst-case F1 current below the two OC trips is 2.33 A, at 0.43 W.
+- **Decision.** D25 (Claude, delegated): F1 sits ahead of D6, so a VBUS_IN short or a crowbarred
+  wrong supply trips F1.
+- **Cost, from the calc script.**
+  - Port drop is now 0.20 / 0.40 / 0.48 V (0.5 A / 1 A / both ports at 1 A).
+  - The HIGH mirror gate headroom falls to 0.03–0.36 V, from 0.19–0.44 V.
+  - OI-27 and V-MEAS-00 now test the 4.59 V corner.
+  - New: REQ-SAFE-04 / V-SAFE-02. F1 was added to the OI-23 study: the bound is 3,780 mm², and
+    the layout still passes.
+- **Verification.**
+  - Rubric `.claude/goal-loop/oi-29-d25/rubric.md`, graded by a sonnet rubric-verifier.
+  - Round 1 passed C2–C8 and failed C1: README.md and the Rev0.4 §7.4 table still gave
+    0.32 V.
+  - Root cause: the stale-figure sweep grepped `0\.32 V at 1 A`, and README wraps that phrase
+    across two lines.
+  - Fixed. A C1/C8 re-grade passed.
+- **Learning.** Promoted to rules.md (sweep for the bare number).
+- **Residual risks.**
+  - The 0.03 V headroom corner rests on the extrapolated OP07 V_OL (OI-27).
+  - The enclosure must clear F1's 18.3 mm height.
+  - D6 may not survive a sustained over-voltage.
+- **Commit.** `d6d7c3d`.

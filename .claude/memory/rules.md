@@ -84,6 +84,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 
 ## Design documents
 
+- **A stale-figure sweep greps the bare number, never the number plus its words.** Markdown
+  wraps lines. In the D25 change, `grep "0\.32 V at 1 A"` missed README.md's "0.32 V" /
+  "at 1 A" split across two lines. An independent verifier found it. Grep `0\.32` and read
+  every hit. Verified 2026-11-03.
 - **Every derived number in a design document comes from one committed script, and every
   column uses one basis.** Verified 2026-11-03: writing `CIRCUIT_DESIGN_Rev0.3_calc.py`
   exposed full-scale currents computed with the pedestal and thresholds without it (366 µA
