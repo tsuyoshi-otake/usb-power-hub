@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Reproduce the calculated numbers quoted in CIRCUIT_DESIGN_Rev0.3.md.
+"""Reproduce the calculated numbers quoted in CIRCUIT_DESIGN_Rev0.4.md.
 
 Usage:
-    python design/circuit/CIRCUIT_DESIGN_Rev0.3_calc.py
+    python design/circuit/CIRCUIT_DESIGN_Rev0.4_calc.py
 
 Every section header names the document section that quotes its output. The
-inputs below are the Rev0.3 component values and datasheet or catalogue
+inputs below are the Rev0.4 component values and datasheet or catalogue
 figures recorded in requirements/parts.md. Change a value here and in the
 document together; the document is the design, this script is its arithmetic.
 
@@ -15,13 +15,16 @@ it looks at):
   it holds its own copy of them;
 - tolerances, temperature, and the OP07 single-supply behaviour it assumes
   (OI-27); it uses typical or bounding datasheet values as noted;
+- the MCP3208's real sampling network: the S/H settling below uses the
+  datasheet's Figure 4-1 model (1 kohm switch, 20 pF, 7 pF pin) and assumes the
+  sample capacitor starts at the previous channel's voltage (OI-31);
 - layout parasitics, comparator delay spread, and the real gate charge;
 - anything about part availability or footprints.
 """
 import math
 
-# ---- inputs (Rev0.3 values) -------------------------------------------------
-VDDA = 3.3                    # ADC reference = VDDA
+# ---- inputs (Rev0.4 values) -------------------------------------------------
+VDDA = 3.3                    # MCP3208 V_REF = VDDA (its V_DD is V5A, 5 V)
 LSB = VDDA / 4096             # 12-bit
 RS = {"LOW": 510.0, "MID": 10.0, "HIGH": 0.1}    # shunts R_L, R_M, R_H
 R1 = 100.0                    # mirror input resistor, every range
@@ -35,7 +38,11 @@ VINJ, RINJ = 8.0, 1e6         # pedestal injection (U4 CJ431 8 V through 1 Mohm)
 VOS = 150e-6                  # OP07D max V_os, used as a bound (OP07C has no max)
 CPORT = 10e-6                 # port capacitor
 STAGE = 3e-6                  # ranging budget per stage
-ADCCLK = 72e6 / 6
+FCLK = 1.0e6                  # MCP3208 clock: 1 MHz is guaranteed down to V_DD 2.7 V
+T_SAMPLE = 4.5e-6            # sample phase as stretched by the RP2040 PIO (native 1.5 clocks)
+CLK_PER_CONV = 20            # datasheet: f_CLK = 20 x f_SAMPLE
+R_SER = 1e3                  # series resistor, amplifier node -> ADC pin
+C_PIN, C_S, R_SS = 7e-12, 20e-12, 1e3   # MCP3208 Figure 4-1 input model
 K = {r: RS[r] * ROUT[r] / R1 for r in RS}        # V per A at the amp output
 PED = {r: (VINJ - 5.0) / RINJ * ROUT[r] for r in RS}   # pedestal at the amp output, 5.0 V port
 IT = {r: (VTH - PED[r]) / K[r] for r in RS}      # current at which the comparator trips
@@ -107,17 +114,47 @@ for vj4 in (5.0, 4.75):
     gate = vj4 - 1.0 * (RSW + RS["HIGH"] + RWIRE) - 1.3
     print(f"J4={vj4}: gate~{gate:.3f} V  headroom={gate-3.0:.2f} V")
 
-print("\n== Sec. 3.3 ADC timing and stream")
-tch = (41.5 + 12.5) / ADCCLK
-scan = 3 * tch
-print(f"t_ch={tch*1e6:.3g} us  scan={scan*1e6:.3g} us -> {1/scan/1e3:.4g} kHz;"
-      f" avg of 4 -> {1/scan/4/1e3:.4g} kSPS; 5 B/pair -> {5/scan/4/1e3:.4g} kB/s"
-      f" = {100*5/scan/4/1.188e6:.2f} % of FS bulk (1188 kB/s)")
+print("\n== Sec. 3.3 ADC timing and stream (2 x MCP3208, shared CLK/CS/DIN, one DOUT each)")
+t_conv = CLK_PER_CONV / FCLK + (T_SAMPLE - 1.5 / FCLK)
+scan = 3 * t_conv
+n_scan = int((1e-3 - t_conv) / scan)          # scans per 1 ms frame, one aux conversion per frame
+rate = n_scan / 1e-3
+print(f"t_conv={t_conv*1e6:.3g} us (native {CLK_PER_CONV/FCLK*1e6:.3g} us + {(T_SAMPLE-1.5/FCLK)*1e6:.3g} us stretch)"
+      f"  scan={scan*1e6:.3g} us  {n_scan} scans + 1 aux per 1 ms ->"
+      f" {rate/1e3:.4g} kSPS; idle {(1e-3-n_scan*scan-t_conv)*1e6:.3g} us per frame")
+print(f"stream: 5 B/pair -> {5*rate/1e3:.4g} kB/s = {100*5*rate/1.188e6:.2f} % of FS bulk (1188 kB/s)")
+dbl = 2 * CLK_PER_CONV / FCLK
+n_dbl = int((1e-3 - CLK_PER_CONV / FCLK) / (3 * dbl))
+print(f"fallback without stretching, each channel converted twice: {n_dbl} scans per 1 ms -> {n_dbl} kSPS")
+
+
+def sh_residual(rout, cn, t_s, v0, vprev, dt=0.25e-9):
+    """Error of the sampled voltage at the end of the sample phase, in LSB."""
+    vn = vp = v0
+    vs = vprev
+    im = v0 / rout
+    for _ in range(int(t_s / dt)):
+        i_ser = (vn - vp) / R_SER
+        i_ss = (vp - vs) / R_SS
+        vn += dt * (im - vn / rout - i_ser) / cn
+        vp += dt * (i_ser - i_ss) / C_PIN
+        vs += dt * i_ss / C_S
+    return (vs - v0) / LSB
+
+
 for r in ("LOW", "HIGH"):
-    kick = 8e-12 / (CN[r] + 8e-12)
-    res = kick * math.exp(-41.5 / ADCCLK / (ROUT[r] * CN[r])) * 3.0
-    print(f"{r} S/H kick {100*kick:.2f} %, residual after 41.5 cycles {res/LSB:.3f} LSB (3 V step)")
-print(f"overrange injection through 1 k: {(5.0-3.3-0.3)/1e3*1e3:.2f} mA (STM32 limit 5 mA per pin)")
+    res = {t: max(abs(sh_residual(ROUT[r], CN[r], t, VDDA, 0.0)), abs(sh_residual(ROUT[r], CN[r], t, 0.0, VDDA)))
+           for t in (1.5 / FCLK, T_SAMPLE)}
+    print(f"{r} S/H residual, 3.3 V step between channels: native 1.5 us {res[1.5/FCLK]:.3g} LSB,"
+          f" stretched {T_SAMPLE*1e6:.3g} us {res[T_SAMPLE]:.3g} LSB")
+for j4, v5 in ((5.25, 4.5), (5.5, 4.75), (5.5, 4.5)):
+    for r in ("LOW", "HIGH"):
+        node = j4 * ROUT[r] / (ROUT[r] + R1 + RDS)
+        print(f"overrange J4={j4} V, V5A={v5} V: {r} node max {node:.2f} V vs pin abs max {v5+0.6:.2f} V"
+              f" -> margin {v5+0.6-node:+.2f} V")
+node_hi = 5.25 * ROUT["HIGH"] / (ROUT["HIGH"] + R1 + RDS)
+print(f"(with V_DD = 3.3 V instead, the HIGH node at J4 5.25 V would drive"
+      f" {(node_hi-3.9)/R_SER*1e3:.2f} mA through 1 kohm into a pin rated only to 3.9 V)")
 
 print("\n== Sec. 3.2 ranging stage time: node tau + LM393 1.3 us + 7 nC gate charge at 6 mA")
 for r in ("LOW", "MID"):
@@ -133,9 +170,13 @@ vmax = 3.3 * (5.1e3 * 1.1) / (5.1e3 * 1.1 + 33e3 * 0.99)
 print(f"{vmin:.3f}..{vmax:.3f} V (Default vRd window 0.25-0.61 V)")
 
 print("\n== Sec. 7.1 J1 load (typical) and AMS1117")
-loads = {"CH335F": 85, "STM32F103 72 MHz + USB": 40, "MAU104 input": 70,
-         "LM393 x3": 3, "LEDs": 5, "AMS1117 Iq": 5, "CJ431 x2 + dividers": 2}
+loads = {"CH335F": 85, "RP2040 (PGA2040) + USB, estimate": 30, "MAU104 input": 70,
+         "LM393 x3": 3, "LEDs": 5, "AMS1117 Iq": 5, "CJ431 x2 + dividers": 2,
+         "MCP3208 x2 (0.4 mA max each)": 1, "SPI level shifters, 3 x 5 V / 1.5 kohm": 10}
 print(f"total {sum(loads.values())} mA")
-p = (5.0 - 3.3) * 0.055
-print(f"AMS1117: {p:.3f} W -> {p*90:.1f} C rise at 90 C/W")
+v3v3 = {"RP2040 (PGA2040), estimate": 30, "LEDs, Rp, pull-ups, VDDA, CJ431 U3 (as Rev0.3)": 15,
+        "HOLD pull-ups 4 x 3.3 V / 10 kohm": 1.3, "MCP3208 V_REF x2": 0.3}
+i3 = sum(v3v3.values())
+p = (5.0 - 3.3) * i3 / 1e3
+print(f"V3V3 load {i3:.1f} mA; AMS1117: {p:.3f} W -> {p*90:.1f} C rise at 90 C/W")
 print(f"MAU104 load: 6 x OP07 at 2.5 typ / 5 max mA = {6*2.5:.0f} / {6*5:.0f} mA")

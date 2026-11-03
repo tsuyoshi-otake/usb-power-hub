@@ -21,16 +21,17 @@ the host PC over a plain COM port.
   independently by firmware. They are OFF at power-up and after any reset (REQ-PORT-01),
   and offer Default USB power (500 mA), with a hardware over-current trip at 1.16 A.
 - **Measurement:** per port, a 3-range shunt ladder (510 Ω / 10 Ω / 0.1 Ω) with hardware
-  up-ranging, discrete current-mirror amplifiers, and the MCU's 12-bit ADCs, at 18.5 kSPS
-  per channel. Accuracy target: ±(1 % + 3 LSB of the range).
-- **Control:** STM32F103 behind a CH335F hub, enumerating as a driverless CDC-ACM COM
+  up-ranging, discrete current-mirror amplifiers, and two 12-bit MCP3208 ADCs (one per
+  port, sampled together), at 14.0 kSPS per channel. Accuracy target: ±(1 % + 3 LSB of the range).
+- **Control:** an RP2040 module (PGA2040) behind a CH335F hub, enumerating as a driverless CDC-ACM COM
   port. Commands such as `PORT A ON`, `PORT B CYCLE 2000` and `STREAM ON` are listed in
   `requirements/product.md` Section 4.1.
 - **Board:** 85 × 35 mm, 4 layers, 1.6 mm FR-4, ENIG.
   - JLCPCB machine-places the small parts, all JLCPCB **Basic**.
   - You hand-solder the large parts, all bought from **Akizuki**: four USB-C modules,
-    the hub module, the 12 V module and two shunts.
-  - This is the sourcing rule D13. Two Preferred Extended parts await a decision (OI-30).
+    the hub module, the RP2040 module, two DIP16 ADCs, the 12 V module and two shunts.
+  - This is the sourcing rule D13. D22 excludes Preferred Extended parts too, so the
+    D+/D− lines of J1–J3 have no ESD protection (`requirements/product.md` §9).
 
 ## Documents
 
@@ -41,7 +42,7 @@ Read in this order:
 | `CLAUDE.md` | Engineering policy, release discipline, and the open-issue list (Section 11). Every unstruck open issue blocks manufacturing. |
 | `requirements/product.md` | What the product must do — the authority. REQ-* IDs, each marked Settled / Delegated / Proposed / Open / Withdrawn. Includes the control protocol. |
 | `requirements/verification.md` | How each requirement is proven (V-* IDs: method, pass criterion, limits). |
-| `design/circuit/CIRCUIT_DESIGN_Rev0.3.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1/Rev0.2 are in Git history. |
+| `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.3 are in Git history. |
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
 | `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the 85 × 35 mm decision (D10). |
 
@@ -56,7 +57,7 @@ Stock in `requirements/parts.md` is a dated snapshot. To re-query the JLCPCB
 assembly-parts pool (Python 3, standard library only, no install step; checked with 3.13):
 
 ```sh
-python tools/jlc_stock.py C8734 STM32F103C8T6
+python tools/jlc_stock.py C7433 OP07CDR
 python tools/jlc_stock.py --all OP07      # list every hit, for finding candidates
 ```
 
@@ -79,8 +80,8 @@ python -m http.server 8000 --directory mockup
 ## Building and programming
 
 Not possible yet. Schematic capture (KiCad, decision D2) starts after the items in
-the circuit document's §12 are done (first: the user's decision on OI-30, and the
-OI-23 placement study). Firmware does not exist.
+the circuit document's §12 are done (first: the OI-23 placement study and the
+OI-31 module checks). Firmware does not exist.
 
 ## Repository
 

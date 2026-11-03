@@ -22,8 +22,9 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > **WIP — MANUFACTURING PROHIBITED.**
 >
 > The circuit design exists as a document —
-> `design/circuit/CIRCUIT_DESIGN_Rev0.3.md` (redesigned 2026-11-03 under the user's
-> sourcing rule D13; Rev0.1 and Rev0.2 are in Git history) — together with the
+> `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` (redesigned 2026-11-03 under the user's
+> sourcing rule D13, then limited to Basic parts only by D22; Rev0.1–Rev0.3 are in
+> Git history) — together with the
 > requirements set in `requirements/`
 > (`product.md`, `verification.md`, `parts.md`). That is currently the whole of
 > the design. There is **no netlist, no schematic capture, no layout, no
@@ -63,11 +64,12 @@ Product architecture:
   power-only 5 V input (J4), and 2 switched downstream ports (J2, J3).
 - No USB-PD. Port power is J4's own 5 V, unregulated (D14).
 - Precision current measurement, **0.1 µA – 1 A**: 3-range shunt ladder with
-  hardware up-ranging, discrete current-mirror amplifiers, and the MCU's 12-bit
-  ADCs, two independent channels.
+  hardware up-ranging, discrete current-mirror amplifiers, and two 12-bit
+  MCP3208 ADCs (one per channel), two independent channels sampled together.
 - Enumerates as a **CDC-ACM COM port** on the upstream PC; driverless control.
 - Sourcing rule D13: JLCPCB **Basic** parts for PCBA, **Akizuki** parts for
   hand soldering, never an Extended-only PCBA; JLCPCB PCB/PCBA services.
+  D22 (user) excludes Preferred Extended parts too.
 - Enclosure: 3D-printed tub + a second PCB used as the top panel.
 - Git holds design sources, manufacturing releases, decisions, and QA evidence.
 
@@ -119,7 +121,7 @@ usb-power-hub/
 │  │  ├─ assembly/              #   enclosure CAD, lid PCB, fit studies
 │  │  └─ reports/
 │  └─ experiments/              # non-authoritative trials
-├─ firmware/                    # STM32F103 — src/ include/ tests/ tools/ reports/
+├─ firmware/                    # RP2040 (PGA2040) — src/ include/ tests/ tools/ reports/
 ├─ manufacturing/
 │  ├─ working/                  # disposable candidate exports — never orderable
 │  └─ releases/<rev>/<rNN>/     # immutable approved or ordered releases
@@ -348,25 +350,25 @@ This board is an instrument. These are functional requirements, not polish.
   main plane. Do not route load-return current under the ADC.
 - Vref MUST have its own decoupling at its pins and a short path to the ADC
   reference pin.
-- Shunt resistors MUST specify tolerance **and** TCR. The Rev0.3 accuracy budget
+- Shunt resistors MUST specify tolerance **and** TCR. The Rev0.4 accuracy budget
   (§4.2) assumes ±100 ppm/°C for every shunt and for each R_OUT / R1 pair. The
   Basic 0.1 Ω part at ±800 ppm/°C is not equivalent. Tolerance is removed by
   per-unit gain calibration; TCR is not.
 - Nothing that leaks may connect between a shunt and the DUT. The port switch, all
   gate networks, the mirrors' R1 and every divider sit on the supply side; VBUS_x
   carries only the port capacitor, the discharge FET and one 10 kΩ amplifier input
-  (Rev0.3 §3.1, G7).
+  (Rev0.4 §3.1, G7).
 - Range switching MUST be verified for both settling time and over-range
-  survival. The architecture is fixed by D9/D17 (Rev0.3 §10). What is *not* yet
+  survival. The architecture is fixed by D9/D17 (Rev0.4 §10). What is *not* yet
   established is that a built board meets the ≤ 3 µs-per-stage ranging budget,
   holds the new range within 100 µs, and survives a stuck range. These are
   bring-up measurements, not review items.
 - The bypass FETs' R<sub>DS(on)</sub> MUST stay outside the sensed span. Its
   temperature coefficient is ~4000 ppm/°C against a ±100 ppm/°C shunt. Topology C
-  guarantees this, because each amplifier senses only its own shunt (Rev0.3 §5).
+  guarantees this, because each amplifier senses only its own shunt (Rev0.4 §5).
 - Zero-point calibration is a **functional requirement**, not a feature. Without
   it, the OP07 offset and the deliberate pedestal current that keeps the current
-  mirror out of its dead zone (Rev0.3 §4.1) put up to 8 LSB (LOW, MID) or 13 LSB (HIGH)
+  mirror out of its dead zone (Rev0.4 §4.1) put up to 8 LSB (LOW, MID) or 13 LSB (HIGH)
   on the zero reading, against a 0.1 µA resolution of 1 LSB.
 
 ---
@@ -489,7 +491,7 @@ power-cycled from the host.
 
 ### 10.2 Functional blocks (from the mockup — historical)
 
-**Superseded by `design/circuit/CIRCUIT_DESIGN_Rev0.3.md` §6.2, which is the
+**Superseded by `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` §6.2, which is the
 authoritative designator and block list.** This table is kept only as the record
 of what the mockup claimed and what was wrong with it; do not design from it.
 
@@ -526,7 +528,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 - **Sourcing (D13, user):** machine-placed parts are JLCPCB Basic and in stock;
   hand-soldered parts are in stock at Akizuki; never an Extended-only PCBA
   (REQ-MFG-05). Avoid special or hard-to-source parts; keep part types and count low.
-  Two Preferred Extended parts await the user (OI-30).
+  Preferred Extended parts are excluded too (D22, user).
 - Port power comes from **J4, a power-only 5 V USB-C input**. J1 carries data and
   logic power only, and there is no USB-PD (D14, superseding D1).
 - Downstream presents Rp on both CC pins only while its port is ON, so the DUT
@@ -546,22 +548,24 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.3.md` Section 10 (D1–D21; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D23; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 85 × 35 mm and 4 layers (D10),
-  and the sourcing rule (D13). D1 (PD sink) and D11 (USB2514B) were also user
+  the sourcing rule (D13), and Basic parts only, with no Preferred Extended (D22,
+  「外して Basic のみにする」). D1 (PD sink) and D11 (USB2514B) were also user
   decisions; both are superseded because their parts are Extended.
 - **Under the delegation:** on 2026-11-03 the user delegated the open choices
   (「推奨で任せるよ」). Claude recorded D14–D21: J4 power input, CH335F hub,
-  STM32F103 (conditional on OI-30), topology C with current mirrors, the port path,
-  the clocks, the accuracy target, and the adoption of P9–P12. Each is labelled
+  topology C with current mirrors, the port path, the clocks, the accuracy target,
+  and the adoption of P9–P12. After D22, Claude recorded D23: the PGA2040 RP2040
+  module and two MCP3208 ADCs, superseding D16's STM32F103. Each is labelled
   "Claude (delegated)", and the user may revert any one.
 
 ### 10.5 Still undecided — record the decision before layout starts
 
-- **OI-30 (the user):** whether the two Preferred Extended parts are allowed. The
-  MCU footprint depends on it.
+- **OI-31:** the PGA2040's supply input, USB series resistors and flash, and the
+  MCP3208 sampling assumptions. U1's footprint and power wiring depend on it.
 - **OI-23:** board fit with real module outlines; this may reopen D10.
 - **OI-25:** how J1's ≈ 0.21 A is declared to the host.
 - **OI-29:** the J4 input fuse.
@@ -576,49 +580,54 @@ withdrawn and not reused).
 
 OI-1 – OI-15 were found by review of the mockup on 2026-08-16; OI-16 – OI-22 by the
 review that produced Rev0.2 on 2026-11-03; OI-23 – OI-30 by the Rev0.3 redesign under
-the sourcing rule D13 (2026-11-03). Every issue not struck through is **blocking**.
+the sourcing rule D13 (2026-11-03); OI-31 by the Rev0.4 change to Basic parts only
+(D22, 2026-11-03). Every issue not struck through is **blocking**.
 Numbers are stable; close them in Git with evidence, do not renumber.
 
 - "Closed by decision" means the design intent is settled but nothing is built or
   measured. Reopen the issue if the built board disagrees.
 - A decision marked "Claude (delegated)" was made under the user's 2026-11-03 delegation,
   and the user may revert it.
-- "Rev0.3 §n" refers to `design/circuit/CIRCUIT_DESIGN_Rev0.3.md`.
+- "Rev0.4 §n" refers to `design/circuit/CIRCUIT_DESIGN_Rev0.4.md`. Rev0.3 and Rev0.4
+  share their section numbers.
 - The Rev0.2 text is at commit `4e59607`:
   `git show 4e59607:design/circuit/CIRCUIT_DESIGN_Rev0.2.md`.
+- The Rev0.3 text is at commit `4e43692`:
+  `git show 4e43692:design/circuit/CIRCUIT_DESIGN_Rev0.3.md`.
 
 | ID | Issue | Evidence |
 |---|---|---|
-| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.3 §10 D21 |
-| OI-2 | ~~No crystal for the USB hub.~~ **Closed by decision** (D19, Claude delegated, 2026-11-03): two 12 MHz Basic crystals (C9002), Y1 → STM32 HSE, Y2 → CH335F. The history: D6's shared oscillator was superseded by D11; the USB2514B (24 MHz) was itself superseded by D13. Y2 against CH335F's built-in load capacitors is checked at bring-up (G9). | Rev0.3 §6.3 |
-| OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D9/D17): ranges 0.1 Ω / 10 Ω / 510 Ω in a nested bypass ladder, LM393 up-ranging ≤ 3 µs per stage, firmware hold ≤ 100 µs, bypass default ON. Bring-up proves the budget (V-MEAS-02). | Rev0.3 §3.2, §4 |
-| OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D14): D1's PD sink is superseded; port power comes from J4, a power-only 5 V input. Its USB-C advertisement drives the advertisement and budget rules (REQ-PWR-04/05). | Rev0.3 §3.1, §7.2 |
+| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.4 §10 D21 |
+| OI-2 | ~~No crystal for the USB hub.~~ **Closed by decision** (D19, Claude delegated, 2026-11-03): a 12 MHz Basic crystal (C9002), Y2 → CH335F; the MCU module carries its own crystal, so D23 removed Y1 (→ STM32 HSE). The history: D6's shared oscillator was superseded by D11; the USB2514B (24 MHz) was itself superseded by D13. Y2 against CH335F's built-in load capacitors is checked at bring-up (G9). | Rev0.4 §6.3 |
+| OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D9/D17): ranges 0.1 Ω / 10 Ω / 510 Ω in a nested bypass ladder, LM393 up-ranging ≤ 3 µs per stage, firmware hold ≤ 100 µs, bypass default ON. Bring-up proves the budget (V-MEAS-02). | Rev0.4 §3.2, §4 |
+| OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D14): D1's PD sink is superseded; port power comes from J4, a power-only 5 V input. Its USB-C advertisement drives the advertisement and budget rules (REQ-PWR-04/05). | Rev0.4 §3.1, §7.2 |
 | OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *Rev0.3:* heat-set M2 inserts at 4 corners adopted (D21). Open until built and checked (V-MECH-01). | boss height = `GAP` = 1.6 |
 | OI-6 | **Silkscreen below fab minimum.** Reference designators 0.80 mm; user-facing kanji 0.81 mm. | canvas px/mm scale |
-| OI-7 | ~~Protection incomplete.~~ **Closed by decision** (D18), with two residuals moved to their own issues. ESD: SRV05-4 on J1–J3 D+/D−/CC1/CC2, PSM712 on J4 CC. TVS: SMBJ6.5CA on the J1 and J4 VBUS. Reverse blocking: back-to-back AO3401A. No TVS on VBUS_A/B, by design: its leakage would be measured, and the port capacitor absorbs ESD. No common-mode choke: not needed for USB 2.0, and none is Basic. Residuals: the J4 fuse (OI-29) and SRV05-4's class (OI-30). | Rev0.3 §3.1, §3.4, G10 |
+| OI-7 | ~~Protection incomplete.~~ **Closed by decision** (D18), with two residuals moved to their own issues. ESD: PSM712 on the CC pins of J1–J4; D+/D− of J1–J3 are unprotected since D22 removed SRV05-4 (product.md §9). TVS: SMBJ6.5CA on the J1 and J4 VBUS. Reverse blocking: back-to-back AO3401A. No TVS on VBUS_A/B, by design: its leakage would be measured, and the port capacitor absorbs ESD. No common-mode choke: not needed for USB 2.0, and none is Basic. Residual: the J4 fuse (OI-29). SRV05-4's class (OI-30) ended with its removal (D22). | Rev0.4 §3.1, §3.4, G10 |
 | OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. *Rev0.3:* TC2030-NL SWD footprint and test pads adopted (D21, REQ-MFG-03/04). Panelization still undefined. | — |
-| OI-9 | ~~BOOTSEL unreachable with the lid fitted.~~ **Closed by decision** (D21): a write-protected flash DFU bootloader, entered by `BOOT` or by SW3 through a lid pinhole; SWD once per board; the USART1 ROM bootloader is the last resort. Reopen if V-BOOT-01 fails. | REQ-BOOT-02 |
-| OI-10 | ~~6 layers may be unjustified.~~ **Closed by decision** (D10, user, 2026-11-03): 4 layers. Reopen if signal-integrity or EMC review of the routed board disagrees. | Rev0.3 §10 |
-| OI-11 | ~~Shunts are 2-terminal.~~ **Closed by decision** (D17, topology C): each shunt has its own amplifier and Kelvin connection. R_H is a 2-terminal chip on a 4-pad land; R_M has its sense taken at each lead pad; R_L is 0805. No FET R<sub>DS(on)</sub> is inside a sensed span. | Rev0.3 §3.2, §5, G2 |
+| OI-9 | ~~BOOTSEL unreachable with the lid fitted.~~ **Closed by decision** (D21 as amended by D23): the RP2040 ROM USB bootloader (UF2 drive), entered by `BOOT` or by SW3 on BOOTSEL through a lid pinhole. It is in mask ROM, so no firmware state removes it; SWD is for debug only. Reopen if V-BOOT-01 fails. | REQ-BOOT-02 |
+| OI-10 | ~~6 layers may be unjustified.~~ **Closed by decision** (D10, user, 2026-11-03): 4 layers. Reopen if signal-integrity or EMC review of the routed board disagrees. | Rev0.4 §10 |
+| OI-11 | ~~Shunts are 2-terminal.~~ **Closed by decision** (D17, topology C): each shunt has its own amplifier and Kelvin connection. R_H is a 2-terminal chip on a 4-pad land; R_M has its sense taken at each lead pad; R_L is 0805. No FET R<sub>DS(on)</sub> is inside a sensed span. | Rev0.4 §3.2, §5, G2 |
 | OI-12 | ~~Documentation disagrees with itself.~~ **Closed 2026-11-03:** the mockup's `<title>` and caption now state the 60 × 24 mm its model actually has, and that the mockup is superseded by D10. | `mockup/usb-power-hub-board.html` |
-| OI-13 | ~~Board area — 60 × 24 mm is not routable (75 % density).~~ **Closed by decision** (D10, user, 2026-11-03): **85 × 35 mm, 4 layers**. Every mockup dimension and the enclosure model are invalidated by it. Rev0.3's module-heavy part mix is re-checked by OI-23. | Rev0.3 §11 |
-| OI-14 | ~~Sample rate capped by the host interface.~~ **Closed by decision** (D17): the rate is 18.5 kSPS per channel, set by the 12-bit ADC's sampling time, and the stream uses 7.8 % of Full-Speed bulk. Faster profiling would need an external ADC, which is not Basic: that is a new decision, not a defect. | Rev0.3 §3.3 |
+| OI-13 | ~~Board area — 60 × 24 mm is not routable (75 % density).~~ **Closed by decision** (D10, user, 2026-11-03): **85 × 35 mm, 4 layers**. Every mockup dimension and the enclosure model are invalidated by it. The module-heavy part mix of Rev0.3 and Rev0.4 is re-checked by OI-23. | Rev0.4 §11 |
+| OI-14 | ~~Sample rate capped by the host interface.~~ **Closed by decision** (D17 as amended by D23): the rate is 14.0 kSPS per channel, set by two MCP3208 at a 1 MHz clock with a stretched sample phase, and the stream uses 5.9 % of Full-Speed bulk. Faster profiling would need a faster ADC: that is a new decision, not a defect. | Rev0.4 §3.3 |
 | OI-15 | ~~The repository is not under version control.~~ **Closed 2026-11-03:** `usb-power-hub` is its own Git repository on branch `main`, no remote; commit `4dd10fb` is the unmodified snapshot of the design as it was paused. | `git log` |
-| OI-16 | ~~Downstream current policy is undefined.~~ **Closed by decision** (D18): each port advertises Default (Rp 33 kΩ, 500 mA). A port is enabled only while J4's advertisement covers all ON ports. Measured over-budget opens the larger port (`FAULT:BUDGET`). Hardware OC trips at 1.16 A. | Rev0.3 §7.2; REQ-PWR-04/05 |
-| OI-17 | ~~The 9 V request (D1) assumes an upstream that may not exist.~~ **Closed by decision** (D14): no PD; port power comes from J4, so it no longer depends on the host PC. The cost is a second cable and an unregulated port voltage (product.md §9). | Rev0.3 §3.1 |
-| OI-18 | ~~The 3.3 V rails as drawn overheat.~~ **Closed by decision** (D14): AMS1117-3.3 (SOT-223) from J1 5 V dissipates 0.094 W, an 8 °C rise. The op-amps run from the MAU104, not from a 3.3 V rail. | Rev0.3 §7.1 |
-| OI-19 | ~~Sense topology D5 needs re-evaluation.~~ **Closed by decision** (D17): topology C, with discrete OP07CDR + AO3401A current mirrors. No mux and no current-sense amplifier is Basic. | Rev0.3 §5 |
-| OI-20 | ~~No stocked HIGH shunt meets the specification.~~ **Closed by decision** (D17/D20): R_H = 0.1 Ω ±0.5 % ±100 ppm/°C KOA TSL1TTER100D (Akizuki, 374 pcs), inside the ±1 % budget. The Basic 0.1 Ω part (±800 ppm/°C) is rejected. | Rev0.3 §4.2; `requirements/parts.md` |
-| OI-21 | ~~No accuracy requirement exists.~~ **Closed by decision** (D20): ±(1 % of reading + 3 LSB of the active range) within ±10 °C of calibration, after gain and zero calibration. | REQ-MEAS-05; Rev0.3 §4.2 |
-| OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D17): no external ADC; the STM32 ADC runs at ADCCLK = 72 MHz / 6 = 12 MHz. | Rev0.3 §3.3 |
-| OI-23 | **Board fit unproven.** The Akizuki modules take ≈ 2,000 mm² and the SMD content needs ≈ 1,200 mm², on a 2,975 mm² board. It fits only if low-profile SMD sits under modules raised on headers. Needed: a placement study with real module outlines and header heights. It may force revisiting D10. | Rev0.3 §11 |
+| OI-16 | ~~Downstream current policy is undefined.~~ **Closed by decision** (D18): each port advertises Default (Rp 33 kΩ, 500 mA). A port is enabled only while J4's advertisement covers all ON ports. Measured over-budget opens the larger port (`FAULT:BUDGET`). Hardware OC trips at 1.16 A. | Rev0.4 §7.2; REQ-PWR-04/05 |
+| OI-17 | ~~The 9 V request (D1) assumes an upstream that may not exist.~~ **Closed by decision** (D14): no PD; port power comes from J4, so it no longer depends on the host PC. The cost is a second cable and an unregulated port voltage (product.md §9). | Rev0.4 §3.1 |
+| OI-18 | ~~The 3.3 V rails as drawn overheat.~~ **Closed by decision** (D14): AMS1117-3.3 (SOT-223) from J1 5 V dissipates 0.079 W, a 7 °C rise (47 mA in Rev0.4). The op-amps run from the MAU104, not from a 3.3 V rail. | Rev0.4 §7.1 |
+| OI-19 | ~~Sense topology D5 needs re-evaluation.~~ **Closed by decision** (D17): topology C, with discrete OP07CDR + AO3401A current mirrors. No mux and no current-sense amplifier is Basic. | Rev0.4 §5 |
+| OI-20 | ~~No stocked HIGH shunt meets the specification.~~ **Closed by decision** (D17/D20): R_H = 0.1 Ω ±0.5 % ±100 ppm/°C KOA TSL1TTER100D (Akizuki, 374 pcs), inside the ±1 % budget. The Basic 0.1 Ω part (±800 ppm/°C) is rejected. | Rev0.4 §4.2; `requirements/parts.md` |
+| OI-21 | ~~No accuracy requirement exists.~~ **Closed by decision** (D20): ±(1 % of reading + 3 LSB of the active range) within ±10 °C of calibration, after gain and zero calibration. | REQ-MEAS-05; Rev0.4 §4.2 |
+| OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D23, replacing D17's on-chip ADC): two external MCP3208, clocked at 1 MHz by the RP2040 PIO. | Rev0.4 §3.3 |
+| OI-23 | **Board fit unproven.** The hand-soldered parts take ≈ 2,800 mm² since D23 added the PGA2040 and two DIP16 ADCs, and the SMD content needs ≈ 1,100–1,200 mm², on a 2,975 mm² board. It fits only if low-profile parts sit under modules raised on headers. Needed: a placement study with real module outlines and header heights. It is now the issue most likely to reopen D10. | Rev0.4 §11 |
 | OI-24 | **CH335F module outline and pin map unknown.** Akizuki publishes no drawing for AE-QFN28-DIP(CH335F). Measure a purchased module, and confirm that the QFN comes mounted and how DIP30 maps to the chip's pins. | `requirements/parts.md` U6 |
-| OI-25 | **J1 current is misdeclared.** The board draws ≈ 0.21 A from J1, but the CH335F's default descriptor declares self-powered and 100 mA. Options: (a) declare honestly via the CH335F EEPROM (an EEPROM part is not yet sourced) plus the STM32 function's own MaxPower; (b) power the MCU and analog from J4, which loses control without J4; (c) accept and document. | Rev0.3 §7.1 |
-| OI-26 | **HS signal integrity through the modules is unverified.** D± pass through 2.54 mm headers and Akizuki module layouts. The fallback is that DUTs enumerate at FS. | Rev0.3 §3.3; V-HOST-01 |
-| OI-27 | **OP07 single-supply operation is extrapolated.** Unverified: common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V (extrapolated from ±15 V specs); the mirror gate's 0.19–0.44 V headroom at 1 A; loop stability into a 645 pF gate. Bench-check before layout (V-MEAS-00). | Rev0.3 §3.2 |
-| OI-28 | **R_M short-time overload is unverified.** A stuck-MID short puts 2.35 W into a 1 W axial resistor for up to 10 ms. | Rev0.3 §4; V-MEAS-00 |
+| OI-25 | **J1 current is misdeclared.** The board draws ≈ 0.21 A from J1, but the CH335F's default descriptor declares self-powered and 100 mA. Options: (a) declare honestly via the CH335F EEPROM (an EEPROM part is not yet sourced) plus the MCU function's own MaxPower; (b) power the MCU and analog from J4, which loses control without J4; (c) accept and document. | Rev0.4 §7.1 |
+| OI-26 | **HS signal integrity through the modules is unverified.** D± pass through 2.54 mm headers and Akizuki module layouts. The fallback is that DUTs enumerate at FS. | Rev0.4 §3.3; V-HOST-01 |
+| OI-27 | **OP07 single-supply operation is extrapolated.** Unverified: common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V (extrapolated from ±15 V specs); the mirror gate's 0.19–0.44 V headroom at 1 A; loop stability into a 645 pF gate. Bench-check before layout (V-MEAS-00). | Rev0.4 §3.2 |
+| OI-28 | **R_M short-time overload is unverified.** A stuck-MID short puts 2.35 W into a 1 W axial resistor for up to 10 ms. | Rev0.4 §4; V-MEAS-00 |
 | OI-29 | **No input fuse on J4.** No fuse or PTC is Basic. Choose an Akizuki resettable fuse (hold ≥ 2.5 A at 5 V), or record the decision to rely on the source's own protection. | `requirements/parts.md` "Not yet selected" |
-| OI-30 | **Two Preferred Extended parts need the user's decision.** STM32F103C8T6 (C8734) and SRV05-4 (C7420376) are Preferred Extended: no feeder fee in Economic PCBA, but labelled Extended, which D13 forbids if read literally. If they are rejected, the fallback is an Akizuki RP2040 module plus a DIP ADC (halved sample rate, no simultaneous sampling) and no D± ESD (against §9). | Rev0.3 §9 |
+| OI-30 | ~~Two Preferred Extended parts need the user's decision.~~ **Closed by decision** (D22, user, 2026-11-03): Basic parts only. STM32F103C8T6 (C8734) and SRV05-4 (C7420376) are removed; D23 replaces the MCU with the PGA2040 and two MCP3208, and D± of J1–J3 lose their ESD protection. | Rev0.4 §9, §10 D22/D23 |
+| OI-31 | **PGA2040 and MCP3208 assumptions unverified.** From a purchased PGA2040, confirm the supply input (3.3 V only, or 5 V through an on-module regulator), whether the 27 Ω USB series resistors are on the module, and that the flash reports a 64-bit unique ID. Bench-check the MCP3208's stretched sample phase (≤ 0.21 LSB computed), its INL at V<sub>REF</sub> = 3.3 V, and the RP2040's reset pull-down against the 10 kΩ hold pull-ups. The fallback for the sample phase is double conversion at 8 kSPS; a failure otherwise reopens D23. | Rev0.4 §3.2, §3.3, §6.2; V-MEAS-06 |
 
 ---
 
@@ -633,8 +642,8 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 - [ ] JLCPCB stackup ID recorded; differential impedance computed against it.
 - [ ] Machine-placed components on Top only. Bottom paste apertures: 0. Hand-soldered
       parts are listed separately and appear in neither BOM nor CPL (V-MFG-01).
-- [ ] Every BOM line Basic, or an OI-30 part with the user's decision recorded; every
-      hand-soldered part in stock at Akizuki (V-MFG-02).
+- [ ] Every BOM line Basic, with no Preferred Extended (D22); every hand-soldered
+      part in stock at Akizuki (V-MFG-02).
 - [ ] Every shunt uses a Kelvin land pattern.
 - [ ] ≥ 3 fiducials present in the Gerber.
 - [ ] Silkscreen: Latin ≥ 1.0 mm, no CJK below 2.0 mm, nothing clipped.

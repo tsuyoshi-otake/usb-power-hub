@@ -1,11 +1,11 @@
 # USB Power-Control Hub — Verification Plan
 
-**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.3 on 2026-11-03. Nothing below has
+**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03. Nothing below has
 been executed — no board exists.
 
 Every requirement in `requirements/product.md` is covered by at least one entry here, and
-every entry cites the requirements it proves. Design-review gates G1 – G18 live in
-`design/circuit/CIRCUIT_DESIGN_Rev0.3.md` Section 8; entries here reference them rather than
+every entry cites the requirements it proves. Design-review gates G1 – G19 live in
+`design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 8; entries here reference them rather than
 restate them. CLAUDE.md Section 8 ("Functional" gate) requires these to pass before release.
 
 **Stages:** *Design review* (against schematic/layout, before order) · *Bench* (a hand-built
@@ -26,7 +26,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - the intended host PCs;
 - Type-C sink tester (Rd = 5.1 kΩ);
 - ≥ 3 different USB-C cables, including the widest overmould on hand;
-- an ST-LINK-class SWD probe with a TC2030-NL cable.
+- an SWD probe with a TC2030-NL cable (debug only; programming uses the ROM USB bootloader).
 
 ---
 
@@ -70,8 +70,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - first power-up with blank flash;
   - power-up with firmware;
   - brown-out (ramp J1 5 V → 2 V → 5 V at 1 V/ms);
-  - IWDG reset (a test build that stops feeding it);
-  - `BOOT`;
+  - watchdog reset (a test build that stops feeding it);
+  - `BOOT`, and SW3 held at plug-in (ROM bootloader);
   - J1 unplugged with J4 present.
 
   Separately, with ports ON, send a USB hub-class `ClearPortFeature(PORT_POWER)` from the
@@ -134,7 +134,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Under-voltage opens both ports 10–20 ms after V_J4 < 4.4 V, with `FAULT:UNDERVOLTAGE`.
   - No automatic re-enable within 10 s; `PORT A OFF` clears to `OFF`; `PORT A ON` re-enables
     once the load is removed.
-  - With the OC event ignored, the hiccup's duty cycle is < 1 %, and the IWDG resets the MCU
+  - With the OC event ignored, the hiccup's duty cycle is < 1 %, and the watchdog resets the MCU
     within 500 ms when the test build also stops feeding it.
 
 ### V-PORT-06 — Rp gating and port independence
@@ -166,6 +166,29 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - R_M changes < 0.1 %.
   - Failing any of these reopens D17 before layout.
 
+### V-MEAS-06 — ADC sampling and MCU interface, before layout
+- **Covers:** REQ-MEAS-05, REQ-MEAS-08, REQ-SAFE-01 (design assumptions behind them; OI-31)
+- **When:** Bench (a PGA2040 and one MCP3208 at V<sub>DD</sub> 5 V, V<sub>REF</sub> 3.3 V,
+  wired as in circuit §3.2 and §6.4)
+- **Method:**
+  - Drive CH0 and CH1 each from 1.5 kΩ ∥ 330 pF through 1 kΩ, one at 0 V and one at 3.3 V
+    (a current into the 1.5 kΩ, as the mirror does). Convert them alternately, first with the
+    native 1.5 µs sample and then with the 4.5 µs stretched sample; compare with a single-
+    channel reading of each.
+  - Sweep CH0 from 0 to 3.3 V against the reference DMM in 64 steps.
+  - Hold the RP2040 in reset (RUN low), then power it with blank flash; measure a GPIO that has
+    a 10 kΩ pull-up to 3.3 V, as Q19/Q20's gates do.
+  - Inspect the PGA2040: its supply input, the D+/D− series resistance from module pin to
+    RP2040 pin, the flash part number, and the unique ID read by a test build.
+- **Pass:**
+  - Stretched: the alternating readings agree with the single-channel ones within 0.5 LSB.
+    Native: they disagree by more than 5 LSB, which shows the test can fail.
+  - INL within ±2 LSB at V<sub>REF</sub> = 3.3 V.
+  - The pulled-up GPIO stays ≥ 2.5 V in reset and after power-up.
+  - The module findings are recorded in `requirements/parts.md`; a missing 27 Ω pair or a
+    flash without a unique ID is added to the design before layout.
+  - Failing any of the first three reopens D23 before layout.
+
 ### V-MEAS-01 — Range, accuracy and sample rate against a reference
 - **Covers:** REQ-MEAS-01, REQ-MEAS-05, REQ-MEAS-08
 - **When:** Bring-up (all points) + Production (one point per range)
@@ -181,7 +204,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Every point within ±(1 % + 3 LSB of its range); points just above a down-range threshold
     are judged against that floor.
   - 0.1 µA is distinguishable from 0.
-  - Sample rate 18.52 kSPS ± 0.1 %.
+  - Sample rate 14.0 kSPS ± 0.1 % (14 samples per 1 ms frame).
   - Record the leakage figure in `requirements/parts.md`.
 
 ### V-MEAS-02 — Hardware up-ranging and firmware hold
@@ -191,7 +214,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Range LOW, 10 µA load. Step to 300 mA and to 1 A with the electronic load. Scope both
     bypass gates, the EVT pins, the HOLD pins and VBUS_A.
   - Repeat with the MCU held in reset after setting LOW through a test build: hold released,
-    then NRST low.
+    then RUN low.
 - **Pass:**
   - Each stage's bypass gate is below −3.5 V V<sub>GS</sub> within 3 µs of its comparator
     threshold.
@@ -217,7 +240,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - **Covers:** REQ-MEAS-04, REQ-MEAS-07
 - **When:** Bring-up
 - **Method:**
-  - Port ON, DUT side = 10 µF only. Record 10 s at 18.5 kSPS and compute the rms.
+  - Port ON, DUT side = 10 µF only. Record 10 s at 14.0 kSPS and compute the rms.
   - Step a resistive load from 50 µA to 100 µA on LOW, and measure the 10 – 90 % rise of the
     reading.
   - Repeat on MID with 5 mA → 10 mA.
@@ -252,7 +275,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Replug 5 times into different ports.
   - Plug a High-Speed USB device (a USB 2.0 flash drive) into J2 and J3, and run a 1 GB
     read/verify on each.
-  - Compare the STM32 function's VID/PID with the allocation record.
+  - Compare the MCU's USB VID/PID with the allocation record.
 - **Pass:**
   - A CH335F hub plus one composite device with two CDC-ACM interfaces; no driver install on
     any OS.
@@ -264,7 +287,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
 ### V-HOST-02 — Control during streaming
 - **Covers:** REQ-HOST-03
 - **When:** Bring-up + every firmware release
-- **Method:** Stream at 18.5 kSPS for 10 min while sending 1,000 `PORT A?` commands at random
+- **Method:** Stream at 14.0 kSPS for 10 min while sending 1,000 `PORT A?` commands at random
   intervals.
 - **Pass:** No sequence gaps; every command answered within 50 ms.
 
@@ -275,13 +298,13 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - **When:** Bring-up
 - **Method:**
   - Fully assembled unit: send `BOOT`.
-  - Then erase the application (keep the bootloader), hold SW3 through the pinhole, and
-    replug.
-  - Then try to overwrite the bootloader pages from the DFU tool.
+  - Then load a firmware that never answers on USB, hold SW3 through the pinhole, and replug
+    J1.
 - **Pass:**
-  - The DFU device appears both times without opening the case, and new firmware flashes and
-    runs.
-  - The bootloader pages are rejected as write-protected.
+  - The RP2040 boot drive appears both times without opening the case, and new firmware
+    copied to it as a UF2 file flashes and runs.
+  - With the ROM bootloader there are no bootloader pages to protect; Rev0.3's
+    write-protection check is not needed.
 
 ## Mechanical
 
@@ -323,8 +346,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Open each hand-soldered part's Akizuki page and record its stock.
   - Compare each BOM line's class with the rule.
 - **Pass:**
-  - Every BOM line is Basic with ≥ 500 assembly stock, or is one of the OI-30 parts with the
-    user's decision recorded.
+  - Every BOM line is Basic with ≥ 500 assembly stock; no Preferred Extended line (D22).
   - Every hand-soldered part shows stock ≥ the build quantity.
 - **Limits:** `jlc_stock.py` sees the class and stock only, not suitability. It was shown
   failing (exit 1) on a non-existent code on 2026-11-03. Akizuki stock is read by hand,

@@ -1,10 +1,10 @@
 # USB Power-Control Hub — Product Requirements
 
-**State: WIP — MANUFACTURING PROHIBITED.** Opened 2026-11-03. Revised for circuit Rev0.3
+**State: WIP — MANUFACTURING PROHIBITED.** Opened 2026-11-03. Revised for circuit Rev0.4
 on 2026-11-03.
 
 This file is the authority for **what** the product must do (CLAUDE.md Section 2).
-**How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.3.md`. **How each requirement is
+**How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.4.md`. **How each requirement is
 proven:** `requirements/verification.md` — every `REQ-` here has at least one `V-` there.
 
 Status legend:
@@ -12,7 +12,7 @@ Status legend:
 | Status | Meaning |
 |---|---|
 | **Settled** | Traced to a user decision (D-number) or a CLAUDE.md MUST. Change only with the user |
-| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.3 §10, D14–D21). Binding until the user reverts it; the user may revert any one |
+| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.4 §10, D14–D21 and D23). Binding until the user reverts it; the user may revert any one |
 | **Proposed** | Written by Claude to fill a gap and **not** covered by the delegation. Becomes Settled when the user accepts it |
 | **Open** | Cannot be written until the named Open Issue (CLAUDE.md Section 11) is resolved |
 | **Withdrawn** | Retired with a reason; the ID is not reused |
@@ -37,12 +37,12 @@ This section answers "can firmware stop power to a port?": yes, and this is the 
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
-| REQ-PORT-01 | **Default state OFF.** Each port is OFF at power-up, after any reset (power-on, brown-out, watchdog, `BOOT`), while the STM32 is unprogrammed or unpowered, and whenever firmware is not actively driving EN_x. Implementation: EN_G_x has 100 kΩ to GND, so an undriven GPIO means OFF. A firmware hang is turned into a reset by the independent watchdog (IWDG, hardware-enabled by option byte, timeout ≤ 500 ms, fed only from the main loop), so a hang also ends OFF. | Delegated | D18 |
+| REQ-PORT-01 | **Default state OFF.** Each port is OFF at power-up, after any reset (power-on, brown-out, watchdog, `BOOT`), while the MCU is unprogrammed, unpowered or in its ROM bootloader, and whenever firmware is not actively driving EN_x. Implementation: EN_G_x has 100 kΩ to GND, so an undriven GPIO means OFF. A firmware hang is turned into a reset by the RP2040 watchdog (enabled by firmware as the first thing at boot, timeout ≤ 500 ms, fed only from the main loop; until it is enabled the ports are in their reset state, OFF), so a hang also ends OFF. | Delegated | D18, D23 |
 | REQ-PORT-02 | **ON / OFF / CYCLE commands** on the control port, per Section 4.1. Every command returns exactly one terminal line: `OK` or `ERR <nn> <TEXT>`. `OFF` always succeeds. A command rejected for its form (`ERR 01`, `ERR 02`, `ERR 08`) is refused before any action and leaves both ports unchanged. `ON` and `CYCLE` that fail after validation (`ERR 04`) leave the port OFF. | Delegated | CLAUDE.md §10.3 "independently switchable under firmware control" (Settled); command set D21/§4.1 |
 | REQ-PORT-03 | **CYCLE discharge, timed.** `PORT x CYCLE [ms]` switches the port OFF with its discharge FET ON (1 kΩ), holds OFF for `ms` (100 – 60000, default 1000), then switches ON under REQ-PWR-04. The 100 ms minimum is ≥ 5 τ for 20 µF of total port capacitance (board 10 µF + DUT ≤ 10 µF), so VBUS_x is below 0.8 V (vSafe0V) before ON. VBUS_x is not measured (circuit §3.1); this is verified by measurement (V-PORT-03), not checked at run time. *Rev0.2's `ERR 06 DISCHARGE TIMEOUT` is withdrawn.* | Delegated | D18 |
 | REQ-PORT-04 | **Back-feed blocked, not detected.** While a port is OFF the back-to-back switch blocks current from a DUT that drives VBUS_x, which sees the 1 kΩ discharge load. Back-feed is not detected, because measuring VBUS_x would add a leakage that the LOW range measures. *Rev0.2's `OFF:BACKFEED` and `ERR 07` are withdrawn.* | Delegated (reduced function, circuit §7.4) | D18 |
 | REQ-PORT-05 | **Faults.** Hardware opens the port within 10 µs when its current exceeds 1.16 A (±3 %); firmware then latches `FAULT:OVERCURRENT`. Firmware also latches `FAULT:UNDERVOLTAGE` and switches both ports OFF if V_J4 is below 4.4 V for more than 10 ms while a port is ON. It latches `FAULT:BUDGET` (REQ-PWR-05) and `FAULT:STUCKRANGE` (REQ-SAFE-03). Firmware never retries automatically. A fault is cleared only by `PORT x OFF` (acknowledge, port stays OFF) or `PORT x ON` (acknowledge and retry). | Delegated | D18 |
-| REQ-PORT-06 | **Single owner.** The STM32 GPIO driving EN_x is the only thing that switches a port. The CH335F's PWREN# pins are not connected, and no host-side hub request (e.g. a hub-class port-power command) changes the port. | Delegated | Rev0.2 P3, adopted in D18 |
+| REQ-PORT-06 | **Single owner.** The MCU GPIO driving EN_x is the only thing that switches a port. The CH335F's PWREN# pins are not connected, and no host-side hub request (e.g. a hub-class port-power command) changes the port. | Delegated | Rev0.2 P3, adopted in D18 |
 | REQ-PORT-07 | Each port presents Rp = 33 kΩ to 3.3 V on CC1 and CC2, **sourced from the EN_x pin itself**, so Rp is present only while that port is commanded ON and disappears at reset. The DUT sees a detach when the port switches OFF. | Delegated change of a Settled requirement — CLAUDE.md §10.3 originally gated Rp by "port VBUS"; a back-feeding DUT would keep VBUS up | Rev0.2 P3, adopted in D18 |
 | REQ-PORT-08 | The two ports switch independently. Switching one never glitches the other's VBUS by more than 100 mV (turn-on is soft-started ≥ 1 ms). | Settled (independence) / Delegated (100 mV figure) | CLAUDE.md §10.3 |
 
@@ -52,23 +52,23 @@ This section answers "can firmware stop power to a port?": yes, and this is the 
 |---|---|---|---|
 | REQ-MEAS-01 | Each port's current is measured from 0.1 µA to 1 A. | Settled | User request 2026-08-16 |
 | REQ-MEAS-02 | Three ranges, 510 Ω / 10 Ω / 0.1 Ω shunts in a nested bypass ladder. Up-ranging on over-range is done by hardware without the MCU, ≤ 3 µs per stage. Firmware holds the new range within 100 µs and does all down-ranging (below 0.8 × the lower range's threshold for 1 ms). | Delegated | D17 (supersedes D3; amends D4) |
-| REQ-MEAS-03 | Zero-point calibration is a function, not an option: `ZERO x` with the port **ON and nothing attached** (the ladder is unpowered while OFF). Firmware asks for a re-zero when the STM32 die temperature has moved more than 5 °C since the last zero. | Settled (mandatory zero) / Delegated (procedure, 5 °C trigger) | D3, D17 |
-| REQ-MEAS-04 | **Resolution:** 0.1 µA = 1 LSB on the LOW range at the full 18.5 kSPS output rate. The calculated amplifier noise (≈ 2.5 nA rms) is far below 1 LSB, so no lower output rate is needed for it. | Delegated | Circuit §4, §4.1 |
+| REQ-MEAS-03 | Zero-point calibration is a function, not an option: `ZERO x` with the port **ON and nothing attached** (the ladder is unpowered while OFF). Firmware asks for a re-zero when the RP2040's on-chip temperature sensor has moved more than 5 °C since the last zero. | Settled (mandatory zero) / Delegated (procedure, 5 °C trigger) | D3, D17 |
+| REQ-MEAS-04 | **Resolution:** 0.1 µA = 1 LSB on the LOW range at the full 14.0 kSPS output rate. The calculated amplifier noise (≈ 2.5 nA rms) is far below 1 LSB, so no lower output rate is needed for it. | Delegated | Circuit §4, §4.1 |
 | REQ-MEAS-05 | **Accuracy** ±(1 % of reading + 3 LSB of the active range) within ±10 °C of the calibration temperature, after per-unit gain calibration and zero-cal. Floors: LOW 0.32 µA, MID 16 µA, HIGH 1.0 mA. Just after a down-range the floor is up to 5.5 % (MID, 292 µA) or 6.8 % (HIGH, 14.9 mA) of the reading. | Delegated | D20 (closes OI-21) |
 | REQ-MEAS-06 | Every sample carries its range code and three flags: *settling* (the sample overlaps a range change), *clipped* (over the top of HIGH, > 1.37 A), and *fault* (the port opened). | Delegated | Circuit §3.3 |
 | REQ-MEAS-07 | **Documented limitation:** with the 10 µF port capacitor, the current bandwidth is ~31 Hz on LOW, ~1.6 kHz on MID and ~100 kHz on HIGH. Below 365 µA, sub-10 ms detail is not observable. The user documentation must say so. | Settled (limitation) / Delegated (values) | Rev0.1 §4 Condition 2; circuit §4 |
-| REQ-MEAS-08 | Sample rate 18.5 kSPS per channel, both channels sampled simultaneously. *Replaces D8's 32 kSPS.* | Delegated | D17 |
+| REQ-MEAS-08 | Sample rate 14.0 kSPS per channel, both channels sampled simultaneously (one ADC per port on a shared clock and chip select). *Replaces D8's 32 kSPS and Rev0.3's 18.5 kSPS.* | Delegated | D17, D23 |
 
 ## 4. Host interface
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
 | REQ-HOST-01 | The board enumerates as a USB hub with a composite CDC-ACM ×2 device behind it: control (`COMn`) and stream (`COMn+1`), driverless on Windows 10/11, macOS and Linux. | Settled | D7 |
-| REQ-HOST-02 | Every unit reports a unique USB serial number derived from the STM32 96-bit unique ID, so its COM numbers are stable across replugs. | Settled | CLAUDE.md §10.3, G8 |
+| REQ-HOST-02 | Every unit reports a unique USB serial number derived from the 64-bit unique ID of the MCU module's flash (OI-31 confirms the flash supports it), so its COM numbers are stable across replugs. | Settled | CLAUDE.md §10.3, G8 |
 | REQ-HOST-03 | The control port stays usable while the stream port is running. | Settled | Rev0.1 §3.3 |
 | REQ-HOST-04 | The control port implements the protocol in Section 4.1. | Delegated | D21 |
 | REQ-HOST-05 | The stream is binary and framed per Section 4.2. | Settled (binary, framed) / Delegated (frame layout) | Rev0.1 §3.3 |
-| REQ-HOST-06 | The STM32 function uses a VID/PID we are entitled to (pid.codes for open hardware, or a purchased VID), never a squatted one. Value not yet chosen. | Settled (rule) / Open (value) | CLAUDE.md §10.5 |
+| REQ-HOST-06 | The MCU's USB function uses a VID/PID we are entitled to (pid.codes for open hardware, or a purchased VID), never a squatted one. Value not yet chosen. | Settled (rule) / Open (value) | CLAUDE.md §10.5 |
 | REQ-HOST-07 | DUT data passes through a USB 2.0 High-Speed hub (CH335F) on each downstream port. HS through the Akizuki modules and headers is unverified (OI-26); if HS fails at bring-up, FS operation is the documented fallback. | Delegated | D15 (D11 superseded by D13) |
 
 ### 4.1 Control protocol v0 — Delegated
@@ -96,7 +96,7 @@ Line-based ASCII, so a plain terminal (TeraTerm, PuTTY, `screen`) is a complete 
 | `CAL? <A\|B>` | `OK <gain and offset per range>` — what the host tool needs to convert stream codes to amperes | `ERR 02 BAD ARGUMENT` |
 | `RANGE <A\|B> <AUTO\|HIGH\|MID\|LOW>` | `OK` — a fixed range is a firmware hold; hardware up-ranging still overrides it on over-range (REQ-SAFE-02), and firmware returns to it after 1 ms below threshold | `ERR 02 BAD ARGUMENT` |
 | `STREAM <ON\|OFF>` | `OK` | — |
-| `BOOT` | `OK`, then reboot into the flash DFU bootloader within 100 ms; ports OFF (REQ-PORT-01) | — |
+| `BOOT` | `OK`, then reboot into the RP2040 ROM USB bootloader within 100 ms; ports OFF (REQ-PORT-01) | — |
 | anything else | — | `ERR 01 UNKNOWN COMMAND` · `ERR 08 LINE TOO LONG` |
 
 `<state>` is one of the `PORT x?` responses without `OK `. Error codes `ERR 06` and
@@ -107,22 +107,27 @@ REQ-PORT-04) and are not reused.
 
 - Frame: sync `0xA5 0x5A`, version (u8), flags (u8), sequence number (u16, wraps), sample
   count n (u16), n sample records, CRC-16/CCITT over everything after the sync bytes.
+- Timing: the ADCs deliver 1 ms frames of 14 samples, 69 µs apart, with a 103 µs gap across
+  each frame's aux conversion (circuit §3.3). A stream frame carries whole 1 ms ADC frames
+  (n is a multiple of 14), and its sequence number is the index of its first 1 ms ADC frame.
+  The host therefore knows every sample's time exactly.
 - Sample record, 5 bytes:
-  - channel A (u16, sum of 4 consecutive 12-bit conversions of the active range's amplifier);
+  - channel A (u16, one 12-bit conversion of the active range's amplifier);
   - channel B (u16, the same);
   - one byte holding each channel's range code (2 bits each) and the settling and clipped
     flags (REQ-MEAS-06).
-- At 18.5 kSPS that is 92.6 kB/s, about 7.8 % of Full-Speed bulk.
+- At 14.0 kSPS that is 70.0 kB/s, about 5.9 % of Full-Speed bulk.
 - The host tool converts codes to amperes with the constants from `CAL?`. Fault events are
   carried in the frame `flags` byte.
-- A gap in sequence numbers is reported by the host tool as lost data, never silently bridged.
+- A sequence number other than the previous one + n / 14 is reported by the host tool as lost
+  data, never silently bridged.
 
 ## 5. Recovery and programming
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
 | REQ-BOOT-01 | Firmware recovery is reachable without disassembly. | Settled | CLAUDE.md §10.3 |
-| REQ-BOOT-02 | Method: a write-protected USB DFU bootloader in the first flash pages. It is entered by the `BOOT` command for normal updates, or by holding SW3 (behind a lid pinhole) at power-up when the application no longer answers. The bootloader is written once per board over SWD (REQ-MFG-03). The STM32 ROM bootloader (USART1 via the BOOT0 test pad) is the last resort. | Delegated | D21 (Rev0.2 P10; the STM32F103 has no ROM USB bootloader) |
+| REQ-BOOT-02 | Method: the RP2040 ROM USB bootloader (a UF2 drive), which is in ROM and cannot be erased. It is entered by the `BOOT` command for normal updates, or by holding SW3 (behind a lid pinhole, wired to the module's BOOTSEL) while J1 is plugged in when the application no longer answers. No per-board programming over SWD is needed. | Delegated | D21 as amended by D23 (Rev0.2 P10) |
 
 ## 6. Mechanical
 
@@ -140,9 +145,9 @@ REQ-PORT-04) and are not reused.
 |---|---|---|---|
 | REQ-MFG-01 | JLCPCB PCBA places SMD parts on Top only. The user hand-solders the Akizuki modules and large parts after delivery: through-hole pins are soldered from Bottom, and the two large SMD shunts on Top. No part body on Bottom; ENIG. | Settled | D13; changes CLAUDE.md §1 "Top-side assembly" |
 | REQ-MFG-02 | ≥ 3 global fiducials, 1 mm copper / 2 mm mask opening. | Settled | CLAUDE.md §10.3 |
-| REQ-MFG-03 | SWD reachable by a fixture with mechanical datums. Method: Tag-Connect TC2030-NL footprint. | Settled (need, OI-8) / Delegated (method) | OI-8, D21 |
-| REQ-MFG-04 | Test pads on VBUS_IN, VSUP_A, VSUP_B, VBUS_A, VBUS_B, V5L, V12F, V_INJ, V3V3, VDDA and GND. | Delegated | D21 |
-| REQ-MFG-05 | **Sourcing.** Every machine-placed part is JLCPCB **Basic** with ≥ 500 assembly-pool stock at order time. Every hand-soldered part is in stock at Akizuki at order time. No Extended-only part. Two Preferred Extended parts (STM32F103C8T6, SRV05-4) are pending the user's decision (OI-30). Special or hard-to-source parts SHOULD be avoided, and part types and count SHOULD be kept low. | Settled | D13 |
+| REQ-MFG-03 | SWD reachable by a fixture with mechanical datums, for debug; programming does not need it (REQ-BOOT-02). Method: Tag-Connect TC2030-NL footprint. | Settled (need, OI-8) / Delegated (method) | OI-8, D21 |
+| REQ-MFG-04 | Test pads on VBUS_IN, VSUP_A, VSUP_B, VBUS_A, VBUS_B, V5L, V5A, V12F, V_INJ, V3V3, VDDA and GND. | Delegated | D21 |
+| REQ-MFG-05 | **Sourcing.** Every machine-placed part is JLCPCB **Basic** with ≥ 500 assembly-pool stock at order time. Every hand-soldered part is in stock at Akizuki at order time. No Extended part of any kind, Preferred Extended included. Special or hard-to-source parts SHOULD be avoided, and part types and count SHOULD be kept low. | Settled | D13, D22 |
 
 ## 8. Safety and fail-safe
 
@@ -165,5 +170,9 @@ REQ-PORT-04) and are not reused.
 - **A step from deep sleep to 1 A** dips the port by ~0.6 V for ~6 µs while the ranges
   switch (circuit §4).
 - **Back-feed** is blocked but not reported (REQ-PORT-04).
-- **The sample rate (18.5 kSPS) is set by the ADC sampling time** (OI-14).
+- **The sample rate (14.0 kSPS) is set by the ADC conversion time** (OI-14). On HIGH, current
+  detail above 7 kHz aliases into the samples; the average current is preserved (circuit §3.3).
+- **No ESD protection on D+/D− of J1, J2 and J3** (D22). Only the hub chip's own protection
+  remains. Discharge yourself and the cable before plugging in, as with a bare development
+  board.
 - **J1 draws ≈ 0.21 A** while the hub declares 100 mA (OI-25).

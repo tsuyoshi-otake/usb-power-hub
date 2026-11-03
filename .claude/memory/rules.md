@@ -76,6 +76,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   (SyntaxError, 2026-11-03). Build a literal backslash with `chr(92)`, or write the script with
   the Write tool. (`<bs>` stands for a backslash here, so this rule does not depend on how it
   is itself pasted.)
+- **`Path.write_text` on Windows writes CRLF.** An edit script that read LF files with
+  `read_text` and saved them with `write_text(s, encoding="utf-8")` left all seven edited
+  files CRLF (675 of 675 lines in CLAUDE.md, counted in the bytes on 2026-11-03). Git's
+  `eol=lf` attribute normalizes the commit, but the working copy keeps CRLF until the next
+  checkout. Pass `newline="\n"` to `write_text`, or use `write_bytes`.
 
 ## Design documents
 
