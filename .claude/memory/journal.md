@@ -508,3 +508,28 @@ Section 13 (board) only once verified.
   - An `rm -rf` of the task's `~/tmp/usb-power-hub/rp2040-price` was denied. It is left for
     the user.
 - **Commit.** This journal entry only.
+
+## 2026-11-04 - RP2350A review (issue #3)
+
+- **Request.** The user asked 「RP2350Aにしようか」, then 「Devinに作業させてSWE-2 Max」.
+- **Devin.** SWE-2 Max extracted 65 facts (A–L) from the RP2350 datasheet (2025-07-29),
+  "Hardware design with RP2350" (2024-10-15), Akizuki 131106 and the JLCPCB API. Its output is in
+  `~/tmp/usb-power-hub/devin-rp2350/`. Claude checked every fact used in the result against the
+  PDFs: the inductor specification, external DVDD (p.451), E9 and its stepping, 5 V tolerance,
+  27 Ω, CHIPID, and RPD. The pull table's text extraction is scrambled, so RPD was rebuilt from the
+  column order. Devin's own `-table` quote gives the same values.
+- **Finding.** The RP2350's 1.1 V core supply cannot be met within D13/D22.
+  - The on-chip regulator needs a polarity-marked, shielded 3.3 µH inductor. The JLCPCB pool has
+    no Basic one. The recommended AOTA-B201610S3R3-101-T (C42411119) is Extended, with stock 1.
+  - An external 1.1 V supply is allowed, but no Basic regulator makes it. The 1.1 V LDOs at
+    JLCPCB are Extended or out of stock. Akizuki's TA4800AF covers 1.5–9.0 V only.
+  - Akizuki's 131106 breakout cannot meet the regulator layout, because of its 2.54 mm headers.
+  - RPD at 3.3 V is 36–113 kΩ, so the 10 kΩ hold pull-ups give 2.54 V against the 2N7002's
+    2.5 V maximum threshold.
+- **Recorded.** Issue #3 comment (issuecomment-6618242801). Nothing in the design changed. The
+  user still decides between #1 (bare RP2040), #5 (bare RP2350A) and the PGA2040.
+- **Investigation.** Devin read only the first 50 hits of its fuzzy inductor search. Re-running
+  the search with `componentLibraryType: "base"` settled it, and that filter is now in rules.md.
+  Before the summary, Claude had noted that Devin's tool files `pdfgrep.py` and `run_jlc.py` did
+  not exist. A listing shows both files exist, so the note is withdrawn.
+- **Commit.** This journal entry and the rules.md entry.

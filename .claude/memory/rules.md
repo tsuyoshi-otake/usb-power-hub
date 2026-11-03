@@ -24,6 +24,12 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   or case-insensitive MPN match counts as found. A search with no exact hit
   (e.g. `TMUX6109`, 2026-11-03) is "not stocked", not "stocked under another
   name".
+- **"Is any Basic part X?" needs the server-side filter.** Add
+  `"componentLibraryType":"base"` to the same request body: the API then returns Basic
+  parts only. `tools/jlc_stock.py --all` shows only the first page of fuzzy hits (50 of
+  5,192 for `3.3uH`), so a Basic part deeper in the list is missed. Verified 2026-11-04:
+  `inductor`, `Inductors` and `10uH` each returned the same two Basic parts (C1035, C1046);
+  `Ferrite Beads` returned 4 and `LDO` 6, all Basic; `3.3uH` returned 0.
 
 - **Prices:** the same search returns `componentPrices`, a list of tiers (`startNumber`,
   `endNumber` with -1 = open-ended, `productPrice` in USD), plus `leastPatchNumber` (20 on the
