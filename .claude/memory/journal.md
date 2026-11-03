@@ -463,8 +463,9 @@ Section 13 (board) only once verified.
     - the flash check was a marking, not a JEDEC ID;
     - two source dates were missing.
   - Round 3 passed C1–C7. After the pass, CLAUDE.md's stale "D1–D21" was fixed and the V_J4
-    tap was added to the §12 test pads. The verifiers' directories are kept:
-    `~/tmp/usb-power-hub/verify-desk-1`, `-2` and `-3`.
+    tap was added to the §12 test pads. The verifiers' directories
+    (`~/tmp/usb-power-hub/verify-desk-1` to `-3`, 17 MB) and the task's own `desk-ds`,
+    `desk-render` and `desk-venv` (79 MB) were deleted once the work was committed.
 - **Learning.** Recorded in rules.md:
   - plot values come from vector paths;
   - render scrambled tables;
