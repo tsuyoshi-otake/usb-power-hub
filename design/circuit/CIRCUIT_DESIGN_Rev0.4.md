@@ -842,6 +842,9 @@ Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
    - R_M's short-time overload (OI-28);
    - the MCP3208's stretched sample phase and its INL at V<sub>REF</sub> = 3.3 V, and the
      RP2040's reset pull-down against the 10 kΩ hold pull-ups (OI-31).
+
+   The parts to buy, the instruments and the bench wiring for items 1, 2 and 5 are in
+   `tests/fixtures/pre-layout-bench/` (issue #1).
 6. Recheck all stock immediately before upload and again before payment (CLAUDE.md §4.1).
 
 ---

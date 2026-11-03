@@ -51,6 +51,7 @@ Read in this order:
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
 | `design/experiments/stackup-impedance/` | The stackup study behind D27: JLCPCB's 4-layer stackups, the 90 Ω USB pair width on each, and a model checked against JLCPCB's single-ended calculator. A non-authoritative study, not design data. |
+| `tests/fixtures/pre-layout-bench/` | The pre-layout bench kit (issue #1): what to buy from Akizuki and LCSC, the instruments, and the wiring for the V-MEAS-00 / V-MEAS-06 bench checks and the CH335F module measurement (OI-24, OI-27, OI-28, OI-31). A test fixture, not design data. |
 | `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
 | `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the board-size decisions D10 and D24 (100 × 72 mm). |
 

@@ -152,7 +152,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
 
 ### V-MEAS-00 — Front-end assumptions, before layout
 - **Covers:** REQ-MEAS-01, REQ-MEAS-02 (design assumptions behind them; OI-27, OI-28)
-- **When:** Bench (one channel hand-built from the same parts)
+- **When:** Bench (one channel hand-built from the same parts). Parts, instruments and wiring:
+  `tests/fixtures/pre-layout-bench/`.
 - **Method:**
   - Build one mirror (OP07CDR on 0/12 V, AO3401A, R1 100 Ω, R_OUT 2.4 kΩ, pedestal 1 MΩ from
     8 V) on the 0.1 Ω shunt. Sweep 0 → 1.2 A from a supply at 4.59 V (J4 = 4.75 V less F1's
@@ -169,7 +170,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
 ### V-MEAS-06 — ADC sampling and MCU interface, before layout
 - **Covers:** REQ-MEAS-05, REQ-MEAS-08, REQ-SAFE-01 (design assumptions behind them; OI-31)
 - **When:** Bench (a PGA2040 and one MCP3208 at V<sub>DD</sub> 5 V, V<sub>REF</sub> 3.3 V,
-  wired as in circuit §3.2 and §6.4)
+  wired as in circuit §3.2 and §6.4). Parts, instruments and wiring:
+  `tests/fixtures/pre-layout-bench/`.
 - **Method:**
   - Drive CH0 and CH1 each from 1.5 kΩ ∥ 330 pF through 1 kΩ, one at 0 V and one at 3.3 V
     (a current into the 1.5 kΩ, as the mirror does). Convert them alternately, first with the

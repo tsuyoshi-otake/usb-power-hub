@@ -79,9 +79,16 @@ is the MAU104, at 178.
     fitted.
   - USB_DP, USB_DM, BOOTSEL, RUN, SWCLK and SWDIO are brought out to pins, with all 30 GPIO.
     This is why it, and not the Pico or the AE-RP2040 kit, can sit behind the CH335F.
-  - *To confirm (OI-31, V-MEAS-06):* the supply input (3.3 V only, or 5 V with an on-module
-    regulator), whether 27 Ω D+/D− series resistors are fitted, the flash part and its unique
-    ID, the crystal, and the module's exact pin map for the footprint.
+  - *On paper (Pimoroni schematic
+    `cdn.shopify.com/s/files/1/0174/1800/files/pga2040_schematic.pdf`, generated 04/06/2021,
+    and shop.pimoroni.com/products/pga2040, both read 2026-11-03):*
+    - The supply input is the VBUS pad A2, "Vbus: 3.0V - 5.5V". It feeds an on-module
+      NCP115AMX330TCG 3.3 V regulator (300 mA max), whose output is the 3V3 pad B3.
+    - R1 = R2 = 27R4 sit in USB_DP / USB_DM. The flash is a W25Q64JVXGIQ.
+  - *To confirm on a purchased module (OI-31, V-MEAS-06):* the supply input, the 27 Ω pair,
+    the flash part and its unique ID, the crystal, the 3V3 pad voltage when VBUS is fed from
+    V3V3 (§6.1 feeds U1 from V3V3), and the module's exact pin map for the footprint. The
+    bench setup is in `tests/fixtures/pre-layout-bench/`.
 - *Verified (MCP3208, Microchip DS21298E):*
   - 12-bit, 8 single-ended channels, SPI; V<sub>DD</sub> 2.7–5.5 V; V<sub>REF</sub> 0.25 V to
     V<sub>DD</sub>.
