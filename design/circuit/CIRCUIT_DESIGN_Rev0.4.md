@@ -2,6 +2,7 @@
 
 **State: WIP — MANUFACTURING PROHIBITED**
 Date opened: 2026-08-16 (Rev0.1). Revised: 2026-11-03 (Rev0.2, Rev0.3 and Rev0.4, all the same day).
+Amended 2026-11-04 (D28: the pre-layout bench is replaced by desk checks, §12).
 
 This document *is* the schematic at this stage. KiCad capture transcribes what is settled
 here; it is not where the design happens (CLAUDE.md Section 2). Nothing in this file has been
@@ -68,11 +69,11 @@ every machine-placed part is JLCPCB Basic (D22, Section 9).
 | 8 | All designators/values in `mockup/` are placeholders | CLAUDE.md §0 | Settled |
 | 9 | ~~Board outline 85 × 35 mm~~, 4 layers | User decision, 2026-11-03 (D10) | 4 layers settled; **outline superseded by fact 17** (D24) |
 | 10 | ~~USB hub is USB2514B~~ | User decision, 2026-11-03 (D11) | **Superseded** by D13 → D15: every USB2514B variant is Extended |
-| 11 | Part parameters quoted here | Manufacturer datasheets fetched 2026-11-03, cited per part in `requirements/parts.md` | High for the parameters cited; nothing else about those parts is confirmed |
+| 11 | Part parameters quoted here | Manufacturer datasheets fetched 2026-11-03 and 2026-11-04 (the D28 desk checks), cited per part in `requirements/parts.md` | High for the parameters cited; nothing else about those parts is confirmed |
 | 12 | Sourcing rule: JLCPCB **Basic** parts in assembly stock for machine-placed parts; **Akizuki** parts in stock for large hand-soldered parts; no Extended-only PCBA | User decision, 2026-11-03 (D13) | Settled |
 | 13 | JLCPCB Basic holds 351 parts: 182 resistors, 88 MLCCs, 81 others. None of the 81 is a microcontroller, a USB hub, a USB-C receptacle, a USB D± ESD array, a current-sense amplifier, a multi-channel ADC or a fuse | JLCPCB assembly-parts list, 2026-11-03 (`requirements/parts.md`) | High as of that date |
 | 14 | Akizuki stock, part numbers and specifications | akizukidenshi.com product pages, 2026-11-03 | High as of that date; stock changes daily |
-| 15 | RP2040: USB 1.1 Full-Speed device with on-chip PHY and D+ pull-up, 4 KB USB packet memory, 30 GPIO with per-pin edge interrupts, PIO, ROM USB bootloader. The PGA2040 module brings USB_DP, USB_DM, BOOTSEL, RUN and SWD out to its 2.54 mm pins | RP2040 datasheet (Raspberry Pi Ltd); Akizuki g116762; Pimoroni's PGA2040 schematic | High for the RP2040. The module's supply input, USB series resistors and flash are OI-31 |
+| 15 | RP2040: USB 1.1 Full-Speed device with on-chip PHY and D+ pull-up, 4 KB USB packet memory, 30 GPIO with per-pin edge interrupts, PIO, ROM USB bootloader. The PGA2040 module brings USB_DP, USB_DM, BOOTSEL, RUN and SWD out to its 2.54 mm pins | RP2040 datasheet (Raspberry Pi Ltd); Akizuki g116762; Pimoroni's PGA2040 schematic | High for the RP2040. The module's supply input (VBUS pad, 3.0–5.5 V, on-module NCP115), its 27 Ω USB pair and its W25Q64JV flash are from Pimoroni's schematic, on paper (D28); a built board confirms them (V-MEAS-06) |
 | 16 | MCP3208-CI/P: 12-bit, 8 ch, SPI; INL ±2 LSB max (C grade); f<sub>CLK</sub> 1 MHz at V<sub>DD</sub> 2.7 V, 2 MHz at 5 V; sample phase 1.5 clocks through a 1 kΩ switch onto 20 pF; inputs rated −0.6 V to V<sub>DD</sub> + 0.6 V, no input-current rating; the clock need not be constant as long as each timing limit is met | Microchip DS21298E, fetched 2026-11-03 | High |
 | 17 | Board outline 100 × 72 mm, 4 layers | D24, 2026-11-03: the user's condition 「100x100未満ならいいんだっけ」 (stay within 100 × 100 mm), size chosen by Claude from the OI-23 study | Settled; block placement checked, routing not |
 | 18 | JLCPCB stackup JLC04161H-7628 (1 oz outer, 7628 prepreg 0.2104 mm, Dk 4.4); the only named 4-layer stackup on the quote page without the special-stackup note. JLCPCB's calculator gives 14.85 mil for 50 Ω single-ended on L1 without mask; its differential calculation returned no result | `jlcpcb.com/impedance` (curl) and the quote page and impedance calculator (browser), 2026-11-03; D27 | High for the stackup data and the single-ended datum. The 90 Ω pair width is a model value, provisional until JLCPCB's differential calculator is rerun |
@@ -130,7 +131,7 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
                                              ├── 10 Ω + 10 µF ── V5A ── U7, U17 MCP3208 V_DD
                                              ├── U5 MAU104 ── V12 ── 10 Ω / 2×22 µF ── V12F ──┬── U10–U12, U20–U22 OP07 V+
                                              │                                             └── U4 CJ431 shunt reg ── V_INJ (8 V)
-                                             └── U2 AMS1117-3.3 ── V3V3 (22 µF) ──┬── U1 PGA2040 (3.3 V or 5 V input: OI-31)
+                                             └── U2 AMS1117-3.3 ── V3V3 (22 µF) ──┬── U1 PGA2040 VBUS pad (its NCP115 in dropout, §7.1)
                                                                                   └── ferrite + 10 µF ── VDDA (U7, U17 V_REF)
 ```
 
@@ -202,16 +203,30 @@ part already fitted for LOW (one part type fewer). The ratios are 51 (MID/LOW) a
 GND), with the inputs at the ~5 V port common mode:
 
 - *Common mode:* OP07 is specified at ±15 V with ±13 V minimum common-mode range, i.e. 2 V
-  from each rail. Applied to 0 / 12 V, that gives 2–10 V. The 4.4–5.25 V inputs sit inside it.
-  **This rail-relative extrapolation is an assumption**: OI-27.
-- *Mirror FET gate:* the gate has to sit about |V<sub>GS(th)</sub>| (≤ 1.3 V) below the
-  source. At HIGH full scale (1 A), with F1 at R1max and the other port off, the source is
-  at 4.66 V (J4 = 5.00 V), so the gate is ≈ 3.36 V. With J4 = 4.75 V it is ≈ 3.11 V, and
-  ≈ 3.03 V when the other port also draws 1 A through the shared F1. The OP07 output low
-  limit is extrapolated as 3.0 V (±12 V into 10 kΩ at ±15 V), which leaves 0.03–0.36 V of
-  headroom (0.19–0.44 V without F1). The 0.03 V corner is J4 at its 4.75 V minimum with
-  both ports at full scale. This is tight and is part of OI-27; V-MEAS-00 tests it at
-  4.59 V.
+  from each rail, and its supply-sensitivity row runs down to ±3 V, i.e. with the inputs
+  3 V from each rail. The 4.4–5.25 V inputs sit 4.40 V above V− and at least 5.37 V below
+  V12F (10.62 V at its lowest: MAU104 −3 %, J1 at −5 % through its line regulation, and the
+  10 Ω filter at 30 mA). That is wider than either specified condition, on each side. It is
+  still a rail-relative reading of a split-supply spec, which a built board confirms
+  (V-MEAS-00, D28).
+- *Mirror FET gate:* the gate has to sit about |V<sub>GS(th)</sub>| (≤ 1.3 V at 250 µA; the
+  mirror carries 1 mA at HIGH full scale) below the source. At HIGH full scale (1 A), with
+  F1 at R1max and the other port off, the source is at 4.66 V (J4 = 5.00 V), so the gate is
+  ≈ 3.36 V. With J4 = 4.75 V it is ≈ 3.11 V, and ≈ 3.03 V when the other port also draws
+  1 A through the shared F1.
+- *OP07 output low (D28 desk check, TI SLOS099F):* the large-signal gain row is specified on
+  a **single 15 V supply** with V<sub>O</sub> = 1.4 V to 11.4 V into R<sub>L</sub> ≥ 500 kΩ
+  (A<sub>VD</sub> ≥ 100 V/mV, OP07C, 25 °C). The gate is a DC load of ≥ 52 MΩ (AO3401A
+  I<sub>GSS</sub> ≤ 100 nA), so that row applies. It puts the output low limit at 1.4 V
+  above V−. On V12F the same row's upper end, 3.6 V below V+, is 7.02 V, above the 5.25 V the
+  gate needs to turn the FET off. The headroom is therefore **1.63–1.96 V**. Rev0.4 had read
+  the output low limit as 3.0 V (±12 V into 10 kΩ at ±15 V), which left 0.03–0.36 V.
+- *Loop stability:* not settled on paper. The 1 kΩ gate resistor into C<sub>iss</sub>
+  645 pF is a pole at 247 kHz, inside the OP07's 0.4–0.6 MHz gain-bandwidth, and
+  C<sub>rss</sub> 55 pF is Miller-multiplied by the drain node. No simulator or vendor model
+  was run (D28). V-MEAS-00's step test at bring-up decides it. The gate resistor (0402) and
+  C_N (0402 / 0603) can be changed by rework; a fix that needs a new part position needs a
+  board revision, which is the risk D28 accepts.
 - *Gate safety:* on a 0 / 12 V supply the gate-source voltage stays between about −5 V and
   +7 V, inside AO3401A's ±12 V rating. A ±12 V supply (MAU108) was rejected because the
   gate could then see −17 V.
@@ -227,9 +242,11 @@ GND), with the inputs at the ~5 V port common mode:
 | Q18 (FET_L) | R_L | 1 MΩ gate→source; Q20 2N7002 gate→GND; LM393 CMP_L output gate→GND |
 
 - Q19 and Q20 have their gates pulled up to V3V3 by 10 kΩ. The RP2040 resets every GPIO to
-  an input with its pull-down on (50–80 kΩ, OI-31). 10 kΩ keeps the gate at ≥ 2.75 V against
-  it; Rev0.3's 100 kΩ would leave it near 1 V. At reset both bypasses are therefore ON and
-  the ladder is in **HIGH** (D9).
+  an input with its pull-down on (PADS_BANK0 PDE resets to 1; 50–80 kΩ, RP2040 datasheet
+  §5.5). 10 kΩ keeps the gate at ≥ 2.70 V against it at V3V3's 3.251 V minimum, above the
+  2N7002's 2.5 V maximum threshold (at 250 µA; it then sinks only the 1 MΩ return, ≤ 5.3 µA).
+  Rev0.3's 100 kΩ would leave it near 1 V. At reset both bypasses are therefore ON and the
+  ladder is in **HIGH** (D9).
 - The MCU's HOLD_M_x / HOLD_L_x pins drive Q19 / Q20 gates. Driving one low releases that
   bypass, which is a down-range.
 - Ranges: HIGH = Q17 ON. MID = Q17 OFF, Q18 ON. LOW = both OFF.
@@ -280,7 +297,7 @@ the LOW node's response becomes τ ≈ 25 µs, and the ranging budget fails. Ins
   therefore stretches the sample phase to 4.5 µs by holding the clock; the datasheet allows
   an irregular clock as long as each timing limit is met (DS21298E §6.2). The residual is
   then 0.06 LSB (LOW, MID) and 0.21 LSB (HIGH). These figures come from the datasheet's
-  input model, and bring-up checks them (OI-31).
+  input model; V-MEAS-06 checks them on the first board (D28).
 
 **Overrange stays inside the ADC's ratings because the MCP3208 runs from 5 V.** An
 overranged amplifier node rises almost to the port supply: 4.92 V (LOW, MID) and 5.04 V
@@ -318,15 +335,18 @@ spare.
 
 Rev0.2's design rules all carry over:
 - The unique serial number comes from the 64-bit unique ID of the module's flash chip. The
-  RP2040 has no unique ID of its own; the Pico SDK reads the flash's. OI-31 confirms that the
-  PGA2040's flash answers that command.
+  RP2040 has no unique ID of its own; the Pico SDK reads the flash's. The PGA2040's flash is
+  a W25Q64JVXGIQ (Pimoroni schematic), which has a factory-set 64-bit unique ID read by
+  instruction 4Bh (Winbond W25Q64JV datasheet, Rev. J). A test build reads it at bring-up
+  (V-MEAS-06).
 - The control interface stays usable while the stream runs.
 - The stream is binary.
 - VID/PID is still OPEN (REQ-HOST-06); pid.codes is the candidate for an open-hardware ID.
 
 The RP2040's D+ pull-up is on chip and under firmware control, so firmware decides when to
-attach and no external pull-up is fitted. The RP2040 needs 27 Ω in series with D+ and D−;
-whether the PGA2040 already carries them is OI-31.
+attach and no external pull-up is fitted. The RP2040 needs 27 Ω in series with D+ and D−.
+The PGA2040 carries them (R1, R2 = 27R4 on USB_DP / USB_DM, Pimoroni schematic), so the
+board adds none.
 
 **Sample rate (replaces D8 and Rev0.3's 18.5 kSPS).**
 - U7 converts port A's three amplifiers and U17 port B's. The two MCP3208s share CLK, CS and
@@ -345,7 +365,7 @@ whether the PGA2040 already carries them is OI-31.
   into the output. The average current is preserved unless the DUT's current is periodic at
   a multiple of the sample rate; waveform detail above 7 kHz is lost.
 - If stretching the sample phase fails at bring-up, the fallback converts each channel twice
-  and keeps the second result, at 8 kSPS (OI-31).
+  and keeps the second result, at 8 kSPS (V-MEAS-06).
 
 | Output | Bytes per sample pair | Rate | % of FS bulk (1188 kB/s) |
 |---|---:|---:|---:|
@@ -431,7 +451,7 @@ the port:
 | Stuck in | Current | Shunt dissipation | What stops it |
 |---|---:|---:|---|
 | LOW | 9.6 mA | 47 mW in 510 Ω 0805 (0.125 W) | Nothing needed |
-| MID | 0.48 A | **2.35 W in R_M (1 W part)** | Below the OC trip. Firmware sees the MID amplifier saturated with the bypass commanded ON, and opens the port within 10 ms. The watchdog is the backstop. R_M's short-time overload rating is OI-28 |
+| MID | 0.48 A | **2.35 W in R_M (1 W part)** | Below the OC trip. Firmware sees the MID amplifier saturated with the bypass commanded ON, and opens the port within 10 ms. The watchdog is the backstop, so firmware sets its timeout to ≤ 5 s. R_M (Faithful Link MFU datasheet) is rated for 2.5 × RCWV for 5 s (6.25 W, ΔR ≤ 1 %) and for 4 × RCWV pulses (16 W, 1 s on / 25 s off, 10,000 cycles). 2.35 W is therefore inside its short-time rating for up to 5 s (D28). The datasheet bounds the resistance shift only after that harsher test, so the < 0.1 % shift after a 10 ms fault is checked at bring-up (V-MEAS-00) |
 | HIGH | Limited by J4's source | R_H 1 W | OC trip at 1.16 A |
 
 ### 4.1 Noise and offset
@@ -485,7 +505,7 @@ MID 16 µA and HIGH 1.0 mA.
 | R_OUT / R1 ratio, two ±100 ppm/°C thick-film parts | 0.20 % |
 | CJ431 used to measure VDDA (U7 CH3) — ratiometric correction | 0.12 % |
 | OP07 drift 0.5 µV/°C typ × 10 °C, referred to input | 0.01 µA LOW, 0.5 µA MID, 50 µA HIGH |
-| ADC INL (MCP3208-C ±1 / ±2 LSB typ / max, specified at V<sub>REF</sub> = 5 V; OI-31 checks 3.3 V) | inside the 3 LSB floor |
+| ADC INL (MCP3208-C ±1 / ±2 LSB typ / max, specified at V<sub>REF</sub> = 5 V; typical +0.6 / −0.4 LSB at 3.3 V in DS21298E Figure 2-2 (read from its vector data), not guaranteed; V-MEAS-06 checks it) | inside the 3 LSB floor |
 | S/H residual after the stretched sample (§3.2) | ≤ 0.21 LSB, inside the floor |
 | Gain calibration residual | ≤ 0.3 % (against a reference meter, V-MEAS-02) |
 
@@ -521,7 +541,7 @@ better choice even in Rev0.2 once D10 removed the area objection (OI-19).
 | V5A | V5L via 10 Ω + 10 µF | 5 V | U7, U17 MCP3208 V<sub>DD</sub> |
 | V12 / V12F | MAU104 / after 10 Ω + 2 × 22 µF 25 V | ≈ 12 V / ≈ 11.7 V | OP07 ×6, U4 |
 | V_INJ | U4 CJ431 shunt regulator | 8.0 V | Six 1 MΩ pedestal resistors |
-| V3V3 | AMS1117-3.3 | 3.3 V | U1 PGA2040 (if it takes 3.3 V, OI-31), pull-ups, Rp (via EN pins), LEDs |
+| V3V3 | AMS1117-3.3 | 3.3 V | U1 PGA2040 VBUS pad (§7.1), pull-ups, Rp (via EN pins), LEDs |
 | VDDA | V3V3 via ferrite + RC | 3.3 V | U7, U17 V<sub>REF</sub> (the ADC full scale), comparator threshold dividers |
 | VREF_CHK | U3 CJ431 | 2.5 V | U7 CH3 only (measures VDDA) |
 
@@ -581,7 +601,7 @@ through-hole and large parts afterwards (REQ-MFG-01).
 
 | Clock | Source | Consumer | Notes |
 |---|---|---|---|
-| 12 MHz on the module | PGA2040's own crystal (OI-31) | RP2040 XOSC | PLLs give the system clock and the 48 MHz USB clock |
+| 12 MHz on the module | PGA2040's own crystal (X1 on Pimoroni's schematic) | RP2040 XOSC | PLLs give the system clock and the 48 MHz USB clock |
 | Y2 12 MHz | C9002 | CH335F XI/XO | CH335F has built-in crystal load capacitors; C9002's 20 pF C<sub>L</sub> may not match them. Measure the frequency against USB's ±500 ppm at bring-up (G9) |
 | SCLK | RP2040 PIO | U7, U17 | 1 MHz; sample phase stretched to 4.5 µs (§3.2, §3.3) |
 
@@ -627,8 +647,17 @@ RP2040 pins are not 5 V-tolerant, so every 5 V signal is translated:
 | **Total** | **≈ 0.21 A** |
 
 V3V3 carries ≈ 47 mA, so AMS1117 dissipates (5.0 − 3.3) V × 47 mA = 0.079 W, a 7 °C rise at
-90 °C/W. This closes OI-18 on this rail. If the PGA2040 takes 5 V and regulates for itself
-(OI-31), its share moves off the AMS1117.
+90 °C/W. This closes OI-18 on this rail.
+
+**U1's supply (D28 desk check).** The PGA2040 takes its supply on the VBUS pad, rated
+3.0–5.5 V, through an on-module NCP115AMX330TCG 3.3 V regulator whose output is the 3V3 pad
+(Pimoroni schematic). U1 stays on V3V3 as drawn, so the NCP115 runs in dropout: 260 mV
+maximum at 300 mA (onsemi NCP115 Rev. 4) is ≤ 43 mV at a 50 mA bound on the module's
+current. The 3V3 pad then sits at ≥ 3.208 V at V3V3's 3.251 V minimum. That is above the
+RP2040's 3.135 V USB_VDD minimum (RP2040 datasheet Table 634), with 0.073 V to spare. Feeding
+the VBUS pad from V5L instead was not chosen: the RP2040 would then run from its own 3.3 V
+rail while the HOLD pull-ups stay on V3V3, and the two rails ramp separately. The 3V3 pad is
+an output and connects to nothing.
 
 **How J1's current is declared (D26, closes OI-25).**
 
@@ -671,7 +700,7 @@ V3V3 carries ≈ 47 mA, so AMS1117 dissipates (5.0 − 3.3) V × 47 mA = 0.079 W
 |---|---|---|---|---|
 | MCU in reset / unprogrammed / in the ROM bootloader / J1 unplugged | OFF (EN_G pulled down) | HIGH (Q19/Q20 pulled up) or unpowered | Absent | ON (or unpowered) |
 | J4 unplugged | No port power | — | Per EN | — |
-| Firmware hung | Hold state, until watchdog reset → as row 1 | Hiccup between ranges | Per EN | Per EN |
+| Firmware hung | Hold state, until watchdog reset (timeout ≤ 5 s, §4) → as row 1 | Hiccup between ranges | Per EN | Per EN |
 | OC trip | OFF in hardware ≤ 10 µs | — | Until firmware drops EN | ON |
 
 The bypass FETs default ON for the reason Rev0.2 gave: a stuck LOW range against a real load
@@ -699,7 +728,7 @@ Checked by a human against the schematic; recorded in the release notes with a n
 
 | # | Gate | Verify | Expect |
 |---|---|---|---|
-| G1 | Bypass FET default state | Trace each gate net with MCU unpowered and J4 present | Q19/Q20 gates pulled to V3V3 by 10 kΩ (≥ 2.75 V against the RP2040's reset pull-down); with V3V3 absent the port switch is also off |
+| G1 | Bypass FET default state | Trace each gate net with MCU unpowered and J4 present | Q19/Q20 gates pulled to V3V3 by 10 kΩ (≥ 2.70 V at V3V3 min against the RP2040's 50 kΩ minimum reset pull-down, §3.2); with V3V3 absent the port switch is also off |
 | G2 | Kelvin sense taps | Inspect R_H (4-pad land), R_M (sense at each lead pad), R_L | Force and sense joined only at the pad; sense traces carry no load current |
 | G3 | Sense pair routing | Inspect each amp's +IN / R1 pair | Tight pair, over L2 GND, away from MAU104 and the hub module |
 | G4 | Analog ground | Inspect ground topology | ADC, amp outputs and VDDA return on a quiet region; no port load current under them |
@@ -710,7 +739,7 @@ Checked by a human against the schematic; recorded in the release notes with a n
 | G9 | Hub crystal | Y2 against CH335F built-in capacitors | Y2 frequency inside ±500 ppm on a built board |
 | G10 | ESD coverage | Count protected lines | J1–J4 CC1, CC2 on PSM712; J1–J3 D+/D− unprotected by decision (D22) and listed as such in the release notes; J1/J4 VBUS on SMBJ6.5CA; SBU not connected (modules do not bring it out) |
 | G11 | Comparator loop | Trace comparator → gate | No MCU in the up-range path; MCU only holds and releases |
-| G12 | Shunt ratings | Datasheets | R_L ≥ 0.125 W for 47 mW stuck-LOW; R_M short-time overload ≥ 2.35 W for 10 ms (OI-28) |
+| G12 | Shunt ratings | Datasheets | R_L ≥ 0.125 W for 47 mW stuck-LOW; R_M short-time overload ≥ 2.35 W for 10 ms (the MFU datasheet gives 6.25 W for 5 s, D28) |
 | G13 | Port-enable ownership | Trace EN_x | Driven only by an RP2040 GPIO; CH335F PWREN# not connected; OVCUR# tied inactive per datasheet |
 | G14 | Hub straps | CH335F PSELF, PGANG | PSELF left at its default, self-powered (D26); ganged mode is irrelevant (PWREN# unused) |
 | G15 | 5 V signals into the MCU | RP2040 pin table and every net on a GPIO | No GPIO net can exceed 3.3 V: EVT through Q24/Q25 (Q44/Q45), DOUT through 10 kΩ / 15 kΩ, OC_x from EN_G_x through 100 kΩ, SCLK/CS/DIN driven through Q50–Q52 |
@@ -788,9 +817,10 @@ appear here.
 | D22 | **Basic parts only:** no Preferred Extended part either. STM32F103C8T6 and SRV05-4 are removed, accepting the costs Claude stated beforehand: an Akizuki RP2040 module plus a DIP ADC, a lower sample rate, and no D± ESD on J1–J3. The user answered 「うん、okだよ」 and then selected 「外して Basic のみにする」 | 2026-11-03 | **User** | OI-30 |
 | D23 | MCU = **PGA2040** (RP2040 module, Akizuki); ADC = **2 × MCP3208-CI/P** (Akizuki DIP16) at V<sub>DD</sub> 5 V, sharing CLK/CS/DIN, sample phase stretched by the PIO, 14.0 kSPS with both ports sampled at once; PSM712 on J1–J3 CC, D± unprotected; RP2040 ROM USB bootloader; hold pull-ups 10 kΩ; level shifters on EVT and the ADC bus. Supersedes D16; amends D17, D19, D21. *Revert → no Basic-only MCU remains; reverting D22 instead restores Rev0.3* | 2026-11-03 | Claude (delegated) | — (opens OI-31) |
 | D24 | Board outline **100 × 72 mm**, 4 layers; amends D10's 85 × 35 mm. The OI-23 study (`design/experiments/oi-23-placement/`) shows that Rev0.4 needs at least 3,715 mm² (no routing space, every low part credited under a module; 3,780 mm² once D25 added F1), against 2,975 mm². The user's condition, 「100x100未満ならいいんだっけ」, is that the outline stays within JLCPCB's 100 × 100 mm base price tier. JLCPCB instant quote, 2026-11-03, 4 layers, 5 pcs, default options: $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; $30.80 at 130 × 72 mm (a $25 engineering fee appears). ENIG adds $16.90 at 85 × 35 and $17.40 at 100 × 72 mm. The size inside the tier is Claude's choice. *Revert → no 85 × 35 layout exists; a smaller outline needs a new study run* | 2026-11-03 | **User** (condition) + Claude (delegated, size) | OI-23 (area only; outlines still open) |
-| D25 | **J4 input fuse F1 = Bourns MF-R300** (Akizuki g112630), ahead of D6. 3.00 A hold (2.49 A at 40 °C) against the 2.33 A the OC trips allow; 6.00 A trip; 30 V, so a wrong supply up to 30 V that D6 crowbars trips F1. Cost: R1max 0.08 Ω adds up to 0.16 V of drop with both ports at 1 A, which cuts the HIGH mirror's gate headroom to 0.03 V in the J4 = 4.75 V corner (OI-27, V-MEAS-00). Fallbacks if the bench check fails: firmware flags HIGH readings while V_J4 (measured after F1) is below the measured limit, or revert D25. Rejected: relying on the source's own protection, because a hand-soldered board can short upstream of the port OC. *Revert → OI-29 reopens; no other Akizuki PTC has a datasheet with resistance figures at hand* | 2026-11-03 | Claude (delegated) | OI-29 |
+| D25 | **J4 input fuse F1 = Bourns MF-R300** (Akizuki g112630), ahead of D6. 3.00 A hold (2.49 A at 40 °C) against the 2.33 A the OC trips allow; 6.00 A trip; 30 V, so a wrong supply up to 30 V that D6 crowbars trips F1. Cost: R1max 0.08 Ω adds up to 0.16 V of drop with both ports at 1 A, which cuts the HIGH mirror's gate headroom to 0.03 V in the J4 = 4.75 V corner (OI-27, V-MEAS-00; **D28:** 1.63 V against TI's single-supply row, §3.2). Fallbacks if the bench check (since D28, V-MEAS-00 at bring-up) fails: firmware flags HIGH readings while V_J4 (measured after F1) is below the measured limit, or revert D25. Rejected: relying on the source's own protection, because a hand-soldered board can short upstream of the port OC. *Revert → OI-29 reopens; no other Akizuki PTC has a datasheet with resistance figures at hand* | 2026-11-03 | Claude (delegated) | OI-29 |
 | D26 | **J1 power declaration.** The CH335F stays self-powered (PSELF default, 100 mA), because J2 and J3 are powered from J4: as a bus-powered hub it would offer DUTs only 100 mA. The RP2040 function declares bMaxPower 200 mA, bus-powered, against its 126 mA typical, 172 mA with every OP07 at its maximum. The board is specified for upstream ports that supply 500 mA, not for bus-powered hubs. Rejected: (a) raising the hub's MaxPower through the CH335F EEPROM, since a self-powered hub may draw only one unit load from upstream, so a larger figure is itself non-compliant, and it adds a part; (b) feeding the MCU and analog from J4. That is compliant, but it removes the COM port whenever J4 is absent. It also takes ≈ 0.13 A out of J4's advertisement, so a Default-only J4 could run no port (REQ-PWR-04), and it cuts F1's 40 °C hold margin from 0.16 A to ≈ 0.03 A. *Revert → OI-25 reopens with (a) and (b)* | 2026-11-03 | Claude (delegated) | OI-25 |
 | D27 | **Stackup JLC04161H-7628**, named on the order ("Specify Stackup: Yes"): 1 oz outer, 7628 prepreg 0.2104 mm (Dk 4.4) between L1 and L2, 1.065 mm core, 1.5862 mm in total; the layer use stays CLAUDE.md §5.1's. On the quote page (browser, 2026-11-03) it was the only one of 18 named 4-layer stackups without the note "This is a special stackup, and it doesn't support economic PCB assembly", naming it left the PCB price at $25.40, and "No requirement" shows the same build. **USB 2.0 pair: W = 0.31 mm, S = 0.15 mm on L1 over L2**, 90.4 Ω in the bare Hammerstad–Jensen + Kirschning–Jansen model at the published Dk (99.7 / 82.8 Ω at W −/+20 %, S held). The model reproduces JLCPCB's own single-ended 50 Ω width to +2 %, but JLCPCB's differential calculator returned no result, so the geometry is **provisional**: rerun that calculator (or ask JLCPCB) for 90 Ω at S = 0.15 mm before routing, and use its width. Study: `design/experiments/stackup-impedance/`. **Impedance control is not ordered for the prototype.** It costs $33.08 plus an auto-selected $1.05 "Confirm Production file" ($59.53 instead of $25.40). It controls only the board segment, while D± also pass through Akizuki modules and 2.54 mm headers (OI-26), and FS is the documented fallback (REQ-HOST-07). Its effect on the Economic PCBA class is also unseen. Rejected: the other 17 named stackups (the special-stackup note); 7628C/F also reach no 90 Ω width within 0.60 mm. *Revert → the order says "No requirement", which shows the same build but names nothing. Reopen impedance control if V-HOST-01's HS test fails and the fault is traced to the board-level pair, or if a later revision routes D± without the modules and headers* | 2026-11-03 | Claude (delegated) | — (CLAUDE.md §5.1 stackup ID) |
+| D28 | **No pre-layout bench: desk checks now, the first PCBA prototype confirms.** The bench kit of issue #1 is not bought. The user: 「試験キットは買わない、基板で確かめる。君が机上で確認すればいい」. The assumptions it was to check are desk-checked from datasheets (§3.2, §4, §7.1; `CIRCUIT_DESIGN_Rev0.4_calc.py`), and V-MEAS-00 and V-MEAS-06 move to bring-up. **Settled on paper:** the OP07 common mode and output low limit (TI's single-supply gain row; gate headroom 1.63–1.96 V, was 0.03–0.36 V); R_M's survival of the stuck-MID fault (6.25 W for 5 s rating); the PGA2040's supply input, 27 Ω pair and flash unique ID; U1 on V3V3; the reset hold. **Not settled on paper, accepted as bring-up risk:** the mirror loop's stability, R_M's < 0.1 % shift after the fault, the MCP3208's INL at V<sub>REF</sub> 3.3 V and its stretched sample. A failure there costs a board revision instead of a bench rebuild. Not covered by D28: the CH335F module's outline (OI-24), which needs the module itself before layout (§12). *Revert → the kit is in Git at commit 609bfb7 (`tests/fixtures/pre-layout-bench/`), and OI-27, OI-28, OI-31 reopen as bench checks* | 2026-11-04 | **User** | OI-27, OI-28, OI-31 |
 
 D12 was withdrawn on 2026-11-03 and is not reused.
 
@@ -827,24 +857,27 @@ height. The study does not route; capture and layout do.
 
 ## 12. What must happen before KiCad capture
 
-Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
+Status as of 2026-11-04 (D28). OI-30 is closed by D22; OI-27, OI-28 and OI-31 by D28.
 
-1. **OI-23 remainder.** The board area is settled (D24, §11). Measure a purchased CH335F
-   module (OI-24; Akizuki publishes no drawing for it), choose the module headers, enter
-   both in `design/experiments/oi-23-placement/placement_study.py`, and re-run it: it must
-   still exit 0.
-2. **OI-31**: confirm the PGA2040's supply input, USB series resistors and flash from the
-   module itself, because they decide U1's footprint and power wiring.
+1. **OI-24, then the OI-23 remainder.** The board area is settled (D24, §11). The CH335F
+   module's outline, its DIP30 pin map and whether the QFN comes mounted cannot be settled
+   on paper. Akizuki publishes no drawing, and its page states only DIP30, 3.3–5 V and
+   through-hole (read 2026-11-04). The module is one of the board's own hand-soldered parts,
+   so measure the one bought for the board, before layout. Then choose the module headers,
+   enter both in `design/experiments/oi-23-placement/placement_study.py`, and re-run it: it
+   must still exit 0.
+2. ~~**OI-31**: confirm the PGA2040's supply input, USB series resistors and flash.~~ Settled
+   on paper by D28: U1 takes V3V3 on its VBUS pad (§7.1), the 27 Ω pair is on the module, and
+   the flash has a 64-bit unique ID (§3.3). U1's footprint takes its pad positions from
+   Pimoroni's documentation. Check them against the module bought for the board in item 1
+   before layout.
 3. ~~**OI-25**: decide how J1's 0.21 A is declared.~~ Closed by D26.
 4. ~~**OI-29**: choose the J4 input fuse.~~ Closed by D25 (F1 = MF-R300).
-5. Bench-check the assumptions this design rests on, before layout:
-   - OP07CDR on 0 / 12 V with a 5 V common mode and the mirror FET's gate headroom (OI-27);
-   - R_M's short-time overload (OI-28);
-   - the MCP3208's stretched sample phase and its INL at V<sub>REF</sub> = 3.3 V, and the
-     RP2040's reset pull-down against the 10 kΩ hold pull-ups (OI-31).
-
-   The parts to buy, the instruments and the bench wiring for items 1, 2 and 5 are in
-   `tests/fixtures/pre-layout-bench/` (issue #1).
+5. ~~Bench-check the assumptions this design rests on, before layout.~~ Replaced by D28: the
+   desk checks are in §3.2, §4 and §7.1. V-MEAS-00 and V-MEAS-06 run on the first board, so
+   **capture adds test pads** for them: on the HIGH mirrors' OP07 outputs (U10, U20) and FET
+   gates (Q21, Q41), on the HOLD gates (Q19, Q20, Q39, Q40), and on the V_J4 divider tap
+   (U7 CH4), which V-MEAS-06's ADC sweep reads against the DMM.
 6. Recheck all stock immediately before upload and again before payment (CLAUDE.md §4.1).
 
 ---
@@ -861,6 +894,7 @@ Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
 | 0.4 | 2026-11-03 | Amended: D25 (Claude, delegated) adds F1, an MF-R300 resettable fuse ahead of D6, and closes OI-29. §3.1 path and port-voltage table, §3.2 gate headroom, §6.2, §7.2 and §12 updated; F1 added to the OI-23 study. Machine-placed types unchanged (35). |
 | 0.4 | 2026-11-03 | Amended: D26 (Claude, delegated) sets how J1's current is declared and closes OI-25: the hub stays self-powered at 100 mA, the RP2040 function declares 200 mA, and bus-powered upstream hubs are unsupported. §7.1, G14 and §12 updated. No circuit change. |
 | 0.4 | 2026-11-03 | Amended: D27 (Claude, delegated) names the stackup JLC04161H-7628 and sets the provisional USB 2.0 pair at W 0.31 / S 0.15 mm, without impedance control for the prototype, from the stackup-impedance study. Fact 18 and §3.3 updated. No circuit change. |
+| 0.4 | 2026-11-04 | Amended: D28 (user) replaces the pre-layout bench with desk checks and closes OI-27, OI-28 and OI-31 by decision; OI-24 stays open. §3.2 (OP07 output low from the single-supply row, headroom 1.63–1.96 V; loop stability left to bring-up; reset hold), §3.3 (27 Ω pair on the module, flash unique ID), §4 (R_M ratings; watchdog ≤ 5 s), §6.1, §7.1 (U1 on V3V3 with the module's NCP115 in dropout), §7.3, G12, §12 and facts 11 and 15 updated. No circuit change; §12 adds test pads to the capture list. |
 
 ---
 

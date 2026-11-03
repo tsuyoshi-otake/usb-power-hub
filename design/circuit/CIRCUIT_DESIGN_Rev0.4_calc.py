@@ -13,11 +13,13 @@ What this script CANNOT see (CLAUDE.md Section 8 - a checker only proves what
 it looks at):
 - whether an input value is the one the document and parts.md actually state:
   it holds its own copy of them;
-- tolerances, temperature, and the OP07 single-supply behaviour it assumes
-  (OI-27); it uses typical or bounding datasheet values as noted;
+- tolerances and temperature; it uses typical or bounding datasheet values as
+  noted. The OP07 limits come from TI SLOS099F's 15 V single-supply row, applied
+  to the 12 V rail (D28); the mirror loop's stability is not computed at all;
 - the MCP3208's real sampling network: the S/H settling below uses the
   datasheet's Figure 4-1 model (1 kohm switch, 20 pF, 7 pF pin) and assumes the
-  sample capacitor starts at the previous channel's voltage (OI-31);
+  sample capacitor starts at the previous channel's voltage (checked on the
+  first board, V-MEAS-06);
 - layout parasitics, comparator delay spread, and the real gate charge;
 - anything about part availability or footprints.
 """
@@ -105,6 +107,16 @@ print("\n== Sec. 4 stuck range into a short at the port (J4 5.0 V, below the OC 
 for r in ("LOW", "MID"):
     i = 5.0 / (SPAN[r] + RSW + RWIRE)
     print(f"stuck {r}: I={i:.4g} A  P({RS[r]:g} ohm)={i*i*RS[r]:.3g} W")
+i_mid = 5.0 / (SPAN["MID"] + RSW + RWIRE)
+p_mid = i_mid * i_mid * RS["MID"]
+rcwv = math.sqrt(1.0 * RS["MID"])      # Faithful Link MFU: RCWV = sqrt(rated power x R), 1 W
+p_sto = (2.5 * rcwv) ** 2 / RS["MID"]  # short-time overload: 2.5 x RCWV for 5 s, dR <= 1 %
+p_pul = (4.0 * rcwv) ** 2 / RS["MID"]  # pulse overload: 4 x RCWV, 1 s on / 25 s off, 10,000 cycles
+print(f"R_M (MFU100F10RB) RCWV {rcwv:.2f} V: short-time overload {p_sto:.2f} W for 5 s"
+      f" ({p_sto*5:.1f} J), pulse overload {p_pul:.1f} W for 1 s ({p_pul:.0f} J) x 10,000;"
+      f" fault {p_mid:.2f} W for 10 ms = {p_mid*10e-3*1e3:.1f} mJ ->"
+      f" power {p_sto/p_mid:.1f}x, energy {p_sto*5/(p_mid*10e-3):.0f}x inside the 5 s rating;"
+      f" {p_mid:.2f} W stays inside it for up to 5 s")
 
 print("\n== Sec. 3.1 / Sec. 7.2 DUT voltage at the port on HIGH (F1 shared, at R1max)")
 for i, other in ((0.5, 0.0), (1.0, 0.0), (1.0, 1.0)):
@@ -113,16 +125,38 @@ for i, other in ((0.5, 0.0), (1.0, 0.0), (1.0, 1.0)):
           f"  at 4.75 V={4.75-drop:.3f}")
 print(f"4.75 V at the port at 0.5 A needs J4 >= {4.75 + 0.5*(RSW+SPAN['HIGH']+RWIRE+RF1):.3f} V")
 
-print("\n== Sec. 3.2 mirror FET gate headroom at HIGH full scale 1 A (|V_GS(th)| 1.3 V, OP07 V_OL 3.0 V)")
+print("\n== Sec. 3.2 mirror FET gate headroom at HIGH full scale 1 A (|V_GS(th)| 1.3 V)")
+VOL_AVD = 1.4    # SLOS099F A_VD row: V_CC = 15 V single supply, V_O = 1.4..11.4 V, R_L >= 500 kohm
+VOL_EXT = 3.0    # Rev0.4 extrapolation from V_OM +-12 V into 10 kohm at +-15 V (superseded, D28)
+gates = []
 for vj4 in (5.0, 4.75):
     for other in (0.0, 1.0):
         src = vj4 - (1.0 + other) * RF1 - 1.0 * (RSW + RS["HIGH"] + RWIRE)
         gate = src - 1.3
+        gates.append(gate)
         print(f"J4={vj4}, other port {other} A: source {src:.3f} V gate~{gate:.3f} V"
-              f"  headroom={gate-3.0:.2f} V")
-print(f"without F1: headroom {5.0-1.0*(RSW+RS['HIGH']+RWIRE)-1.3-3.0:.2f} V at J4 5.0,"
-      f" {4.75-1.0*(RSW+RS['HIGH']+RWIRE)-1.3-3.0:.2f} V at J4 4.75")
+              f"  headroom={gate-VOL_AVD:.2f} V over the {VOL_AVD} V row"
+              f" ({gate-VOL_EXT:.2f} V over the old {VOL_EXT} V extrapolation)")
+print(f"without F1, old basis: headroom {5.0-1.0*(RSW+RS['HIGH']+RWIRE)-1.3-VOL_EXT:.2f} V at J4 5.0,"
+      f" {4.75-1.0*(RSW+RS['HIGH']+RWIRE)-1.3-VOL_EXT:.2f} V at J4 4.75")
 print(f"V-MEAS-00 low supply: J4 4.75 V less F1 at 2 A = {4.75-2*RF1:.2f} V")
+
+print("\n== Sec. 3.2 OP07 on V12F, against SLOS099F (D28 desk check)")
+V12_MIN = 12.0 * (1 - 0.03 - 0.05 * 1.2) - 10.0 * 30e-3   # MAU104 -3 % max, J1 at -5 % x 1.2 line
+                                         # regulation, less 10 ohm at the 30 mA maximum load
+VOH_AVD = 15.0 - 11.4                    # the same row's upper end sits 3.6 V below V+
+CM_LO, CM_HI = 4.4, 5.25                 # mirror input common mode (port supply range)
+print(f"V12F min {V12_MIN:.2f} V -> linear output {VOL_AVD:.1f}..{V12_MIN-VOH_AVD:.2f} V;"
+      f" the gate spans {min(gates):.2f} V (HIGH at 1 A, worst corner) to {CM_HI:.2f} V (off, at the source)")
+print(f"common mode {CM_LO}..{CM_HI} V: {CM_LO:.2f} V above V-, {V12_MIN-CM_HI:.2f} V below V+"
+      f" (VICR +-13 V at +-15 V = 2 V from each rail; kSVS row runs at +-3 V, i.e. 3 V from each)")
+IGSS = 100e-9                            # AO3401A I_GSS max at V_GS +-12 V
+print(f"gate DC load: I_GSS {IGSS*1e9:.0f} nA at <= {CM_HI:.2f} V -> >= {CM_HI/IGSS/1e6:.0f} Mohm"
+      " against the row's 500 kohm")
+CISS, CRSS = 645e-12, 55e-12
+print(f"gate network pole, 1 kohm into C_iss {CISS*1e12:.0f} pF: {1/(2*math.pi*1e3*CISS)/1e3:.0f} kHz,"
+      f" against OP07 GBW 0.4 min / 0.6 typ MHz; C_rss {CRSS*1e12:.0f} pF is Miller-multiplied by the"
+      " drain node: stability is NOT settled here (V-MEAS-00 at bring-up)")
 
 print("\n== Sec. 7.2 F1 hold margin and dissipation (both ports just below the OC trip)")
 i_f1 = 2 * IT["HIGH"]
@@ -201,4 +235,18 @@ v3v3 = {"RP2040 (PGA2040), estimate": 30, "LEDs, Rp, pull-ups, VDDA, CJ431 U3 (a
 i3 = sum(v3v3.values())
 p = (5.0 - 3.3) * i3 / 1e3
 print(f"V3V3 load {i3:.1f} mA; AMS1117: {p:.3f} W -> {p*90:.1f} C rise at 90 C/W")
+
+print("\n== Sec. 6.1 / Sec. 3.2 U1 on V3V3 and the reset hold (D28 desk check)")
+V3V3_MIN = 3.251                    # AMS1117-3.3 output minimum (parts.md)
+R_DO = 0.260 / 0.300                # NCP115 3.3 V, XDFN4: dropout 260 mV max at 300 mA
+I_U1 = 50e-3                        # RP2040 + flash, a bound above the 30 mA estimate
+v_u1 = V3V3_MIN - R_DO * I_U1
+print(f"PGA2040 VBUS pad from V3V3 (Pimoroni: 3.0-5.5 V): NCP115 in dropout, <= {R_DO*I_U1*1e3:.0f} mV"
+      f" at {I_U1*1e3:.0f} mA -> 3V3 pad >= {v_u1:.3f} V vs RP2040 USB_VDD min 3.135 V"
+      f" (margin {v_u1-3.135:+.3f} V)")
+for rpd in (50e3, 80e3):
+    v = V3V3_MIN * rpd / (rpd + 10e3 * 1.01)
+    print(f"reset hold: RP2040 pull-down {rpd/1e3:.0f} k vs 10 k +1 % to V3V3 min -> gate {v:.3f} V"
+          f" vs 2N7002 V_th max 2.5 V at 250 uA (it then sinks only Q17/Q18's 1 Mohm return,"
+          f" <= {5.25/1e6*1e6:.2f} uA at a 5.25 V port)")
 print(f"MAU104 load: 6 x OP07 at 2.5 typ / 5 max mA = {6*2.5:.0f} / {6*5:.0f} mA")

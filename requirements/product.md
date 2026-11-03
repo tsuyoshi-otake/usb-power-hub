@@ -64,7 +64,7 @@ This section answers "can firmware stop power to a port?": yes, and this is the 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
 | REQ-HOST-01 | The board enumerates as a USB hub with a composite CDC-ACM ×2 device behind it: control (`COMn`) and stream (`COMn+1`), driverless on Windows 10/11, macOS and Linux. | Settled | D7 |
-| REQ-HOST-02 | Every unit reports a unique USB serial number derived from the 64-bit unique ID of the MCU module's flash (OI-31 confirms the flash supports it), so its COM numbers are stable across replugs. | Settled | CLAUDE.md §10.3, G8 |
+| REQ-HOST-02 | Every unit reports a unique USB serial number derived from the 64-bit unique ID of the MCU module's flash (the module's W25Q64JV has one, read by instruction 4Bh, D28; V-MEAS-06 reads it on the first board), so its COM numbers are stable across replugs. | Settled | CLAUDE.md §10.3, G8 |
 | REQ-HOST-03 | The control port stays usable while the stream port is running. | Settled | Rev0.1 §3.3 |
 | REQ-HOST-04 | The control port implements the protocol in Section 4.1. | Delegated | D21 |
 | REQ-HOST-05 | The stream is binary and framed per Section 4.2. | Settled (binary, framed) / Delegated (frame layout) | Rev0.1 §3.3 |
@@ -156,7 +156,7 @@ REQ-PORT-04) and are not reused.
 |---|---|---|---|
 | REQ-SAFE-01 | The shunt-bypass FETs are ON whenever the MCU does not drive them (hold transistors pulled up), so the ladder sits at the HIGH range. | Settled | D9 |
 | REQ-SAFE-02 | Over-range up-ranges in hardware with no MCU in the path; over-current opens the port in hardware. | Settled | D4, G11 |
-| REQ-SAFE-03 | **Stuck range.** Firmware switches the port OFF within 10 ms and latches `FAULT:STUCKRANGE` when an amplifier whose shunt is commanded bypassed reads more than 10 % of the active range's current (and > 50 LSB), or sits at its own clip level, for 10 ms. Healthy parallel conduction through a bypassed shunt is ≤ 0.8 %. This covers a bypass FET that fails open and a hold that does not take. Detection floor: 1 mA. Below it a stuck range dissipates < 1 mW and is harmless. R_M must survive 2.35 W for that 10 ms window (OI-28). | Delegated | Circuit §4 stuck-range table |
+| REQ-SAFE-03 | **Stuck range.** Firmware switches the port OFF within 10 ms and latches `FAULT:STUCKRANGE` when an amplifier whose shunt is commanded bypassed reads more than 10 % of the active range's current (and > 50 LSB), or sits at its own clip level, for 10 ms. Healthy parallel conduction through a bypassed shunt is ≤ 0.8 %. This covers a bypass FET that fails open and a hold that does not take. Detection floor: 1 mA. Below it a stuck range dissipates < 1 mW and is harmless. R_M must survive 2.35 W for that 10 ms window: the MFU is rated 6.25 W for 5 s (D28), and V-MEAS-00 checks its shift on the first board. | Delegated | Circuit §4 stuck-range table |
 | REQ-SAFE-04 | **Input fuse.** J4's VBUS passes a resettable fuse ahead of the TVS. It holds the largest load the port OC trips allow (2 × 1.16 A) at 40 °C ambient, and it opens on a short of VBUS_IN or on a source above the TVS breakdown. | Delegated | D25 |
 
 ## 9. Documented limitations (for the user manual)

@@ -133,7 +133,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D21 live in circuit §10)
+│                               #   created, decisions D1–D28 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -561,14 +561,16 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D27; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D28; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
   100 × 100 mm (D24, 「100x100未満ならいいんだっけ」),
   the sourcing rule (D13), and Basic parts only, with no Preferred Extended (D22,
-  「外して Basic のみにする」). D1 (PD sink) and D11 (USB2514B) were also user
-  decisions; both are superseded because their parts are Extended.
+  「外して Basic のみにする」), and no pre-layout bench: desk checks now, the first board
+  confirms (D28, 2026-11-04, 「試験キットは買わない、基板で確かめる。君が机上で確認すればいい」).
+  D1 (PD sink) and D11 (USB2514B) were also user decisions; both are superseded because
+  their parts are Extended.
 - **Under the delegation:** on 2026-11-03 the user delegated the open choices
   (「推奨で任せるよ」). Claude recorded D14–D21: J4 power input, CH335F hub,
   topology C with current mirrors, the port path, the clocks, the accuracy target,
@@ -582,12 +584,9 @@ withdrawn and not reused).
 
 ### 10.5 Still undecided — record the decision before layout starts
 
-- **OI-31:** the PGA2040's supply input, USB series resistors and flash, and the
-  MCP3208 sampling assumptions. U1's footprint and power wiring depend on it.
-- **OI-23 (remainder):** re-run the placement study with the measured CH335F outline
-  (OI-24) and the chosen header height. The board area itself is settled by D24.
-- **OI-27, OI-28:** bench-check the OP07 single-supply margins and R_M's overload
-  before layout.
+- **OI-24, then OI-23 (remainder):** measure the CH335F module bought for the board,
+  then re-run the placement study with its outline and the chosen header height. The
+  board area itself is settled by D24.
 - USB VID/PID. Do not ship a squatted VID.
 - Whether the mockup's placement is kept at all. Assume not.
 
@@ -637,14 +636,14 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-21 | ~~No accuracy requirement exists.~~ **Closed by decision** (D20): ±(1 % of reading + 3 LSB of the active range) within ±10 °C of calibration, after gain and zero calibration. | REQ-MEAS-05; Rev0.4 §4.2 |
 | OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D23, replacing D17's on-chip ADC): two external MCP3208, clocked at 1 MHz by the RP2040 PIO. | Rev0.4 §3.3 |
 | OI-23 | **Board fit: area settled, outlines not measured.** The placement study (`design/experiments/oi-23-placement/`, 15 tests) proved that 85 × 35 mm cannot hold Rev0.4: even with no routing space and every low part credited under a module, it needs 3,780 mm² (F1 included, D25) against 2,975 mm². D24 set 100 × 72 mm, where a block placement passes every check at routing factor K = 1.6 (headroom to K = 1.74). Still open: the CH335F outline is measured off a product photo (OI-24), and the header height behind the study's 1.5 mm under-module rule is not chosen. Re-run the study with both; it must still exit 0. | Rev0.4 §11; study README |
-| OI-24 | **CH335F module outline and pin map unknown.** Akizuki publishes no drawing for AE-QFN28-DIP(CH335F). Measure a purchased module, and confirm that the QFN comes mounted and how DIP30 maps to the chip's pins. | `requirements/parts.md` U6 |
+| OI-24 | **CH335F module outline and pin map unknown.** Akizuki publishes no drawing for AE-QFN28-DIP(CH335F). Measure a purchased module, and confirm that the QFN comes mounted and how DIP30 maps to the chip's pins. *D28 (2026-11-04):* not settled on paper. The page states only DIP30, 3.3–5 V and through-hole, so the module bought for the board is measured before layout (Rev0.4 §12 item 1). | `requirements/parts.md` U6 |
 | OI-25 | ~~J1 current is misdeclared.~~ **Closed by decision** (D26, Claude delegated, 2026-11-03): the CH335F stays self-powered at its default 100 mA, and the RP2040 function declares bMaxPower 200 mA. That covers its 126 mA typical share of J1's ≈ 0.21 A (172 mA with every OP07 at its maximum). USB still charges the upstream port only 100 mA, so the board is specified for 500 mA upstream ports and not for bus-powered hubs. Options (a) and (b) are recorded as rejected in D26. Reopen if V-HOST-01 measures more than 0.30 A from J1. | Rev0.4 §7.1, §10 |
 | OI-26 | **HS signal integrity through the modules is unverified.** D± pass through 2.54 mm headers and Akizuki module layouts. The fallback is that DUTs enumerate at FS. | Rev0.4 §3.3; V-HOST-01 |
-| OI-27 | **OP07 single-supply operation is extrapolated.** Unverified: common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V (extrapolated from ±15 V specs); the mirror gate's headroom at 1 A, which F1 (D25) cuts to 0.11–0.36 V with one port loaded and to 0.03 V at J4 = 4.75 V with both ports at 1 A; loop stability into a 645 pF gate. Bench-check before layout (V-MEAS-00). | Rev0.4 §3.2 |
-| OI-28 | **R_M short-time overload is unverified.** A stuck-MID short puts 2.35 W into a 1 W axial resistor for up to 10 ms. | Rev0.4 §4; V-MEAS-00 |
+| OI-27 | ~~OP07 single-supply operation is extrapolated.~~ **Closed by decision** (D28, user, 2026-11-04): no bench; desk-checked, and the first board confirms. TI SLOS099F specifies the gain on a single 15 V supply with the output at 1.4–11.4 V into ≥ 500 kΩ, so the gate headroom at 1 A is 1.63–1.96 V (it was read as 0.03–0.36 V against a 3.0 V limit). The 4.4–5.25 V common mode sits ≥ 4.40 V from V− and ≥ 5.37 V from V+, wider than the specified ±15 V and ±3 V conditions. Loop stability into the 645 pF gate is not settled on paper and is accepted as bring-up risk. Reopen if V-MEAS-00 fails at bring-up. | Rev0.4 §3.2, §10 D28 |
+| OI-28 | ~~R_M short-time overload is unverified.~~ **Closed by decision** (D28, user, 2026-11-04): the Faithful Link MFU datasheet rates it for 2.5 × RCWV for 5 s (6.25 W, ΔR ≤ 1 %) and for 4 × RCWV pulses (16 W, 1 s on / 25 s off, 10,000 cycles). The stuck-MID fault puts 2.35 W in it for ≤ 10 ms, or until the watchdog fires (timeout ≤ 5 s). Its < 0.1 % shift after the fault is checked on the first board. Reopen if V-MEAS-00 fails at bring-up. | Rev0.4 §4, §10 D28 |
 | OI-29 | ~~No input fuse on J4.~~ **Closed by decision** (D25, Claude delegated, 2026-11-03): F1 = Bourns MF-R300 (Akizuki g112630; 3.00 A hold, 2.49 A at 40 °C; 6.00 A trip; 30 V), ahead of the J4 TVS. Its 0.08 Ω (R1max) costs up to 0.16 V at 2 A, which moves into OI-27 and V-MEAS-00. No fuse or PTC is Basic, so it is hand-soldered. Reopen if V-SAFE-02 fails. | Rev0.4 §3.1, §7.2; `requirements/parts.md` |
 | OI-30 | ~~Two Preferred Extended parts need the user's decision.~~ **Closed by decision** (D22, user, 2026-11-03): Basic parts only. STM32F103C8T6 (C8734) and SRV05-4 (C7420376) are removed; D23 replaces the MCU with the PGA2040 and two MCP3208, and D± of J1–J3 lose their ESD protection. | Rev0.4 §9, §10 D22/D23 |
-| OI-31 | **PGA2040 and MCP3208 assumptions unverified.** From a purchased PGA2040, confirm the supply input (3.3 V only, or 5 V through an on-module regulator), whether the 27 Ω USB series resistors are on the module, and that the flash reports a 64-bit unique ID. Bench-check the MCP3208's stretched sample phase (≤ 0.21 LSB computed), its INL at V<sub>REF</sub> = 3.3 V, and the RP2040's reset pull-down against the 10 kΩ hold pull-ups. The fallback for the sample phase is double conversion at 8 kSPS; a failure otherwise reopens D23. | Rev0.4 §3.2, §3.3, §6.2; V-MEAS-06 |
+| OI-31 | ~~PGA2040 and MCP3208 assumptions unverified.~~ **Closed by decision** (D28, user, 2026-11-04), from Pimoroni's schematic and the datasheets. The supply input is the VBUS pad, 3.0–5.5 V, into an on-module NCP115; on V3V3 it leaves ≥ 3.208 V on the 3V3 pad, above the RP2040's 3.135 V USB_VDD minimum. The 27 Ω pair is on the module. The W25Q64JVXGIQ flash has a 64-bit unique ID (4Bh). The RP2040 resets its GPIO with a 50–80 kΩ pull-down, against which the 10 kΩ hold pull-ups give ≥ 2.70 V, above the 2N7002's 2.5 V maximum threshold. Not settled on paper and accepted as bring-up risk: the MCP3208's INL at V<sub>REF</sub> = 3.3 V (typical only) and the stretched sample (≤ 0.21 LSB computed). The fallback for the sample phase is double conversion at 8 kSPS; an INL failure reopens D23. U1's pad positions are checked against the module bought for the board before layout (Rev0.4 §12 item 2). | Rev0.4 §3.2, §3.3, §7.1, §10 D28; V-MEAS-06 |
 
 ---
 

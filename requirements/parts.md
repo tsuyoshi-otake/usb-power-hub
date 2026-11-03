@@ -81,14 +81,24 @@ is the MAU104, at 178.
     This is why it, and not the Pico or the AE-RP2040 kit, can sit behind the CH335F.
   - *On paper (Pimoroni schematic
     `cdn.shopify.com/s/files/1/0174/1800/files/pga2040_schematic.pdf`, generated 04/06/2021,
-    and shop.pimoroni.com/products/pga2040, both read 2026-11-03):*
+    and shop.pimoroni.com/products/pga2040, both read 2026-11-03; the schematic re-read
+    2026-11-04 for D28):*
     - The supply input is the VBUS pad A2, "Vbus: 3.0V - 5.5V". It feeds an on-module
       NCP115AMX330TCG 3.3 V regulator (300 mA max), whose output is the 3V3 pad B3.
     - R1 = R2 = 27R4 sit in USB_DP / USB_DM. The flash is a W25Q64JVXGIQ.
-  - *To confirm on a purchased module (OI-31, V-MEAS-06):* the supply input, the 27 Ω pair,
-    the flash part and its unique ID, the crystal, the 3V3 pad voltage when VBUS is fed from
-    V3V3 (§6.1 feeds U1 from V3V3), and the module's exact pin map for the footprint. The
-    bench setup is in `tests/fixtures/pre-layout-bench/`.
+  - *Desk check (D28, datasheets fetched 2026-11-04):*
+    - NCP115 (onsemi, Rev. 4, via the JLCPCB part C603503): V<sub>IN</sub> 1.7–5.5 V; output
+      ±2 % for V<sub>OUT</sub> > 2.0 V; dropout 215 typ / 260 max mV at 300 mA for the 3.3 V
+      XDFN4 part. On V3V3 it runs in dropout, leaving ≥ 3.208 V on the 3V3 pad at a 50 mA
+      bound (Rev0.4 §7.1).
+    - RP2040 datasheet (build 2025-02-20): USB_VDD 3.135–3.63 V (Table 634); every GPIO pad
+      resets with its pull-down on (PADS_BANK0 PDE = 1, PUE = 0); pull-up and pull-down
+      50–80 kΩ (§5.5).
+    - W25Q64JV (Winbond, Rev. J, 2018-03-27): a factory-set, read-only 64-bit unique ID,
+      read by instruction 4Bh; JEDEC ID (9Fh) EFh 4017h for the -IQ/JQ parts.
+  - *To confirm on the first board (V-MEAS-06, D28):* the 3V3 pad voltage, the 27 Ω pair,
+    the flash part and its unique ID. Before layout, check the footprint's pad positions
+    against the module bought for the board (Rev0.4 §12 item 2).
 - *Verified (MCP3208, Microchip DS21298E):*
   - 12-bit, 8 single-ended channels, SPI; V<sub>DD</sub> 2.7–5.5 V; V<sub>REF</sub> 0.25 V to
     V<sub>DD</sub>.
@@ -103,8 +113,11 @@ is the MAU104, at 178.
     ±1 µA max.
   - V<sub>IH</sub> 0.7 V<sub>DD</sub>; V<sub>OH</sub> ≥ 4.1 V at 4.5 V; I<sub>DD</sub>
     400 µA max; V<sub>REF</sub> current 150 µA max.
-  - *To confirm (OI-31, V-MEAS-06):* INL at V<sub>REF</sub> = 3.3 V (only typical curves),
-    and the settling with the stretched sample.
+  - *Desk check (D28; DS21298E, re-read 2026-11-04):* Figure 2-2 (INL vs V<sub>REF</sub> at V<sub>DD</sub> 5 V, typical,
+    "not tested or guaranteed") reads about +0.6 / −0.4 LSB at 3.3 V (+0.59 / −0.37 from the
+    figure's vector data).
+  - *To confirm on the first board (V-MEAS-06, D28):* INL at V<sub>REF</sub> = 3.3 V, and
+    the settling with the stretched sample.
 - *Verified (AE-USB2.0-TYPE-C page, schematic, drawing):*
   - Pins on one 1 × 7 row, 2.54 mm pitch: VBUS, D−, D+, GND, CC1, CC2, GND.
   - Plus mechanical pins beside the receptacle.
@@ -136,8 +149,13 @@ is the MAU104, at 178.
   - *To confirm:* KOA's recommended land, and a land split for Kelvin sense.
 - *Verified (MFU100F10RB page):* 10 Ω, 1 W, ±1 %, ±100 ppm/°C, 6 mm × 2.3 mm axial,
   −55 to 155 °C.
-  - *To confirm (OI-28):* short-time overload — it must survive 2.35 W for 10 ms in the
-    stuck-MID fault.
+  - *Verified (Faithful Link MFU series datasheet, Akizuki `/goodsaffix/mfu.pdf`, fetched
+    2026-11-04; D28):* RCWV = √(P × R), 3.16 V here. Short-time overload 2.5 × RCWV for 5 s
+    (6.25 W), ΔR ≤ 1 %; pulse overload 4 × RCWV (16 W), 1 s on / 25 s off, 10,000 cycles,
+    ΔR ≤ ±(1 % + 0.05 Ω). The stuck-MID fault, 2.35 W for 10 ms, is inside the short-time
+    rating for up to 5 s (Rev0.4 §4).
+  - *To confirm on the first board (V-MEAS-00):* R_M shifts < 0.1 % after 100 faults. The
+    datasheet bounds the shift only after its harsher test.
 - *Verified (MF-R300, Bourns MF-R series datasheet, Akizuki `/goodsaffix/mfr.pdf`,
   fetched 2026-11-03):*
   - V<sub>max</sub> 30 V, I<sub>max</sub> 40 A; I<sub>hold</sub> 3.00 A, I<sub>trip</sub>
@@ -192,22 +210,36 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`.
 | SW1–SW3 | TS-1187A-B-A-B | C318884 | SMD 5.1 × 5.1 | 1,054,631 | Basic | Port buttons; BOOT |
 | FB1 | BLM18PG121SN1D | C14709 | 0603 | 2,198,407 | Basic | VDDA ferrite |
 
-- *Verified (OP07C, TI):*
+- *Verified (OP07C, TI SLOS099F, January 2014; re-read 2026-11-04):*
   - V<sub>OS</sub> 60 µV typ, **no maximum given for the C grade** (OP07D max 150 µV is used
     as the planning bound); drift 0.5 µV/°C typ.
   - I<sub>B</sub> ±1.8 nA typ; noise 10.5 nV/√Hz.
   - Supply ±3 to ±18 V (≥ 6 V total); common mode ±13 V min at ±15 V; output ±12 V into
     10 kΩ at ±15 V.
   - GBW 0.4 min / 0.6 typ MHz; slew 0.3 V/µs.
-  - *Assumed, to verify (OI-27):* common mode 2–10 V and output low ≤ 3.0 V on 0 / 12 V.
+  - *Desk check (D28; TI SLOS099F, January 2014, via LCSC C7433, fetched 2026-11-04):* the large-signal gain
+    row is specified on a single 15 V supply, V<sub>O</sub> = 1.4 V to 11.4 V,
+    R<sub>L</sub> ≥ 500 kΩ: A<sub>VD</sub> ≥ 100 V/mV (OP07C, 25 °C). The supply-sensitivity
+    row runs from ±3 V. Rev0.4 §3.2 uses 1.4 V as the output low limit and the ±15 V common
+    mode range, read rail-relative, for the inputs.
+  - *To confirm on the first board (V-MEAS-00):* the gate headroom at 1 A and loop stability.
 - *Verified (LM393):*
   - 1.3 µs response at 5 mV overdrive, 300 ns large-signal.
   - Supply 2–36 V; common mode 0 to V<sub>CC</sub> − 1.5 V; V<sub>OS</sub> ±5 mV max.
   - Open-collector output, sink ≥ 6 mA (16 typ).
 - *Verified (AO3401A):*
   - R<sub>DS(on)</sub> 47 / 60 mΩ at −4.5 V, 60 / 85 mΩ at −2.5 V.
-  - V<sub>GS(th)</sub> −0.5 / −0.9 / −1.3 V; Q<sub>g</sub> 7 nC at 4.5 V; C<sub>iss</sub> 645 pF.
+  - V<sub>GS(th)</sub> −0.5 / −0.9 / −1.3 V at −250 µA; Q<sub>g</sub> 7 nC at 4.5 V;
+    C<sub>iss</sub> 645 pF, C<sub>oss</sub> 80 pF, C<sub>rss</sub> 55 pF;
+    I<sub>GSS</sub> ±100 nA at ±12 V (AOS Rev 3.1, December 2023, fetched 2026-11-04).
   - −30 V; V<sub>GS</sub> ±12 V; I<sub>D</sub> −4 A.
+  - *To confirm on the first board (V-MEAS-00):* the HIGH mirror loop into this gate (C<sub>iss</sub>,
+    and C<sub>rss</sub> multiplied by the drain node) is stable; the datasheet does not settle it.
+- *Verified (2N7002, JSCJ / JCET datasheet, September 2016, via LCSC C8545, fetched 2026-11-04):*
+  V<sub>th(GS)</sub> 1.0 min / 2.5 max V at 250 µA. Rev0.4 §3.2's reset hold gives its gate
+  ≥ 2.70 V.
+  - *To confirm on the first board (V-MEAS-06):* the HOLD gates (Q19, Q20, Q39, Q40) stay
+    ≥ 2.5 V with blank flash and with RUN held low.
 - *Verified (AO3400A):* R<sub>DS(on)</sub> 19 / 32 mΩ at 4.5 V; V<sub>GS(th)</sub> 0.65 / 1.05 /
   1.45 V.
 - *Verified (AMS1117):*

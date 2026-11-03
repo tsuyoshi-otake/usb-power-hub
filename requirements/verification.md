@@ -1,6 +1,7 @@
 # USB Power-Control Hub — Verification Plan
 
-**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03. Nothing below has
+**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28 on
+2026-11-04. Nothing below has
 been executed — no board exists.
 
 Every requirement in `requirements/product.md` is covered by at least one entry here, and
@@ -8,9 +9,10 @@ every entry cites the requirements it proves. Design-review gates G1 – G19 liv
 `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 8; entries here reference them rather than
 restate them. CLAUDE.md Section 8 ("Functional" gate) requires these to pass before release.
 
-**Stages:** *Design review* (against schematic/layout, before order) · *Bench* (a hand-built
-sub-circuit, before layout) · *Bring-up* (first article, bench) · *Production* (every unit, by
-fixture).
+**Stages:** *Design review* (against schematic/layout, before order) · *Bring-up* (first
+article, bench) · *Production* (every unit, by fixture). The *Bench* stage (a hand-built
+sub-circuit before layout) was removed by D28 on 2026-11-04; its two entries, V-MEAS-00 and
+V-MEAS-06, now run at bring-up.
 
 **Rule for automated checks** (CLAUDE.md Section 8): a script that grades a result must say
 what it cannot see, and must be shown failing on a deliberately corrupted input before its
@@ -150,46 +152,69 @@ pass counts. Entries that rely on a script note this under *Limits*.
 
 ## Measurement
 
-### V-MEAS-00 — Front-end assumptions, before layout
-- **Covers:** REQ-MEAS-01, REQ-MEAS-02 (design assumptions behind them; OI-27, OI-28)
-- **When:** Bench (one channel hand-built from the same parts). Parts, instruments and wiring:
-  `tests/fixtures/pre-layout-bench/`.
+### V-MEAS-00 — Front-end assumptions, at bring-up (D28)
+- **Covers:** REQ-MEAS-01, REQ-MEAS-02 (design assumptions behind them; OI-27 and OI-28,
+  closed on paper by D28)
+- **When:** Bring-up, on the first PCBA board, before V-MEAS-01. Until 2026-11-04 this ran on
+  a hand-built bench channel before layout; D28 (user) moved it here. The desk check it
+  confirms is circuit §3.2 and §4.
 - **Method:**
-  - Build one mirror (OP07CDR on 0/12 V, AO3401A, R1 100 Ω, R_OUT 2.4 kΩ, pedestal 1 MΩ from
-    8 V) on the 0.1 Ω shunt. Sweep 0 → 1.2 A from a supply at 4.59 V (J4 = 4.75 V less F1's
-    0.16 V at 2 A, D25) and at 5.25 V, and measure the OP07 output and gate voltage.
-  - Apply a 0.1 → 1 A step and look for ringing.
-  - Pulse R_M with 2.35 W for 10 ms, 100 times, and remeasure it.
+  - Port A on HIGH. Step the electronic load from 0 to 1.1 A (the OC trip is 1.16 A) with J4
+    from the bench supply at 4.75 V and at 5.25 V. At 4.75 V, repeat with port B at 1 A. At
+    each step, measure the OP07 output (U10) and the mirror gate (Q21) at their test pads,
+    and the board reading against the reference DMM.
+  - Apply a 0.1 → 1 A load step and look at the HIGH amplifier node for ringing.
+  - On the board prepared for V-SAFE-01 (Q17 removed, so FET_M is open as in its stuck-MID
+    fault), short port A 100 times at ≥ 1 s spacing. Firmware clears each fault within
+    10 ms; record each fault's duration. Before and after the 100 faults, measure the MID
+    gain at V-MEAS-01's 15 mA point (reference DMM in series, after `ZERO`, 1 s average);
+    the MID range works with Q17 removed.
 - **Pass:**
-  - The output is linear within 0.5 % to 1.2 A at both supplies, with the gate ≥ 0.15 V above
-    the OP07's lowest output.
-  - Overshoot < 10 % and no sustained oscillation (add the 1 kΩ gate resistor first).
-  - R_M changes < 0.1 %.
-  - Failing any of these reopens D17 before layout.
+  - The reading is linear within 0.5 % to 1.1 A in every supply case, and the OP07 output
+    stays ≥ 0.15 V above 1.4 V, the lowest output TI specifies on a single supply.
+  - On the 0.1 → 1 A step, the HIGH amplifier node overshoots by < 10 % of the step, settles
+    within ±1 % of its final value within 100 µs (the firmware hold window), and stays within
+    ±1 % afterwards (no oscillation above 1 % of the step).
+  - The MID gain changes < 0.1 % (R_M).
+  - Failing any of these reopens D17, and the fix is a board revision.
 
-### V-MEAS-06 — ADC sampling and MCU interface, before layout
-- **Covers:** REQ-MEAS-05, REQ-MEAS-08, REQ-SAFE-01 (design assumptions behind them; OI-31)
-- **When:** Bench (a PGA2040 and one MCP3208 at V<sub>DD</sub> 5 V, V<sub>REF</sub> 3.3 V,
-  wired as in circuit §3.2 and §6.4). Parts, instruments and wiring:
-  `tests/fixtures/pre-layout-bench/`.
+### V-MEAS-06 — ADC sampling and MCU interface, at bring-up (D28)
+- **Covers:** REQ-MEAS-05, REQ-MEAS-08, REQ-SAFE-01 (design assumptions behind them; OI-31,
+  closed on paper by D28)
+- **When:** Bring-up, on the first PCBA board, with a test firmware build. Until 2026-11-04
+  this ran on a bench PGA2040 and MCP3208 before layout; D28 (user) moved it here. The desk
+  check it confirms is circuit §3.2, §3.3 and §7.1.
 - **Method:**
-  - Drive CH0 and CH1 each from 1.5 kΩ ∥ 330 pF through 1 kΩ, one at 0 V and one at 3.3 V
-    (a current into the 1.5 kΩ, as the mirror does). Convert them alternately, first with the
-    native 1.5 µs sample and then with the 4.5 µs stretched sample; compare with a single-
-    channel reading of each.
-  - Sweep CH0 from 0 to 3.3 V against the reference DMM in 64 steps.
-  - Hold the RP2040 in reset (RUN low), then power it with blank flash; measure a GPIO that has
-    a 10 kΩ pull-up to 3.3 V, as Q19/Q20's gates do.
-  - Inspect the PGA2040: its supply input, the D+/D− series resistance from module pin to
-    RP2040 pin, the flash part number, and the unique ID read by a test build.
+  - Port A ON with no DUT, so the LOW amplifier sits at its pedestal. Convert U7 CH3
+    (VREF_CHK, 2.5 V) and CH0 (LOW) alternately, first with the native 1.5 µs sample and then
+    with the 4.5 µs stretched sample. Compare with a single-channel reading of each.
+  - INL, two ways:
+    - the ADC alone: sweep J4 from the bench supply in 64 steps over 0.5–5.5 V and compare U7
+      CH4 with the DMM at the V_J4 divider tap (0.16–1.72 V);
+    - the LOW range with its mirror: sweep a reference current on port A in 64 steps from 0
+      to 350 µA against the reference DMM. That stays below the 365 µA hardware up-range
+      threshold (circuit §3.2) and covers 81 % of the ADC span.
+  - With blank flash (the RP2040 stays in its ROM bootloader), and again with the module's RUN
+    pin held low, measure the Q19, Q20, Q39 and Q40 gates at their test pads.
+  - Inspect the PGA2040:
+    - the 3V3 pad voltage with the board powered from J1;
+    - the D+/D− series resistance from module pin to RP2040 pin;
+    - the flash's JEDEC ID (instruction 9Fh) and 64-bit unique ID (4Bh), read by the test
+      build, on both boards.
 - **Pass:**
   - Stretched: the alternating readings agree with the single-channel ones within 0.5 LSB.
     Native: they disagree by more than 5 LSB, which shows the test can fail.
-  - INL within ±2 LSB at V<sub>REF</sub> = 3.3 V.
-  - The pulled-up GPIO stays ≥ 2.5 V in reset and after power-up.
-  - The module findings are recorded in `requirements/parts.md`; a missing 27 Ω pair or a
-    flash without a unique ID is added to the design before layout.
-  - Failing any of the first three reopens D23 before layout.
+  - INL within ±2 LSB in both sweeps. A failure of the LOW-range sweep alone points at the
+    mirror (V-MEAS-00), not the ADC.
+  - Every HOLD gate stays ≥ 2.5 V in both states.
+  - The 3V3 pad is ≥ 3.135 V; each of D+ and D− measures 27 Ω ± 5 % from module pin to
+    RP2040 pin; the JEDEC ID is EFh 4017h (W25Q64JV-IQ/JQ, Winbond Rev. J); and the two
+    boards' 64-bit unique IDs differ in ≥ 1 bit.
+    Record the findings in `requirements/parts.md`.
+  - Failing any of the first three reopens D23, and the fix is a board revision. Failing the
+    fourth reopens the item that failed: the 3V3 pad reopens U1's supply (circuit §7.1); a
+    missing 27 Ω pair puts it on the board (circuit §3.3); a different flash or equal IDs
+    reopen REQ-HOST-02's serial-number source.
 
 ### V-MEAS-01 — Range, accuracy and sample rate against a reference
 - **Covers:** REQ-MEAS-01, REQ-MEAS-05, REQ-MEAS-08
@@ -370,9 +395,11 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - **Method:**
   1. MCU unpowered, J4 present, port forced ON by a test jumper: 4-wire resistance from VSUP_A
      to VBUS_A.
-  2. A fault-injection build that holds one bypass FET OFF while the range state reports
-     HIGH, run with 0.5 mA and 300 mA loads.
-  3. Repeat step 2 for the LOW-bypass FET in MID.
+  2. On one board, remove Q17, so FET_M is open while the range state reports HIGH, and run
+     with 0.5 mA and 300 mA loads. Firmware cannot inject this fault: the LM393 turns a
+     bypass ON in hardware whenever its amplifier overranges (circuit §3.2). Corrected
+     2026-11-04; the earlier text used a fault-injection build.
+  3. Repeat step 2 with Q18 removed (FET_L open) in MID. Refit both afterwards.
 - **Pass:**
   - The ladder is ≈ 0.16 Ω (HIGH: R_H + FET_M), not 10 Ω or 520 Ω.
   - At 300 mA the port switches OFF within 10 ms with `FAULT:STUCKRANGE`, and R_M is within
