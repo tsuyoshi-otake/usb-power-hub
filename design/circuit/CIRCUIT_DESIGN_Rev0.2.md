@@ -626,8 +626,9 @@ trying harder.
    assembly cost and adds a connector in the current path — which is exactly where you least
    want a connector.
 
-**Recommendation: option 1 (80 × 30 mm, 4 layers).** It is the smallest outline that keeps
-everything the product is supposed to do.
+*Historical:* Rev0.1 recommended option 1 (80 × 30 mm, 4 layers) as the smallest outline that
+keeps everything the product is supposed to do. **The user chose option 2 (85 × 35 mm, 4
+layers) — D10, 2026-11-03.**
 
 **Consequences to follow past this decision** (CLAUDE.md §3, easy-stick 14.4): the enclosure
 model, the mounting-hole pattern, the lid PCB outline, the port pitch, and every dimension in

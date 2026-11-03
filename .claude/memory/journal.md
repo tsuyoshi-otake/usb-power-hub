@@ -68,3 +68,19 @@ Section 13 (board) only once verified.
   alternatives the decision still leaves open; if there are any, it is a
   proposal. Also, a test point chosen to trip a threshold needs the
   threshold arithmetic written next to it.
+
+## 2026-11-03 - Independent verification, round 2: all criteria pass
+
+- **Result.** A second fresh-context verifier (no shared context with round 1)
+  passed C1-C9 against commit `98a451e`: Git state, document set and rename
+  history, two-way REQ/V trace (42 REQ, 19 V, zero orphans), decision records,
+  live stock recheck of all 46 rows (MPN and class unchanged) plus the negative
+  test, every recomputed calculation within 2 %, cross-document consistency,
+  labelling of proposals, and the port-power contract.
+- **Follow-up.** Its one observation: Rev0.2 §11 still read "Recommendation:
+  option 1 (80 × 30 mm)" under a CLOSED heading. Relabelled as historical with
+  the user's choice (D10) stated next to it.
+- **Residual risk.** Everything verified is document consistency and dated
+  vendor data. Nothing is built or measured; the stock figures will drift; the
+  P13 note "whether RP2040 USB boot accepts another XOSC frequency" is
+  unconfirmed because the RP2040 datasheet was not fetched in this session.
