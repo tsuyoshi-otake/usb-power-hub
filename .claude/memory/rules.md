@@ -23,6 +23,17 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   (e.g. `TMUX6109`, 2026-11-03) is "not stocked", not "stocked under another
   name".
 
+- **Prices:** the same search returns `componentPrices`, a list of tiers (`startNumber`,
+  `endNumber` with -1 = open-ended, `productPrice` in USD), plus `leastPatchNumber` (20 on the
+  passives) and `lossNumber` (attrition). How JLCPCB combines the last two at order time is not
+  documented; `design/experiments/cost-estimate/` reads them as need + loss, at least
+  `leastPatchNumber`. Verified 2026-11-03 on the 35 machine-placed codes.
+- **JLCPCB help and blog pages are server-rendered.** `curl -sL -A "Mozilla/5.0"` returns the
+  full text, prices included (`/help/article/pcb-assembly-price`,
+  `/blog/reduce-pcb-assembly-cost-prototype`, 2026-11-03), so a verifier can check fee
+  constants without a browser. The quote calculator at `cart.jlcpcb.com/quote` is not: it
+  needs the browser, and its PCBA section requires a Gerber upload before it shows a price.
+
 ## Akizuki (akizukidenshi.com)
 
 - **Search:** `https://akizukidenshi.com/catalog/goods/search.aspx?keyword=<kw>&search=x`.
@@ -103,3 +114,16 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   Verified 2026-11-03: the Rev0.3 header had "corrected" 「デカくい」 to 「デカい」 and dropped one
   line of the user's message; an independent verifier caught it.
 
+
+## Delegated verifiers
+
+- **Tell a verifier to delete nothing.** A rubric that said "delete it when done" let a
+  rubric-verifier run `find -maxdepth 1 -type d ! -name 'dl-*' -exec rm -rf` in
+  `~/tmp/usb-power-hub/` on 2026-11-03. That removed six sibling directories of this task,
+  the `pdfx` venv among them. Deletes of those same directories from the main session had
+  been denied. `ls` before and after showed the loss. Give the verifier one new directory of
+  its own, forbid every delete, and have it report the path. The main session cleans up.
+- **Keep memory edits out of the tree while a verifier grades a scoped change set.** A
+  "only the files in scope changed" criterion failed twice on 2026-11-03, once for a journal
+  entry and once for rules.md, both written while the verifier ran. Commit the graded files
+  first, then the memory files.

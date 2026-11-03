@@ -274,3 +274,41 @@ Section 13 (board) only once verified.
 - **Residual risk.** The RP2040 share rests on a 30 mA estimate for the PGA2040 (OI-31). The
   0.30 A pass limit in V-HOST-01 catches a larger draw.
 - **Commit.** `8f18bb2`.
+
+## 2026-11-03 - Prototype cost estimate (5 PCBs, 2 assembled)
+
+- **Request.** The user asked for 「製造コストを試算してPCBA2台基板5枚」.
+- **Result.** `design/experiments/cost-estimate/`, at 160 yen/USD:
+  - Economic PCBA: JLCPCB $64.77, plus Akizuki 11,520–12,480 yen, for 21,883–22,843 yen for
+    2 units.
+  - Standard PCBA: 37,008–37,968 yen.
+  - Economic is cheaper because D22 made every machine-placed part Basic, and Economic charges
+    no feeder fee for Basic parts.
+- **Sources.** All read on 2026-11-03:
+  - The JLCPCB price page (updated 2026-10-22).
+  - The quote page: PCB price and Japan shipping. No order was placed.
+  - The API price snapshot `jlc_prices.json`.
+  - The JLCPCB blog post of 2026-10-13 for the Economic limits.
+  - Akizuki: parts.md and its order page (free shipping from 11,000 yen).
+- **Verification.** Rubric `.claude/goal-loop/cost-estimate/rubric.md`, sonnet rubric-verifier.
+  - Round 1 failed C6: the FX figures and the blog post had no named source.
+  - Round 1 also failed C7: the D26 journal edit was in the working tree. It was committed
+    separately as `370703b`.
+  - Round 2 passed C1 and C6. C7 failed again because rules.md was edited during grading.
+  - Resolved by committing the in-scope files alone. `git show --stat 0d0eae0` lists only
+    them.
+- **Incident.** The round-1 verifier ran a broad `find ... -exec rm -rf` in
+  `~/tmp/usb-power-hub/`. It removed `pdfx/` (the task venv), `ds-verify/`,
+  `akizuki-ch335f/`, `akizuki-fuse/`, `fuse-ds/` and `costcheck/`. All six were this task's
+  own scratch directories. The user's PNG was untouched.
+- **Learning.** Promoted to rules.md:
+  - Tell a verifier to delete nothing.
+  - JLCPCB help and blog pages are curl-readable.
+  - The API's price fields.
+  - Also: keep memory edits out of the tree while a verifier grades a scoped change set.
+- **Residual risks.**
+  - Economic eligibility: a named stackup may count as "special". The ENIG combination is
+    unconfirmed.
+  - 38 of the 138 0402 positions are unattributed.
+  - PCBA parcel shipping and import tax are not priced.
+- **Commit.** `0d0eae0`.
