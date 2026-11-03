@@ -49,6 +49,7 @@ Read in this order:
 | `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.3 are in Git history. |
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
+| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
 | `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the board-size decisions D10 and D24 (100 × 72 mm). |
 
 Decisions are D-numbers in the circuit document's §10. Its "By" column says whether the
