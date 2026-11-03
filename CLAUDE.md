@@ -36,7 +36,7 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 >
 > The other thing that exists is a three.js appearance mockup
 > (`mockup/`). Component names such as `U2_usb_hub` in it are placeholders, not
-> procurement specifications, and D10 (85 × 35 mm, 4 layers) supersedes its
+> procurement specifications, and D10/D24 (100 × 72 mm, 4 layers) supersede its
 > outline and layer count. Section 11 lists the blocking issues.
 >
 > The repository is under Git since 2026-11-03 (commit `4dd10fb` is the design
@@ -53,8 +53,11 @@ stackup, pad shapes, and part sizes are **not** design data.
 
 Product architecture:
 
-- FR-4 PCB, 1.6 mm, **85 × 35 mm, 4 layers** (D10, decided by the user
-  2026-11-03; closes OI-13 and OI-10).
+- FR-4 PCB, 1.6 mm, **100 × 72 mm, 4 layers** (D10 as amended by D24, 2026-11-03).
+  The user set the 4 layers (D10) and the limit that the outline stays within 100 × 100 mm,
+  JLCPCB's base price tier (D24; the quote figures and their date are in that row). The
+  OI-23 placement study set the size, because 85 × 35 mm
+  cannot hold the Rev0.4 parts. Closes OI-13 and OI-10.
 - Assembly (D13, REQ-MFG-01):
   - JLCPCB machine-places the SMD parts, on Top only.
   - The user hand-solders the large Akizuki parts (modules, two shunts); through-hole
@@ -522,7 +525,8 @@ of what the mockup claimed and what was wrong with it; do not design from it.
 traced to a V-* entry in `requirements/verification.md`). This list is the
 summary; where the two differ, `product.md` wins and this list is the defect.
 
-- Board thickness 1.6 mm, ENIG. **Outline 85 × 35 mm, 4 layers (D10).**
+- Board thickness 1.6 mm, ENIG. **Outline 100 × 72 mm, 4 layers (D10, D24),** inside
+  100 × 100 mm.
   JLCPCB machine-places Top SMD only; the large Akizuki parts are hand-soldered
   (D13, REQ-MFG-01).
 - **Sourcing (D13, user):** machine-placed parts are JLCPCB Basic and in stock;
@@ -548,10 +552,11 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D23; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D24; D12 is
 withdrawn and not reused).
 
-- **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 85 × 35 mm and 4 layers (D10),
+- **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
+  100 × 100 mm (D24, 「100x100未満ならいいんだっけ」),
   the sourcing rule (D13), and Basic parts only, with no Preferred Extended (D22,
   「外して Basic のみにする」). D1 (PD sink) and D11 (USB2514B) were also user
   decisions; both are superseded because their parts are Extended.
@@ -559,14 +564,16 @@ withdrawn and not reused).
   (「推奨で任せるよ」). Claude recorded D14–D21: J4 power input, CH335F hub,
   topology C with current mirrors, the port path, the clocks, the accuracy target,
   and the adoption of P9–P12. After D22, Claude recorded D23: the PGA2040 RP2040
-  module and two MCP3208 ADCs, superseding D16's STM32F103. Each is labelled
+  module and two MCP3208 ADCs, superseding D16's STM32F103. Within D24's limit, Claude
+  chose the 100 × 72 mm outline from the OI-23 study. Each is labelled
   "Claude (delegated)", and the user may revert any one.
 
 ### 10.5 Still undecided — record the decision before layout starts
 
 - **OI-31:** the PGA2040's supply input, USB series resistors and flash, and the
   MCP3208 sampling assumptions. U1's footprint and power wiring depend on it.
-- **OI-23:** board fit with real module outlines; this may reopen D10.
+- **OI-23 (remainder):** re-run the placement study with the measured CH335F outline
+  (OI-24) and the chosen header height. The board area itself is settled by D24.
 - **OI-25:** how J1's ≈ 0.21 A is declared to the host.
 - **OI-29:** the J4 input fuse.
 - **OI-27, OI-28:** bench-check the OP07 single-supply margins and R_M's overload
@@ -608,8 +615,8 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-9 | ~~BOOTSEL unreachable with the lid fitted.~~ **Closed by decision** (D21 as amended by D23): the RP2040 ROM USB bootloader (UF2 drive), entered by `BOOT` or by SW3 on BOOTSEL through a lid pinhole. It is in mask ROM, so no firmware state removes it; SWD is for debug only. Reopen if V-BOOT-01 fails. | REQ-BOOT-02 |
 | OI-10 | ~~6 layers may be unjustified.~~ **Closed by decision** (D10, user, 2026-11-03): 4 layers. Reopen if signal-integrity or EMC review of the routed board disagrees. | Rev0.4 §10 |
 | OI-11 | ~~Shunts are 2-terminal.~~ **Closed by decision** (D17, topology C): each shunt has its own amplifier and Kelvin connection. R_H is a 2-terminal chip on a 4-pad land; R_M has its sense taken at each lead pad; R_L is 0805. No FET R<sub>DS(on)</sub> is inside a sensed span. | Rev0.4 §3.2, §5, G2 |
-| OI-12 | ~~Documentation disagrees with itself.~~ **Closed 2026-11-03:** the mockup's `<title>` and caption now state the 60 × 24 mm its model actually has, and that the mockup is superseded by D10. | `mockup/usb-power-hub-board.html` |
-| OI-13 | ~~Board area — 60 × 24 mm is not routable (75 % density).~~ **Closed by decision** (D10, user, 2026-11-03): **85 × 35 mm, 4 layers**. Every mockup dimension and the enclosure model are invalidated by it. The module-heavy part mix of Rev0.3 and Rev0.4 is re-checked by OI-23. | Rev0.4 §11 |
+| OI-12 | ~~Documentation disagrees with itself.~~ **Closed 2026-11-03:** the mockup's `<title>` and caption now state the 60 × 24 mm its model actually has, and that the mockup is superseded by D10 (now D24). | `mockup/usb-power-hub-board.html` |
+| OI-13 | ~~Board area — 60 × 24 mm is not routable (75 % density).~~ **Closed by decision** (D10, user, 2026-11-03): **85 × 35 mm, 4 layers**. Every mockup dimension and the enclosure model are invalidated by it. The module-heavy part mix of Rev0.3 and Rev0.4 did not fit, so D24 enlarged the outline to **100 × 72 mm** (OI-23). | Rev0.4 §10, §11 |
 | OI-14 | ~~Sample rate capped by the host interface.~~ **Closed by decision** (D17 as amended by D23): the rate is 14.0 kSPS per channel, set by two MCP3208 at a 1 MHz clock with a stretched sample phase, and the stream uses 5.9 % of Full-Speed bulk. Faster profiling would need a faster ADC: that is a new decision, not a defect. | Rev0.4 §3.3 |
 | OI-15 | ~~The repository is not under version control.~~ **Closed 2026-11-03:** `usb-power-hub` is its own Git repository on branch `main`, no remote; commit `4dd10fb` is the unmodified snapshot of the design as it was paused. | `git log` |
 | OI-16 | ~~Downstream current policy is undefined.~~ **Closed by decision** (D18): each port advertises Default (Rp 33 kΩ, 500 mA). A port is enabled only while J4's advertisement covers all ON ports. Measured over-budget opens the larger port (`FAULT:BUDGET`). Hardware OC trips at 1.16 A. | Rev0.4 §7.2; REQ-PWR-04/05 |
@@ -619,7 +626,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-20 | ~~No stocked HIGH shunt meets the specification.~~ **Closed by decision** (D17/D20): R_H = 0.1 Ω ±0.5 % ±100 ppm/°C KOA TSL1TTER100D (Akizuki, 374 pcs), inside the ±1 % budget. The Basic 0.1 Ω part (±800 ppm/°C) is rejected. | Rev0.4 §4.2; `requirements/parts.md` |
 | OI-21 | ~~No accuracy requirement exists.~~ **Closed by decision** (D20): ±(1 % of reading + 3 LSB of the active range) within ±10 °C of calibration, after gain and zero calibration. | REQ-MEAS-05; Rev0.4 §4.2 |
 | OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D23, replacing D17's on-chip ADC): two external MCP3208, clocked at 1 MHz by the RP2040 PIO. | Rev0.4 §3.3 |
-| OI-23 | **Board fit unproven.** The hand-soldered parts take ≈ 2,800 mm² since D23 added the PGA2040 and two DIP16 ADCs, and the SMD content needs ≈ 1,100–1,200 mm², on a 2,975 mm² board. It fits only if low-profile parts sit under modules raised on headers. Needed: a placement study with real module outlines and header heights. It is now the issue most likely to reopen D10. | Rev0.4 §11 |
+| OI-23 | **Board fit: area settled, outlines not measured.** The placement study (`design/experiments/oi-23-placement/`, 15 tests) proved that 85 × 35 mm cannot hold Rev0.4: even with no routing space and every low part credited under a module, it needs 3,715 mm² against 2,975 mm². D24 set 100 × 72 mm, where a block placement passes every check at routing factor K = 1.6 (headroom to K = 1.74). Still open: the CH335F outline is measured off a product photo (OI-24), and the header height behind the study's 1.5 mm under-module rule is not chosen. Re-run the study with both; it must still exit 0. | Rev0.4 §11; study README |
 | OI-24 | **CH335F module outline and pin map unknown.** Akizuki publishes no drawing for AE-QFN28-DIP(CH335F). Measure a purchased module, and confirm that the QFN comes mounted and how DIP30 maps to the chip's pins. | `requirements/parts.md` U6 |
 | OI-25 | **J1 current is misdeclared.** The board draws ≈ 0.21 A from J1, but the CH335F's default descriptor declares self-powered and 100 mA. Options: (a) declare honestly via the CH335F EEPROM (an EEPROM part is not yet sourced) plus the MCU function's own MaxPower; (b) power the MCU and analog from J4, which loses control without J4; (c) accept and document. | Rev0.4 §7.1 |
 | OI-26 | **HS signal integrity through the modules is unverified.** D± pass through 2.54 mm headers and Akizuki module layouts. The fallback is that DUTs enumerate at FS. | Rev0.4 §3.3; V-HOST-01 |

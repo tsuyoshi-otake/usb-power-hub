@@ -133,7 +133,7 @@ REQ-PORT-04) and are not reused.
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
-| REQ-MECH-01 | PCB 85 × 35 mm, 1.6 mm, 4 layers, ENIG. Whether the modules fit is OI-23. | Settled | D10, CLAUDE.md §10.3 |
+| REQ-MECH-01 | PCB 100 × 72 mm, 1.6 mm, 4 layers, ENIG. The outline stays within 100 × 100 mm (JLCPCB's base price tier as quoted on 2026-11-03, the user's condition in D24). A block placement is checked; the measured module outlines are still OI-23 / OI-24. | Settled (4 layers, ≤ 100 × 100 mm) / Delegated (100 × 72 mm) | D10, D24, CLAUDE.md §10.3 |
 | REQ-MECH-02 | Two USB-C plugs fit J2 and J3 at the same time, verified with real cables. Design input: J2–J3 centre pitch ≥ 18 mm. The J2/J3 modules are 20 mm wide, so side-by-side placement gives ≥ 20 mm. | Settled (requirement, OI-1) / Delegated (18 mm) | OI-1, D21 |
 | REQ-MECH-03 | ≥ 3 mounting points, at least one near each connector end; insertion force is not carried by solder joints. The connector modules' mechanical pins are soldered, and the modules sit on the PCB, not on their header pins alone. | Settled | CLAUDE.md §7 |
 | REQ-MECH-04 | Fasteners have ≥ 4 mm thread engagement or use heat-set inserts. | Settled (rule) / Delegated (heat-set M2 ×4) | CLAUDE.md §7, D21 |

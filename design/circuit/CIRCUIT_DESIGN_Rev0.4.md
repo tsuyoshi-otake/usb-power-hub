@@ -66,7 +66,7 @@ every machine-placed part is JLCPCB Basic (D22, Section 9).
 | 6 | ~~STM32F103 USB is Full-Speed (12 Mbps) device only~~ | DS5319 Rev 18 | **Superseded** by D22 → D23: the MCU is now an RP2040 (fact 15) |
 | 7 | ~~Board outline 60 × 24 mm~~ | `mockup/board-model.js` | **Superseded by fact 9** |
 | 8 | All designators/values in `mockup/` are placeholders | CLAUDE.md §0 | Settled |
-| 9 | Board outline 85 × 35 mm, 4 layers | User decision, 2026-11-03 (D10) | Settled; fit is OI-23 |
+| 9 | ~~Board outline 85 × 35 mm~~, 4 layers | User decision, 2026-11-03 (D10) | 4 layers settled; **outline superseded by fact 17** (D24) |
 | 10 | ~~USB hub is USB2514B~~ | User decision, 2026-11-03 (D11) | **Superseded** by D13 → D15: every USB2514B variant is Extended |
 | 11 | Part parameters quoted here | Manufacturer datasheets fetched 2026-11-03, cited per part in `requirements/parts.md` | High for the parameters cited; nothing else about those parts is confirmed |
 | 12 | Sourcing rule: JLCPCB **Basic** parts in assembly stock for machine-placed parts; **Akizuki** parts in stock for large hand-soldered parts; no Extended-only PCBA | User decision, 2026-11-03 (D13) | Settled |
@@ -74,6 +74,7 @@ every machine-placed part is JLCPCB Basic (D22, Section 9).
 | 14 | Akizuki stock, part numbers and specifications | akizukidenshi.com product pages, 2026-11-03 | High as of that date; stock changes daily |
 | 15 | RP2040: USB 1.1 Full-Speed device with on-chip PHY and D+ pull-up, 4 KB USB packet memory, 30 GPIO with per-pin edge interrupts, PIO, ROM USB bootloader. The PGA2040 module brings USB_DP, USB_DM, BOOTSEL, RUN and SWD out to its 2.54 mm pins | RP2040 datasheet (Raspberry Pi Ltd); Akizuki g116762; Pimoroni's PGA2040 schematic | High for the RP2040. The module's supply input, USB series resistors and flash are OI-31 |
 | 16 | MCP3208-CI/P: 12-bit, 8 ch, SPI; INL ±2 LSB max (C grade); f<sub>CLK</sub> 1 MHz at V<sub>DD</sub> 2.7 V, 2 MHz at 5 V; sample phase 1.5 clocks through a 1 kΩ switch onto 20 pF; inputs rated −0.6 V to V<sub>DD</sub> + 0.6 V, no input-current rating; the clock need not be constant as long as each timing limit is met | Microchip DS21298E, fetched 2026-11-03 | High |
+| 17 | Board outline 100 × 72 mm, 4 layers | D24, 2026-11-03: the user's condition 「100x100未満ならいいんだっけ」 (stay within 100 × 100 mm), size chosen by Claude from the OI-23 study | Settled; block placement checked, routing not |
 
 Everything else below is derived by calculation in this document, or is explicitly marked OPEN.
 The arithmetic is reproduced by `CIRCUIT_DESIGN_Rev0.4_calc.py` beside this file
@@ -745,7 +746,7 @@ appear here.
 | D7 | Upstream control interface is CDC-ACM ×2 (control + stream), driverless | 2026-08-16 | User | — |
 | D8 | ~~32 kSPS~~ **SUPERSEDED by D17**: 14.0 kSPS since D23 (Rev0.3: 18.5 kSPS) | 2026-08-16 | Rev0.1 design | — |
 | D9 | Bypass FETs default ON (fail-safe to HIGH range) | 2026-08-16 | Rev0.1 design | — |
-| D10 | Board outline **85 × 35 mm, 4 layers** | 2026-11-03 | User | OI-13, OI-10 (fit re-checked by OI-23) |
+| D10 | Board outline ~~85 × 35 mm~~, **4 layers**. **Outline amended by D24** (100 × 72 mm) | 2026-11-03 | User | OI-13, OI-10 |
 | D11 | ~~USB hub is USB2514B~~ **SUPERSEDED by D15** — every variant is Extended (D13) | 2026-11-03 | User | — |
 | D13 | **Sourcing rule:** JLCPCB Basic parts in stock for machine-placed small parts; Akizuki parts in stock for large hand-soldered parts; never an Extended-only PCBA. Functions that cannot be built this way are reduced. Restated the same day as a list that adds: avoid special or hard-to-source parts, and reduce part types and count | 2026-11-03 | **User** | — |
 | D14 | Port power from **J4, a power-only 5 V USB-C input** (Rd 5.1 kΩ, advertisement read by ADC); J1 = data + logic power; no PD, no buck. *Revert → reopens OI-4, OI-17* | 2026-11-03 | Claude (delegated) | OI-4, OI-17, OI-18 |
@@ -758,29 +759,38 @@ appear here.
 | D21 | Rev0.2 proposals adopted: P9 (≥ 18 mm port pitch; the 20 mm-wide modules side by side meet it), P10 (BOOT command + lid pinhole; **amended by D23:** the RP2040 ROM USB bootloader, where Rev0.3 had a flash DFU bootloader), P11 (TC2030-NL + test pads; SWD is now for debug only), P12 (heat-set M2 inserts, 4 corners) | 2026-11-03 | Claude (delegated) | OI-9 (design); OI-1, OI-5, OI-8 still need physical checks |
 | D22 | **Basic parts only:** no Preferred Extended part either. STM32F103C8T6 and SRV05-4 are removed, accepting the costs Claude stated beforehand: an Akizuki RP2040 module plus a DIP ADC, a lower sample rate, and no D± ESD on J1–J3. The user answered 「うん、okだよ」 and then selected 「外して Basic のみにする」 | 2026-11-03 | **User** | OI-30 |
 | D23 | MCU = **PGA2040** (RP2040 module, Akizuki); ADC = **2 × MCP3208-CI/P** (Akizuki DIP16) at V<sub>DD</sub> 5 V, sharing CLK/CS/DIN, sample phase stretched by the PIO, 14.0 kSPS with both ports sampled at once; PSM712 on J1–J3 CC, D± unprotected; RP2040 ROM USB bootloader; hold pull-ups 10 kΩ; level shifters on EVT and the ADC bus. Supersedes D16; amends D17, D19, D21. *Revert → no Basic-only MCU remains; reverting D22 instead restores Rev0.3* | 2026-11-03 | Claude (delegated) | — (opens OI-31) |
+| D24 | Board outline **100 × 72 mm**, 4 layers; amends D10's 85 × 35 mm. The OI-23 study (`design/experiments/oi-23-placement/`) shows that Rev0.4 needs at least 3,715 mm² (no routing space, every low part credited under a module), against 2,975 mm². The user's condition, 「100x100未満ならいいんだっけ」, is that the outline stays within JLCPCB's 100 × 100 mm base price tier. JLCPCB instant quote, 2026-11-03, 4 layers, 5 pcs, default options: $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; $30.80 at 130 × 72 mm (a $25 engineering fee appears). ENIG adds $16.90 at 85 × 35 and $17.40 at 100 × 72 mm. The size inside the tier is Claude's choice. *Revert → no 85 × 35 layout exists; a smaller outline needs a new study run* | 2026-11-03 | **User** (condition) + Claude (delegated, size) | OI-23 (area only; outlines still open) |
 
 D12 was withdrawn on 2026-11-03 and is not reused.
 
 ---
 
-## 11. OI-13 — Board area. **CLOSED by D10 (2026-11-03): 85 × 35 mm, 4 layers.**
+## 11. OI-13 / OI-23 — Board area. **D10's 85 × 35 mm is amended by D24 (2026-11-03): 100 × 72 mm, 4 layers.**
 
 Rev0.2's option study (in Git history, commit `4e59607`) assumed an all-SMD board at 36 %
-density. Rev0.3 and Rev0.4 change the area mix:
+density. Rev0.3 and Rev0.4 moved the large parts onto Akizuki modules and DIP packages, and
+the OI-23 placement study (`design/experiments/oi-23-placement/`, run with `python -I`)
+counted the result:
 
-- In Rev0.3 the Akizuki modules take about 2,000 mm² of the 2,975 mm² board: four USB-C
-  modules at ~300 mm² each, the CH335F module (outline not published, OI-24), the MAU104,
-  R_H and R_M.
-- Rev0.4 adds the PGA2040 (21 × 21 mm, 441 mm²) and two DIP16 ADCs (≈ 210 mm² each with
-  pads), about 860 mm², and removes the STM32 (≈ 81 mm²) and Y1. Hand-soldered parts now
-  take about 2,800 mm², nearly the whole board.
-- The SMD content needs about 1,100–1,200 mm².
+- **Hand-soldered parts: 2,574 mm².** Four USB-C modules at 20 × 15 mm, the PGA2040 at
+  21 × 21 mm, the CH335F module at 38.5 × 10.2 mm (measured off a photo, OI-24), two DIP16
+  at 9.8 × 20.85 mm and the MAU104 at 20 × 6.6 mm.
+- **SMD courtyards: 1,649 mm²,** including the two hand-soldered shunts per port (133 mm²).
+  Rev0.4 as first written had estimated 1,100–1,200 mm² without counting; the count gives
+  1,516 mm² without the shunts.
+- **Space under raised modules: 704 mm²,** for parts up to 1.5 mm tall. The parts that low
+  would fill 971 mm² even at K = 1.0, so the bound credits all 704 mm².
 
-The board fits only if low-profile parts sit under modules raised on pin headers. In Rev0.4
-that is a necessity, not a refinement: the DIP ADCs may have to sit under a raised module
-too. Whether that works, or whether D10 must be revisited, is **OI-23**, a placement study
-before capture. D10 stands until that study says otherwise, but OI-23 is now the issue most
-likely to reopen it.
+With the four mounting-hole keepouts, the board needs at least 3,715 mm² with no routing
+space at all (K = 1.0), and 4,689 mm² at the planning value K = 1.6. The 85 × 35 mm board has
+2,975 mm², so no layout of it exists. D24 sets 100 × 72 mm (7,200 mm²), where the study's
+block placement passes every check: board bounds, clearances, region capacity at K = 1.6
+(headroom to K = 1.74), connector edges, a 28 mm J2–J3 pitch, the MAU104 ≥ 6 mm from the
+analog parts, and a USB corridor that runs in front of the front ends rather than through
+them.
+
+What stays open is in OI-23 (CLAUDE.md §11): the measured CH335F outline and the header
+height. The study does not route; capture and layout do.
 
 ---
 
@@ -788,9 +798,10 @@ likely to reopen it.
 
 Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
 
-1. **OI-23 placement study** with real module outlines, now including the PGA2040 and the
-   two DIP16 ADCs. Measure a purchased CH335F module (OI-24); Akizuki publishes no drawing
-   for it.
+1. **OI-23 remainder.** The board area is settled (D24, §11). Measure a purchased CH335F
+   module (OI-24; Akizuki publishes no drawing for it), choose the module headers, enter
+   both in `design/experiments/oi-23-placement/placement_study.py`, and re-run it: it must
+   still exit 0.
 2. **OI-31**: confirm the PGA2040's supply input, USB series resistors and flash from the
    module itself, because they decide U1's footprint and power wiring.
 3. **OI-25**: decide how J1's 0.21 A is declared.
@@ -812,6 +823,7 @@ Status as of Rev0.4 (2026-11-03). OI-30 is closed by D22.
 | 0.2 | 2026-11-03 | D10 (85 × 35 mm, 4 L) and D11 (USB2514B) by the user; D6 superseded, replacement clocks proposed (P13). OI-13, OI-10 closed; OI-2 reopened. Corrected §3.1, §3.2, §7.1, §7.3, G12. Added §4.1 noise, §6.3 clocks, G13–G15, Section 14 proposals. Shortlist moved to `requirements/parts.md`. OI-16 – OI-22 opened. |
 | 0.3 | 2026-11-03 | D13 (sourcing rule) by the user, with the open choices delegated. Redesigned from Basic and Akizuki parts: J4 power-only input (D14), CH335F (D15), STM32F103C8T6 (D16), discrete current-mirror topology C with 0.1 / 10 / 510 Ω and pedestal injection (D17), back-to-back port switch (D18), two 12 MHz crystals (D19), accuracy target (D20), proposals P9–P12 adopted (D21). D1, D3, D5, D8, D11 superseded; D4 amended. OI-2, 4, 7 (part), 9, 16–22 closed by decision; OI-23 – OI-30 opened. Still no capture. |
 | 0.4 | 2026-11-03 | D22 (Basic parts only, no Preferred Extended) by the user closes OI-30. MCU and ADC redesigned (D23): PGA2040 RP2040 module and two MCP3208 DIP16 ADCs at V<sub>DD</sub> 5 V, 14.0 kSPS; SRV05-4 removed, PSM712 on J1–J3 CC, D± unprotected; Y1 removed; ROM USB bootloader; hold pull-ups 10 kΩ; EVT and ADC-bus level shifters. D16 superseded; D8, D17, D19, D21 amended. OI-31 opened. Machine-placed part types 38 → 35. Still no capture. |
+| 0.4 | 2026-11-03 | Amended: D24 (user condition, Claude's size) sets the board outline to 100 × 72 mm, 4 layers, amending D10, from the OI-23 placement study. §11 rewritten with counted areas; §12 item 1 and fact 9/17 updated. No circuit change. |
 
 ---
 

@@ -313,12 +313,14 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - **When:** Design review (mechanical overlay with real module outlines, OI-23) + Bring-up
   (real parts)
 - **Method:**
+  - Run `python -I design/experiments/oi-23-placement/placement_study.py` with the measured
+    module outlines and the chosen header height entered (design review). It must exit 0.
   - Measure the Gerber outline and the fabricated board.
   - Insert the two widest cables on hand into J2 and J3 together, lid fitted.
   - Count mounting points and measure thread engagement or insert depth.
   - Insert and remove a cable 50 times per connector module.
 - **Pass:**
-  - 85.0 × 35.0 mm ± 0.2 mm, 4 layers per the fab drawing.
+  - 100.0 × 72.0 mm ± 0.2 mm, 4 layers per the fab drawing.
   - Both plugs seat fully together.
   - ≥ 3 mounting points, one near each connector end; ≥ 4 mm engagement or heat-set inserts.
   - After 50 cycles, no solder-joint cracking and no module movement.

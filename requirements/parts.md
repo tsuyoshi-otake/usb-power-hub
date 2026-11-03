@@ -270,5 +270,6 @@ All Extended. The full Rev0.2 rows, with stock and datasheet notes, are in Git h
 - **J4 input fuse (OI-29).** No fuse or PTC is Basic. Akizuki resettable fuses are the
   candidates, and must be checked for hold current ≥ 2.5 A at 5 V.
 - **Pin headers and sockets for the modules and the DIP16 ADCs (OI-23).** These are Akizuki
-  parts; their height decides what fits underneath.
+  parts; their height decides what fits underneath. The OI-23 study assumes 2.5 mm header
+  plastic and allows parts up to 1.5 mm tall under a module; the chosen header must keep that.
 - **Heat-set M2 inserts** (mechanical; not under D13).

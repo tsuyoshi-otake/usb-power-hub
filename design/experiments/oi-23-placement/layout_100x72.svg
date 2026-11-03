@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="452" viewBox="-10 -10 620 452" font-family="sans-serif" font-size="9">
+<rect x="0" y="0" width="600.0" height="432.0" fill="#1f5f3a" stroke="#000"/>
+<rect x="45.0" y="342.0" width="60.0" height="87.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="48.0" y="353.0" fill="#fff">UIA: UI_A</text>
+<rect x="231.0" y="342.0" width="42.0" height="87.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="234.0" y="353.0" fill="#fff">GAP</text>
+<rect x="399.0" y="342.0" width="78.0" height="87.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="402.0" y="353.0" fill="#fff">UIB: UI_B</text>
+<rect x="480.0" y="342.0" width="75.0" height="87.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="483.0" y="353.0" fill="#fff">MCUF: MCUF</text>
+<rect x="3.0" y="132.0" width="162.0" height="186.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="6.0" y="143.0" fill="#fff">AFEA: PSW_A, LADDER_A, AMPS_A, CMP_A</text>
+<rect x="168.0" y="135.0" width="162.0" height="183.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="171.0" y="146.0" fill="#fff">AFEB: PSW_B, LADDER_B, AMPS_B, CMP_B</text>
+<rect x="333.0" y="147.0" width="120.6" height="42.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="336.0" y="158.0" fill="#fff">ADCS: ADCSUP</text>
+<rect x="459.0" y="255.0" width="73.8" height="63.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="462.0" y="266.0" fill="#fff">V12: V12</text>
+<rect x="459.0" y="93.0" width="73.8" height="36.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="462.0" y="104.0" fill="#fff">TVS1: TVS1</text>
+<rect x="45.0" y="93.0" width="120.0" height="36.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="48.0" y="104.0" fill="#fff">PWR4: TVS4</text>
+<rect x="309.0" y="3.0" width="84.0" height="129.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="312.0" y="14.0" fill="#fff">LDO: LDO, PGASUP, OC</text>
+<rect x="6.0" y="363.0" width="18.0" height="18.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="9.0" y="374.0" fill="#fff">F1</text>
+<rect x="576.0" y="363.0" width="18.0" height="18.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="579.0" y="374.0" fill="#fff">F2</text>
+<rect x="6.0" y="48.0" width="18.0" height="18.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="9.0" y="59.0" fill="#fff">F3</text>
+<rect x="0.0" y="390.0" width="42.0" height="42.0" fill="#555" stroke="#ccc"/>
+<text x="3.0" y="401.0" fill="#fff">MH1</text>
+<rect x="558.0" y="390.0" width="42.0" height="42.0" fill="#555" stroke="#ccc"/>
+<text x="561.0" y="401.0" fill="#fff">MH2</text>
+<rect x="0.0" y="0.0" width="42.0" height="42.0" fill="#555" stroke="#ccc"/>
+<text x="3.0" y="11.0" fill="#fff">MH3</text>
+<rect x="558.0" y="0.0" width="42.0" height="42.0" fill="#555" stroke="#ccc"/>
+<text x="561.0" y="11.0" fill="#fff">MH4</text>
+<rect x="108.0" y="321.0" width="427.8" height="18.0" fill="#2a4f8f" stroke="#ccc"/>
+<text x="111.0" y="332.0" fill="#fff">USB_CORRIDOR</text>
+<rect x="108.0" y="342.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
+<text x="111.0" y="428.0" fill="#ffd24a">J2 USBC</text>
+<rect x="142.8" y="381.6" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="111.0" y="361.8" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="276.0" y="342.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
+<text x="279.0" y="428.0" fill="#ffd24a">J3 USBC</text>
+<rect x="310.8" y="381.6" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="279.0" y="361.8" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="45.0" y="0.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
+<text x="48.0" y="86.0" fill="#ffd24a">J4 USBC</text>
+<rect x="79.2" y="3.0" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="48.0" y="50.4" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="396.0" y="0.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
+<text x="399.0" y="86.0" fill="#ffd24a">J1 USBC</text>
+<rect x="430.2" y="3.0" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="399.0" y="50.4" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="333.0" y="192.9" width="58.8" height="125.1" fill="none" stroke="#ffd24a"/>
+<text x="336.0" y="314.0" fill="#ffd24a">U7 DIP16</text>
+<rect x="394.8" y="192.9" width="58.8" height="125.1" fill="none" stroke="#ffd24a"/>
+<text x="397.8" y="314.0" fill="#ffd24a">U17 DIP16</text>
+<rect x="535.8" y="87.0" width="61.2" height="231.0" fill="none" stroke="#ffd24a"/>
+<text x="538.8" y="314.0" fill="#ffd24a">U6 CH335F</text>
+<rect x="551.6" y="90.0" width="29.5" height="225.0" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="492.0" y="132.0" width="39.6" height="120.0" fill="none" stroke="#ffd24a"/>
+<text x="495.0" y="248.0" fill="#ffd24a">U5 MAU104</text>
+<rect x="180.0" y="6.0" width="126.0" height="126.0" fill="none" stroke="#ffd24a"/>
+<text x="183.0" y="128.0" fill="#ffd24a">U1 PGA2040</text>
+<text x="2" y="441" fill="#000">front edge (OUT A / OUT B); 100 x 72 mm; yellow = hand-soldered, dashed = SMD under module</text>
+</svg>

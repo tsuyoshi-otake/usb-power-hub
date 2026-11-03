@@ -26,7 +26,10 @@ the host PC over a plain COM port.
 - **Control:** an RP2040 module (PGA2040) behind a CH335F hub, enumerating as a driverless CDC-ACM COM
   port. Commands such as `PORT A ON`, `PORT B CYCLE 2000` and `STREAM ON` are listed in
   `requirements/product.md` Section 4.1.
-- **Board:** 85 × 35 mm, 4 layers, 1.6 mm FR-4, ENIG.
+- **Board:** 100 × 72 mm, 4 layers, 1.6 mm FR-4, ENIG (D24). The earlier 85 × 35 mm
+  cannot hold the Rev0.4 parts. JLCPCB's instant quote on 2026-11-03 (4 layers, 5 pcs,
+  default options) was $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; ENIG adds $16.90 and
+  $17.40 at the two sizes. Recheck the live quote before ordering.
   - JLCPCB machine-places the small parts, all JLCPCB **Basic**.
   - You hand-solder the large parts, all bought from **Akizuki**: four USB-C modules,
     the hub module, the RP2040 module, two DIP16 ADCs, the 12 V module and two shunts.
@@ -44,7 +47,8 @@ Read in this order:
 | `requirements/verification.md` | How each requirement is proven (V-* IDs: method, pass criterion, limits). |
 | `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.3 are in Git history. |
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
-| `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the 85 × 35 mm decision (D10). |
+| `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
+| `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the board-size decisions D10 and D24 (100 × 72 mm). |
 
 Decisions are D-numbers in the circuit document's §10. Its "By" column says whether the
 user made each one, whether it came from the Rev0.1 design, or whether Claude made it
@@ -80,8 +84,8 @@ python -m http.server 8000 --directory mockup
 ## Building and programming
 
 Not possible yet. Schematic capture (KiCad, decision D2) starts after the items in
-the circuit document's §12 are done (first: the OI-23 placement study and the
-OI-31 module checks). Firmware does not exist.
+the circuit document's §12 are done (first: measuring the purchased CH335F and PGA2040
+modules, OI-24 and OI-31, and re-running the OI-23 placement study with them). Firmware does not exist.
 
 ## Repository
 
