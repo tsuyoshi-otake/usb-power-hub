@@ -55,6 +55,29 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   Space requests >= 2 s apart and back off on errors. Verified 2026-11-03 on the five
   Akizuki rows of `requirements/parts.md`. No committed tool reads Akizuki yet, so stock is
   rechecked by hand at order time (V-MFG-02).
+- **Pages are UTF-8, and a search keyword is UTF-8 percent-encoded.** Decoding a page as cp932
+  gives mojibake, and a cp932-encoded keyword returns no hits (`金属皮膜抵抗 470Ω` found
+  g108532 only when UTF-8-encoded).
+- **Fields on a product page:**
+  - name: `<h1 ... block-goods-name ...>`;
+  - pack: `block-goods-price--qty` (e.g. 1袋100本入);
+  - tax-included price: `block-goods-price--price`;
+  - purchasable stock: the one `<div class="block-goods-detail-available_purchase">`.
+  The bulk-purchase blocks lower on the page belong to related products: a regex over any
+  "available_purchase" field returned their stock.
+- **The shipping rule is on `/catalog/pages/buy.aspx`, server-rendered.**
+- Verified 2026-11-03 on 43 product pages by the main session, and again by two verifiers'
+  fresh downloads.
+
+## LCSC (lcsc.com)
+
+- **A product page `https://www.lcsc.com/product-detail/C<n>.html` is curl-readable.** It embeds
+  a JSON block with `productCode`, `productModel`, `brandNameEn`, `encapStandard`,
+  `stockNumber`, `minBuyNumber` and `productPriceList` (`ladder`, `usdPrice`, `extPrice`).
+  Read figures from that JSON, not from the page's FAQ prose, which was stale. Verified
+  2026-11-03 on C7433 and C15127, and again by a verifier.
+- **No public page read gave the shipping charge to Japan.** The shipping page lists only
+  promotions, so LCSC's charge is known only at checkout (2026-11-03).
 
 ## Datasheet text extraction
 
@@ -97,7 +120,9 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   `"<bs><bs>n"` reached Python as `"<bs>n"` and put a real newline into the generated file
   (SyntaxError, 2026-11-03). Build a literal backslash with `chr(92)`, or write the script with
   the Write tool. (`<bs>` stands for a backslash here, so this rule does not depend on how it
-  is itself pasted.)
+  is itself pasted.) It recurred on 2026-11-03, when a heredoc edit put real newlines into two
+  string literals of the bench kit's `kit.py`. Re-read this rule before any heredoc that
+  writes code.
 - **`Path.write_text` on Windows writes CRLF.** An edit script that read LF files with
   `read_text` and saved them with `write_text(s, encoding="utf-8")` left all seven edited
   files CRLF (675 of 675 lines in CLAUDE.md, counted in the bytes on 2026-11-03). Git's
@@ -143,6 +168,13 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   48.1 Ω where the formula gives 50.57 Ω. A fitted Dk of 4.04, against the published 4.4,
   still made its single-ended width match JLCPCB's. The main session's own implementation
   exposed it. The fix was to forbid the fit and pin the hand-worked value in a test.
+- **Review a delegated test plan against the open issue's question, not only against its own
+  checker.** A plan can pass its own tests and still be unable to answer the issue.
+  Verified 2026-11-03: Devin's bench kit passed its 13 tests, yet
+  - its substitute OP07 die and P-FET could not close OI-27, which is about the exact parts;
+  - its V-MEAS-06 negative control could not fail (a stiff pot source removes the droop);
+  - its bench A back-fed a supply into the PC's USB VBUS.
+  The main session's review against V-MEAS-00/06 and the design found all three.
 
 ## Devin CLI
 
@@ -153,6 +185,8 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **In print mode a denied tool call ends the run without a message.** Deny rules still apply
   under `--permission-mode dangerous`. Read the `--export` transcript to see which call was
   refused. Verified 2026-11-03 with a permission test whose denied `rm` cancelled the run.
+  It recurred on the bench-kit run, when Devin tried to delete its own downloaded PDFs. A
+  brief therefore forbids deleting even Devin's own files. Resume with `-r` and a reminder.
 - **Devin also loads `~/.claude/skills`.** A brief's rules therefore compete with the global
   skills, so a brief states its file scope, its no-delete and no-commit rules, and the
   interpreter flags (`python -I -B`, LF) explicitly. Observed 2026-11-03.

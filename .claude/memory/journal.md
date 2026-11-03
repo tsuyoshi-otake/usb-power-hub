@@ -371,3 +371,59 @@ Section 13 (board) only once verified.
   `gh repo view` reports `PRIVATE`, and `main` tracks `origin/main`.
 - **Docs.** CLAUDE.md §0, the OI-15 row and the README's Repository section said "no remote".
   They now name the private remote.
+
+## 2026-11-03 - Pre-layout bench kit (issue #1)
+
+- **Request.** 「進めて」: carry on with issue #1. That means the parts to buy, the instruments
+  and the bench wiring for OI-24, OI-27/OI-28 (V-MEAS-00) and OI-31 (V-MEAS-06).
+- **Delegation.** Devin (SWE-2 Max) drafted `tests/fixtures/pre-layout-bench/`. Its Akizuki
+  figures for 38 items (price, pack, stock) matched the main session's own download of every
+  product page. Its titles matched too.
+- **Defects in the draft, found by the main session's review and fixed:**
+  1. **Substitutes that could not close the issue.** OP07CPZ (ADI, PDIP) and IRLML6402 stood
+     in for OP07CDR and AO3401A. OI-27 asks how these exact parts behave. Fix: the exact parts
+     from LCSC (C7433, C15127), plus an SOP-8 adapter.
+  2. **A negative control that could not fail.** CH0/CH1 were driven from a pot wiper. A stiff
+     source removes the charge-sharing droop that V-MEAS-06's native sample must show. Fix: a
+     PNP current source per channel.
+  3. **Back-feed.** Bench A tied a bench 5 V supply to the USB-C kit's VBUS, which feeds the
+     PC's port. Fix: bench A is powered only from the PC's USB port.
+  4. **R_M pulse voltage.** The draft said "at 3.3 V", which is the gate drive. 2.35 W in 10 Ω
+     needs 4.85 V across R_M. Fix: set it on the scope; pulses ≥ 1 s apart, spacing recorded.
+     Gate pull-downs were added, because a floating gate would hold 2.35 W on a 1 W resistor.
+  5. **Smaller defects.**
+     - The DMM fallback overstated a 3½-digit meter: a 1999-count meter shows 10 mV at 3.3 V.
+     - An unsourced scope requirement was removed.
+     - The PGA2040 facts were taken from a mirror and a search snippet. They now come from
+       Pimoroni's own page and schematic.
+     - V3V3 was said to feed the SPI pull-ups. They go to 5 V (§6.4).
+     - The socketed PGA2040 was listed as able to move to a prototype.
+     - kit.py was Akizuki-only. It now knows the vendor, with LCSC prices in USD and LCSC's
+       minimum order.
+- **Cost.**
+  - Akizuki: 41 items, 11,345 yen, shipping free. The spare MCP3208 (500 yen) is what lifts
+    the order over the 11,000 yen line; without it the subtotal is 10,845 yen and shipping costs 550 yen.
+  - LCSC: $1.04 plus shipping. The shipping is unknown because LCSC shows it only at checkout.
+- **Verification.** 21 tests, each check negative-tested; kit.py exits 0. Rubric
+  `.claude/goal-loop/bench-kit/rubric.md`, graded by a sonnet rubric-verifier.
+  - Round 1 failed C3 and C5. C3: the port and V12F capacitors were electrolytics, against
+    the design's 0805 MLCCs, whose ESR and DC-bias derating shape the step test. C5: PC and
+    soldering had no fallback, the resistor fallback reached only 1.07 A at 4.59 V, and
+    "4½ digits" does not give 0.1 mV at 3.3 V.
+  - The fixes: Murata 0805 MLCCs (g108240, g113388); a resistor set that reaches 1.25 A;
+    a DMM of at least 40,000 counts; and real fallbacks.
+  - Round 2 passed C1-C7. The verifier re-downloaded all 41 Akizuki pages, both LCSC
+    pages and the Pimoroni schematic. It also mutated copies of kit.py, and each disabled
+    check made a test fail.
+  - After the pass, the 4.7 ohm || 15 ohm fallback was reworded, because the verifier
+    read its rating as ambiguous. Its directories `~/tmp/usb-power-hub/verify-bench-1`
+    and `verify-bench-2` are left in place.
+- **Incident.** The heredoc doubled-backslash rule, already in rules.md, recurred. A heredoc
+  edit put real newlines into two string literals in kit.py (SyntaxError). They were fixed
+  with Edit.
+- **Residual risks.**
+  - LCSC's shipping charge is unknown.
+  - Stock is volatile: the PGA2040 had 41 and dupont-mm was low.
+  - TL431 and AZ1117 stand in for supply-role parts.
+  - No bench firmware exists, and nothing is built.
+- **Commit.** `7b25e24`.
