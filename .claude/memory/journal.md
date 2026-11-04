@@ -533,3 +533,61 @@ Section 13 (board) only once verified.
   Before the summary, Claude had noted that Devin's tool files `pdfgrep.py` and `run_jlc.py` did
   not exist. A listing shows both files exist, so the note is withdrawn.
 - **Commit.** This journal entry and the rules.md entry.
+
+## 2026-11-04 - D29: a bare RP2040 replaces the PGA2040 (issue #3)
+
+- **Request.** The user accepted a larger redesign (「いいよ、大きな設計変更になってもいいよ」)
+  and chose 「素の RP2040 (推奨)」.
+- **Decision.** D29 (user): the MCU is a bare RP2040 (C2040, Extended, LQFN-56), machine-placed
+  by JLCPCB, the one exception to D22. It replaces D23's PGA2040; D23's ADC choice stands.
+- **Design.** Rev0.4 §6.5 adds U1's support circuit after Raspberry Pi's minimal design:
+  - U8 W25Q128JVSIQ (C97521);
+  - Y1 C9002 with 2 × 15 pF C0G (C1548) and 1 kΩ in XOUT;
+  - 27 Ω per USB line as 22 Ω (C25092) + 5.1 Ω (C25197), because no 27 Ω is Basic;
+  - 100 nF per power pin and 1 µF at VREG_VIN and VREG_VOUT; SW3 to QSPI_SS through 1 kΩ;
+    RUN to V3V3 through 10 kΩ; TESTEN to GND;
+  - test pads on DVDD, RUN and one GPOUT pin.
+  Machine-placed types went from 35 to 40 (39 Basic + C2040).
+- **Desk checks.**
+  - C9002 is rated for C<sub>L</sub> 20 pF and runs at ≈ 10.5 pF. The pull is ≤ 119 ppm at
+    C1 = 5 fF and ≤ 509 ppm at worst (20 fF, tolerances included), against the 1000 ppm the
+    RP2040 tolerates.
+  - Start-up margin is 0.625 × the reference design's.
+  - USB_VDD has 0.116 V to spare at V3V3's 3.251 V minimum.
+  - DVDD draws ≤ 16.6 mA against the 100 mA on-chip regulator.
+- **Studies.**
+  - Placement: 85 × 35 mm needs 3,518 mm² at K = 1.0 (was 3,780). 100 × 72 mm holds to
+    K = 1.74.
+  - Cost: Economic is 20,674–21,154 yen for 2 units (was 21,883–22,843), with one Extended
+    feeder fee of $3.07. X-ray inspection (2 × $1.64) is likely and not included.
+  - The cost check now admits only approved Extended codes (`APPROVED_EXTENDED`), and a new
+    test shows an unapproved one is caught.
+- **Verification.**
+  - Rubric: `.claude/goal-loop/rp2040-bare/rubric.md`, C1–C8, graded by rubric-verifier
+    (sonnet).
+  - Round 1 failed C3: the calc script printed figures the document did not quote (reset hold
+    2.705 / 2.887 V, BOOTSEL DVDD 14.7 mA, the 2 fF and 10 fF pull points, the 9.5–12.5 pF
+    sweep, a 0.281 V margin).
+  - Round 1 also failed C5: parts.md's "1 nF / 10 nF" row held two codes, so 39 rows stood
+    for 40 types.
+  - Both were fixed, and round 2 passed all eight criteria.
+  - Calc script exit 0; placement study 15 tests OK; cost estimate 12 tests OK. Afterwards no
+    runner process was left.
+- **Investigation.**
+  - The verifier reported that `grep $'\r'` finds no CR in Git Bash.
+  - Confirmed on a one-CRLF file: `grep -c` printed 0; `grep -U -c` and Python's byte count
+    both gave 1.
+  - This change set was also byte-counted with Python: 0 CR.
+  - Rule added.
+- **Incident.** A heredoc edit of the calc script lost a doubled backslash again (a ValueError
+  before anything was written). Every later edit went through a script written with the
+  Write tool. Existing rule updated.
+- **Residual risk.**
+  - C9002's start-up (ESR 80 Ω against 50 Ω) and its pull. Fallback: ABM8-272-T3, a second
+    Extended part, which needs the user's decision.
+  - The reduced-ePad land (G20).
+  - Whether Economic PCBA accepts the 0.4 mm QFN.
+  - The MCP3208's INL.
+  - HS through the modules (OI-26).
+- **Purchases.** The PGA2040 is not needed. CH335F × 2 is still needed (OI-24).
+- **Commit.** `5e97c73` (design); this entry and the rules.md update follow.

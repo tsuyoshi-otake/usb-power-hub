@@ -145,13 +145,21 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   (SyntaxError, 2026-11-03). Build a literal backslash with `chr(92)`, or write the script with
   the Write tool. (`<bs>` stands for a backslash here, so this rule does not depend on how it
   is itself pasted.) It recurred on 2026-11-03, when a heredoc edit put real newlines into two
-  string literals of the bench kit's `kit.py`. Re-read this rule before any heredoc that
-  writes code.
+  string literals of the bench kit's `kit.py`, and again on 2026-11-04 in an edit of
+  `CIRCUIT_DESIGN_Rev0.4_calc.py` (a `str.index` ValueError, before anything was written).
+  Re-read this rule before any heredoc that writes code; an edit script written with the
+  Write tool and run by path avoided it for every later edit that day.
 - **`Path.write_text` on Windows writes CRLF.** An edit script that read LF files with
   `read_text` and saved them with `write_text(s, encoding="utf-8")` left all seven edited
   files CRLF (675 of 675 lines in CLAUDE.md, counted in the bytes on 2026-11-03). Git's
   `eol=lf` attribute normalizes the commit, but the working copy keeps CRLF until the next
   checkout. Pass `newline="\n"` to `write_text`, or use `write_bytes`.
+- **Git Bash's `grep` does not see CR bytes: use `grep -U`, or count them in Python.** GNU
+  grep 3.0 here reads files in text mode. On a file holding one CRLF line, `grep -c $'\r'`
+  printed 0, `grep -U -c $'\r'` printed 1, and Python's `open(p, "rb").read().count(b"\r")`
+  gave 1 (2026-11-04). An independent verifier found it while running a rubric's
+  `xargs grep -l $'\r'` check, so that check had never been able to fail. A rubric's CR
+  criterion uses `grep -U` or the Python byte count.
 
 ## Design documents
 
@@ -163,6 +171,15 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   column uses one basis.** Verified 2026-11-03: writing `CIRCUIT_DESIGN_Rev0.3_calc.py`
   exposed full-scale currents computed with the pedestal and thresholds without it (366 µA
   vs 365 µA), which no reviewer of the document alone had flagged.
+  The document quotes every figure the script prints for it, sweep points and secondary
+  cases included, or the script stops printing that figure. Verified 2026-11-04: an
+  independent verifier failed the D29 round on figures the script printed and the document
+  did not quote (the reset hold's 2.705 / 2.887 V, the BOOTSEL DVDD case, two crystal-pull
+  sweep points, the load sweep, a 0.281 V margin). The second round passed once they were
+  quoted.
+- **One LCSC code per row in a parts table.** A stated type count is checked against the
+  rows. A "1 nF / 10 nF" row holding two codes made 39 rows for 40 types, and a verifier's
+  count failed it (2026-11-04). Split such a row in two.
 - **A printed sum shows the terms the code actually used, and a lower bound takes the most
   favourable value at every step.** Verified 2026-11-03:
   - `placement_study.py` printed "under-module 704" while subtracting min(704, 442);
