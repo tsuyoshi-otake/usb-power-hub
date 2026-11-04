@@ -147,8 +147,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   is itself pasted.) It recurred on 2026-11-03, when a heredoc edit put real newlines into two
   string literals of the bench kit's `kit.py`, and again on 2026-11-04 in an edit of
   `CIRCUIT_DESIGN_Rev0.4_calc.py` (a `str.index` ValueError, before anything was written).
-  Re-read this rule before any heredoc that writes code; an edit script written with the
-  Write tool and run by path avoided it for every later edit that day.
+  It recurred once more on 2026-11-04 (D31): a heredoc script appending to `journal.md`
+  wrote `<bs>r` as two real CR bytes before its next assertion failed, so a failing
+  assertion does not prove that nothing was written. Re-read this rule before any heredoc
+  that writes code or text with a backslash; an edit script written with the Write tool and
+  run by path avoided it for every later edit that day.
 - **`Path.write_text` on Windows writes CRLF.** An edit script that read LF files with
   `read_text` and saved them with `write_text(s, encoding="utf-8")` left all seven edited
   files CRLF (675 of 675 lines in CLAUDE.md, counted in the bytes on 2026-11-03). Git's
@@ -160,6 +163,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   gave 1 (2026-11-04). An independent verifier found it while running a rubric's
   `xargs grep -l $'\r'` check, so that check had never been able to fail. A rubric's CR
   criterion uses `grep -U` or the Python byte count.
+  Inside a command substitution this Git Bash drops a literal `$'\r'`: `c=$(grep -U -c $'\r'
+  "$f")` greps for the empty pattern and counts every line. On a 3-line file with one CRLF
+  line it printed 3, the same grep outside `$(...)` printed 1, and `${#p}` of `$'\r'` was 0
+  inside and 1 outside (2026-11-04). Assign the pattern to a variable outside the
+  substitution, or count in Python.
 
 ## Design documents
 

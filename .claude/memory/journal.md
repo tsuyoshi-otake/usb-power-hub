@@ -623,3 +623,46 @@ Section 13 (board) only once verified.
 - **Residual risk.** HASL bridges or opens at U1 (V-MFG-03), and the Economic eligibility of
   the finish combination.
 - **Commit.** `72756ad` (design); this entry follows.
+
+## 2026-11-04 - D31: bare CH335F (C5137013) instead of the Akizuki module (issue #5)
+
+- **Request.** Asked what to buy from Akizuki, the user asked 「ええ、CH335FはLCSCに在庫無いの?」
+  and 「こんなモジュール実装するのデカくない?」. Claude offered the bare chip against the module;
+  the user selected 「IC 単体にする (推奨)」.
+- **Decision.** D31 (user): U6 is the bare CH335F, QFN-28 4 × 4 mm, LCSC C5137013, Extended
+  (4,937 in JLCPCB's pool on 2026-11-04), machine-placed. The second exception to D22. It
+  replaces D15's module AE-QFN28-DIP(CH335F) (g129556).
+- **Change.**
+  - Rev0.4 §6.6 (U6 support circuit from the WCH CH334/335 datasheet V2.5), fact 19, the
+    VDD33_HUB net, G21, the D31 row; D15, D22, D28, D29, D30 amended; OI-24 closed.
+  - Calc script: V5 margin, U6 dissipation, the rejected 3.3 V feed.
+  - Placement study: the module leaves, R_HUB holds U6/Y2; a 16th test corrupts R_HUB.
+  - Cost estimate: C5137013 queried alone (one request, not a full `--fetch`), approved as
+    the second Extended exception; one header strip per board.
+  - product.md, verification.md (V-MFG-03 covers U6), parts.md, CLAUDE.md, README.
+- **Result.**
+  - Machine-placed types 40 → 41 (39 Basic). No new passive type.
+  - Hand-soldered area 2,198 → 1,806 mm²; 85 × 35 mm needs 3,332 mm² at K = 1.0 (was 3,518).
+  - Economic order $61.01 = 9,761 yen (was $55.69). 2 units with the Akizuki parts:
+    17,421–17,661 yen, 59–299 yen less than with the module.
+- **Desk-check finding.** V5's operating range with the internal LDO (4.5–5.25 V) equals
+  V5L's design range: zero margin at both ends, and the 5.5 V USB-C corner sits at V5's
+  absolute maximum. Not new with D31 (the module had the same chip on the same rail).
+- **Incident.** A CR check written as `c=$(grep -U -c $'\r' "$f")` reported a CR on every
+  line of all 15 files. Python's byte count gave 0. Cause, verified on a 3-line test file
+  with one CRLF line: inside `$(...)` this Git Bash drops the literal `$'\r'`, so grep got
+  an empty pattern (`${#p}` printed 0 inside, 1 outside). Rule updated.
+- **Verification.**
+  - Rubric `.claude/goal-loop/d31-bare-ch335f/rubric.md`, C1–C8, graded by rubric-verifier
+    (sonnet). All eight passed on the first round; it re-read every CH335F pin number and
+    figure from the datasheet pages and the package drawing.
+  - Calc exit 0; placement exit 0, 16 tests OK; cost exit 0, 13 tests OK; 45 REQ IDs all
+    covered.
+- **Residual risk.**
+  - Two 0.4 mm-pitch QFNs with ePads on leaded HASL (V-MFG-03).
+  - U6's land is drawn by hand from the §5.6 drawing (G21).
+  - The zero V5 margin at the USB-C corners.
+  - Economic PCBA eligibility; X-ray may be charged for two leadless parts.
+  - HS through one USB-C module per path (OI-26).
+- **Purchases.** The CH335F module is no longer needed.
+- **Commit.** `4475bd6` (design); this entry and the rules.md update follow.
