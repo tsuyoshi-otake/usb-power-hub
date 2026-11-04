@@ -462,3 +462,78 @@ IOL_MAX, IDSS_2N7002 = 1e-6, 80e-9       # LM393 I_OL max at V_O 30 V, 0-70 C; 2
 print(f"datasheet bounds at their own (harsher) conditions: LM393 I_OL {IOL_MAX*1e9:.0f} nA + 2N7002 I_DSS"
       f" {IDSS_2N7002*1e9:.0f} nA -> V_GS {-(IOL_MAX+IDSS_2N7002)*1e6:.2f} V vs AO3401A V_th -0.5 V min;"
       f" typical I_OL 0.1 nA -> {-(0.1e-9+IDSS_2N7002)*1e6*1e3:.0f} mV (checked by V-MEAS-01)")
+
+print("\n== Sec. 3.1 / Sec. 7.1 J1 soft start (D35, OI-32): Q53 AO3401A between VBUS_J1 and V5L")
+# Q53: source VBUS_J1 (J1 pin 1, D5), drain V5L. R34 33 k gate -> GND turns it on; C35 100 nF
+# gate -> drain (V5L) is the Miller capacitor that sets V5L's ramp; C36 + C37, 2 x 1 uF gate ->
+# source, hold the gate at the source when VBUS_J1 steps up at plug-in. No gate-source resistor:
+# the gate ends at GND, V_GS = -V_J1.
+R_G, C_MJ, C_GSJ = 33e3, 100e-9, 2 * 1e-6
+TOL_R, TOL_C = 0.01, 0.10                   # +-1 % resistors; +-10 % X7R / X5R capacitors
+CISS_J, CRSS_J = 645e-12, 55e-12            # AO3401A (parts.md)
+VTH_J = (0.5, 1.3)                          # |V_GS(th)| min / max at 250 uA
+VPL_J = (0.5, 2.0)                          # |Miller plateau|: V_th min, and Figure 7's 2 V at 4 A as a bound
+VJ1 = (4.4, 5.25)                           # J1 VBUS at the board: USB 2.0's 4.40 V device minimum, host maximum
+VJ1_CORNER = 5.5                            # USB-C corner, for the plug-in step only
+# Capacitance whose voltage follows V5L during the ramp (nominal, from the capture list): V5L
+# itself, V5A behind 10 ohm, V3V3 and VDDA (and TH_REF behind 1 k) behind the AMS1117, which
+# tracks its input in dropout, U6's VDD33 and U1's DVDD behind their on-chip regulators. The
+# MAU104's 45 uF on V12/V12F is charged by the MAU104 itself and is not in this sum.
+C_FOLLOW = {"V5L: C2 10u, C5 1u, C27 1u": 12e-6,
+            "V5A: C10 10u, C30 + C32 100n": 10.2e-6,
+            "V3V3: C3 22u, C4 10u, C20 1u, C12-C19 + C24 9 x 100n": 33.9e-6,
+            "VDDA: C9 10u, C31 + C33 100n; TH_REF C11 1u": 11.2e-6,
+            "VDD33_HUB: C29 10u, C28 100n": 10.1e-6,
+            "DVDD: C21 1u, C22 + C23 100n": 1.2e-6}
+RAIL_V = (5.0, 5.0, 3.3, 3.3, 3.3, 1.1)     # each group's final voltage, in C_FOLLOW's order
+c_l = sum(C_FOLLOW.values())
+c_l_hi = c_l * 1.2                          # +20 % bound on the sum (the 22 uF parts are +-20 %)
+q_plug = sum(c * v for c, v in zip(C_FOLLOW.values(), RAIL_V))
+print(f"capacitance following V5L: {c_l*1e6:.1f} uF nominal, {c_l_hi*1e6:.1f} uF bound;"
+      f" without a soft start J1 delivers {q_plug*1e6:.0f} uC at plug-in, {q_plug/50e-6:.1f} x"
+      f" a 10 uF load's 50 uC at 5 V")
+# 1. Plug-in: VBUS_J1 steps in microseconds. The gate divides between C_GS (to the source) and
+#    C_M + C_rss (to the drain, held at 0 V by c_l), so V_GS jumps by the C_M share.
+step = VJ1_CORNER * (C_MJ * (1 + TOL_C) + CRSS_J) / (C_GSJ * (1 - TOL_C) + C_MJ * (1 + TOL_C) + CISS_J)
+print(f"plug-in step: V_GS {-step:.3f} V at {VJ1_CORNER} V (C_GS -10 %, C_M +10 %) vs V_th {-VTH_J[0]} V min:"
+      f" {VTH_J[0]/step:.2f} x margin")
+# 2. Hold-off: the gate falls from V_S * a through R_G, tau = R_G (C_GS + C_M); Q53 starts to
+#    conduct when V_S - V_G reaches |V_th|.
+def hold(r, cgs, cm, vs, vth):
+    tau = r * (cgs + cm + CISS_J)
+    a = (cgs + CISS_J) / (cgs + cm + CISS_J)
+    return tau * math.log(a * vs / (vs - vth))
+t_hold_lo = hold(R_G * (1 - TOL_R), C_GSJ * (1 - TOL_C), C_MJ * (1 + TOL_C), VJ1[1], VTH_J[0])
+t_hold_hi = hold(R_G * (1 + TOL_R), C_GSJ * (1 + TOL_C), C_MJ * (1 - TOL_C), VJ1[0], VTH_J[1])
+print(f"hold-off after plug-in: {t_hold_lo*1e3:.1f}..{t_hold_hi*1e3:.1f} ms")
+# 3. Ramp: on the Miller plateau the gate is at V_S - |V_pl|, and R_G's current charges C_M as
+#    V5L rises: dV/dt = (V_S - |V_pl|) / (R_G C_M).
+dvdt_hi = (VJ1[1] - VPL_J[0]) / (R_G * (1 - TOL_R) * C_MJ * (1 - TOL_C))
+dvdt_lo = (VJ1[0] - VPL_J[1]) / (R_G * (1 + TOL_R) * C_MJ * (1 + TOL_C))
+t_ramp_lo, t_ramp_hi = VJ1[1] / dvdt_hi, VJ1[0] / dvdt_lo
+i_c_nom = c_l * (5.0 - 1.0) / (R_G * C_MJ)
+i_c_hi = c_l_hi * dvdt_hi
+print(f"ramp: {dvdt_lo/1e3:.3f}..{dvdt_hi/1e3:.3f} V/ms, {t_ramp_lo*1e3:.1f}..{t_ramp_hi*1e3:.1f} ms;"
+      f" capacitive inrush {i_c_nom*1e3:.0f} mA nominal (5 V, |V_pl| 1 V), <= {i_c_hi*1e3:.0f} mA bound,"
+      f" against {5.0/44*1e3:.0f} mA for USB's 44 ohm (the 10 uF || 44 ohm load)")
+t_up = t_hold_hi + t_ramp_hi
+print(f"plug-in to V5L up: <= {t_up*1e3:.1f} ms; the hub must signal attach within 100 ms of VBUS valid,"
+      f" leaving >= {100 - t_up*1e3:.0f} ms for U6's own start (not on its sheet; V-PWR-03)")
+# 4. Q53 during the ramp: V_DS falls linearly from V_S to 0 while it carries the capacitive
+#    current plus the loads that start on the way (bounded by J1's maximum).
+I_J1_MAX = (85 + func + mau_extra) / 1e3     # Sec. 7.1 above: every OP07 and LM393 at its maximum
+p_pk = VJ1[1] * (i_c_hi + I_J1_MAX)
+e_ramp = 0.5 * VJ1[1] * (i_c_hi + I_J1_MAX) * t_ramp_hi
+print(f"Q53 in the ramp: <= {p_pk:.2f} W peak, <= {e_ramp*1e3:.1f} mJ over <= {t_ramp_hi*1e3:.1f} ms"
+      f" vs about 25 W for 10 ms single pulse (AO3401A Figure 10, read from the graph)")
+# 5. Fully on: V_GS = -V_J1. R_DS(on) between the -4.5 V (60 mohm) and -2.5 V (85 mohm) maxima,
+#    linear, times Figure 4's 1.23 at 70 C.
+def rds_j(vgs):
+    return 0.060 + max(0.0, 4.5 - vgs) / 2.0 * 0.025
+for vs in (VJ1[0], 4.75):
+    r25 = rds_j(vs)
+    print(f"V_J1 {vs:.2f} V: R_DS(on) <= {r25*1e3:.1f} mohm at 25 C, {r25*1.23*1e3:.1f} at 70 C;"
+          f" at J1 {I_J1_MAX*1e3:.0f} mA the drop is <= {I_J1_MAX*r25*1e3:.0f} / {I_J1_MAX*r25*1.23*1e3:.0f} mV,"
+          f" {I_J1_MAX**2*r25*1.23*1e3:.1f} mW")
+drop_hi = I_J1_MAX * rds_j(VJ1[0]) * 1.23
+print(f"V5L >= {V5L_MIN} V (U6 V5 and MAU104 minimum) now needs J1 >= {V5L_MIN + drop_hi:.3f} V at the module pin")

@@ -30,6 +30,7 @@ IDs are stable. Never renumber; retire an ID by marking it `Withdrawn` with a re
 | REQ-PWR-03 | The downstream ports never advertise, in total, more current than the power input can deliver. | Settled | CLAUDE.md §10.3 |
 | REQ-PWR-04 | **Advertisement rule.** Each port advertises Default USB power (500 mA). `PORT x ON` is accepted only if (ports already ON + 1) × 0.5 A ≤ J4's advertised current; otherwise it returns `ERR 04` and the port stays OFF. With J4 absent, every `ON` returns `ERR 04`. | Delegated | D18; implements REQ-PWR-03 |
 | REQ-PWR-05 | **Budget rule.** If the two ports' measured currents together exceed J4's advertised current for > 50 ms, firmware switches OFF the port drawing more and latches `FAULT:BUDGET`. | Delegated | D18 (closes OI-16) |
+| REQ-PWR-06 | **J1 inrush.** J1's VBUS reaches the logic rails only through a soft start, so at plug-in nothing but the TVS sits directly across it and the capacitive inrush is ≤ 152 mA (95 mA nominal), not an unlimited surge into ≈ 79 µF. The logic rails are up within 31 ms of plug-in, so the hub can signal attach within USB 2.0's 100 ms. | Delegated (values) | D35 (the fix: user), OI-32 |
 
 ## 2. Port power control
 
@@ -180,6 +181,7 @@ REQ-PORT-04) and are not reused.
   remains: all three pairs run to U6, whose USB pins are rated 6 kV HBM (CH334/335 datasheet
   §4.1). Discharge yourself and the cable before plugging in, as with a bare development
   board.
+- **J1 needs at least 4.52 V at the board** (D35): its 5 V passes the soft-start FET.
 - **Plug J1 into a port that supplies 500 mA** (a PC port or a self-powered hub), not into a
   bus-powered hub. J1 draws ≈ 0.21 A typical, ≈ 0.28 A with every OP07 and LM393 at its maximum (D34). The
   hub declares 100 mA and the control function 200 mA, but USB charges the upstream port

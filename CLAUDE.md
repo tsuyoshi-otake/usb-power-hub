@@ -33,8 +33,8 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > generated project skeleton exists in `design/ecad/source/` (4-layer JLC04161H-7628
 > stackup, 100 × 72 mm outline, §5.3 starting rules, the USB_HS net class), written by
 > `design/ecad/scripts/make_project.py`. The schematic is captured (P2, D34): six
-> sub-sheets and 294 components, every passive bound to a Basic LCSC part, ERC with 0
-> violations. `make_schematic.py` writes it from
+> sub-sheets and 300 components (294 at D34; D35, issue #7, added J1's soft start), every
+> passive bound to a Basic LCSC part, ERC with 0 violations. `make_schematic.py` writes it from
 > `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md`, and `check_schematic.py` compares the
 > exported netlist with that list, with the circuit document's §6.2 and with
 > `requirements/parts.md`. The project
@@ -148,7 +148,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D34 live in circuit §10)
+│                               #   created, decisions D1–D35 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -580,7 +580,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D34; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D35; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -597,7 +597,9 @@ withdrawn and not reused).
   「ええ、CH335FはLCSCに在庫無いの?」, 「こんなモジュール実装するのデカくない?」, and the
   choice 「IC 単体にする (推奨)」), and the ECAD workflow, amending D2: capture and lay out
   in KiCad 9.0.8 until the design is complete, then import into EasyEDA (D32, 2026-11-04:
-  「いったんローカルでKiCadで完成まで目指してそのご、EasyEDAにインポートしよう」).
+  「いったんローカルでKiCadで完成まで目指してそのご、EasyEDAにインポートしよう」), and J1's
+  soft start, an AO3401A between J1's VBUS and V5L, whose values Claude set (D35, 2026-11-04:
+  「OKお願いします」, accepting the recommended fix for OI-32).
   D1 (PD sink) and D11 (USB2514B) were also user decisions; both are superseded because
   their parts are Extended.
 - **Under the delegation:** on 2026-11-03 the user delegated the open choices
@@ -674,7 +676,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-29 | ~~No input fuse on J4.~~ **Closed by decision** (D25, Claude delegated, 2026-11-03): F1 = Bourns MF-R300 (Akizuki g112630; 3.00 A hold, 2.49 A at 40 °C; 6.00 A trip; 30 V), ahead of the J4 TVS. Its 0.08 Ω (R1max) costs up to 0.16 V at 2 A, which moves into OI-27 and V-MEAS-00. No fuse or PTC is Basic, so it is hand-soldered. Reopen if V-SAFE-02 fails. | Rev0.4 §3.1, §7.2; `requirements/parts.md` |
 | OI-30 | ~~Two Preferred Extended parts need the user's decision.~~ **Closed by decision** (D22, user, 2026-11-03): Basic parts only. STM32F103C8T6 (C8734) and SRV05-4 (C7420376) are removed; D23 replaces the MCU with the PGA2040 and two MCP3208, and D± of J1–J3 lose their ESD protection. D29 (user, 2026-11-04) has since replaced the PGA2040 with the bare RP2040, one of the two Extended parts (the other is D31's CH335F). | Rev0.4 §9, §10 D22/D23 |
 | OI-31 | ~~PGA2040 and MCP3208 assumptions unverified.~~ **Closed by decision** (D28, user, 2026-11-04), from Pimoroni's schematic and the datasheets. The supply input is the VBUS pad, 3.0–5.5 V, into an on-module NCP115; on V3V3 it leaves ≥ 3.208 V on the 3V3 pad, above the RP2040's 3.135 V USB_VDD minimum. The 27 Ω pair is on the module. The W25Q64JVXGIQ flash has a 64-bit unique ID (4Bh). The RP2040 resets its GPIO with a 50–80 kΩ pull-down, against which the 10 kΩ hold pull-ups give ≥ 2.70 V, above the 2N7002's 2.5 V maximum threshold. Not settled on paper and accepted as bring-up risk: the MCP3208's INL at V<sub>REF</sub> = 3.3 V (typical only) and the stretched sample (≤ 0.21 LSB computed). The fallback for the sample phase is double conversion at 8 kSPS; an INL failure reopens D23. **D29 (user, 2026-11-04) removed the PGA2040,** so the module items above (supply input and NCP115, 27 Ω pair, W25Q64JV, pad positions) are history. The bare RP2040's support circuit was desk-checked instead (Rev0.4 §3.3, §6.3, §7.1) and is confirmed on the first board (V-MEAS-06); before layout, U1's land is drawn from the RP2040 datasheet's Figure 167 (Rev0.4 §12 item 2, G20). The MCP3208 items and the reset hold stand. | Rev0.4 §3.2, §3.3, §6.5, §7.1, §10 D28/D29; V-MEAS-06 |
-| OI-32 | **J1's inrush is not limited.** Found at capture (issue #6 P2). The J1 side has, at nominal values, 12 µF directly on V5L (C2, C5, C27), 10.2 µF on V5A behind 10 Ω, and 44 µF on V3V3 and VDDA behind the AMS1117, which does not limit its own inrush: about 260 µC at plug-in before the MAU104 starts, ≈ 7 µF of the 10 µF parts at 5 V DC bias aside. USB 2.0 §7.2.4.1 allows 10 µF directly across VBUS, or surge limiting that matches it; USB-IF's compliance test uses 50 µC. Neither text has been read into this repository yet. A soft-start AO3401A on J1's VBUS (Basic, already on the board) is the candidate; it is a circuit change and needs its own decision. A PC port that resets on the surge would show up in V-HOST-01. | Rev0.4 §6.1, §7.1; `CIRCUIT_DESIGN_Rev0.4_netlist.md` sheet `power` |
+| OI-32 | ~~J1's inrush is not limited.~~ **Closed by decision** (D35, the fix by the user, 2026-11-04; the values by Claude). Found at capture (issue #6 P2): 78.6 µF follows V5L, so J1 would deliver 294 µC at plug-in with no limit, 5.9 × a 10 µF load's 50 µC; USB 2.0 allows 10 µF directly across VBUS, or inrush limiting (TI SLVS798G and NXP AN11392, as web-search excerpts; the USB 2.0 text itself has not been read here).Q53, an AO3401A between VBUS_J1 and V5L with a Miller capacitor, ramps V5L in 3.2–6.7 ms after a 2.5–23.7 ms hold-off: 95 mA nominal and ≤ 152 mA of capacitive inrush, V5L up ≤ 30.4 ms after plug-in, ≤ 21 mV of drop (J1 ≥ 4.52 V). Not settled on paper: the MAU104's start-up current and U6's time to attach. Reopen if V-PWR-03 fails. | Rev0.4 §3.1, §10 D35; V-PWR-03 |
 
 ---
 

@@ -94,7 +94,7 @@ Not possible yet. The board is captured and laid out in KiCad 9.0.8 until the de
 complete, then imported into EasyEDA (decision D32, issue #6). The module headers are
 chosen (D33) and every part has a symbol and a footprint, the RP2040's and the CH335F's
 lands drawn from their datasheets (G20, G21). The schematic is captured (issue #6 P2,
-D34), so the next step is placement (P3). The front-end checks are made on
+D34) and includes J1's soft start (D35, issue #7), so the next step is placement (P3). The front-end checks are made on
 the first assembled board, not on a bench beforehand (decision D28). Firmware does not
 exist.
 

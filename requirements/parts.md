@@ -214,7 +214,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
 | U13, U23, U30 | LM393DR2G | C7955 | SOIC-8 | 357,235 | Basic | Range and OC comparators |
 | U2 | AMS1117-3.3 | C6186 | SOT-223 | 1,742,729 | Basic | V3V3 |
 | U3, U4 | CJ431 | C3113 | SOT-23 | 689,130 | Basic | VREF_CHK 2.5 V; V_INJ 8 V shunt regulator |
-| Q10, Q11, Q17, Q18, Q21–Q23 (+20) | AO3401A | C15127 | SOT-23 | 1,705,924 | Basic | Port switch, bypass, mirror P-FETs (14) |
+| Q10, Q11, Q17, Q18, Q21–Q23 (+20); Q53 | AO3401A | C15127 | SOT-23 | 1,705,924 | Basic | Port switch, bypass, mirror P-FETs; J1 soft start (15, D35) |
 | Q13 (+20) | AO3400A | C20917 | SOT-23 | 956,538 | Basic | VBUS discharge |
 | Q12, Q14, Q15, Q19, Q20, Q24, Q25 (+20); Q50–Q52 | 2N7002 | C8545 | SOT-23 | 3,305,126 | Basic | Drivers, inverters, holds, level shifters (17) |
 | Q16 (+20) | S9012 | C8543 | SOT-23 | 167,918 | Basic | Fast-off clamp PNP |
@@ -329,6 +329,10 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - −30 V; V<sub>GS</sub> ±12 V; I<sub>D</sub> −4 A.
   - *To confirm on the first board (V-MEAS-00):* the HIGH mirror loop into this gate (C<sub>iss</sub>,
     and C<sub>rss</sub> multiplied by the drain node) is stable; the datasheet does not settle it.
+  - *D35 (the same sheet via LCSC C15127, fetched 2026-11-04, read from its graphs):* Figure 10,
+    single-pulse power junction-to-ambient, about 25 W at 10 ms; Figure 4, R<sub>DS(on)</sub>
+    × 1.23 at 70 °C; Figure 7, the gate-charge plateau near −2 V at −4 A. Q53, the J1 soft
+    start, takes ≤ 2.26 W for ≤ 6.7 ms (Rev0.4 §3.1). *To confirm:* V-PWR-03.
 - *Verified (2N7002, JSCJ / JCET datasheet, September 2016, via LCSC C8545, fetched 2026-11-04):*
   V<sub>th(GS)</sub> 1.0 min / 2.5 max V at 250 µA. Rev0.4 §3.2's reset hold gives its gate
   ≥ 2.70 V. *D34 (the same sheet, page 2):* I<sub>DSS</sub> 80 nA max at V<sub>DS</sub> = 60 V;
@@ -394,7 +398,7 @@ for some rows and were not used.
 | 5.1 Ω ±1 % ±200 ppm † | USB D± series, part 2 of 27 Ω (×2) | C25197 | 0603 | 131,418 | No 0402 5.1 Ω is Basic; 22 + 5.1 = 27.1 Ω, 26.83–27.37 Ω |
 | 10 kΩ ±1 % ±100 ppm | +IN guard (×6), EN series (×2), DIS pull-up (×2), HOLD pull-ups (×4), DOUT divider top (×2), U1 RUN pull-up † | C25744 | 0402 | 16,208,659 | — |
 | 15 kΩ ±1 % ±100 ppm | U4 divider (33 k / 15 k → 8.0 V); V_J4 divider bottom; DOUT divider bottom (×2); comparator thresholds CMP_L, CMP_M, CMP_OC (×6) | C25756 | 0402 | 2,494,056 | — |
-| 33 kΩ ±1 % ±100 ppm | Rp (×4); U4 divider; V_J4 divider top (5.5 V → 1.72 V) | C25779 | 0402 | 2,369,774 | No 36 kΩ is Basic |
+| 33 kΩ ±1 % ±100 ppm | Rp (×4); U4 divider; V_J4 divider top (5.5 V → 1.72 V); Q53 gate pull-down (D35) | C25779 | 0402 | 2,369,774 | No 36 kΩ is Basic |
 | 5.1 kΩ ±1 % ±100 ppm | Rd on J1, J4 CC (×4); TH_REF divider bottom, part 1; R_B, Q16 base (×2) | C25905 | 0402 | 4,938,551 | — |
 | 100 kΩ ±1 % ±100 ppm | R_on (×2); EN_G pull-down (×2); OC_x sense of EN_G (×2); DISG, Q13 gate series (×2); R_BE (×2); event series (×4) | C25741 | 0402 | 7,841,979 | — |
 | 1 MΩ ±1 % ±100 ppm | R_GS, port switch off (×2); bypass gate return (×4); pedestal R_INJ (×6) | C26083 | 0402 | 2,794,209 | — |
@@ -404,8 +408,8 @@ for some rows and were not used.
 | 220 pF X7R | C_N on R_OUT HIGH (×2); comparator hysteresis divider (×6) | C1530 | 0402 | 1,340,537 | No Basic C0G 220 pF found |
 | 10 µF 25 V X5R | Port capacitor (×2); VDDA; V5A; U2 input; V3V3 at U1 †; U6 VDD33 ‡ | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
 | 22 µF 25 V | VBUS_IN bulk; V12F filter (2 ×); V3V3 (AMS1117 output) | C45783 | 0805 | 3,579,516 | — |
-| 100 nF 50 V | All decoupling (one rating for every rail), 25 in all: U1's 10 power pins and U8 †, U6 VDD33 ‡, U7, U17, U30, and each channel's U10–U13 | C307331 | 0402 | 20,893,452 | — |
-| 1 µF 25 V | U5 MAU104 input and output; TH_REF filter; U1 VREG_VIN and VREG_VOUT †; U6 V5 ‡ | C52923 | 0402 | 10,715,829 | — |
+| 100 nF 50 V | All decoupling (one rating for every rail), 25 in all: U1's 10 power pins and U8 †, U6 VDD33 ‡, U7, U17, U30, and each channel's U10–U13; and Q53's Miller capacitor (D35) | C307331 | 0402 | 20,893,452 | — |
+| 1 µF 25 V | U5 MAU104 input and output; TH_REF filter; U1 VREG_VIN and VREG_VOUT †; U6 V5 ‡; Q53 gate hold (×2, D35) | C52923 | 0402 | 10,715,829 | — |
 | 15 pF C0G ±5 % 50 V † | Y1 load (×2); comparator hysteresis, output to +IN (×6) | C1548 | 0402 | 1,311,598 | As Raspberry Pi's reference |
 | 10 nF | C_M, soft-start Miller, 2 × 10 nF per port (×4) | C15195 | 0402 | 5,868,443 | — |
 

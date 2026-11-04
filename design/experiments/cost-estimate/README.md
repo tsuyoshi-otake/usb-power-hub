@@ -13,10 +13,11 @@ bare CH335F (C5137013), machine-placed, instead of the hand-soldered Akizuki mod
 (the same day) the USB-C modules are soldered on PH-1x40SG pin headers without sockets, and
 the header count includes each module's four mechanical pins: 44 pins per board.
 
-**Not re-run for D34** (issue #6 P2, the same day). The capture bound every passive, so the
+**Not re-run for D34 or D35** (issues #6 P2 and #7, the same day). The capture bound every passive, so the
 per-board counts in `cost_estimate.py` no longer match the schematic, and the 1 nF C1523 is
 gone (41 → 40 machine-placed types; Standard PCBA's feeder loading falls by one type,
-1.53). The figures below are the D33 re-run's.
+1.53). D35 adds one AO3401A, one 33 kΩ, one 100 nF and two 1 µF per board, no new type.
+The figures below are the D33 re-run's.
 
 **Answer** (at 160 yen/USD; Japanese import tax, M2 inserts and the enclosure print are not
 included):

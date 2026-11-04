@@ -93,11 +93,16 @@ widest thickness code).
 <!-- netlist:begin sheet=power -->
 | Ref | Symbol | Value | Order | Pins | Note |
 |---|---|---|---|---|---|
-| J1 | AE-USB2.0-TYPE-C | AE-USB2.0-TYPE-C | Akizuki g113080 | 1=V5L 2=USB_UP_N 3=USB_UP_P 4=GND 5=CC1_J1 6=CC2_J1 7=GND | HOST: data and logic power |
+| J1 | AE-USB2.0-TYPE-C | AE-USB2.0-TYPE-C | Akizuki g113080 | 1=VBUS_J1 2=USB_UP_N 3=USB_UP_P 4=GND 5=CC1_J1 6=CC2_J1 7=GND | HOST: data and logic power |
 | R1 | R | 5.1k | C25905 | 1=CC1_J1 2=GND | J1 Rd |
 | R2 | R | 5.1k | C25905 | 1=CC2_J1 2=GND | J1 Rd |
 | D1 | PSM712-LF-T7 | PSM712-LF-T7 | C32677 | 1=CC1_J1 2=CC2_J1 3=GND | J1 CC ESD, at J1 |
-| D5 | SMBJ6.5CA | SMBJ6.5CA | C7420377 | 1=V5L 2=GND | J1 VBUS TVS, at J1 |
+| D5 | SMBJ6.5CA | SMBJ6.5CA | C7420377 | 1=VBUS_J1 2=GND | J1 VBUS TVS, at J1 |
+| Q53 | AO3401A | AO3401A | C15127 | 1=GJ1 2=VBUS_J1 3=V5L | J1 soft start: source VBUS_J1, drain V5L (D35) |
+| R34 | R | 33k | C25779 | 1=GJ1 2=GND | Q53 turn-on, gate to GND (D35) |
+| C35 | C | 100n | C307331 | 1=GJ1 2=V5L | Q53 Miller, gate to drain: sets V5L's ramp (D35) |
+| C36 | C | 1u | C52923 | 1=VBUS_J1 2=GJ1 | Q53 gate hold at plug-in, part 1 (D35) |
+| C37 | C | 1u | C52923 | 1=VBUS_J1 2=GJ1 | Q53 gate hold at plug-in, part 2 (D35) |
 | J4 | AE-USB2.0-TYPE-C | AE-USB2.0-TYPE-C | Akizuki g113080 | 1=VBUS_J4 2=NC 3=NC 4=GND 5=CC1_J4 6=CC2_J4 7=GND | PWR IN: power only |
 | R3 | R | 5.1k | C25905 | 1=CC1_J4 2=GND | J4 Rd |
 | R4 | R | 5.1k | C25905 | 1=CC2_J4 2=GND | J4 Rd |
@@ -143,6 +148,7 @@ widest thickness code).
 | TP7 | TestPoint | GND | none | 1=GND | P11 |
 | TP8 | TestPoint | VBUS_IN | none | 1=VBUS_IN | P11 |
 | TP9 | TestPoint | V_J4 | none | 1=V_J4 | Rev0.4 §12 item 5 (V-MEAS-06) |
+| TP14 | TestPoint | VBUS_J1 | none | 1=VBUS_J1 | D35 (V-PWR-03) |
 | FID1 | Fiducial | Fiducial | none | — | ≥ 3 global fiducials |
 | FID2 | Fiducial | Fiducial | none | — | |
 | FID3 | Fiducial | Fiducial | none | — | |
@@ -338,7 +344,7 @@ appear in the netlist.
 <!-- flags:begin -->
 | Net | Sheet | Why |
 |---|---|---|
-| V5L | power | its only source is J1's module pin 1, a passive pin |
+| V5L | power | its only source is Q53's drain, a passive pin (D35) |
 | V12F | power | behind R10 |
 | VDDA | power | behind FB1 |
 | V5A | power | behind R16 |

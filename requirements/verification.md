@@ -63,6 +63,26 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Overload case: A switches OFF 50–70 ms after the overload starts, `PORT A?` reports
     `FAULT:BUDGET`, and B stays ON.
 
+### V-PWR-03 — J1 plug-in: soft start and attach (D35)
+- **Covers:** REQ-PWR-06
+- **When:** Bring-up, on both PCBA boards
+- **Method:**
+  - J1 to a PC port through a USB breakout that exposes VBUS and D+, with a current probe (or
+    a 0.1 Ω shunt) in VBUS. Scope J1's current, VBUS_J1 at TP14, V5L at TP1 and D+.
+  - 10 plug-ins, ≥ 5 s apart, from the PC port; repeat 10 from a bench supply at 4.52 V and
+    at 5.25 V into the same breakout.
+  - With the board running, measure TP14 − TP1 at J1's current.
+- **Pass:**
+  - Until V5L starts to rise, J1's current stays ≤ 50 mA; V5L starts 2–30 ms after VBUS_J1
+    passes 4.01 V (desk check 2.5–23.7 ms).
+  - V5L rises from 10 % to 90 % in 2–8 ms (desk check 3.2–6.7 ms for the whole ramp).
+  - J1's peak current over the plug-in is ≤ 0.5 A; record its shape, including the MAU104's
+    start (not settled on paper).
+  - D+ rises (the hub's attach) within 100 ms of VBUS_J1 passing 4.01 V, and the board
+    enumerates, at every plug-in.
+  - TP14 − TP1 ≤ 21 mV.
+  - Failing any of these reopens D35.
+
 ## Port power control
 
 ### V-PORT-01 — Default OFF in every reset path

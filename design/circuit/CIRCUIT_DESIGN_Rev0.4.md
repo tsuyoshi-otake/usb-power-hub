@@ -7,7 +7,7 @@ PGA2040 module is replaced by a bare RP2040 that JLCPCB places, §6.5; D30: lead
 instead of ENIG, §10; D31: the CH335F module is replaced by the bare chip, which JLCPCB
 places, §6.6; D32: capture and layout in KiCad until complete, then an EasyEDA import, §10;
 D33: the module pin headers, §11; D34: the values set at capture, issue #6 P2, §3.2, §3.4,
-§6.4, §10).
+§6.4, §10; D35: J1's soft start, OI-32, issue #7, §3.1, §7.1).
 
 This document *is* the schematic at this stage. KiCad capture transcribes what is settled
 here; it is not where the design happens (CLAUDE.md Section 2). Nothing in this file has been
@@ -158,7 +158,8 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
 
  J1 (Akizuki USB-C module, host data + logic power)
    CC1,CC2 ── Rd 5.1 kΩ ×2 to GND;  D1 PSM712 on CC1, CC2;  D+, D− unprotected (D22)
-   VBUS ── D5 SMBJ6.5CA ── V5L (logic 5 V) ──┬── U6 CH335F V5 (its VDD33: §6.6)
+   VBUS_J1 ── D5 SMBJ6.5CA ── Q53 AO3401A soft start, source VBUS_J1, drain V5L (D35, below)
+   Q53 soft start (D35) ── V5L (logic 5 V) ──┬── U6 CH335F V5 (its VDD33: §6.6)
                                              ├── 10 Ω + 10 µF ── V5A ── U7, U17 MCP3208 V_DD
                                              ├── U5 MAU104 ── V12 ── 10 Ω / 2×22 µF ── V12F ──┬── U10–U12, U20–U22 OP07 V+
                                              │                                             ├── U13, U23, U30 LM393 (comparators, D34)
@@ -166,6 +167,38 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
                                              └── U2 AMS1117-3.3 ── V3V3 (22 µF) ──┬── U1 RP2040 3.3 V pins, U8 flash (U1's core: its own 1.1 V regulator, §7.1)
                                                                                   └── ferrite + 10 µF ── VDDA (U7, U17 V_REF; TH_REF, §3.2)
 ```
+
+**J1's soft start (D35, closes OI-32).** At nominal values 78.6 µF follows V5L as it rises:
+V5L itself, V5A behind 10 Ω, V3V3 and VDDA behind the AMS1117 (which tracks its input in
+dropout), and U6's and U1's on-chip regulator outputs. Without a limit J1 would deliver
+294 µC at plug-in, 5.9 × the 50 µC of the 10 µF that USB 2.0 allows directly across VBUS
+(the "10 µF in parallel with 44 Ω" load; a function above it must limit its inrush, as
+TI's TPS2062A datasheet SLVS798G and NXP's AN11392 put it, read as web-search excerpts on
+2026-11-04; the USB 2.0 text itself has not been read here).
+Q53, an AO3401A, sits between VBUS_J1 and V5L. R34 (33 kΩ) pulls its gate to GND; C35
+(100 nF) from gate to drain is a Miller capacitor; C36 and C37 (2 × 1 µF) from gate to
+source hold the gate at the source when VBUS_J1 steps up. `CIRCUIT_DESIGN_Rev0.4_calc.py`:
+- *Plug-in:* the gate divides between C36 + C37 and C35, so V<sub>GS</sub> steps by only
+  −0.317 V at the USB-C 5.5 V corner (C36 + C37 −10 %, C35 +10 %), 1.58 × inside the
+  AO3401A's −0.5 V minimum threshold.
+- *Hold-off:* the gate then falls through R34; Q53 starts to conduct 2.5–23.7 ms later.
+- *Ramp:* on the Miller plateau R34's current charges C35 as V5L rises, at 0.655–1.615 V/ms
+  (J1 4.40–5.25 V, plateau 0.5–2.0 V, ±1 % and ±10 % parts): 3.2–6.7 ms. The capacitive
+  inrush is 95 mA nominal and ≤ 152 mA at the bound (+20 % on every capacitor and no DC-bias
+  loss), against the 114 mA of USB's 44 Ω; it adds to the loads that start during the ramp.
+- *Attach:* V5L is up ≤ 30.4 ms after plug-in, leaving ≥ 70 ms of the 100 ms in which a
+  device must signal attach after VBUS is valid (USB 2.0 §7.1.7.3, as secondary sources
+  quote it) for U6's own start, which its datasheet does not give. V-PWR-03 measures it.
+- *Q53:* ≤ 2.26 W peak and ≤ 7.6 mJ in the ramp (with J1's 277 mA maximum load on top),
+  against about 25 W for a 10 ms single pulse (AO3401A Figure 10, read from the graph).
+  Fully on, V<sub>GS</sub> = −V_J1, so R<sub>DS(on)</sub> ≤ 61.2 mΩ at 4.40 V and 25 °C,
+  75.3 mΩ at 70 °C (Figure 4's 1.23): ≤ 17 / 21 mV and 5.8 mW at 277 mA. V5L's 4.5 V
+  design minimum (§3.2; U6's V5 range, §6.6) therefore needs J1 ≥ 4.52 V at the module
+  pin.
+- Not settled on paper: the MAU104's own start-up current, which Q53 passes once V5L is
+  past the MAU104's start; its datasheet gives no figure. V-PWR-03 records J1's peak.
+- On unplug, V5L's charge returns to VBUS_J1 through Q53's body diode and its still-on
+  channel; nothing else is on VBUS_J1 but D5 and TP14.
 
 **Why the switch sits upstream of the ladder.** Any current that leaves the circuit
 between a shunt and the DUT is measured as load current. The switch's gate network, the
@@ -615,7 +648,8 @@ better choice even in Rev0.2 once D10 removed the area objection (OI-19).
 | VBUS_IN | J4 VBUS through F1 (D6 to GND) | 5 V (source) less F1's drop, ≤ 0.16 V at 2 A | Port switches, V_J4 divider |
 | VSUP_A / VSUP_B | Port switch output | ≈ VBUS_IN | Ladder supply side, mirror R1s |
 | VBUS_A / VBUS_B | Ladder load side | ≈ VBUS_IN − 0.32 V at 1 A | J2 / J3 VBUS, port C, discharge |
-| V5L | J1 VBUS via D5 | 5 V (host) | U6 CH335F V5, MAU104, AMS1117, V5A, SPI level-shifter pull-ups |
+| VBUS_J1 | J1 VBUS (D5 to GND) | 5 V (host) | Q53's source and C36, C37 only (D35) |
+| V5L | VBUS_J1 through Q53, the soft start (D35) | VBUS_J1 less ≤ 21 mV | U6 CH335F V5, MAU104, AMS1117, V5A, SPI level-shifter pull-ups |
 | VDD33_HUB | U6's internal LDO (VDD33, pin 28) | 3.2–3.5 V | U6 only, and its four OVCUR# pins (held inactive). Not tied to V3V3 (§6.6) |
 | V5A | V5L via 10 Ω + 10 µF | 5 V | U7, U17 MCP3208 V<sub>DD</sub> |
 | V12 / V12F | MAU104 / after 10 Ω + 2 × 22 µF 25 V | ≈ 12 V / ≈ 11.7 V (≥ 10.53 V) | OP07 ×6, LM393 ×3 (D34), U4 |
@@ -664,6 +698,7 @@ this table and that list name the same parts.
 | Q21, Q22, Q23 | Mirror FET HIGH / MID / LOW | AO3401A (C15127) | Basic |
 | Q24, Q25 | EVT_M, EVT_L level shifters (inverting) | 2N7002 (C8545) | Basic |
 | Q50, Q51, Q52 | SCLK, CS, DIN level shifters to 5 V (inverting; shared by U7 and U17) | 2N7002 (C8545) | Basic |
+| Q53 | J1 soft start, VBUS_J1 to V5L (D35) | AO3401A (C15127) | Basic |
 | D1, D2, D3 | ESD on J1 / J2 / J3 CC1, CC2 (D+/D− unprotected, D22) | PSM712-LF-T7 (C32677) | Basic |
 | D4 | ESD on J4 CC1, CC2 | PSM712-LF-T7 (C32677) | Basic |
 | D5, D6 | TVS on J1 / J4 VBUS | SMBJ6.5CA (C7420377) | Basic |
@@ -876,6 +911,8 @@ with the module (D29).
 - The board therefore needs an upstream port that supplies 500 mA, such as a PC port or a
   self-powered hub. It is not supported behind a bus-powered hub (`requirements/product.md`
   §9).
+- J1's current passes Q53, the soft start (D35, §3.1): ≤ 21 mV at 277 mA and 70 °C, so
+  V5L ≥ 4.5 V needs J1 ≥ 4.52 V at the module pin.
 
 ### 7.2 J4 (port) power and the port policy (D18; closes OI-16)
 
@@ -1063,6 +1100,7 @@ appear here.
 | D32 | **ECAD workflow: capture and lay out Rev0.4 in KiCad 9.0.8 on the design PC until the design is complete, then import it into EasyEDA.** The user: 「いったんローカルでKiCadで完成まで目指してそのご、EasyEDAにインポートしよう」. "Complete" means every CLAUDE.md §8 gate up to and including BOM/CPL is reached and recorded; the state stays `WIP` (later `REVIEW`). Until the import is settled, the KiCad project in `design/ecad/source/` is the source of truth, and the EasyEDA copy is checked against it (nets, footprints, outputs). The import needs the user's EasyEDA account; Claude does not log in. Nothing is uploaded or ordered without the user's approval. Tracking: issue #6. *Revert → capture directly in EasyEDA; the KiCad project is then a reference only* | 2026-11-04 | **User** | — (amends D2) |
 | D33 | **Module headers: PH-1x40SG (Useconn; Akizuki g100167, ¥35 per 1 × 40 strip, 8,000 in stock on 2026-11-04), soldered without sockets; the DIP16 ADCs are soldered without sockets too.** Closes OI-23's remainder. From the PH-1xXXSG drawing: insulator 2.50 mm tall and 2.50 mm wide, general tolerance ±0.2 mm, so ≥ 2.30 mm; pins sq 0.64 mm, 6.10 mm above and 3.00 mm below the insulator; ø1.02 mm holes; 3 A. Under a module it leaves ≥ 0.80 mm above a 1.5 mm part, against the 0.5 mm the placement study now requires. Each USB-C module takes 11 pins: its 1 × 7 row and two 1 × 2 mechanical pieces, which REQ-MECH-03 requires to be soldered; 44 per board. Reading the module drawing and the receptacle drawing (Hirose CX70M-24P1) for the header height led to three corrections. (1) The receptacle is mid-mounted and hangs below the module by 2.36 mm less the module board's unpublished thickness, so the study's layout no longer puts parts under it: one 19.0 × 3.4 mm strip per module (65 mm²) replaces 130 mm². (2) The area bound now credits each module's outline less its header insulators (230.2 mm²), the most favourable reading. At K = 1.0 it is 2,931 mm², 1.5 % under 85 × 35 mm, which it exceeds from K = 1.025 (§11). (3) The cost estimate's header count had left out the mechanical pins: two units need 3 strips, not 2. Sockets rejected: they add a contact pair to every USB D± path (OI-26) and to the port current path, raise each module by the socket's height, and cost 360 yen more for two units. Gain: the study's last open input is on paper. Cost: replacing a module means desoldering 11 pins. The 2-unit Economic total is 17,456 yen. *Revert → sockets FH2.54-40U1GF8.5-0.5 (Akizuki 110073, ¥120 per strip) under the modules; re-run the study and the cost estimate* | 2026-11-04 | Claude (delegated) | OI-23 (remainder) |
 | D34 | **The values set at capture (issue #6 P2).** Capture needed the values Rev0.4 left to it, and their desk check changed three circuit details. The values are in `CIRCUIT_DESIGN_Rev0.4_netlist.md`, the numbers in `CIRCUIT_DESIGN_Rev0.4_calc.py`. (1) **The three LM393s move from V5L to V12F.** An overranged amplifier node reaches 5.04 V, and LM393/D note 1 sets an input's absolute maximum equal to the supply voltage: on V5L (≥ 4.50 V) that fails by 0.54 V, on V12F (≥ 10.53 V) 5.49 V are left. Cost: V12F's minimum falls from 10.62 to 10.53 V (the OP07 common mode stays ≥ 5.28 V below V+, the output top is 6.93 V); the MAU104 carries ≤ 41.0 mA of its 84 mA; J1's function current with every OP07 and LM393 at its maximum is 192 mA, against the 200 mA it declares (D26). (2) **Comparator inputs:** the amplifier on −, TH_REF on + through 15 kΩ each; TH_REF is VDDA × 5.61 k / 6.61 k = 2.8008 V (ratio ±0.30 %) with 1 µF; the hysteresis is a 15 pF / 220 pF kick on + (255–335 mV on the bypass comparators, 151–198 mV on OC, τ 3.5 µs). The OC trip is then 1.164 A nominal, 1.110–1.221 A at 25 °C and 1.100–1.241 A over 0–70 °C, which replaces D18's ±3 % (REQ-PORT-05), and F1's worst-case 40 °C margin is +0.03 A (§7.2). (3) **Port switch:** R_on 100 kΩ, C_M 2 × 10 nF from gate to VSUP_x: soft start 1.99–5.93 ms, inrush ≤ 26 mA. **Q13's gate moves behind 100 kΩ (DISG_x):** on DIS_x directly its 630 pF made DIS_x take 10.0 µs to reach 2.5 V, the whole turn-off budget; now 0.85 µs. Q16 gets 5.1 kΩ / 100 kΩ base drive (S9012 rank H): OC to open in 3.8 µs, against 10 µs. (4) LEDs through 510 Ω, the R_L part (the green's current is not guaranteed at its V<sub>F</sub> limit, a first-board check, §6.4); 1 µF at the MAU104's input and output; no capacitor at either CJ431 (§4.1); GPIO21 is the clock pad; every passive bound to a Basic part, and the 1 nF C1523 is dropped (machine-placed types 41 → 40). **Not settled on paper:** an unpowered LM393 input takes ≤ 0.19 mA if TH_REF rises before V12F (§3.2); an OFF bypass gate's leakage reaches −1.08 V at the datasheet limits, −80 mV typical (§3.2, V-MEAS-01). *Revert (1) → overrange exceeds the LM393 input rating; revert (3) → Q13's gate alone spends the 10 µs turn-off budget* | 2026-11-04 | Claude (delegated) | — (amends D18, D25, D26) |
+| D35 | **J1's soft start: Q53, an AO3401A (C15127, Basic, already on the board), between VBUS_J1 and V5L (issue #7).** The fix is the user's (「OKお願いします」, accepting the recommendation in OI-32); the values are Claude's. R34 33 kΩ gate → GND, C35 100 nF gate → drain (Miller), C36 + C37 2 × 1 µF gate → source; D5 and the new TP14 on VBUS_J1. Without it J1 delivers 294 µC at plug-in, 5.9 × a 10 µF load's 50 µC. With it (§3.1): plug-in step −0.317 V against the −0.5 V minimum threshold, hold-off 2.5–23.7 ms, ramp 3.2–6.7 ms, capacitive inrush 95 mA nominal and ≤ 152 mA bound, V5L up ≤ 30.4 ms after plug-in, and ≤ 21 mV of drop, so J1 needs ≥ 4.52 V at the board. Parts: one more of the AO3401A, 33 kΩ, 100 nF and 1 µF types (two of the last); no new type (40 machine-placed types). **Not settled on paper:** the MAU104's start-up current and U6's time to attach, both measured in V-PWR-03. *Rejected: a load-switch IC with its own slew control (none is Basic or at hand); a gate RC without the Miller capacitor, which does not set the ramp. Revert → J1 again delivers 294 µC unlimited* | 2026-11-04 | **User** (the fix); Claude (the values) | OI-32 |
 
 D12 was withdrawn on 2026-11-03 and is not reused.
 
@@ -1118,8 +1156,8 @@ question (V-MECH-01). The study does not route; capture and layout do (D32).
 
 ## 12. What must happen before KiCad capture
 
-Status as of 2026-11-04 (D28, D29, D31, D33, D34). OI-30 is closed by D22; OI-27, OI-28 and OI-31
-by D28; OI-24 by D31; OI-23 by D33. Capture has started in KiCad (D32, issue #6); items 1
+Status as of 2026-11-04 (D28, D29, D31, D33, D34, D35). OI-30 is closed by D22; OI-27, OI-28 and
+OI-31 by D28; OI-24 by D31; OI-23 by D33; OI-32, found at capture, by D35. Capture has started in KiCad (D32, issue #6); items 1
 and 2 are drawn there before layout.
 
 1. ~~**OI-24**: measure the CH335F module's outline and DIP30 pin map.~~ Closed by D31: the
@@ -1173,6 +1211,7 @@ and 2 are drawn there before layout.
 | 0.4 | 2026-11-04 | Amended: D32 (user) sets the ECAD workflow: KiCad 9.0.8 on the design PC until the design is complete, then an EasyEDA import (issue #6); D2 amended. A KiCad project skeleton is added under `design/ecad/` (4 layers, JLC04161H-7628, the CLAUDE.md §5.3 starting rules as net classes); no part is captured yet. No circuit change. |
 | 0.4 | 2026-11-04 | Amended: D33 (Claude, delegated) chooses the module headers (PH-1x40SG, soldered, no sockets) and closes OI-23. The placement study checks the header height and reads the space under the USB-C modules from their drawings: its layout strip avoids the receptacle, and the area bound at K = 1.0 is 2,931 mm², exceeding 85 × 35 mm from K = 1.025. The cost estimate counts 44 header pins per board. Header, §11, §12 and the D24 and D31 rows updated. No circuit change. |
 | 0.4 | 2026-11-04 | Amended: D34 (Claude, delegated) records the values set at capture (issue #6 P2) and three circuit changes found by their desk check: the LM393s move to V12F, Q13's gate moves behind 100 kΩ, and the comparators take the amplifier on − and a 2.80 V TH_REF divider on +. The capture list `CIRCUIT_DESIGN_Rev0.4_netlist.md` is added; the OC trip tolerance becomes 1.110–1.221 A at 25 °C (REQ-PORT-05). §3.1, §3.2, §3.4, §4.1, §6.1, §6.2 (J5), §6.4, §7.1, §7.2, G7, G16, G17, §9, §12 and the D25 and D26 rows updated. Machine-placed types 41 → 40 (38 Basic + C2040 + C5137013). |
+| 0.4 | 2026-11-04 | Amended: D35 (the user's fix, Claude's values; issue #7) closes OI-32: Q53, an AO3401A soft start between VBUS_J1 and V5L, with R34, C35–C37 and TP14. §3.1, §6.1, §6.2, §7.1 and P11 updated. No new part type. |
 
 ---
 
@@ -1193,6 +1232,6 @@ recorded in Section 10 instead.
 | P8 | Active bypass gate drive | Superseded — LM393 sink + 1 MΩ return + firmware hold (§3.2) |
 | P9 | J2–J3 pitch ≥ 18 mm | **Adopted** (D21) |
 | P10 | BOOTSEL via pinhole + `BOOT` command | **Adopted** (D21); since D23 as proposed, with the RP2040 ROM bootloader |
-| P11 | TC2030-NL SWD + test pads | **Adopted** (D21); test pads now on VBUS_IN, VSUP_A/B, VBUS_A/B, V5L, V5A, V12F, V_INJ, V3V3, VDDA, GND, since D29 DVDD, RUN and the GPOUT clock pin, and since D31 VDD33_HUB |
+| P11 | TC2030-NL SWD + test pads | **Adopted** (D21); test pads now on VBUS_IN, VSUP_A/B, VBUS_A/B, V5L, V5A, V12F, V_INJ, V3V3, VDDA, GND, since D29 DVDD, RUN and the GPOUT clock pin, since D31 VDD33_HUB, and since D35 VBUS_J1 |
 | P12 | Heat-set M2 inserts, 4 corners | **Adopted** (D21) |
 | P13 | Y1 12 MHz + Y2 24 MHz | Replaced — Y1 and Y2 are both 12 MHz C9002: Y2 → CH335F (D19), Y1 → RP2040 (D29; D23 had removed Y1) |
