@@ -591,3 +591,35 @@ Section 13 (board) only once verified.
   - HS through the modules (OI-26).
 - **Purchases.** The PGA2040 is not needed. CH335F × 2 is still needed (OI-24).
 - **Commit.** `5e97c73` (design); this entry and the rules.md update follow.
+
+## 2026-11-04 - D30: leaded HASL instead of ENIG; ship by OCS Express (issue #4)
+
+- **Request.** Asked about the JLCPCB manufacturing cost, the user wrote 「ENIGいらないよ、」.
+  Claude named the risk (HASL is not flat; U1 is a 0.4 mm-pitch QFN with an ePad, D29) and
+  offered three finishes; the user selected 「有鉛 HASL (推奨)」. For shipping:
+  「UPSじゃなくていい」.
+- **Decision.** D30 (user): leaded HASL. Shipping in the cost estimate: OCS Express, the
+  cheapest quoted ($7.23; UPS $9.79). An order option, not a design decision.
+- **Change.**
+  - Rev0.4 §10 D30 row and change-log row.
+  - `CLAUDE.md` §9, §10.3, §10.4 and D1–D30.
+  - REQ-MECH-01, REQ-MFG-01, product.md §9 (not RoHS).
+  - New V-MFG-03: U1's pins under ≥ 10× magnification, V3V3 and DVDD ≥ 100 Ω to GND
+    before power-up.
+  - Cost estimate: `PCB_FINISH`, `SHIP_PLAN` and the README figures.
+- **Result.** The Economic order is $55.69 = 8,910 yen (was $75.65). The 2 units come to
+  17,480–17,960 yen with the Akizuki parts (was 20,674–21,154). D30 saves $19.96, 3,194 yen.
+- **Investigation.** JLCPCB's blog, re-read with curl, says Standard is forced by a
+  thickness / mask colour / finish combination outside the Economic options, but it lists
+  no options. So Economic eligibility stays unconfirmed, as it was with ENIG.
+- **Also corrected.** Two cost README figures had gone stale with D29: the exchange-rate
+  sensitivity (it said ±320 yen, now ±280 yen per ±5 yen/USD) and the import-tax figures.
+- **Verification.**
+  - Rubric `.claude/goal-loop/d30-hasl/rubric.md`, C1–C6, graded by rubric-verifier
+    (sonnet). All six passed on the first round.
+  - The rubric named a `PKG` table, but the script's table is `COURTYARD`; the verifier
+    found the right table itself.
+  - Cost estimate exit 0, 12 tests OK; calc script exit 0; placement tests 15 OK.
+- **Residual risk.** HASL bridges or opens at U1 (V-MFG-03), and the Economic eligibility of
+  the finish combination.
+- **Commit.** `72756ad` (design); this entry follows.
