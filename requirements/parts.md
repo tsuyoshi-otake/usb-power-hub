@@ -129,7 +129,13 @@ record is in Git at commit `3e11f68`.
   terminals, −55 to 180 °C.
   - It is a 2-terminal part. The Kelvin connection is made by the 4-pad land pattern
     (CLAUDE.md §5.4, G2).
-  - *To confirm:* KOA's recommended land, and a land split for Kelvin sense.
+  - *Land (issue #6 P1):* KOA's TSL / SL / SLN sheet (Oct. 2014, Akizuki
+    `/goodsaffix/tsl_sl_rohs.pdf`) gives the TSL1 body (L 6.3 ± 0.3, W 3.1 ± 0.2 mm) and
+    electrodes (a 2.4 ± 0.2 mm wide, c 1.2 ± 0.3 mm long) but **no recommended land**. The
+    Kelvin land is therefore derived, not the manufacturer's: each end is split across the
+    width into a 1.85 mm force pad and a 0.60 mm sense pad, 0.25 mm apart, 2.0 mm long and
+    reaching 0.45 mm past the longest body; both sense pads on one side; no paste (hand
+    soldered). Footprint `R_Shunt_KOA_TSL1_6332Metric_Kelvin`.
 - *Verified (MFU100F10RB page):* 10 Ω, 1 W, ±1 %, ±100 ppm/°C, 6 mm × 2.3 mm axial,
   −55 to 155 °C.
   - *Verified (Faithful Link MFU series datasheet, Akizuki `/goodsaffix/mfu.pdf`, fetched
@@ -151,8 +157,10 @@ record is in Git at commit `3e11f68`.
     ⌀0.81 mm.
   - **18.3 mm is the tallest part on the board.** The enclosure must clear it, or F1 is
     bent flat (then 12 × 18.3 mm of board).
-  - *To confirm:* the lead style (kinked or straight) on the parts Akizuki ships, for the
-    hole size and the courtyard.
+  - *Lead style (issue #6 P1):* the datasheet's table lists MF-R300 as style 2, whose drawing
+    (PDF p3) has straight leads. The footprint `Fuse_Bourns_MF-R300_Style2_P5.10mm` puts the
+    holes 5.1 mm apart (C nominal), drilled 1.1 mm for the ⌀0.81 mm lead, with a 12.0 × 3.0 mm
+    body. *To confirm when the parts arrive (V-MECH-01):* that Akizuki's MF-R300 are style 2.
 - *Verified (PH-1x40SG, Useconn drawing PH-1xXXSG rev. B, Akizuki product page g100167, read
   2026-11-04; D33):*
   - Insulator 2.50 mm tall and 2.50 mm wide, 2.54 mm per pin; general tolerance ±0.2 mm on
@@ -219,8 +227,13 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
 - *Verified (RP2040, Raspberry Pi RP2040 datasheet build 2025-02-20, and "Hardware design
   with RP2040" Release 2; read 2026-11-04 for D29):*
   - LQFN-56, 7 × 7 mm, 0.4 mm pitch. The ePad is smaller than most; the datasheet says stock
-    0.4 mm QFN-56 footprints may need adjusting. Its Figure 167 gives a 3.20 × 3.20 mm ePad,
-    0.20 × 1.175 mm pads and a 7.75 mm outer span (derived from the figure's geometry).
+    0.4 mm QFN-56 footprints may need adjusting. Its Figure 167 gives a 3.20 × 3.20 mm ePad
+    and 0.20 × 0.875 mm pads between a 6.00 mm inner and a 7.75 mm outer span, 5.40 mm along
+    each side. (Its 1.175 mm is the corner distance from the last pad to the outer span, not a
+    pad length; this line said 1.175 mm pads until 2026-11-04, issue #6 P1.)
+  - *Footprint (issue #6 P1, G20):* `RP2040_QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm`, generated
+    from those numbers and checked against them pad by pad (`design/ecad/libraries/`). KiCad
+    9.0.8's stock QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm has the same copper.
   - Supplies (Table 634): IOVDD, VREG_VIN and ADC_AVDD 1.62–3.63 V; USB_VDD 3.135–3.63 V;
     DVDD 1.05–1.16 V. The on-chip linear core regulator gives 1.1 V at power-on and supplies up
     to 100 mA; it needs 1 µF close to VREG_VIN and to VREG_VOUT. 100 nF close to each IOVDD,
@@ -266,7 +279,12 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
     24 µA (§3.1, §4.2). PWREN1–4# are outputs.
   - ESD: 6 kV HBM on the USB signal pins (§4.1). −40 to 85 °C. No thermal resistance is
     given.
-  - *To confirm before layout (Rev0.4 G21):* U6's land against the §5.6 drawing.
+  - *Land (Rev0.4 G21, issue #6 P1):* §5.6 gives the package only (body 4.0 ± 0.1 mm,
+    terminal 0.20 ± 0.05 × 0.35 ± 0.1 mm, ePad 2.7 ± 0.2 mm), no land. The footprint
+    `CH335F_QFN-28-1EP_4x4mm_P0.4mm_EP2.7x2.7mm` has 0.80 × 0.20 mm pads centred 1.95 mm out,
+    covering each nominal terminal and reaching 0.35 mm past the nominal body edge (0.30 mm
+    past the maximum), and a
+    2.7 mm ePad, 0.20 mm from the pads; the check measures it against §5.6.
   - *To confirm on the first boards:* U6's joints on leaded HASL (V-MFG-03); Y2 against the
     built-in load capacitors (G9).
 - *Verified (W25Q128JVSIQ, Winbond W25Q128JV Rev. J, 2024-04-25, via LCSC C97521, read
@@ -313,6 +331,9 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - *To confirm:* the output-capacitor stability requirement (capacitance and ESR range) in
     the datasheet, against the 22 µF ceramic on V3V3.
 - *Verified (CJ431):*
+  - SOT-23 pins: 1 REF, 2 K, 3 A (page 1). That is KiCad's `TL432DBZ` order; KiCad's
+    `TL431DBZ` (and JSCJ's own CD431) is 1 K, 2 REF, so the symbol is built on TL432DBZ
+    (issue #6 P1).
   - 2.475 / 2.5 / 2.525 V; catalogue lists the ±0.5 % rank.
   - I<sub>K(min)</sub> 0.45 / 1 mA.
   - Deviation over −25 to 85 °C: 4.5 typ / 17 max mV.
@@ -386,6 +407,36 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   MCP3208 from 5 V removes the need (circuit §3.2).
 - OP07 is the only precision op-amp in Basic. LM358 / LM324 have 7 mV / 30 µV/°C offset, and
   TL072 3 mV.
+
+---
+
+## Symbols and footprints (issue #6 P1, 2026-11-04)
+
+`design/ecad/libraries/library.json` is the per-part record of pin names and land facts,
+each with the datasheet page it was read from. `check_libraries.py` measures the KiCad
+library against it (`design/ecad/libraries/README.md`). Facts that rest on less than the
+part's own drawing, and so stay open:
+
+- **AMS1117-3.3 (U2):** the SOT-223 tab is taken as VOUT (pin 2). The AMS sheet says "TAB IS
+  OUTPUT" only for TO-252. *To confirm:* continuity tab–pin 2 on a received part.
+- **AO3401A, AO3400A:** the AOS sheets give neither a package drawing nor pin numbers. The
+  pin order (1 G, 2 S, 3 D) comes from their top view, and the land check uses the JSCJ SOT-23
+  dimensions as a proxy.
+- **NCD0805R1 (D11, D13):** the sheet never names the terminals. The green-marked terminal
+  is read as the cathode. *To confirm:* in the JLCPCB placement preview (CLAUDE.md §4.2).
+- **BLM18PG121SN1D (FB1):** the catalog excerpt has only the BLM18A drawing; the 1.6 × 0.8 mm
+  body is the same size code.
+- **TSL1TTER100D (RS10, RS20):** KOA gives no land, so the 4-pad Kelvin land is derived from
+  the body and electrode dimensions: each end is split across its width into a 1.85 mm force
+  pad and a 0.60 mm sense pad, 0.25 mm apart, reaching 0.45 mm past the maximum body end. The
+  force and sense pads are joined only through the part's electrode. *To confirm:* the joints
+  on the first board, and the HIGH-range gain against the reference in V-MEAS-01.
+- **Mounting holes (H1–H4):** KiCad's M2 hole with an ISO 7380 button-head courtyard
+  (3.5 mm), a provisional choice: the screw and the heat-set insert are not chosen (OI-5).
+  *To confirm:* V-MECH-01.
+- **Passives:** the R and C footprints are KiCad's IPC-7351 nominal 0402 / 0603 / 0805. Each
+  value's own sheet is checked when it is bound in the schematic (P2). That includes R_L's
+  510 Ω (C17734), whose Kelvin land is checked against generic EIA 0805 dimensions for now.
 
 ---
 

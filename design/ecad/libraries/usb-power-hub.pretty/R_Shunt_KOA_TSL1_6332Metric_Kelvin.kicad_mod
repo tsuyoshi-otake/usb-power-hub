@@ -1,0 +1,101 @@
+(footprint "R_Shunt_KOA_TSL1_6332Metric_Kelvin"
+	(version 20241229)
+	(generator "make_libraries.py")
+	(layer "F.Cu")
+	(descr "TSL1TTER100D KOA on a derived Kelvin land (force 1/4, sense 2/3); KOA gives no land; body 6.3 x 3.1 mm")
+	(tags "resistor shunt Kelvin 4-terminal")
+	(property "Reference" "REF**"
+		(at 0 -2.5 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "R_Shunt_KOA_TSL1_6332Metric_Kelvin"
+		(at 0 2.5 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1.49 -1.66)
+		(end 1.49 -1.66)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start -1.49 1.66)
+		(end 1.49 1.66)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_rect
+		(start -4 -1.8)
+		(end 4 1.8)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+	)
+	(fp_rect
+		(start -3.15 -1.55)
+		(end 3.15 1.55)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(pad "1" smd roundrect
+		(at -2.75 0.425)
+		(size 2 1.85)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.1)
+	)
+	(pad "2" smd roundrect
+		(at -2.75 -1.05)
+		(size 2 0.6)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.1)
+	)
+	(pad "3" smd roundrect
+		(at 2.75 -1.05)
+		(size 2 0.6)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.1)
+	)
+	(pad "4" smd roundrect
+		(at 2.75 0.425)
+		(size 2 1.85)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.1)
+	)
+	(embedded_fonts no)
+)

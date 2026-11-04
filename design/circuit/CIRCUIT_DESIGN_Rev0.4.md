@@ -1065,7 +1065,9 @@ and 2 are drawn there before layout.
    module is gone, and the bare chip's package drawing and pin table are in its datasheet
    (§5.6, Table 1-3). **D31's item instead:** draw U6's QFN-28 land from that drawing
    (0.4 mm pitch, 0.20 mm terminals, 2.7 mm ePad) rather than a stock footprint (G21,
-   CLAUDE.md §4.2). ~~**The OI-23 remainder:** choose the USB-C module headers and their
+   CLAUDE.md §4.2). **Drawn (issue #6 P1, 2026-11-04):** `design/ecad/libraries/`, measured
+   against §5.6 by `check_libraries.py`; G21's joint inspection stays with V-MFG-03.
+   ~~**The OI-23 remainder:** choose the USB-C module headers and their
    height, enter it in the placement study and re-run it.~~ Closed by D33: PH-1x40SG,
    whose 2.30 mm minimum insulator keeps the 1.5 mm under-module rule; the study checks it
    and exits 0 (§11).
@@ -1073,7 +1075,9 @@ and 2 are drawn there before layout.
    on paper by D28, then superseded by D29: the PGA2040 is gone, so there are no module pad
    positions to check. **D29's item instead:** draw U1's LQFN-56 land from the RP2040
    datasheet's Figure 167 (the reduced 3.20 mm ePad) rather than a stock QFN-56 footprint,
-   and U8's from the Winbond package drawing (G20, CLAUDE.md §4.2).
+   and U8's from the Winbond package drawing (G20, CLAUDE.md §4.2). **Drawn (issue #6 P1,
+   2026-11-04):** U1's land is generated from Figure 167 and checked pad by pad; U8 uses
+   KiCad's SOIC-8 5.3 mm land, checked against the Winbond drawing (`design/ecad/libraries/`).
 3. ~~**OI-25**: decide how J1's 0.21 A is declared.~~ Closed by D26.
 4. ~~**OI-29**: choose the J4 input fuse.~~ Closed by D25 (F1 = MF-R300).
 5. ~~Bench-check the assumptions this design rests on, before layout.~~ Replaced by D28: the

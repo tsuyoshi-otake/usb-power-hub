@@ -4,8 +4,9 @@ A 2-channel switched USB-C hub that measures each downstream port's current from
 0.1 µA to 1 A, so a device under test can be power-profiled and power-cycled from
 the host PC over a plain COM port.
 
-> **Status: WIP — MANUFACTURING PROHIBITED.** The design exists as documents and a
-> generated, still empty KiCad project skeleton. No part is captured; there is no layout,
+> **Status: WIP — MANUFACTURING PROHIBITED.** The design exists as documents, a
+> generated, still empty KiCad project skeleton and its part library (a symbol and a
+> footprint for every part, checked on paper). No part is captured; there is no layout,
 > no manufacturing output, no firmware, and nothing has been built or measured. Do not
 > order anything from this repository.
 
@@ -50,7 +51,7 @@ Read in this order:
 | `requirements/verification.md` | How each requirement is proven (V-* IDs: method, pass criterion, limits). |
 | `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.3 are in Git history. |
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
-| `design/ecad/` | The KiCad 9 project (D32): `source/` holds the project, the source of truth until the EasyEDA import; `scripts/` holds its generator and checks. Only a skeleton so far: stackup, outline, rules, net classes, an empty schematic. |
+| `design/ecad/` | The KiCad 9 project (D32): `source/` holds the project, the source of truth until the EasyEDA import; `scripts/` holds its generators and checks; `libraries/` holds the project's symbols and footprints and the parts register they are checked against (its README). So far: stackup, outline, rules, net classes, the libraries, an empty schematic. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
 | `design/experiments/stackup-impedance/` | The stackup study behind D27: JLCPCB's 4-layer stackups, the 90 Ω USB pair width on each, and a model checked against JLCPCB's single-ended calculator. A non-authoritative study, not design data. |
 | `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03 and re-run 2026-11-04 for D29, D30, D31 and D33: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
@@ -91,17 +92,20 @@ python -m http.server 8000 --directory mockup
 
 Not possible yet. The board is captured and laid out in KiCad 9.0.8 until the design is
 complete, then imported into EasyEDA (decision D32, issue #6). The module headers are
-chosen (D33), so the next capture step is drawing the RP2040's and the CH335F's lands from
-their datasheets (G20, G21; the circuit document's §12). The front-end checks are made on
+chosen (D33) and every part has a symbol and a footprint, the RP2040's and the CH335F's
+lands drawn from their datasheets (G20, G21), so the next step is the schematic (issue #6
+P2). The front-end checks are made on
 the first assembled board, not on a bench beforehand (decision D28). Firmware does not
 exist.
 
-The KiCad project skeleton is generated, not hand-edited. With KiCad 9.0's own Python,
-from the repository root:
+The KiCad project skeleton and its libraries are generated, not hand-edited. With KiCad
+9.0's own Python, from the repository root:
 
 ```sh
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py       # writes and checks design/ecad/source
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_make_project.py  # the check's negative tests
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py           # writes and checks design/ecad/source
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_make_project.py      # the check's negative tests
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_libraries.py         # writes and checks design/ecad/libraries
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_libraries.py   # its negative tests
 ```
 
 ## Repository

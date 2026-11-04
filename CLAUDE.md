@@ -32,11 +32,14 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > manufacturing output**. Capture has started in KiCad 9.0.8 (D32, issue #6): a
 > generated project skeleton exists in `design/ecad/source/` (4-layer JLC04161H-7628
 > stackup, 100 × 72 mm outline, §5.3 starting rules, the USB_HS net class), written by
-> `design/ecad/scripts/make_project.py`; its schematic is still empty. Candidate parts have been looked up in the JLCPCB
+> `design/ecad/scripts/make_project.py`; its schematic is still empty. The project
+> library exists (P1): a symbol and a footprint for every Rev0.4 part in
+> `design/ecad/libraries/`, each land measured by `check_libraries.py` against the
+> datasheet numbers recorded in `library.json`. Candidate parts have been looked up in the JLCPCB
 > assembly pool and at Akizuki (`requirements/parts.md`, dated stock), but **none
 > is confirmed**:
-> no footprint is verified and no order-time stock check has been done. Nothing
-> has been built or measured.
+> no footprint is proven on a board or in the JLCPCB placement preview, and no order-time
+> stock check has been done. Nothing has been built or measured.
 >
 > The other thing that exists is a three.js appearance mockup
 > (`mockup/`). Component names such as `U2_usb_hub` in it are placeholders, not
