@@ -195,6 +195,12 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
     which weakened a bound meant as a proof;
   - an independent verifier recomputed the printed terms and caught it.
   A test now asserts that the printed terms add up.
+  Second incident, 2026-11-04 (D33, #6): the bound credited the space the layout used under
+  each USB-C module (130 mm²), not the largest the geometry allows (the outline less the
+  header insulators, 230.2 mm²), so "3,332 mm² at K = 1.0" was not a lower bound. Reading
+  the module and receptacle drawings for the header height found it, and also that the
+  layout's rectangle sat under the mid-mounted receptacle. A credit for space under a part
+  comes from that part's drawing and its connector's, never from a layout choice.
 - **Check a fault-injection step against what drives the node in hardware.** V-SAFE-01 asked
   firmware to hold a bypass FET off to simulate a stuck range. Rev0.4 §3.2 has the LM393 turn
   the bypass on in hardware whenever its amplifier overranges, so the step could not produce
@@ -209,6 +215,28 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   Verified 2026-11-03: the Rev0.3 header had "corrected" 「デカくい」 to 「デカい」 and dropped one
   line of the user's message; an independent verifier caught it.
 
+
+## KiCad 9 (pcbnew from KiCad's own Python)
+
+- **Run scripts with `<KiCad 9.0>/bin/python.exe -I -B`.** It carries `pcbnew` and works
+  isolated. It prints "Adding duplicate image handler" lines on stderr; filter them with
+  `grep -v "duplicate image"` and read the exit status from `${PIPESTATUS[0]}`.
+- **SaveBoard rewrites `.kicad_pro` from pcbnew's cached project.** Verified 2026-11-04 (#6):
+  `make_project.py` edited the project JSON, then ran a LoadBoard/SaveBoard round trip in the
+  same process, and every rule and net class came back at KiCad's defaults
+  (`min_clearance` 0.0, no USB_HS). Edit `.kicad_pro` after the last SaveBoard, and check
+  the result in a new process; only there does pcbnew read just the files.
+- **The stackup cannot be set through the Python API.** Insert the `(stackup ...)`
+  S-expression text right after `(setup` and let a LoadBoard/SaveBoard round trip normalize
+  it. KiCad keeps the layers and adds mask thickness 0.01 mm and loss tangent 0.02 (observed
+  2026-11-04). The general `(thickness 1.6)` stays the nominal board thickness.
+- **Replace every `(uuid "...")` with uuid5 of its position for byte-identical re-runs.**
+  Verified 2026-11-04: two runs of `make_project.py` gave the same SHA-256 for all three files.
+- **`kicad-cli pcb drc` exits 0 even with violations unless `--exit-code-violations` is
+  passed.** Verified 2026-11-04 on a copy with a track 0.05 mm from the edge: 2 violations
+  (`copper_edge_clearance`, `track_dangling`), exit 0 without the flag, 5 with it. `sch erc`
+  has the same flag. Pass it, and also count `violations`, `unconnected_items`,
+  `schematic_parity` and, for ERC, `sheets[*].violations` in the JSON report.
 
 ## Delegated verifiers
 

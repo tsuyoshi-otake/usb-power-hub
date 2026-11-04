@@ -666,3 +666,51 @@ Section 13 (board) only once verified.
   - HS through one USB-C module per path (OI-26).
 - **Purchases.** The CH335F module is no longer needed.
 - **Commit.** `4475bd6` (design); this entry and the rules.md update follow.
+
+## 2026-11-04 - P0 of issue #6: D32 KiCad-first workflow, D33 module headers, KiCad skeleton
+
+- **Request.** The user: 「いったんローカルでKiCadで完成まで目指してそのご、EasyEDAにインポートしよう」.
+  Recorded as D32 (user, amends D2). Tracking issue #6, phases P0–P6.
+- **Decision D33** (Claude, delegated). PH-1x40SG headers (g100167, ¥35 per strip), soldered,
+  no sockets. The insulator is 2.50 ± 0.2 mm, so ≥ 2.30 mm, which leaves ≥ 0.80 mm above a
+  1.5 mm part under a module. This closes the OI-23 remainder.
+- **Findings from the drawings.** Reading the module and receptacle drawings
+  (AE-USB2.0-TYPE-C, Hirose CX70M-24P1) for the header height found three defects:
+  - the study's under-module rectangle sat under the mid-mounted receptacle, which hangs
+    below the module;
+  - the area bound's credit (130 mm² per module) was a layout choice, not the most
+    favourable space (230.2 mm²), so "3,332 mm² at K = 1.0" was not a lower bound;
+  - the cost estimate's header count left out the 4 mechanical pins of each module.
+- **Fix.**
+  - One 19.0 × 3.4 mm strip per module, checked against the receptacle, its pins, the shell
+    tabs and the insulators.
+  - The bound is now 2,931 mm² at K = 1.0 (0.99 × 85 × 35) and exceeds 85 × 35 from
+    K = 1.025.
+  - 44 header pins per board and 3 strips for 2 units. Economic total 17,456 yen; D31 delta
+    corrected to −24 to −144 yen.
+  - History is labelled, not overwritten.
+- **KiCad skeleton.** `design/ecad/scripts/make_project.py` writes `design/ecad/source/`:
+  - JLC04161H-7628 stackup, HAL SnPb, 1.6 mm, 100 × 72 mm outline;
+  - the §5.3 rules, and the Default and USB_HS (0.31 / 0.15) net classes;
+  - an empty schematic.
+- **Incident 1: rules reset to defaults.** The first run's check failed with every rule and
+  net class at KiCad's defaults (`min_clearance` 0.0). Root cause: SaveBoard in the same
+  process rewrites `.kicad_pro` from pcbnew's cached project; a fresh-process probe showed
+  the defaults. Fix: edit the project after the last SaveBoard, and check in a new process.
+  `test_make_project.py` corrupts copies in 9 ways (plus one clean pass), and every
+  corruption is named.
+- **Incident 2: a rule from memory.** A draft rule said `kicad-cli` DRC exits 0 with
+  violations. Before it was recorded, it was tested on a board with a deliberate edge
+  violation: exit 0 without `--exit-code-violations`, 5 with it.
+- **Verification.**
+  - Rubric `.claude/goal-loop/kicad-p0/rubric.md` (C1–C9), graded by rubric-verifier
+    (sonnet).
+  - Round 1 failed C3: circuit §11 did not retract the old figure as a bound. Fixed; round 2
+    passed all nine.
+  - Study exit 0, 21 tests; cost exit 0, 14 tests; skeleton check PASS, 10 tests.
+  - DRC: 0 violations, 0 unconnected, 0 parity. ERC: 0.
+  - A re-run is byte-identical.
+- **Residual risk.** Two facts are not on paper and are left to V-MECH-01: the module
+  board's thickness and the receptacle's 1.06 mm front overhang. The rules in the skeleton
+  are starting values, not JLCPCB's current capabilities.
+- **Commit.** `8b8dded` (design); this entry and the rules.md update follow.
