@@ -37,8 +37,8 @@ class LayoutChecks(unittest.TestCase):
         self.assertFailure("J2 and J3")
 
     def test_off_board(self):
-        self.m.PLACE["U1"] = (85.0, 50.0, 0)           # past the right edge
-        self.assertFailure("U1 leaves the board")
+        self.m.PLACE["U7"] = (95.0, 19.0, 0)           # past the right edge
+        self.assertFailure("U7 leaves the board")
 
     def test_region_too_small(self):
         r, bl = self.m.REGIONS["R_AFEA"]
@@ -47,7 +47,7 @@ class LayoutChecks(unittest.TestCase):
 
     def test_package_wider_than_region(self):
         self.m.REGIONS["R_GAP"] = (self.m.REGIONS["R_GAP"][0], ["OC"])   # SOIC-8 into 7 mm
-        self.m.REGIONS["R_LDO"] = (self.m.REGIONS["R_LDO"][0], ["LDO", "PGASUP"])
+        self.m.REGIONS["R_LDO"] = (self.m.REGIONS["R_LDO"][0], ["LDO"])
         self.assertFalse(any("R_GAP: needs" in x for x in self.fails()))
         r = self.m.REGIONS["R_GAP"][0]
         self.m.REGIONS["R_GAP"] = ((r[0], r[1], 5.0, r[3]), ["OC"])

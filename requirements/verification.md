@@ -1,11 +1,11 @@
 # USB Power-Control Hub — Verification Plan
 
-**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28 on
-2026-11-04. Nothing below has
+**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28 and
+D29 on 2026-11-04. Nothing below has
 been executed — no board exists.
 
 Every requirement in `requirements/product.md` is covered by at least one entry here, and
-every entry cites the requirements it proves. Design-review gates G1 – G19 live in
+every entry cites the requirements it proves. Design-review gates G1 – G20 live in
 `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 8; entries here reference them rather than
 restate them. CLAUDE.md Section 8 ("Functional" gate) requires these to pass before release.
 
@@ -178,12 +178,13 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - The MID gain changes < 0.1 % (R_M).
   - Failing any of these reopens D17, and the fix is a board revision.
 
-### V-MEAS-06 — ADC sampling and MCU interface, at bring-up (D28)
-- **Covers:** REQ-MEAS-05, REQ-MEAS-08, REQ-SAFE-01 (design assumptions behind them; OI-31,
-  closed on paper by D28)
-- **When:** Bring-up, on the first PCBA board, with a test firmware build. Until 2026-11-04
-  this ran on a bench PGA2040 and MCP3208 before layout; D28 (user) moved it here. The desk
-  check it confirms is circuit §3.2, §3.3 and §7.1.
+### V-MEAS-06 — ADC sampling and MCU interface, at bring-up (D28, D29)
+- **Covers:** REQ-MEAS-05, REQ-MEAS-08, REQ-SAFE-01, REQ-HOST-02 (design assumptions behind
+  them; OI-31, closed on paper by D28; U1's support circuit, D29)
+- **When:** Bring-up, on both PCBA boards, with a test firmware build. Until 2026-11-04
+  this ran on a bench PGA2040 and MCP3208 before layout; D28 (user) moved it here, and D29
+  replaced the module's inspection with checks of U1's own support circuit (circuit §6.5).
+  The desk check it confirms is circuit §3.2, §3.3, §6.3 and §7.1.
 - **Method:**
   - Port A ON with no DUT, so the LOW amplifier sits at its pedestal. Convert U7 CH3
     (VREF_CHK, 2.5 V) and CH0 (LOW) alternately, first with the native 1.5 µs sample and then
@@ -194,27 +195,45 @@ pass counts. Entries that rely on a script note this under *Limits*.
     - the LOW range with its mirror: sweep a reference current on port A in 64 steps from 0
       to 350 µA against the reference DMM. That stays below the 365 µA hardware up-range
       threshold (circuit §3.2) and covers 81 % of the ADC span.
-  - With blank flash (the RP2040 stays in its ROM bootloader), and again with the module's RUN
-    pin held low, measure the Q19, Q20, Q39 and Q40 gates at their test pads.
-  - Inspect the PGA2040:
-    - the 3V3 pad voltage with the board powered from J1;
-    - the D+/D− series resistance from module pin to RP2040 pin;
+  - With blank flash (the RP2040 stays in its ROM bootloader), and again with U1's RUN held
+    low at its test pad, measure the Q19, Q20, Q39 and Q40 gates at their test pads.
+  - U1's support circuit (D29), on both boards:
+    - unpowered: the series resistance of each of D+ and D− across its 22 Ω + 5.1 Ω pair,
+      with the DMM's leads zeroed (REL);
+    - powered from J1: V3V3 at U1's local 10 µF, and DVDD at its test pad, once with blank
+      flash (ROM bootloader) and once running the test build;
     - the flash's JEDEC ID (instruction 9Fh) and 64-bit unique ID (4Bh), read by the test
-      build, on both boards.
+      build;
+    - crystal start-up: switch J1's power off for ≥ 2 s and on again, 100 times (a switched
+      USB port or by hand). After each, the test build must enumerate; its clock set-up waits
+      for XOSC to report stable, so a crystal that does not start leaves it unenumerated;
+    - crystal frequency: the test build drives XOSC, undivided, onto the GPOUT clock pad; read
+      it with a counter (or an oscilloscope's) of ±50 ppm accuracy or better.
 - **Pass:**
   - Stretched: the alternating readings agree with the single-channel ones within 0.5 LSB.
     Native: they disagree by more than 5 LSB, which shows the test can fail.
   - INL within ±2 LSB in both sweeps. A failure of the LOW-range sweep alone points at the
     mirror (V-MEAS-00), not the ADC.
   - Every HOLD gate stays ≥ 2.5 V in both states.
-  - The 3V3 pad is ≥ 3.135 V; each of D+ and D− measures 27 Ω ± 5 % from module pin to
-    RP2040 pin; the JEDEC ID is EFh 4017h (W25Q64JV-IQ/JQ, Winbond Rev. J); and the two
-    boards' 64-bit unique IDs differ in ≥ 1 bit.
+  - U1, on each board:
+    - D+ and D− each 26.5–27.7 Ω (the parts' 26.83–27.37 Ω plus 1 % for the meter);
+    - V3V3 ≥ 3.135 V (USB_VDD minimum), and DVDD 1.05–1.16 V in both states;
+    - JEDEC ID EFh 4018h (W25Q128JV-IQ/JQ, Winbond Rev. J); the two boards' 64-bit unique IDs
+      differ in ≥ 1 bit;
+    - 100 enumerations in 100 power cycles;
+    - 12 MHz within ±950 ppm (the RP2040's 1000 ppm less the instrument's 50 ppm). The desk
+      check expects ≤ +152 ppm at C1 = 5 fF (circuit §6.3); record the reading, which bounds
+      C1.
     Record the findings in `requirements/parts.md`.
-  - Failing any of the first three reopens D23, and the fix is a board revision. Failing the
-    fourth reopens the item that failed: the 3V3 pad reopens U1's supply (circuit §7.1); a
-    missing 27 Ω pair puts it on the board (circuit §3.3); a different flash or equal IDs
-    reopen REQ-HOST-02's serial-number source.
+  - Failing any of the first three reopens D23's ADC choice, and the fix is a board revision.
+    Failing a U1 check reopens the item that failed:
+    - the series resistance reopens the resistor fit (G20);
+    - V3V3 or DVDD reopens U1's supply (circuit §7.1) and D29;
+    - a different JEDEC ID reopens U8's part (parts.md); equal unique IDs reopen REQ-HOST-02's
+      serial-number source;
+    - a missed start-up or a frequency outside the limit reopens Y1 (circuit §6.3). The
+      fallback, ABM8-272-T3 (C20625731), fits the same land but is a second Extended part, so
+      it needs the user's decision (D29).
 
 ### V-MEAS-01 — Range, accuracy and sample rate against a reference
 - **Covers:** REQ-MEAS-01, REQ-MEAS-05, REQ-MEAS-08
@@ -381,7 +400,9 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Open each hand-soldered part's Akizuki page and record its stock.
   - Compare each BOM line's class with the rule.
 - **Pass:**
-  - Every BOM line is Basic with ≥ 500 assembly stock; no Preferred Extended line (D22).
+  - Every BOM line is Basic with ≥ 500 assembly stock, except one: C2040 (RP2040), the
+    Extended line D29 allows, which also needs ≥ 500. No other Extended line, and no Preferred
+    Extended line (D22, D29).
   - Every hand-soldered part shows stock ≥ the build quantity.
 - **Limits:** `jlc_stock.py` sees the class and stock only, not suitability. It was shown
   failing (exit 1) on a non-existent code on 2026-11-03. Akizuki stock is read by hand,

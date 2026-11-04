@@ -24,8 +24,11 @@ What it CANNOT see (write these next to any result quoted from it):
   layout prove that a region routes;
 - real footprints: courtyards are IPC-7351-nominal planning values (COURTYARD), and passive
   counts come from the Rev0.4 circuit text and requirements/parts.md, numbered at capture;
-- the CH335F module outline (measured from Akizuki's product photo against a ruler, OI-24)
-  and the PGA2040 pin map (OI-31). No SMD is assumed under the PGA2040 for that reason;
+- the CH335F module outline (measured from Akizuki's product photo against a ruler, OI-24).
+  U1 (the bare RP2040, D29) and U8 are SMD parts in R_MCU; their courtyards come from the
+  RP2040 datasheet's Figure 167 and the Winbond SOIC-8 208-mil drawing, not from a footprint;
+- the Full-Speed link from CH335F port 1 to U1: it has no corridor of its own and shares the
+  routing allowance K (the HS corridor to J2/J3 is checked);
 - heights, except through the under-module rule; enclosure, thermal and EMC behaviour;
 - the placement inside each region (for example, that the shunt ladder keeps away from the
   USB corridor). The SVG draws regions, not parts.
@@ -50,6 +53,10 @@ COURTYARD = {
     "SOT-223": (60.6, 7.30, 1.80),   # SOT-223-3_TabPin2: 8.3 x 7.3
     "SMB": (33.0, 4.50, 2.30),       # D_SMB: 7.3 x 4.5
     "3225": (16.7, 3.70, 0.80),      # Crystal_SMD_3225-4Pin: 4.5 x 3.7
+    "QFN-56": (68.1, 8.25, 0.90),    # RP2040: 7.75 outer pad span (DS Fig. 167) + 0.25 each
+                                     # side; height not printed in the DS, 0.9 assumed
+    "SOIC-8-208": (56.4, 5.88, 2.16),  # W25Q128JVSIQ: lead span 8.10 max + 0.5 pad + 0.25,
+                                     # body 5.38 max + 0.25 each side; A 2.16 max (Winbond 10.1)
     "TACT": (43.0, 6.10, 3.50),      # TS-1187A 5.1 x 5.1 body, legs out: ~7.0 x 6.1
     "TC2030": (45.0, 4.50, 0.00),    # TC2030-NL land with its keepout: ~10 x 4.5
     "FID": (9.0, 3.00, 0.00),        # 1 mm copper, 2 mm mask opening, 3 x 3 keepout
@@ -86,7 +93,10 @@ COMMON = {
     "ADCSUP": [("SOT-23", 4), ("0402", 13), ("0805", 2)],  # Q50-Q52, U3; pull-ups, DOUT dividers
     "OC": [("SOIC-8", 1), ("0402", 7)],                   # U30 and its network
     "MCUF": [("TACT", 1), ("TC2030", 1)],                 # SW3 BOOT, SWD land
-    "PGASUP": [("0402", 4), ("0805", 1)],                 # decoupling, 27 ohm x 2 (OI-31)
+    # U1 RP2040, U8 flash, Y1 (D29, Rev0.4 Sec. 6.5): 100 nF x 11, 1 uF x 2, 15 pF x 2,
+    # 22 ohm x 2, 1 k x 2 (XOUT, BOOTSEL), 10 k (RUN); 5.1 ohm x 2 (0603); 10 uF at U1
+    "MCU": [("QFN-56", 1), ("SOIC-8-208", 1), ("3225", 1), ("0402", 20), ("0603", 2),
+            ("0805", 1)],
     "HUB": [("3225", 1), ("0402", 5), ("0805", 1)],       # Y2, decoupling, straps
     "FID": [("FID", 1)],
 }
@@ -134,7 +144,6 @@ CH335_UNDER = [(0.5, 2.64, 37.5, 4.92)]
 
 HAND = {  # name: (w, h, under-rects in local frame)
     "USBC": (20.0, 15.0, USBC_UNDER),
-    "PGA2040": (21.0, 21.0, []),          # pin map unknown (OI-31): nothing assumed under it
     "CH335F": (38.5, 10.2, CH335_UNDER),
     "DIP16": (9.8, 20.85, []),            # DIP-16_W7.62mm courtyard
     "MAU104": (20.0, 6.6, []),            # 19.5 x 6.1 SIP body, courtyard
@@ -142,7 +151,7 @@ HAND = {  # name: (w, h, under-rects in local frame)
 }
 HAND_PARTS = {  # designator: kind
     "J1": "USBC", "J2": "USBC", "J3": "USBC", "J4": "USBC",
-    "U1": "PGA2040", "U6": "CH335F", "U7": "DIP16", "U17": "DIP16", "U5": "MAU104",
+    "U6": "CH335F", "U7": "DIP16", "U17": "DIP16", "U5": "MAU104",
     "F1": "PTC",
 }
 
@@ -178,7 +187,6 @@ PLACE = {
     "U7": (55.5, 19.0, 0), "U17": (65.8, 19.0, 0),     # ADCs next to the front ends
     "U6": (89.3, 19.0, 90),                            # CH335F, right edge, upstream end at J1
     "U5": (82.0, 30.0, 90),                            # MAU104, digital side
-    "U1": (30.0, 50.0, 0),                             # PGA2040
     "F1": (1.0, 50.5, 0),                              # J4 input fuse, ahead of D6 (D25)
 }
 KEEPOUT = {  # mounting holes (heat-set M2, D21) and the USB corridor
@@ -197,7 +205,8 @@ REGIONS = {  # top-side SMD regions: name -> ((x, y, w, h), [blocks])
     "R_V12": ((76.5, 19.0, 12.3, 10.5), ["V12"]),
     "R_TVS1": ((76.5, 50.5, 12.3, 6.0), ["TVS1"]),
     "R_PWR4": ((14.5, 50.5, 13.0, 6.0), ["TVS4"]),
-    "R_LDO": ((51.5, 50.0, 14.0, 21.5), ["LDO", "PGASUP", "OC"]),
+    "R_MCU": ((28.0, 50.0, 23.0, 21.5), ["MCU"]),           # U1, U8, Y1 (D29)
+    "R_LDO": ((51.5, 50.0, 14.0, 21.5), ["LDO", "OC"]),
     "R_F1": ((1.0, 8.5, 3.0, 3.0), ["FID"]),
     "R_F2": ((96.0, 8.5, 3.0, 3.0), ["FID2"]),
     "R_F3": ((1.0, 61.0, 3.0, 3.0), ["FID3"]),

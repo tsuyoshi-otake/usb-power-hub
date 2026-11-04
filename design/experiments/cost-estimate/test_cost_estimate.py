@@ -47,17 +47,28 @@ class Bom(unittest.TestCase):
         totals["0402"] = sum(n for _, n in ce.EST_0402.values()) - 1
         self.assertTrue(any(e.startswith("0402") for e in ce.check_bom(totals)))
 
-    def test_codes_are_the_35_in_parts_md(self):
+    def test_codes_are_the_40_in_parts_md(self):
         bom = list(ce.EXACT) + list(ce.EST_0402)
         md = parts_md_codes()
-        self.assertEqual(len(md), 35)
+        self.assertEqual(len(md), 40)
         self.assertEqual(sorted(bom), sorted(md))
         self.assertNotEqual(sorted(bom[1:]), sorted(md))      # a dropped code would show
 
-    def test_snapshot_holds_every_code_as_basic(self):
+    def test_snapshot_is_basic_except_the_approved_exception(self):
         snap = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
-        for code in list(ce.EXACT) + list(ce.EST_0402):
-            self.assertEqual(snap[code]["componentLibraryType"], "base", code)
+        codes = list(ce.EXACT) + list(ce.EST_0402)
+        self.assertEqual(ce.class_errors(snap, codes), [])
+        self.assertEqual(ce.extended_codes(snap, codes), ["C2040"])
+        self.assertEqual(ce.APPROVED_EXTENDED, {"C2040": "D29"})
+
+    def test_an_unapproved_extended_part_is_caught(self):
+        snap = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
+        bad = copy.deepcopy(snap)
+        bad["C7433"]["componentLibraryType"] = "expand"
+        errs = ce.class_errors(bad, list(ce.EXACT))
+        self.assertTrue(any(e.startswith("C7433") for e in errs), errs)
+        del bad["C9002"]
+        self.assertTrue(any(e.startswith("C9002: not in") for e in ce.class_errors(bad, ["C9002"])))
 
 
 class Arithmetic(unittest.TestCase):
@@ -77,16 +88,21 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(ce.order_qty(17, 2, {"lossNumber": 5, "leastPatchNumber": 0}), 39)
 
     def test_economic_fees(self):
-        fees = ce.pcba_fees(1090, 35, 2)["Economic"]
-        self.assertAlmostEqual(sum(fees.values()), 8.18 + 1.53 + 1090 * 0.0016 + 0.45, places=6)
+        fees = ce.pcba_fees(1090, 40, 2, 1)["Economic"]
+        self.assertAlmostEqual(sum(fees.values()), 8.18 + 1.53 + 1090 * 0.0016 + 3.07 + 0.45,
+                               places=6)
+        none = ce.pcba_fees(1090, 40, 2, 0)["Economic"]
+        self.assertAlmostEqual(sum(fees.values()) - sum(none.values()), 3.07, places=6)
 
     def test_akizuki_free_shipping_threshold(self):
-        yen, rows = ce.akizuki_cost(2, False)
-        self.assertGreaterEqual(yen, ce.AKIZUKI_FREE_SHIPPING_YEN)
-        self.assertEqual(rows[-1][2], 0)
-        yen1, rows1 = ce.akizuki_cost(1, False)
-        self.assertLess(yen1 - ce.AKIZUKI_SHIPPING_YEN, ce.AKIZUKI_FREE_SHIPPING_YEN)
-        self.assertEqual(rows1[-1][2], ce.AKIZUKI_SHIPPING_YEN)
+        seen = set()
+        for units in (1, 2, 4):
+            yen, rows = ce.akizuki_cost(units, False)
+            ship = rows[-1][2]
+            free = yen - ship >= ce.AKIZUKI_FREE_SHIPPING_YEN
+            self.assertEqual(ship, 0 if free else ce.AKIZUKI_SHIPPING_YEN, units)
+            seen.add(free)
+        self.assertEqual(seen, {True, False})          # both branches exercised
 
 
 if __name__ == "__main__":

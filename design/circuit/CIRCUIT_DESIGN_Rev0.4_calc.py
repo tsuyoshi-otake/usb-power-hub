@@ -21,6 +21,9 @@ it looks at):
   sample capacitor starts at the previous channel's voltage (checked on the
   first board, V-MEAS-06);
 - layout parasitics, comparator delay spread, and the real gate charge;
+- Y1's motional capacitance C1 (not on the C9002 sheet, so it is swept) and the
+  RP2040 oscillator's own gain: crystal start-up is only compared, as a ratio, with
+  Raspberry Pi's reference design (checked on the first board, V-MEAS-06);
 - anything about part availability or footprints.
 """
 import math
@@ -220,7 +223,7 @@ vmax = 3.3 * (5.1e3 * 1.1) / (5.1e3 * 1.1 + 33e3 * 0.99)
 print(f"{vmin:.3f}..{vmax:.3f} V (Default vRd window 0.25-0.61 V)")
 
 print("\n== Sec. 7.1 J1 load (typical) and AMS1117")
-loads = {"CH335F": 85, "RP2040 (PGA2040) + USB, estimate": 30, "MAU104 input": 70,
+loads = {"CH335F": 85, "RP2040 + W25Q128JV flash with USB, estimate": 30, "MAU104 input": 70,
          "LM393 x3": 3, "LEDs": 5, "AMS1117 Iq": 5, "CJ431 x2 + dividers": 2,
          "MCP3208 x2 (0.4 mA max each)": 1, "SPI level shifters, 3 x 5 V / 1.5 kohm": 10}
 print(f"total {sum(loads.values())} mA")
@@ -230,20 +233,52 @@ mau_extra = 6 * 2.5 * 12.0 / 0.78 / 5.0     # every OP07 at 5 mA max instead of 
 print(f"hub {hub} mA (declares 100 mA); MCU function {func} mA typ, {func + mau_extra:.0f} mA with"
       f" every OP07 at max (J1 then {hub + func + mau_extra:.0f} mA) -> function declares 200 mA (D26),"
       f" declarations total {100 + 200} mA")
-v3v3 = {"RP2040 (PGA2040), estimate": 30, "LEDs, Rp, pull-ups, VDDA, CJ431 U3 (as Rev0.3)": 15,
+v3v3 = {"RP2040 + W25Q128JV flash, estimate": 30, "LEDs, Rp, pull-ups, VDDA, CJ431 U3 (as Rev0.3)": 15,
         "HOLD pull-ups 4 x 3.3 V / 10 kohm": 1.3, "MCP3208 V_REF x2": 0.3}
 i3 = sum(v3v3.values())
 p = (5.0 - 3.3) * i3 / 1e3
 print(f"V3V3 load {i3:.1f} mA; AMS1117: {p:.3f} W -> {p*90:.1f} C rise at 90 C/W")
 
-print("\n== Sec. 6.1 / Sec. 3.2 U1 on V3V3 and the reset hold (D28 desk check)")
-V3V3_MIN = 3.251                    # AMS1117-3.3 output minimum (parts.md)
-R_DO = 0.260 / 0.300                # NCP115 3.3 V, XDFN4: dropout 260 mV max at 300 mA
-I_U1 = 50e-3                        # RP2040 + flash, a bound above the 30 mA estimate
-v_u1 = V3V3_MIN - R_DO * I_U1
-print(f"PGA2040 VBUS pad from V3V3 (Pimoroni: 3.0-5.5 V): NCP115 in dropout, <= {R_DO*I_U1*1e3:.0f} mV"
-      f" at {I_U1*1e3:.0f} mA -> 3V3 pad >= {v_u1:.3f} V vs RP2040 USB_VDD min 3.135 V"
-      f" (margin {v_u1-3.135:+.3f} V)")
+print("\n== Sec. 7.1 / Sec. 6.1 U1, the bare RP2040 (D29), and U8 on V3V3")
+V3V3_MIN, V3V3_MAX = 3.251, 3.349   # AMS1117-3.3 output (parts.md)
+RAILS = {"USB_VDD": (3.135, 3.63), "IOVDD": (1.62, 3.63), "VREG_VIN": (1.62, 3.63),
+         "ADC_AVDD": (1.62, 3.63), "W25Q128JV VCC": (2.7, 3.6)}   # RP2040 DS Table 634; Winbond
+for pin, (lo, hi) in RAILS.items():
+    print(f"{pin} {lo}-{hi} V on V3V3 {V3V3_MIN}-{V3V3_MAX} V: margin {V3V3_MIN-lo:+.3f} V low,"
+          f" {hi-V3V3_MAX:+.3f} V high")
+I_DVDD = {"BOOTSEL active": 14.7, "Popcorn demo": 16.6}   # DS Table 637, maximum column, mA
+for case, i in I_DVDD.items():
+    print(f"DVDD {case} {i} mA max vs the on-chip regulator's 100 mA: {100/i:.1f} x;"
+          f" its loss (V3V3 max - 1.1 V) x I = {(V3V3_MAX-1.1)*i:.0f} mW")
+
+print("\n== Sec. 3.3 USB series termination per line: 22 ohm (C25092) + 5.1 ohm (C25197), both +-1 %")
+r_nom = 22.0 + 5.1
+r_lo, r_hi = 0.99 * r_nom, 1.01 * r_nom
+print(f"{r_nom:.1f} ohm, {r_lo:.2f}-{r_hi:.2f} ohm against the 27 ohm the RP2040 requires"
+      f" ({100*(r_lo/27-1):+.1f} % / {100*(r_hi/27-1):+.1f} %; the datasheet states no tolerance)")
+
+print("\n== Sec. 6.3 Y1 = C9002 (C_L 20 pF) on the RP2040 XOSC with the reference 2 x 15 pF")
+CL_RATED = 20e-12                    # C9002
+C_CAP = 15e-12                       # two 15 pF C0G (C1548), "Hardware design with RP2040"
+C_STRAY = (2e-12, 3e-12, 5e-12)      # the reference design assumes 3 pF; swept
+C0 = (1e-12, 3e-12)                  # C9002 shunt capacitance: 3 pF max; 1 pF as a low bound
+C1 = (2e-15, 5e-15, 10e-15, 20e-15)  # motional capacitance: not on the C9002 sheet; swept
+TOL = 10 + 20 + 3                    # ppm: tolerance at 25 C + over temperature + first year
+print(f"load as built {(C_CAP/2 + 3e-12)*1e12:.1f} pF (3 pF stray), swept"
+      f" {(C_CAP/2 + C_STRAY[0])*1e12:.1f}-{(C_CAP/2 + C_STRAY[-1])*1e12:.1f} pF,"
+      f" against the {CL_RATED*1e12:.0f} pF it is rated for")
+for c1 in C1:
+    pull = max(c1 / 2 * (1 / (c0 + C_CAP / 2 + cs) - 1 / (c0 + CL_RATED)) * 1e6
+               for cs in C_STRAY for c0 in C0)
+    print(f"C1 {c1*1e15:.0f} fF: pulled high by <= {pull:.0f} ppm; with +-{TOL} ppm"
+          f" <= {pull + TOL:.0f} ppm, against the 1000 ppm the RP2040 tolerates")
+gain = ((3e-12 + CL_RATED) / (3e-12 + C_CAP / 2 + 3e-12)) ** 2
+print(f"loading it to 20 pF instead (2 x 33 pF) raises the oscillator's critical gain"
+      f" {gain:.1f} x (g_m,crit ~ ESR (C0 + C_L)^2)")
+print(f"start-up margin against the reference crystal (ABM8-272-T3, ESR 50 ohm max, C0 3 pF max),"
+      f" same load: 50 / 80 = {50/80:.3f} x")
+
+print("\n== Sec. 3.2 reset hold (D28 desk check)")
 for rpd in (50e3, 80e3):
     v = V3V3_MIN * rpd / (rpd + 10e3 * 1.01)
     print(f"reset hold: RP2040 pull-down {rpd/1e3:.0f} k vs 10 k +1 % to V3V3 min -> gate {v:.3f} V"

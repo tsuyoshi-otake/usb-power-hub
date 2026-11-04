@@ -3,6 +3,10 @@
 **Question.** Does the Rev0.4 part set fit on the board? This is OI-23. D10 fixed the board at
 85 × 35 mm before Rev0.3/Rev0.4 moved the large parts onto Akizuki modules and DIP packages.
 
+Re-run 2026-11-04 for D29: the PGA2040 module is replaced by a bare RP2040 (U1), its flash
+(U8) and crystal (Y1), all SMD in a new region R_MCU where the module sat. The answers below
+did not change; the figures are the re-run's.
+
 **Answer.**
 - **No: 85 × 35 mm cannot hold Rev0.4, under any layout.**
 - A block placement at **100 × 72 mm** passes every check below.
@@ -35,26 +39,29 @@ a lower bound on the board area any layout would need.
 
 | K (region area per courtyard area) | Needed | Against 85 × 35 (2,975 mm²) |
 |---:|---:|---:|
-| 1.0 (no routing space at all) | 3,780 mm² | 1.27 × |
-| 1.4 | 4,429 mm² | 1.49 × |
-| 1.6 (planning value) | 4,754 mm² | 1.60 × |
-| 2.0 | 5,403 mm² | 1.82 × |
+| 1.0 (no routing space at all) | 3,518 mm² | 1.18 × |
+| 1.4 | 4,239 mm² | 1.42 × |
+| 1.6 (planning value) | 4,599 mm² | 1.55 × |
+| 2.0 | 5,319 mm² | 1.79 × |
 
-K = 1.0 is physically impossible to build, and it still needs 27 % more area than the board
-has. That makes the K = 1.0 row a proof, not an estimate.
+K = 1.0 is physically impossible to build, and it still needs 18 % more area than the board
+has. That makes the K = 1.0 row a proof, not an estimate. (Before D29, with the PGA2040, it
+was 3,780 mm², 1.27 ×.)
 
 The inputs:
-- **Hand-soldered: 2,639 mm².** Four USB-C modules at 20 × 15 mm (Akizuki drawing), the
-  PGA2040 at 21 × 21 mm, the CH335F module at 38.5 × 10.2 mm, two DIP16 at 9.8 × 20.85 mm,
-  the MAU104 at 20 × 6.6 mm, and the F1 input fuse at 13 × 5 mm (MF-R300, D25).
-- **SMD courtyards: 1,649 mm².** This includes the four hand-soldered shunts (133 mm²). The
-  count is 138 × 0402, 41 × SOT-23, 9 × SOIC-8, and the rest as listed in the script.
+- **Hand-soldered: 2,198 mm².** Four USB-C modules at 20 × 15 mm (Akizuki drawing), the
+  CH335F module at 38.5 × 10.2 mm, two DIP16 at 9.8 × 20.85 mm, the MAU104 at 20 × 6.6 mm,
+  and the F1 input fuse at 13 × 5 mm (MF-R300, D25). The PGA2040's 21 × 21 mm left with D29.
+- **SMD courtyards: 1,828 mm².** This includes the four hand-soldered shunts (133 mm²). The
+  count is 154 × 0402, 41 × SOT-23, 9 × SOIC-8, one QFN-56 (U1, 8.25 × 8.25 mm from the
+  RP2040 datasheet's 7.75 mm pad span), one SOIC-8 208 mil (U8, 9.6 × 5.88 mm from the
+  Winbond drawing), and the rest as listed in the script.
 - **Space under modules: 704 mm²,** all of it credited: the parts no taller than 1.5 mm would
-  fill 971 mm² even at K = 1.0. That is 130 mm² under each USB-C module, between its
+  fill 1,094 mm² even at K = 1.0. That is 130 mm² under each USB-C module, between its
   shell tabs and pins, and 184 mm² between the CH335F module's pin rows.
 
 Rev0.4 §11 had estimated the SMD content at 1,100–1,200 mm² without counting it. The count
-gives 1,516 mm² excluding the shunts.
+gave 1,516 mm² excluding the shunts before D29, and gives 1,695 mm² with U1's circuit.
 
 ## Result 2 — a block placement at 100 × 72 mm
 
@@ -80,7 +87,8 @@ gives 1,516 mm² excluding the shunts.
 
 **Back edge:**
 - PWR IN (J4) at the left, with the input fuse F1 in front of it, and HOST (J1) at the right;
-- the PGA2040 between them, with the LDO and the OC comparator next to it.
+- U1 (RP2040), U8 and Y1 between them in R_MCU (23 × 21.5 mm, 62 % used at K = 1.6), with
+  the LDO and the OC comparator next to it.
 
 Under the modules: the port-side parts (discharge FET, port capacitor, CC ESD, Rp) sit under
 J2 and J3, the input parts under J4 and J1, and Y2 and the hub decoupling under the CH335F.
@@ -105,8 +113,10 @@ Checks that pass:
   counts come from the Rev0.4 circuit text and `requirements/parts.md`; capture will number
   them.
 - **Measured outlines.** The CH335F module outline was measured off Akizuki's product photo
-  against a ruler (OI-24). The PGA2040 pin map is unknown (OI-31), so no SMD is assumed under
-  it.
+  against a ruler (OI-24). U1's and U8's courtyards are derived from their package drawings,
+  not from footprints (Rev0.4 G20).
+- **The link from CH335F port 1 to U1.** It is Full-Speed only, but it has no corridor of its
+  own: it shares the routing allowance K. Only the HS corridor to J2 and J3 is checked.
 - **Placement inside a region.** For example, it does not check that the shunt ladder keeps
   away from the USB corridor, or that the 12 V trace from the MAU104 reaches the front ends
   cleanly.

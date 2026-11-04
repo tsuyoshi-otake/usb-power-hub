@@ -1,7 +1,7 @@
 # USB Power-Control Hub — Product Requirements
 
 **State: WIP — MANUFACTURING PROHIBITED.** Opened 2026-11-03. Revised for circuit Rev0.4
-on 2026-11-03.
+on 2026-11-03; amended 2026-11-04 for D29 (the bare RP2040).
 
 This file is the authority for **what** the product must do (CLAUDE.md Section 2).
 **How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.4.md`. **How each requirement is
@@ -12,7 +12,7 @@ Status legend:
 | Status | Meaning |
 |---|---|
 | **Settled** | Traced to a user decision (D-number) or a CLAUDE.md MUST. Change only with the user |
-| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.4 §10, D14–D21 and D23). Binding until the user reverts it; the user may revert any one |
+| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.4 §10, D14–D21 and D23; D23's MCU choice is superseded by D29, a user decision). Binding until the user reverts it; the user may revert any one |
 | **Proposed** | Written by Claude to fill a gap and **not** covered by the delegation. Becomes Settled when the user accepts it |
 | **Open** | Cannot be written until the named Open Issue (CLAUDE.md Section 11) is resolved |
 | **Withdrawn** | Retired with a reason; the ID is not reused |
@@ -64,7 +64,7 @@ This section answers "can firmware stop power to a port?": yes, and this is the 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
 | REQ-HOST-01 | The board enumerates as a USB hub with a composite CDC-ACM ×2 device behind it: control (`COMn`) and stream (`COMn+1`), driverless on Windows 10/11, macOS and Linux. | Settled | D7 |
-| REQ-HOST-02 | Every unit reports a unique USB serial number derived from the 64-bit unique ID of the MCU module's flash (the module's W25Q64JV has one, read by instruction 4Bh, D28; V-MEAS-06 reads it on the first board), so its COM numbers are stable across replugs. | Settled | CLAUDE.md §10.3, G8 |
+| REQ-HOST-02 | Every unit reports a unique USB serial number derived from the 64-bit unique ID of the QSPI flash U8 (W25Q128JVSIQ: factory-set, read by instruction 4Bh, D29; V-MEAS-06 reads it on the first boards and checks that two boards differ), so its COM numbers are stable across replugs. | Settled | CLAUDE.md §10.3, G8, D29 |
 | REQ-HOST-03 | The control port stays usable while the stream port is running. | Settled | Rev0.1 §3.3 |
 | REQ-HOST-04 | The control port implements the protocol in Section 4.1. | Delegated | D21 |
 | REQ-HOST-05 | The stream is binary and framed per Section 4.2. | Settled (binary, framed) / Delegated (frame layout) | Rev0.1 §3.3 |
@@ -128,7 +128,7 @@ REQ-PORT-04) and are not reused.
 | ID | Requirement | Status | Source |
 |---|---|---|---|
 | REQ-BOOT-01 | Firmware recovery is reachable without disassembly. | Settled | CLAUDE.md §10.3 |
-| REQ-BOOT-02 | Method: the RP2040 ROM USB bootloader (a UF2 drive), which is in ROM and cannot be erased. It is entered by the `BOOT` command for normal updates, or by holding SW3 (behind a lid pinhole, wired to the module's BOOTSEL) while J1 is plugged in when the application no longer answers. No per-board programming over SWD is needed. | Delegated | D21 as amended by D23 (Rev0.2 P10) |
+| REQ-BOOT-02 | Method: the RP2040 ROM USB bootloader (a UF2 drive), which is in ROM and cannot be erased. It is entered by the `BOOT` command for normal updates, or by holding SW3 (behind a lid pinhole, wired to U1's QSPI_SS through 1 kΩ placed next to U8, Raspberry Pi's reference arrangement) while J1 is plugged in when the application no longer answers. No per-board programming over SWD is needed. | Delegated (method) / Settled (wiring, D29) | D21 as amended by D23 and D29 (Rev0.2 P10) |
 
 ## 6. Mechanical
 
@@ -144,11 +144,11 @@ REQ-PORT-04) and are not reused.
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
-| REQ-MFG-01 | JLCPCB PCBA places SMD parts on Top only. The user hand-solders the Akizuki modules and large parts after delivery: through-hole pins are soldered from Bottom, and the two large SMD shunts on Top. No part body on Bottom; ENIG. | Settled | D13; changes CLAUDE.md §1 "Top-side assembly" |
+| REQ-MFG-01 | JLCPCB PCBA places SMD parts on Top only, the MCU U1, its flash U8 and crystal Y1 included (D29). The user hand-solders the Akizuki modules and large parts after delivery: through-hole pins are soldered from Bottom, and the two large SMD shunts on Top. No part body on Bottom; ENIG. | Settled | D13, D29; changes CLAUDE.md §1 "Top-side assembly" |
 | REQ-MFG-02 | ≥ 3 global fiducials, 1 mm copper / 2 mm mask opening. | Settled | CLAUDE.md §10.3 |
 | REQ-MFG-03 | SWD reachable by a fixture with mechanical datums, for debug; programming does not need it (REQ-BOOT-02). Method: Tag-Connect TC2030-NL footprint. | Settled (need, OI-8) / Delegated (method) | OI-8, D21 |
-| REQ-MFG-04 | Test pads on VBUS_IN, VSUP_A, VSUP_B, VBUS_A, VBUS_B, V5L, V5A, V12F, V_INJ, V3V3, VDDA and GND. | Delegated | D21 |
-| REQ-MFG-05 | **Sourcing.** Every machine-placed part is JLCPCB **Basic** with ≥ 500 assembly-pool stock at order time. Every hand-soldered part is in stock at Akizuki at order time. No Extended part of any kind, Preferred Extended included. Special or hard-to-source parts SHOULD be avoided, and part types and count SHOULD be kept low. | Settled | D13, D22 |
+| REQ-MFG-04 | Test pads on VBUS_IN, VSUP_A, VSUP_B, VBUS_A, VBUS_B, V5L, V5A, V12F, V_INJ, V3V3, VDDA and GND; since D29 also on U1's DVDD, RUN and one GPOUT clock pin (GPIO21, 23, 24 or 25), which V-MEAS-06 reads. | Delegated (D21) / Settled (the D29 pads) | D21, D29 |
+| REQ-MFG-05 | **Sourcing.** Every machine-placed part is JLCPCB **Basic** with ≥ 500 assembly-pool stock at order time, with **one exception: the RP2040, C2040 (Extended, D29)**, which needs the same ≥ 500 stock. Every hand-soldered part is in stock at Akizuki at order time. No other Extended part of any kind, Preferred Extended included; a second one needs the user's decision. Special or hard-to-source parts SHOULD be avoided, and part types and count SHOULD be kept low. | Settled | D13, D22, D29 |
 
 ## 8. Safety and fail-safe
 

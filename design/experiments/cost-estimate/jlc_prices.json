@@ -1,41 +1,123 @@
 {
- "checked_utc": "2026-11-03",
+ "checked_utc": "2026-11-04",
  "parts": {
+  "C2040": {
+   "componentCode": "C2040",
+   "componentModelEn": "RP2040",
+   "componentLibraryType": "expand",
+   "stockCount": 5845,
+   "componentPrices": [
+    {
+     "startNumber": 1,
+     "endNumber": 9,
+     "productPrice": 1.089
+    },
+    {
+     "startNumber": 10,
+     "endNumber": 29,
+     "productPrice": 1.0021
+    },
+    {
+     "startNumber": 30,
+     "endNumber": 99,
+     "productPrice": 0.9201
+    },
+    {
+     "startNumber": 100,
+     "endNumber": 499,
+     "productPrice": 0.8594
+    },
+    {
+     "startNumber": 500,
+     "endNumber": 999,
+     "productPrice": 0.7397
+    },
+    {
+     "startNumber": 1000,
+     "endNumber": -1,
+     "productPrice": 0.7266
+    }
+   ],
+   "leastPatchNumber": 0,
+   "lossNumber": 0,
+   "minPurchaseNum": 1
+  },
+  "C97521": {
+   "componentCode": "C97521",
+   "componentModelEn": "W25Q128JVSIQ",
+   "componentLibraryType": "base",
+   "stockCount": 75369,
+   "componentPrices": [
+    {
+     "startNumber": 1,
+     "endNumber": 9,
+     "productPrice": 2.4617
+    },
+    {
+     "startNumber": 10,
+     "endNumber": 29,
+     "productPrice": 2.1321
+    },
+    {
+     "startNumber": 30,
+     "endNumber": 99,
+     "productPrice": 1.8975
+    },
+    {
+     "startNumber": 100,
+     "endNumber": 499,
+     "productPrice": 1.6843
+    },
+    {
+     "startNumber": 500,
+     "endNumber": 999,
+     "productPrice": 1.5859
+    },
+    {
+     "startNumber": 1000,
+     "endNumber": -1,
+     "productPrice": 1.5466
+    }
+   ],
+   "leastPatchNumber": 0,
+   "lossNumber": 0,
+   "minPurchaseNum": 1
+  },
   "C7433": {
    "componentCode": "C7433",
    "componentModelEn": "OP07CDR",
    "componentLibraryType": "base",
-   "stockCount": 344488,
+   "stockCount": 239315,
    "componentPrices": [
     {
      "startNumber": 1,
      "endNumber": 49,
-     "productPrice": 0.1135
+     "productPrice": 0.1119
     },
     {
      "startNumber": 50,
      "endNumber": 149,
-     "productPrice": 0.0888
+     "productPrice": 0.0876
     },
     {
      "startNumber": 150,
      "endNumber": 499,
-     "productPrice": 0.076
+     "productPrice": 0.0752
     },
     {
      "startNumber": 500,
      "endNumber": 2499,
-     "productPrice": 0.0655
+     "productPrice": 0.0648
     },
     {
      "startNumber": 2500,
      "endNumber": 4999,
-     "productPrice": 0.0617
+     "productPrice": 0.0612
     },
     {
      "startNumber": 5000,
      "endNumber": -1,
-     "productPrice": 0.0593
+     "productPrice": 0.0588
     }
    ],
    "leastPatchNumber": 0,
@@ -46,7 +128,7 @@
    "componentCode": "C7955",
    "componentModelEn": "LM393DR2G",
    "componentLibraryType": "base",
-   "stockCount": 356129,
+   "stockCount": 352540,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -87,7 +169,7 @@
    "componentCode": "C6186",
    "componentModelEn": "AMS1117-3.3",
    "componentLibraryType": "base",
-   "stockCount": 1731654,
+   "stockCount": 1716501,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -128,7 +210,7 @@
    "componentCode": "C3113",
    "componentModelEn": "CJ431",
    "componentLibraryType": "base",
-   "stockCount": 684361,
+   "stockCount": 676131,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -169,7 +251,7 @@
    "componentCode": "C15127",
    "componentModelEn": "AO3401A",
    "componentLibraryType": "base",
-   "stockCount": 1691333,
+   "stockCount": 1675266,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -210,7 +292,7 @@
    "componentCode": "C20917",
    "componentModelEn": "AO3400A",
    "componentLibraryType": "base",
-   "stockCount": 941137,
+   "stockCount": 913965,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -251,7 +333,7 @@
    "componentCode": "C8545",
    "componentModelEn": "2N7002",
    "componentLibraryType": "base",
-   "stockCount": 4190029,
+   "stockCount": 4153388,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -292,7 +374,7 @@
    "componentCode": "C8543",
    "componentModelEn": "S9012 2T1(RANGE:200-350)",
    "componentLibraryType": "base",
-   "stockCount": 167458,
+   "stockCount": 165823,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -333,7 +415,7 @@
    "componentCode": "C32677",
    "componentModelEn": "PSM712-LF-T7",
    "componentLibraryType": "base",
-   "stockCount": 128067,
+   "stockCount": 126923,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -374,7 +456,7 @@
    "componentCode": "C7420377",
    "componentModelEn": "SMBJ6.5CA",
    "componentLibraryType": "base",
-   "stockCount": 1184077,
+   "stockCount": 1184513,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -415,7 +497,7 @@
    "componentCode": "C9002",
    "componentModelEn": "X322512MSB4SI",
    "componentLibraryType": "base",
-   "stockCount": 295208,
+   "stockCount": 289621,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -456,7 +538,7 @@
    "componentCode": "C2297",
    "componentModelEn": "KT-0805G",
    "componentLibraryType": "base",
-   "stockCount": 2168338,
+   "stockCount": 2149839,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -497,7 +579,7 @@
    "componentCode": "C84256",
    "componentModelEn": "NCD0805R1",
    "componentLibraryType": "base",
-   "stockCount": 2386930,
+   "stockCount": 2357275,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -538,7 +620,7 @@
    "componentCode": "C318884",
    "componentModelEn": "TS-1187A-B-A-B",
    "componentLibraryType": "base",
-   "stockCount": 1054646,
+   "stockCount": 1017472,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -579,7 +661,7 @@
    "componentCode": "C14709",
    "componentModelEn": "BLM18PG121SN1D",
    "componentLibraryType": "base",
-   "stockCount": 2179056,
+   "stockCount": 2155523,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -620,7 +702,7 @@
    "componentCode": "C1664",
    "componentModelEn": "CL10C331JB8NNNC",
    "componentLibraryType": "base",
-   "stockCount": 685715,
+   "stockCount": 676978,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -661,7 +743,7 @@
    "componentCode": "C22940",
    "componentModelEn": "0603WAF2401T5E",
    "componentLibraryType": "base",
-   "stockCount": 1115090,
+   "stockCount": 1089306,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -698,11 +780,52 @@
    "lossNumber": 10,
    "minPurchaseNum": 1
   },
+  "C25197": {
+   "componentCode": "C25197",
+   "componentModelEn": "0603WAF510KT5E",
+   "componentLibraryType": "base",
+   "stockCount": 131418,
+   "componentPrices": [
+    {
+     "startNumber": 1,
+     "endNumber": 999,
+     "productPrice": 0.0036
+    },
+    {
+     "startNumber": 1000,
+     "endNumber": 4999,
+     "productPrice": 0.0028
+    },
+    {
+     "startNumber": 5000,
+     "endNumber": 9999,
+     "productPrice": 0.0024
+    },
+    {
+     "startNumber": 10000,
+     "endNumber": 49999,
+     "productPrice": 0.0022
+    },
+    {
+     "startNumber": 50000,
+     "endNumber": 50199,
+     "productPrice": 0.002
+    },
+    {
+     "startNumber": 50200,
+     "endNumber": -1,
+     "productPrice": 0.002
+    }
+   ],
+   "leastPatchNumber": 20,
+   "lossNumber": 10,
+   "minPurchaseNum": 1
+  },
   "C17734": {
    "componentCode": "C17734",
    "componentModelEn": "0805W8F5100T5E",
    "componentLibraryType": "base",
-   "stockCount": 2192161,
+   "stockCount": 2149472,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -743,7 +866,7 @@
    "componentCode": "C45783",
    "componentModelEn": "CL21A226MAQNNNE",
    "componentLibraryType": "base",
-   "stockCount": 3577770,
+   "stockCount": 3542535,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -784,7 +907,7 @@
    "componentCode": "C15850",
    "componentModelEn": "CL21A106KAYNNNE",
    "componentLibraryType": "base",
-   "stockCount": 7932081,
+   "stockCount": 7771815,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -825,7 +948,7 @@
    "componentCode": "C25076",
    "componentModelEn": "0402WGF1000TCE",
    "componentLibraryType": "base",
-   "stockCount": 6273540,
+   "stockCount": 6064645,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -866,7 +989,7 @@
    "componentCode": "C25867",
    "componentModelEn": "0402WGF1501TCE",
    "componentLibraryType": "base",
-   "stockCount": 1510164,
+   "stockCount": 1502065,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -907,7 +1030,7 @@
    "componentCode": "C25744",
    "componentModelEn": "0402WGF1002TCE",
    "componentLibraryType": "base",
-   "stockCount": 15753358,
+   "stockCount": 15787129,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -948,7 +1071,7 @@
    "componentCode": "C25756",
    "componentModelEn": "0402WGF1502TCE",
    "componentLibraryType": "base",
-   "stockCount": 2492347,
+   "stockCount": 2460527,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -989,7 +1112,7 @@
    "componentCode": "C25779",
    "componentModelEn": "0402WGF3302TCE",
    "componentLibraryType": "base",
-   "stockCount": 2365222,
+   "stockCount": 2330863,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1030,7 +1153,7 @@
    "componentCode": "C25905",
    "componentModelEn": "0402WGF5101TCE",
    "componentLibraryType": "base",
-   "stockCount": 4927846,
+   "stockCount": 4817800,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1071,7 +1194,7 @@
    "componentCode": "C25741",
    "componentModelEn": "0402WGF1003TCE",
    "componentLibraryType": "base",
-   "stockCount": 7829854,
+   "stockCount": 7593119,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1112,7 +1235,7 @@
    "componentCode": "C26083",
    "componentModelEn": "0402WGF1004TCE",
    "componentLibraryType": "base",
-   "stockCount": 2769611,
+   "stockCount": 2685101,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1153,7 +1276,7 @@
    "componentCode": "C11702",
    "componentModelEn": "0402WGF1001TCE",
    "componentLibraryType": "base",
-   "stockCount": 21489129,
+   "stockCount": 21241249,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1194,7 +1317,7 @@
    "componentCode": "C25077",
    "componentModelEn": "0402WGF100JTCE",
    "componentLibraryType": "base",
-   "stockCount": 3042824,
+   "stockCount": 2982811,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1235,7 +1358,7 @@
    "componentCode": "C1530",
    "componentModelEn": "0402B221K500NT",
    "componentLibraryType": "base",
-   "stockCount": 1334396,
+   "stockCount": 1326710,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1276,7 +1399,7 @@
    "componentCode": "C307331",
    "componentModelEn": "CL05B104KB54PNC",
    "componentLibraryType": "base",
-   "stockCount": 20780895,
+   "stockCount": 20545438,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1317,7 +1440,7 @@
    "componentCode": "C52923",
    "componentModelEn": "CL05A105KA5NQNC",
    "componentLibraryType": "base",
-   "stockCount": 10671839,
+   "stockCount": 10330126,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1337,7 +1460,7 @@
     {
      "startNumber": 10000,
      "endNumber": 49999,
-     "productPrice": 0.0036
+     "productPrice": 0.0037
     },
     {
      "startNumber": 50000,
@@ -1358,7 +1481,7 @@
    "componentCode": "C1523",
    "componentModelEn": "0402B102K500NT",
    "componentLibraryType": "base",
-   "stockCount": 2343986,
+   "stockCount": 2294694,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1399,7 +1522,7 @@
    "componentCode": "C15195",
    "componentModelEn": "CL05B103KB5NNNC",
    "componentLibraryType": "base",
-   "stockCount": 5832921,
+   "stockCount": 5732897,
    "componentPrices": [
     {
      "startNumber": 1,
@@ -1430,6 +1553,88 @@
      "startNumber": 50200,
      "endNumber": -1,
      "productPrice": 0.002
+    }
+   ],
+   "leastPatchNumber": 20,
+   "lossNumber": 10,
+   "minPurchaseNum": 1
+  },
+  "C1548": {
+   "componentCode": "C1548",
+   "componentModelEn": "0402CG150J500NT",
+   "componentLibraryType": "base",
+   "stockCount": 1311268,
+   "componentPrices": [
+    {
+     "startNumber": 1,
+     "endNumber": 999,
+     "productPrice": 0.0026
+    },
+    {
+     "startNumber": 1000,
+     "endNumber": 2999,
+     "productPrice": 0.0019
+    },
+    {
+     "startNumber": 3000,
+     "endNumber": 9999,
+     "productPrice": 0.0016
+    },
+    {
+     "startNumber": 10000,
+     "endNumber": 49999,
+     "productPrice": 0.0013
+    },
+    {
+     "startNumber": 50000,
+     "endNumber": 50199,
+     "productPrice": 0.0011
+    },
+    {
+     "startNumber": 50200,
+     "endNumber": -1,
+     "productPrice": 0.0011
+    }
+   ],
+   "leastPatchNumber": 20,
+   "lossNumber": 10,
+   "minPurchaseNum": 1
+  },
+  "C25092": {
+   "componentCode": "C25092",
+   "componentModelEn": "0402WGF220JTCE",
+   "componentLibraryType": "base",
+   "stockCount": 2696524,
+   "componentPrices": [
+    {
+     "startNumber": 1,
+     "endNumber": 999,
+     "productPrice": 0.0012
+    },
+    {
+     "startNumber": 1000,
+     "endNumber": 2999,
+     "productPrice": 0.001
+    },
+    {
+     "startNumber": 3000,
+     "endNumber": 9999,
+     "productPrice": 0.0009
+    },
+    {
+     "startNumber": 10000,
+     "endNumber": 49999,
+     "productPrice": 0.0008
+    },
+    {
+     "startNumber": 50000,
+     "endNumber": 50199,
+     "productPrice": 0.0007
+    },
+    {
+     "startNumber": 50200,
+     "endNumber": -1,
+     "productPrice": 0.0007
     }
    ],
    "leastPatchNumber": 20,

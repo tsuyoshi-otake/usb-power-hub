@@ -11,7 +11,8 @@ Usage (from the repository root):
 The first form computes from the committed price snapshot. ``--fetch`` refreshes that
 snapshot from the JLCPCB assembly-parts API first, through tools/jlc_stock.py, which owns
 the API client and its rate limiting. Exit status: 0 = computed; 1 = a BOM code is missing
-from the snapshot or is not Basic; 2 = the fetch failed.
+from the snapshot, or is not Basic without being an approved exception (APPROVED_EXTENDED);
+2 = the fetch failed.
 """
 from __future__ import annotations
 
@@ -52,6 +53,8 @@ BOARD_AREA_CM2 = 10.0 * 7.2
 # ---- Machine-placed BOM, per board ----------------------------------------------------
 # Actives and the passives with an exact count: Rev0.4 §6.2 designators and parts.md.
 EXACT = {
+    "C2040": ("RP2040", "QFN-56", 1),
+    "C97521": ("W25Q128JVSIQ flash", "SOIC-8-208", 1),
     "C7433": ("OP07CDR", "SOIC-8", 6),
     "C7955": ("LM393DR2G", "SOIC-8", 3),
     "C6186": ("AMS1117-3.3", "SOT-223", 1),
@@ -62,35 +65,39 @@ EXACT = {
     "C8543": ("S9012", "SOT-23", 2),
     "C32677": ("PSM712-LF-T7", "SOT-23", 4),
     "C7420377": ("SMBJ6.5CA", "SMB", 2),
-    "C9002": ("12 MHz crystal", "3225", 1),
+    "C9002": ("12 MHz crystal (Y1, Y2)", "3225", 2),
     "C2297": ("LED green", "0805", 2),
     "C84256": ("LED red", "0805", 2),
     "C318884": ("tact switch", "TACT", 3),
     "C14709": ("ferrite 120 ohm", "0603", 1),
     "C1664": ("330 pF C0G", "0603", 4),
     "C22940": ("2.4 kohm", "0603", 2),
+    "C25197": ("5.1 ohm (USB 27 ohm, part 2)", "0603", 2),
     "C17734": ("510 ohm", "0805", 3),
     "C45783": ("22 uF", "0805", 4),
     "C15850": ("10 uF", "0805", 7),
 }
 # 0402 passives: positions are numbered at capture, so these counts come from parts.md's
 # "Use" column. The positions not attributed to a value (decoupling, comparator thresholds,
-# the OC network, hub straps, the two 27 ohm resistors of OI-31) are REMAINDER_0402 and are
-# priced at the dearest 0402 code.
+# the OC network, hub straps) are REMAINDER_0402 and are priced at the dearest 0402 code.
+# U1's circuit (Rev0.4 Sec. 6.5, D29) is attributed in full: 100 nF x 11, 1 uF x 2,
+# 15 pF x 2, 22 ohm x 2, 1 kohm x 2, 10 kohm x 1.
 EST_0402 = {
-    "C25076": ("100 ohm", 6), "C25867": ("1.5 kohm", 8), "C25744": ("10 kohm", 16),
+    "C25076": ("100 ohm", 6), "C25867": ("1.5 kohm", 8), "C25744": ("10 kohm", 17),
     "C25756": ("15 kohm", 4), "C25779": ("33 kohm", 6), "C25905": ("5.1 kohm", 4),
-    "C25741": ("100 kohm", 6), "C26083": ("1 Mohm", 10), "C11702": ("1 kohm", 18),
-    "C25077": ("10 ohm", 2), "C1530": ("220 pF", 2), "C307331": ("100 nF", 8),
-    "C52923": ("1 uF", 4), "C1523": ("1 nF", 4), "C15195": ("10 nF", 2),
+    "C25741": ("100 kohm", 6), "C26083": ("1 Mohm", 10), "C11702": ("1 kohm", 20),
+    "C25077": ("10 ohm", 2), "C1530": ("220 pF", 2), "C307331": ("100 nF", 19),
+    "C52923": ("1 uF", 6), "C1523": ("1 nF", 4), "C15195": ("10 nF", 2),
+    "C1548": ("15 pF C0G (Y1 load)", 2), "C25092": ("22 ohm (USB 27 ohm, part 1)", 2),
 }
 PINS = {"0402": 2, "0603": 2, "0805": 2, "SOT-23": 3, "SOIC-8": 8, "SOT-223": 4, "SMB": 2,
-        "3225": 4, "TACT": 4}
+        "3225": 4, "TACT": 4, "QFN-56": 57, "SOIC-8-208": 8}   # QFN-56: 56 pins + the ePad
+# The sourcing rule is Basic only (D13, D22). The user's exceptions, each with its decision:
+APPROVED_EXTENDED = {"C2040": "D29"}
 NOT_MACHINE = {"TSL-KELVIN", "AXIAL-10", "TC2030", "FID"}   # hand parts and bare lands
 
 # ---- Akizuki, per board unless noted (requirements/parts.md, 2026-11-03, tax incl.) -----
-AKIZUKI = [  # (part, code, yen each, per board)
-    ("PGA2040 RP2040 module", "g116762", 1680, 1),
+AKIZUKI = [  # (part, code, yen each, per board); the PGA2040 (g116762) left with D29
     ("MCP3208-CI/P", "g100238", 500, 2),
     ("AE-USB2.0-TYPE-C", "g113080", 350, 4),
     ("AE-QFN28-DIP(CH335F)", "g129556", 420, 1),
@@ -100,9 +107,10 @@ AKIZUKI = [  # (part, code, yen each, per board)
 ]
 AKIZUKI_ONCE = [("MFU100F10RB, bag of 100 (4 needed)", "g108805", 600)]
 # Not selected (parts.md "Not yet selected"): an allowance, read off Akizuki on 2026-11-03.
-HEADER_ALLOWANCE = [("pin header 1x40, PH-1x40SG", "100167", 35, 4),
+# 58 module pins per board since D29: 4 USB-C modules x 7 + the CH335F's 30, so 2 strips.
+HEADER_ALLOWANCE = [("pin header 1x40, PH-1x40SG", "100167", 35, 2),
                     ("pin socket 1x40, FH2.54-40U1GF8.5-0.5 (if modules are socketed)",
-                     "110073", 120, 4)]
+                     "110073", 120, 2)]
 AKIZUKI_FREE_SHIPPING_YEN = 11000                     # subtotal, tax incl.
 AKIZUKI_SHIPPING_YEN = 550                             # Sagawa, per parcel (from 2025-10-01)
 
@@ -177,10 +185,27 @@ def parts_cost(snapshot: dict, rem_0402: int, boards: int) -> tuple[float, list[
     return sum(q * p for *_, q, p in rows), rows
 
 
-def pcba_fees(n_joints_total: int, n_types: int, n_boards: int) -> dict[str, dict[str, float]]:
+def class_errors(parts: dict, codes: list[str]) -> list[str]:
+    """Codes missing from the snapshot, or not Basic without an approved exception."""
+    errs = []
+    for c in codes:
+        if c not in parts:
+            errs.append(f"{c}: not in the snapshot")
+        elif parts[c]["componentLibraryType"] != "base" and c not in APPROVED_EXTENDED:
+            errs.append(f"{c}: {parts[c]['componentLibraryType']}, not Basic")
+    return errs
+
+
+def extended_codes(parts: dict, codes: list[str]) -> list[str]:
+    return [c for c in codes if parts[c]["componentLibraryType"] != "base"]
+
+
+def pcba_fees(n_joints_total: int, n_types: int, n_boards: int,
+              n_extended: int) -> dict[str, dict[str, float]]:
     smt = n_joints_total * ECONOMIC["joint"]
     eco = {"setup": ECONOMIC["setup"], "stencil": ECONOMIC["stencil"], "SMT joints": smt,
-           "Extended feeders (Basic only)": 0.0, "confirm placement": CONFIRM_PLACEMENT}
+           f"Extended feeders ({n_extended})": ECONOMIC["extended_feeder"] * n_extended,
+           "confirm placement": CONFIRM_PLACEMENT}
     smt_s = n_joints_total * STANDARD["joint"]
     surcharge = max(0.0, STANDARD["min_smt_per_board"] * n_boards - smt_s)
     std = {"setup": STANDARD["setup"], "stencil": STANDARD["stencil"], "SMT joints": smt_s,
@@ -234,10 +259,11 @@ def main(argv: list[str]) -> int:
         return 2
     snap = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
     parts = snap["parts"]
-    bad = [c for c in codes if c not in parts or parts[c]["componentLibraryType"] != "base"]
+    bad = class_errors(parts, codes)
     if bad:
-        print(f"not in the snapshot, or not Basic: {bad}", file=sys.stderr)
+        print("sourcing rule (D13, D22): " + "; ".join(bad), file=sys.stderr)
         return 1
+    ext = extended_codes(parts, codes)
 
     totals = package_totals(load_study().BLOCKS)
     errs = check_bom(totals)
@@ -246,7 +272,8 @@ def main(argv: list[str]) -> int:
         return 1
     rem = remainder_0402(totals)
     nj = joints(totals)
-    print(f"== Machine-placed BOM ({len(codes)} types, snapshot {snap['checked_utc']})")
+    print(f"== Machine-placed BOM ({len(codes)} types, snapshot {snap['checked_utc']}; Extended:"
+          f" {', '.join(f'{c} ({APPROVED_EXTENDED[c]})' for c in ext) or 'none'})")
     print(f"parts per board {sum(totals.values())}; joints per board {nj}; "
           f"0402 positions not attributed to a value {rem}")
     comp, rows = parts_cost(parts, rem, BOARDS_PCBA)
@@ -258,7 +285,7 @@ def main(argv: list[str]) -> int:
     print(f"\n== PCB: {BOARDS_PCB} pcs, 4 layers, 100 x 72 mm, {PCB_FINISH}: ${pcb:.2f}"
           f" (other finishes: " + ", ".join(f"{k} ${PCB_BASE_USD+v:.2f}"
                                             for k, v in PCB_FINISH_USD.items()) + ")")
-    fees = pcba_fees(nj * BOARDS_PCBA, len(codes), BOARDS_PCBA)
+    fees = pcba_fees(nj * BOARDS_PCBA, len(codes), BOARDS_PCBA, len(ext))
     ship = SHIP_JP_USD[SHIP_PLAN]
     totals_usd = {}
     for tier, f in fees.items():
