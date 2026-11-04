@@ -6,7 +6,7 @@ design/ecad/source:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_make_project.py
 
-Each test copies the three source files into a temporary directory, corrupts one aspect
+Each test copies the two source files into a temporary directory, corrupts one aspect
 and runs `make_project.py --check DIR` in a new process, because pcbnew caches a loaded
 project within a process. The unchanged copy must pass; every corruption must fail and be
 named in the output. The source files themselves are never modified.
@@ -23,7 +23,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 SCRIPT = HERE / "make_project.py"
 SOURCE = HERE.parents[0] / "source"
 NAME = "usb-power-hub"
-EXTS = (".kicad_pcb", ".kicad_pro", ".kicad_sch")
+EXTS = (".kicad_pcb", ".kicad_pro")
 
 
 def run_check(edit_pcb=None, edit_pro=None):
@@ -84,6 +84,11 @@ class CheckTest(unittest.TestCase):
         def edit(pro):
             pro["net_settings"]["classes"] = [classes(pro)["Default"]]
         self.assertFailsWith(run_check(edit_pro=edit), "no net class USB_HS")
+
+    def test_usb_pattern_missing(self):
+        def edit(pro):
+            pro["net_settings"]["netclass_patterns"] = []
+        self.assertFailsWith(run_check(edit_pro=edit), "netclass patterns []")
 
     def test_prepreg_thickness(self):
         self.assertFailsWith(

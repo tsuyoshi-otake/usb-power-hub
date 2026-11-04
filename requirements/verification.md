@@ -131,7 +131,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Repeat the short with a firmware build that ignores the OC event.
   - Observe for 10 s after each trip.
 - **Pass:**
-  - The port opens within 10 µs of crossing 1.16 A (±3 %), and `PORT A?` reports
+  - The port opens within 10 µs of crossing its trip, which lies within 1.110–1.221 A at
+    25 °C (1.164 A nominal, D34), and `PORT A?` reports
     `FAULT:OVERCURRENT`.
   - Under-voltage opens both ports 10–20 ms after V_J4 < 4.4 V, with `FAULT:UNDERVOLTAGE`.
   - No automatic re-enable within 10 s; `PORT A OFF` clears to `OFF`; `PORT A ON` re-enables
@@ -154,12 +155,13 @@ pass counts. Entries that rely on a script note this under *Limits*.
 
 ### V-MEAS-00 — Front-end assumptions, at bring-up (D28)
 - **Covers:** REQ-MEAS-01, REQ-MEAS-02 (design assumptions behind them; OI-27 and OI-28,
-  closed on paper by D28)
+  closed on paper by D28; the capture values' desk checks, D34)
 - **When:** Bring-up, on the first PCBA board, before V-MEAS-01. Until 2026-11-04 this ran on
   a hand-built bench channel before layout; D28 (user) moved it here. The desk check it
   confirms is circuit §3.2 and §4.
 - **Method:**
-  - Port A on HIGH. Step the electronic load from 0 to 1.1 A (the OC trip is 1.16 A) with J4
+  - Port A on HIGH. Step the electronic load from 0 to 1.1 A (the OC trip is 1.110–1.221 A
+    at 25 °C, D34, so 1.1 A stays below it) with J4
     from the bench supply at 4.75 V and at 5.25 V. At 4.75 V, repeat with port B at 1 A. At
     each step, measure the OP07 output (U10) and the mirror gate (Q21) at their test pads,
     and the board reading against the reference DMM.
@@ -169,6 +171,12 @@ pass counts. Entries that rely on a script note this under *Limits*.
     10 ms; record each fault's duration. Before and after the 100 faults, measure the MID
     gain at V-MEAS-01's 15 mA point (reference DMM in series, after `ZERO`, 1 s average);
     the MID range works with Q17 removed.
+  - The CJ431s (D34: no capacitor at either). With port A on HIGH at 0 A and at 1 A, scope
+    V_INJ at TP4 and VREF_CHK at R15's U3 end, AC-coupled, 20 MHz bandwidth; measure both DC
+    values with the DMM.
+  - The comparators' power-up (D34: TH_REF can rise before V12F). Scope TH_REF at C11 and
+    V12F at TP3 through 10 J1 plug-ins, and record how long TH_REF leads V12F above 1 V.
+    Then run V-MEAS-02.
 - **Pass:**
   - The reading is linear within 0.5 % to 1.1 A in every supply case, and the OP07 output
     stays ≥ 0.15 V above 1.4 V, the lowest output TI specifies on a single supply.
@@ -176,7 +184,12 @@ pass counts. Entries that rely on a script note this under *Limits*.
     within ±1 % of its final value within 100 µs (the firmware hold window), and stays within
     ±1 % afterwards (no oscillation above 1 % of the step).
   - The MID gain changes < 0.1 % (R_M).
-  - Failing any of these reopens D17, and the fix is a board revision.
+  - V_INJ 7.81–8.37 V and VREF_CHK 2.475–2.525 V, each with < 10 mV peak-to-peak of
+    oscillation in both load cases.
+  - After the 10 plug-ins, V-MEAS-02 passes.
+  - Failing any of the first three reopens D17, and the fix is a board revision. Failing a
+    CJ431 or power-up check reopens D34, and the fix is a part change (a CJ431 capacitor, or
+    TH_REF taken from V12F's side).
 
 ### V-MEAS-06 — ADC sampling and MCU interface, at bring-up (D28, D29)
 - **Covers:** REQ-MEAS-05, REQ-MEAS-08, REQ-SAFE-01, REQ-HOST-02 (design assumptions behind
@@ -246,12 +259,18 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Measure the sample rate from frame sequence numbers over 60 s.
   - Measure the MLCC leakage contribution on LOW by repeating 0.1 µA with the port capacitor
     lifted.
+  - OFF bypass gates (D34): on LOW at 0.1 µA, measure V<sub>GS</sub> of FET_M and FET_L
+    across their 1 MΩ gate returns (R113 and R114; R213 and R214 on port B) with a ≥ 10 MΩ
+    DMM; on MID at 1 mA, FET_M's.
 - **Pass:**
   - Every point within ±(1 % + 3 LSB of its range); points just above a down-range threshold
     are judged against that floor.
   - 0.1 µA is distinguishable from 0.
   - Sample rate 14.0 kSPS ± 0.1 % (14 samples per 1 ms frame).
   - Record the leakage figure in `requirements/parts.md`.
+  - Every OFF bypass gate reads |V<sub>GS</sub>| < 0.25 V (the DMM's 10 MΩ reads it 9 % low,
+    inside the margin to the AO3401A's 0.5 V minimum threshold). A failure reopens D34: the
+    desk check bounds the leakage only at −1.08 V (circuit §3.2).
 
 ### V-MEAS-02 — Hardware up-ranging and firmware hold
 - **Covers:** REQ-MEAS-02, REQ-SAFE-02
@@ -324,6 +343,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Compare the MCU's USB VID/PID with the allocation record.
   - Read the descriptors (USB Tree View on Windows, `lsusb -v` on Linux). Measure J1's
     current with both ports ON, the stream running and all LEDs lit.
+  - Light each LED alone and measure the voltage across its 510 Ω (D34).
 - **Pass:**
   - A CH335F hub plus one composite device with two CDC-ACM interfaces; no driver install on
     any OS.
@@ -334,6 +354,9 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - The hub reports self-powered with MaxPower 100 mA. The control function reports
     bus-powered with MaxPower 200 mA.
   - J1 current ≤ 0.30 A, the sum of the two declarations.
+  - Each LED is visible from 1 m in room light. Record each LED's current in
+    `requirements/parts.md`: the green KT-0805G's is not guaranteed at its V<sub>F</sub>
+    limit (circuit §6.4). A green that is not visible is fixed by a part change.
 
 ### V-HOST-02 — Control during streaming
 - **Covers:** REQ-HOST-03

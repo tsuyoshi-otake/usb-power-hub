@@ -13,6 +13,252 @@
 		(comment 3 "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
 	)
 	(lib_symbols)
+	(sheet
+		(at 30.48 40.64)
+		(size 88.9 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "c851ceab-814d-5d4d-8d23-794d238c23b0")
+		(property "Sheetname" "power"
+			(at 30.48 39.9284 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power.kicad_sch"
+			(at 30.48 71.6884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 151.13 40.64)
+		(size 88.9 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "7baea723-c0a4-5753-bfa2-ae4348369015")
+		(property "Sheetname" "mcu"
+			(at 151.13 39.9284 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu.kicad_sch"
+			(at 151.13 71.6884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 271.78 40.64)
+		(size 88.9 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "e7940347-d1d6-5ce9-91f9-9fb941cf7c86")
+		(property "Sheetname" "hub"
+			(at 271.78 39.9284 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "hub.kicad_sch"
+			(at 271.78 71.6884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 30.48 101.6)
+		(size 88.9 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "b2dfb8b0-31c8-50e6-983c-83fea074c0e4")
+		(property "Sheetname" "adc"
+			(at 30.48 100.8884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "adc.kicad_sch"
+			(at 30.48 132.6484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 151.13 101.6)
+		(size 88.9 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "c2b9fae9-1009-5df3-8f6f-e9cae9b9d4e6")
+		(property "Sheetname" "channel_a"
+			(at 151.13 100.8884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "channel_a.kicad_sch"
+			(at 151.13 132.6484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 271.78 101.6)
+		(size 88.9 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "32b21641-74c6-5f56-9bff-3b1d2432e5ae")
+		(property "Sheetname" "channel_b"
+			(at 271.78 100.8884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "channel_b.kicad_sch"
+			(at 271.78 132.6484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a"
+					(page "7")
+				)
+			)
+		)
+	)
 	(sheet_instances
 		(path "/"
 			(page "1")

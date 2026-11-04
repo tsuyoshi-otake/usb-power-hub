@@ -6,7 +6,7 @@ land here has been soldered or seen in the JLCPCB placement preview.
 | File | What it is | Written by |
 |---|---|---|
 | `library.json` | The parts register: one entry per symbol, with its pins and land facts and the datasheet page each was read from | hand (the evidence) |
-| `usb-power-hub.kicad_sym` | 31 symbols, flattened (no `extends`) | `make_libraries.py` |
+| `usb-power-hub.kicad_sym` | 32 symbols, flattened (no `extends`): one per part, and PWR_FLAG, because the project has no global symbol table (P2) | `make_libraries.py` |
 | `usb-power-hub.pretty/` | 28 footprints: 20 copies of KiCad 9.0.8 stock (its CRLF written as LF), 8 generated | `make_libraries.py` |
 | `../source/fp-lib-table`, `../source/sym-lib-table` | the project's library tables (`${KIPRJMOD}/../libraries/...`) | `make_libraries.py` |
 

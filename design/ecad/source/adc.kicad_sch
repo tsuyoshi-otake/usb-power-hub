@@ -1,0 +1,6060 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "4e033c23-7d57-558a-b7ee-11c49c1f4827")
+	(paper "A2")
+	(title_block
+		(title "USB Power-Control Hub")
+		(date "2026-11-04")
+		(rev "Rev0.4")
+		(comment 1 "WIP - MANUFACTURING PROHIBITED")
+		(comment 2 "Source: design/circuit/CIRCUIT_DESIGN_Rev0.4.md")
+		(comment 3 "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
+		(comment 4 "Sheet: U7, U17 MCP3208, SPI level shifters, U30 OC comparators")
+	)
+	(lib_symbols
+		(symbol "usb-power-hub:2N7002"
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "Q"
+				(at 5.08 1.905 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "2N7002"
+				(at 5.08 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" "usb-power-hub:SOT-23"
+				(at 5.08 -1.905 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(italic yes)
+					)
+					(justify left)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/a141b8bd86b14475955ac8c4d3eea0a8.pdf?productCode=C8545"
+				(at 5.08 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+					(hide yes)
+				)
+			)
+			(property "Description" "JSCJ (JCET) 2N7002; JLCPCB C8545 (Basic); register: usb-power-hub library.json"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "SOT-23"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "MPN" "2N7002"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Manufacturer" "JSCJ (JCET)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "LCSC" "C8545"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Class" "Basic"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "2N7002_0_1"
+				(polyline
+					(pts
+						(xy 0.254 1.905)
+						(xy 0.254 -1.905)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.254 0)
+						(xy -2.54 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.762 2.286)
+						(xy 0.762 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.762 0.508)
+						(xy 0.762 -0.508)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.762 -1.27)
+						(xy 0.762 -2.286)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.762 -1.778)
+						(xy 3.302 -1.778)
+						(xy 3.302 1.778)
+						(xy 0.762 1.778)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.016 0)
+						(xy 2.032 0.381)
+						(xy 2.032 -0.381)
+						(xy 1.016 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(circle
+					(center 1.651 0)
+					(radius 2.794)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 2.54)
+						(xy 2.54 1.778)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.54 1.778)
+					(radius 0.254)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(circle
+					(center 2.54 -1.778)
+					(radius 0.254)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 -2.54)
+						(xy 2.54 0)
+						(xy 0.762 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.921 0.381)
+						(xy 3.683 0.381)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.302 0.381)
+						(xy 2.921 -0.254)
+						(xy 3.683 -0.254)
+						(xy 3.302 0.381)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "2N7002_1_1"
+				(pin input line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "G"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 2.54 5.08 270)
+					(length 2.54)
+					(name "D"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 2.54 -5.08 90)
+					(length 2.54)
+					(name "S"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "usb-power-hub:C"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "C; JLCPCB per value (requirements/parts.md Passives) (Basic); register: usb-power-hub library.json"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "C_0402_1005Metric C_0603_1608Metric C_0805_2012Metric"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Class" "Basic"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "C_0_1"
+				(polyline
+					(pts
+						(xy -2.032 0.762)
+						(xy 2.032 0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.032 -0.762)
+						(xy 2.032 -0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "C_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "usb-power-hub:LM393DR2G"
+			(pin_names
+				(offset 0.127)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at 3.81 3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "LM393DR2G"
+				(at 6.35 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/0a7f69005bd54ef2bf3e8b1a5a2f8965.pdf?productCode=C7955"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "onsemi LM393DR2G; JLCPCB C7955 (Basic); register: usb-power-hub library.json"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "SOIC-8_3.9x4.9mm_P1.27mm"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "MPN" "LM393DR2G"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Manufacturer" "onsemi"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "LCSC" "C7955"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Class" "Basic"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "LM393DR2G_1_1"
+				(polyline
+					(pts
+						(xy -5.08 5.08)
+						(xy 5.08 0)
+						(xy -5.08 -5.08)
+						(xy -5.08 5.08)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.302 -0.508)
+						(xy 2.794 -0.508)
+						(xy 3.302 0)
+						(xy 2.794 0.508)
+						(xy 2.286 0)
+						(xy 2.794 -0.508)
+						(xy 2.286 -0.508)
+					)
+					(stroke
+						(width 0.127)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin input line
+					(at -7.62 2.54 0)
+					(length 2.54)
+					(name "+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 -2.54 0)
+					(length 2.54)
+					(name "-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin open_collector line
+					(at 7.62 0 180)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "LM393DR2G_2_1"
+				(polyline
+					(pts
+						(xy -5.08 5.08)
+						(xy 5.08 0)
+						(xy -5.08 -5.08)
+						(xy -5.08 5.08)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.302 -0.508)
+						(xy 2.794 -0.508)
+						(xy 3.302 0)
+						(xy 2.794 0.508)
+						(xy 2.286 0)
+						(xy 2.794 -0.508)
+						(xy 2.286 -0.508)
+					)
+					(stroke
+						(width 0.127)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin input line
+					(at -7.62 2.54 0)
+					(length 2.54)
+					(name "+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 -2.54 0)
+					(length 2.54)
+					(name "-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin open_collector line
+					(at 7.62 0 180)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "LM393DR2G_3_1"
+				(pin power_in line
+					(at -2.54 7.62 270)
+					(length 3.81)
+					(name "V+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -2.54 -7.62 90)
+					(length 3.81)
+					(name "V-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "usb-power-hub:MCP3208-CI-P"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at -5.08 13.335 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Value" "MCP3208-CI/P"
+				(at -5.08 11.43 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Footprint" "usb-power-hub:DIP-16_W7.62mm"
+				(at 2.54 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://akizukidenshi.com/goodsaffix/MCP3208.pdf"
+				(at 2.54 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Microchip MCP3208-CI/P; Akizuki g100238 (Hand (DIP16)); register: usb-power-hub library.json"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "DIP-16_W7.62mm"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "MPN" "MCP3208-CI/P"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Manufacturer" "Microchip"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Akizuki" "g100238"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Class" "Hand (DIP16)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "MCP3208-CI-P_0_0"
+				(text "MUX"
+					(at -6.35 -1.27 900)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(text "ADC"
+					(at -0.635 1.27 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(text "CNTRL"
+					(at 5.969 -2.921 900)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify left bottom)
+					)
+				)
+			)
+			(symbol "MCP3208-CI-P_0_1"
+				(polyline
+					(pts
+						(xy -7.62 8.89)
+						(xy -7.62 -11.43)
+						(xy -5.08 -10.16)
+						(xy -5.08 7.62)
+						(xy -7.62 8.89)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -3.81 1.27)
+						(xy -5.08 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.905 3.175)
+						(xy 1.905 -0.635)
+						(xy -2.54 -0.635)
+						(xy -3.81 1.27)
+						(xy -2.54 3.175)
+						(xy 1.905 3.175)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.905 1.27)
+						(xy 3.81 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 3.81 -3.175)
+						(xy -3.81 -3.175)
+						(xy -3.81 -11.43)
+						(xy -6.35 -11.43)
+						(xy -6.35 -10.795)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 3.81 -3.81)
+					(end 6.985 3.81)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 12.7 -12.7)
+					(end -12.7 10.16)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "MCP3208-CI-P_1_1"
+				(pin input line
+					(at -15.24 7.62 0)
+					(length 2.54)
+					(name "CH0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 5.08 0)
+					(length 2.54)
+					(name "CH1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 2.54 0)
+					(length 2.54)
+					(name "CH2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 0 0)
+					(length 2.54)
+					(name "CH3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 -2.54 0)
+					(length 2.54)
+					(name "CH4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 -5.08 0)
+					(length 2.54)
+					(name "CH5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 -7.62 0)
+					(length 2.54)
+					(name "CH6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 -10.16 0)
+					(length 2.54)
+					(name "CH7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -2.54 12.7 270)
+					(length 2.54)
+					(name "Vref"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -2.54 -15.24 90)
+					(length 2.54)
+					(name "AGND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 5.08 12.7 270)
+					(length 2.54)
+					(name "Vdd"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 5.08 -15.24 90)
+					(length 2.54)
+					(name "DGND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input clock
+					(at 15.24 2.54 180)
+					(length 2.54)
+					(name "CLK"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 15.24 0 180)
+					(length 2.54)
+					(name "Dout"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 15.24 -2.54 180)
+					(length 2.54)
+					(name "Din"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 15.24 -5.08 180)
+					(length 2.54)
+					(name "~{CS}/SHDN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "usb-power-hub:R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "R; JLCPCB per value (requirements/parts.md Passives) (Basic); register: usb-power-hub library.json"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "R_0402_1005Metric R_0603_1608Metric R_0805_2012Metric"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Class" "Basic"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 33.02)
+			(xy 35.56 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4ad60f16-b8b0-5d23-8815-9cdebc967e02")
+	)
+	(global_label "ADC_L_A"
+		(shape passive)
+		(at 35.56 33.02 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "f461c1d0-767b-52b9-8b29-f0897c7c5e2b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 33.02 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 35.56)
+			(xy 35.56 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8eb4b927-b000-583a-a23f-dbace1fa9cf5")
+	)
+	(global_label "ADC_M_A"
+		(shape passive)
+		(at 35.56 35.56 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ba459508-a18a-5b09-a187-a9f5e2ea7a52")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 35.56 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 38.1)
+			(xy 35.56 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7e42019a-2632-518e-8a3e-57a19834cf64")
+	)
+	(global_label "ADC_H_A"
+		(shape passive)
+		(at 35.56 38.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e55a928b-0208-505f-b9ba-8747e62fda0e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 38.1 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 40.64)
+			(xy 35.56 40.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ac443970-09fa-5534-88d6-cdb6568e3372")
+	)
+	(global_label "ADC_VREF_CHK"
+		(shape passive)
+		(at 35.56 40.64 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "30ade61d-9de1-5976-9d1c-297b7e534ada")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 40.64 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 43.18)
+			(xy 35.56 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c63ec832-0cda-5953-95ac-7d5961350490")
+	)
+	(global_label "ADC_VJ4"
+		(shape passive)
+		(at 35.56 43.18 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "00d1b214-00a5-51fe-ad45-97307596ee9c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 43.18 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 45.72)
+			(xy 35.56 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "80ad3de3-1432-56a0-9845-d46ccd408950")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 35.56 45.72 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "4f4b8b86-0b34-53fc-836b-e9dcd08cfb57")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 45.72 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 48.26)
+			(xy 35.56 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4e568c01-f949-537c-8e5c-9a905288418c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 35.56 48.26 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "6100e4cf-8e2a-5e8d-ba68-133886745e0a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 48.26 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 50.8)
+			(xy 35.56 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3c56c249-abbf-5ff8-adac-48d621083947")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 35.56 50.8 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "694d0837-3d9f-5218-a105-f5b2d67b3de6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 35.56 50.8 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 27.94)
+			(xy 50.8 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fd380ab3-db8b-5cf5-b88a-de6c821928c5")
+	)
+	(global_label "VDDA"
+		(shape passive)
+		(at 50.8 25.4 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f149d9c0-df0f-5de2-8a63-a74010e278b8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 25.4 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 55.88)
+			(xy 50.8 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a07bf85d-7b09-5efc-8bf4-be0dbdb75553")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 50.8 58.42 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e7ce333f-795b-5966-b94a-e4dfe83ec7c8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 58.42 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 58.42 27.94)
+			(xy 58.42 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e48c8450-fedf-5a96-b982-9204145218be")
+	)
+	(global_label "V5A"
+		(shape passive)
+		(at 58.42 25.4 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "af26ad38-8d69-5129-b3d0-7d8431a960f9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 58.42 25.4 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 58.42 55.88)
+			(xy 58.42 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "85168e77-f08d-594a-ae20-6fd42589543d")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 58.42 58.42 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3c61198a-2401-5e9b-aadd-f8658a01ae76")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 58.42 58.42 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 68.58 38.1)
+			(xy 71.12 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4b970fba-5ea6-5a06-89d4-6614969c6a47")
+	)
+	(global_label "ADC_SCLK"
+		(shape passive)
+		(at 71.12 38.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "34a42b45-78ef-597c-9736-2de2b88f5308")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 68.58 40.64)
+			(xy 71.12 40.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3dcd05c1-7837-5795-94af-1f1f1cd6b1e0")
+	)
+	(global_label "DOUT_A"
+		(shape passive)
+		(at 71.12 40.64 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a783c3c5-f9da-5b2b-9f49-126e06e8d422")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 68.58 43.18)
+			(xy 71.12 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4b0d19cf-6850-5a12-817c-3b3d53b96c5c")
+	)
+	(global_label "ADC_DIN"
+		(shape passive)
+		(at 71.12 43.18 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a968e073-2746-536d-990a-32dfdb504340")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 43.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 68.58 45.72)
+			(xy 71.12 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c87323d3-4c78-58ee-b378-7c2efad25611")
+	)
+	(global_label "ADC_CS"
+		(shape passive)
+		(at 71.12 45.72 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "bedc75d0-91fa-5aa9-8f59-91f418b7b7a8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 93.98 26.67)
+			(xy 93.98 24.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8c3a1332-a8a3-54fc-9af6-dc30810f03be")
+	)
+	(global_label "V5A"
+		(shape passive)
+		(at 93.98 24.13 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a7a72f9f-4931-5deb-9fa7-071d054af2d1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 93.98 24.13 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 93.98 34.29)
+			(xy 93.98 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8ee77d01-6928-5a13-a488-b268caa94e92")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 93.98 36.83 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2ab4ce97-b51f-5b0f-adbb-aca034f671a2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 93.98 36.83 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 109.22 29.21)
+			(xy 109.22 26.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f9e419d2-069d-59b1-86bb-7c6ee0faba65")
+	)
+	(global_label "VDDA"
+		(shape passive)
+		(at 109.22 26.67 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2ab09146-3d89-5257-9ed1-a71bffbaa3d3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 109.22 26.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 109.22 36.83)
+			(xy 109.22 39.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "89db93a8-589b-52c8-b11c-b646ada1fb5b")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 109.22 39.37 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "a0f65a86-e0d6-53e1-84d3-00f5a90034d8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 109.22 39.37 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 33.02)
+			(xy 132.08 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "699304d8-3bfc-5e3c-89d9-4c48a7389c53")
+	)
+	(global_label "ADC_L_B"
+		(shape passive)
+		(at 132.08 33.02 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e8c80a04-63c8-5236-a1af-55cc7892db36")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 33.02 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 35.56)
+			(xy 132.08 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a3891a8c-dedb-509c-8b31-5af7f88a5380")
+	)
+	(global_label "ADC_M_B"
+		(shape passive)
+		(at 132.08 35.56 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ebd92fd1-1480-5fd5-ae01-2e30b22cdd42")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 35.56 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 38.1)
+			(xy 132.08 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fa9c5f74-75ae-58a6-8c47-2258fcc51a4b")
+	)
+	(global_label "ADC_H_B"
+		(shape passive)
+		(at 132.08 38.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "0839c45f-0426-5e46-9432-ffa7aa2bce1a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 38.1 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 40.64)
+			(xy 132.08 40.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "049ed3af-049b-5eea-969a-e7472a52b29e")
+	)
+	(global_label "ADC_CC1"
+		(shape passive)
+		(at 132.08 40.64 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "9ae420a5-a9df-58df-a8fa-dc0f46b91f34")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 40.64 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 43.18)
+			(xy 132.08 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c9472573-b930-5137-98a3-0f1b4f8547cc")
+	)
+	(global_label "ADC_CC2"
+		(shape passive)
+		(at 132.08 43.18 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "4882e3d9-92be-5b9e-b074-73634e99ca79")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 43.18 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 45.72)
+			(xy 132.08 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "19c1f256-3376-500a-81a6-a726e8e0d7fb")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 132.08 45.72 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "aaf80848-0c25-5682-a156-578be627edc4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 45.72 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 48.26)
+			(xy 132.08 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6bb1fe62-3718-5feb-a64c-3e735a3b7667")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 132.08 48.26 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "24442dd8-0729-5ed9-a886-8fc39ad78d7a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 48.26 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 134.62 50.8)
+			(xy 132.08 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7f8e0e78-e4c0-502b-9c32-32b90167ece6")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 132.08 50.8 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ebf5a54d-e128-59c1-af40-381f2356b134")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.08 50.8 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 147.32 27.94)
+			(xy 147.32 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "13e0c886-8af9-5589-aad3-cac1647f3b13")
+	)
+	(global_label "VDDA"
+		(shape passive)
+		(at 147.32 25.4 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "39a994e3-e415-53be-a1da-d9e6ba136cff")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 147.32 25.4 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 147.32 55.88)
+			(xy 147.32 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2f0869b3-c1e4-5934-bef4-001d85233951")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 147.32 58.42 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "77f8dbb1-a6ee-50fa-8c73-8fd5ea12db5a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 147.32 58.42 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 154.94 27.94)
+			(xy 154.94 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6cfd8d7-bbfd-55c6-b1f2-115aa1730a18")
+	)
+	(global_label "V5A"
+		(shape passive)
+		(at 154.94 25.4 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "be710367-64d2-5070-8b6a-0dbb5a892d10")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 154.94 25.4 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 154.94 55.88)
+			(xy 154.94 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fc59b6c7-5f8d-58df-82e3-ff54626edac9")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 154.94 58.42 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2d7ecec4-eb44-53c0-972f-673529c72383")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 154.94 58.42 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 165.1 38.1)
+			(xy 167.64 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e8a624e7-d455-5590-939b-cc46fcedac6c")
+	)
+	(global_label "ADC_SCLK"
+		(shape passive)
+		(at 167.64 38.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "0c24052f-ce7b-5353-a41e-d71c1aeb8a16")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 167.64 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 165.1 40.64)
+			(xy 167.64 40.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "15894be2-2e3b-51c1-b6cd-267c8ed12b9f")
+	)
+	(global_label "DOUT_B"
+		(shape passive)
+		(at 167.64 40.64 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "8cc89549-d267-53ec-8226-7d0e369c2954")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 167.64 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 165.1 43.18)
+			(xy 167.64 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f2074781-5447-5134-b344-48efc50fccc6")
+	)
+	(global_label "ADC_DIN"
+		(shape passive)
+		(at 167.64 43.18 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7087de55-268e-53c3-aa37-2a91c0daf10f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 167.64 43.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 165.1 45.72)
+			(xy 167.64 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4cd10106-0464-5e47-8a94-3017a9169c7c")
+	)
+	(global_label "ADC_CS"
+		(shape passive)
+		(at 167.64 45.72 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "0bf75864-95f8-5f80-a7dc-5adf2ea5f7b5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 167.64 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 190.5 26.67)
+			(xy 190.5 24.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "646f3460-373b-51ce-9238-9a9e8303aef1")
+	)
+	(global_label "V5A"
+		(shape passive)
+		(at 190.5 24.13 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "0919eaec-50a9-5f23-93c3-8ea190844085")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 190.5 24.13 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 190.5 34.29)
+			(xy 190.5 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "29d4b1f4-7de9-5d3f-9a98-e8b7056a7153")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 190.5 36.83 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "8841bc75-cd5d-5023-ab5a-b8a9ceb8c761")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 190.5 36.83 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 205.74 29.21)
+			(xy 205.74 26.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6b4f0a75-b9bf-515d-b243-ef1857569d7a")
+	)
+	(global_label "VDDA"
+		(shape passive)
+		(at 205.74 26.67 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "41e0d9a9-78e8-5eea-836b-6c6999cbfd49")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 205.74 26.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 205.74 36.83)
+			(xy 205.74 39.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "88558af6-3179-5f81-bae4-60c21c23bfb1")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 205.74 39.37 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ed957579-4f64-53ba-bbcd-2472e61bb614")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 205.74 39.37 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 236.22 38.1)
+			(xy 233.68 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d41337d0-88f7-5e56-abaa-288934f17054")
+	)
+	(global_label "ADC_SCLK_3V"
+		(shape passive)
+		(at 233.68 38.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "962f9985-63ae-50c5-9ce9-262df09d7b3a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 233.68 38.1 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 243.84 33.02)
+			(xy 243.84 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3dbaba21-9f45-51ac-8e73-357136aa920a")
+	)
+	(global_label "ADC_SCLK"
+		(shape passive)
+		(at 243.84 30.48 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "88e14266-6206-523a-8f6d-280e70c98a78")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 243.84 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 243.84 43.18)
+			(xy 243.84 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b1e33533-8027-56f8-95ef-77259193807f")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 243.84 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "9adf65dc-b6dc-56e5-8bc7-0efdf8844a21")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 243.84 45.72 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 261.62 26.67)
+			(xy 261.62 24.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "54b3e9d0-aee8-5d33-8b5a-5171ac96f301")
+	)
+	(global_label "V5L"
+		(shape passive)
+		(at 261.62 24.13 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "79375e5e-f257-500d-bb82-6dccd8de8b8a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 261.62 24.13 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 261.62 34.29)
+			(xy 261.62 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ef078657-b001-5c24-97e4-c787ceaa95a3")
+	)
+	(global_label "ADC_SCLK"
+		(shape passive)
+		(at 261.62 36.83 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "fed77173-abed-5caf-847e-3bba9bf07896")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 261.62 36.83 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 289.56 35.56)
+			(xy 287.02 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc3ef51f-af28-5110-9e18-8b39d5271a08")
+	)
+	(global_label "ADC_CS_3V"
+		(shape passive)
+		(at 287.02 35.56 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "b71886f8-75c8-513a-9f1e-36deff023f5f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 287.02 35.56 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 297.18 30.48)
+			(xy 297.18 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c35870d9-2871-5ff9-a5ed-6d777953b8ed")
+	)
+	(global_label "ADC_CS"
+		(shape passive)
+		(at 297.18 27.94 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a524e58c-6b73-5690-bc04-46a4788f472a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 297.18 27.94 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 297.18 40.64)
+			(xy 297.18 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67bbf951-1ef5-5667-a2b9-0a1428a35704")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 297.18 43.18 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "714fd7b5-ed12-56a1-ace9-6573351c25cb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 297.18 43.18 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 314.96 26.67)
+			(xy 314.96 24.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a77fb3e7-5f3e-5f4c-a330-ebe63d383e62")
+	)
+	(global_label "V5L"
+		(shape passive)
+		(at 314.96 24.13 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "50e456ca-363c-5e75-b8e5-640c600bb45e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 314.96 24.13 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 314.96 34.29)
+			(xy 314.96 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "837aa87b-a140-5206-ae24-9e10b44e7664")
+	)
+	(global_label "ADC_CS"
+		(shape passive)
+		(at 314.96 36.83 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "70480539-53b0-54d1-b44c-e98cee0df154")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 314.96 36.83 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 345.44 38.1)
+			(xy 342.9 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "60656ca0-7f75-5158-bd42-200e01ef577f")
+	)
+	(global_label "ADC_DIN_3V"
+		(shape passive)
+		(at 342.9 38.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ca17c328-2879-5466-a50a-eb366027fa9b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 342.9 38.1 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 353.06 33.02)
+			(xy 353.06 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6b72addb-bead-526f-a105-e03d2a2bacda")
+	)
+	(global_label "ADC_DIN"
+		(shape passive)
+		(at 353.06 30.48 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "82eef918-b489-58ef-9860-ad8e1478ed25")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 353.06 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 353.06 43.18)
+			(xy 353.06 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "58fe8298-15cf-5806-a18d-1ac909a6bfb1")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 353.06 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "309546d7-5832-5e76-bf88-9f814da504a2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 353.06 45.72 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 370.84 26.67)
+			(xy 370.84 24.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a61675ef-27ac-5c37-adac-391a0c0b5306")
+	)
+	(global_label "V5L"
+		(shape passive)
+		(at 370.84 24.13 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f11b6af6-a5e5-5e61-b824-8a2f79dd094d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 370.84 24.13 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 370.84 34.29)
+			(xy 370.84 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fa4bc512-5e6b-5e63-a0bf-d760de4fe946")
+	)
+	(global_label "ADC_DIN"
+		(shape passive)
+		(at 370.84 36.83 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "eaba36e5-3992-5e63-8a35-d9d45cbd723d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 370.84 36.83 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 386.08 31.75)
+			(xy 386.08 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "db242ed9-a960-5526-8974-e0b81b531bcb")
+	)
+	(global_label "DOUT_A"
+		(shape passive)
+		(at 386.08 29.21 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "26265692-f8f3-5877-8858-61287fe25248")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 386.08 29.21 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 386.08 39.37)
+			(xy 386.08 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4ac30c41-eba2-50b5-b7db-63531831bb97")
+	)
+	(global_label "DOUT_A_3V"
+		(shape passive)
+		(at 386.08 41.91 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ea09d8bd-eb9a-58b9-a8f5-6b9b2b13136f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 386.08 41.91 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 401.32 34.29)
+			(xy 401.32 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3ed14c43-6ee7-5ad8-adfa-8e95e0a206a2")
+	)
+	(global_label "DOUT_A_3V"
+		(shape passive)
+		(at 401.32 31.75 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "37b90b20-22fc-505d-97f4-5dde08ee55e8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 401.32 31.75 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 401.32 41.91)
+			(xy 401.32 44.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "849740de-c92d-56bd-82a1-42eb91fe9287")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 401.32 44.45 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "031ed251-be8e-5f0f-ab1e-7aef4c60d7b5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 401.32 44.45 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 416.56 31.75)
+			(xy 416.56 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5748397a-eed5-5a8a-a9d6-63066eb0fdb6")
+	)
+	(global_label "DOUT_B"
+		(shape passive)
+		(at 416.56 29.21 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "86c64686-d2bb-5436-b6a4-b2a1678489ae")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 416.56 29.21 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 416.56 39.37)
+			(xy 416.56 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "db7eb529-3455-537c-b83d-6b7bb51161ba")
+	)
+	(global_label "DOUT_B_3V"
+		(shape passive)
+		(at 416.56 41.91 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3d613748-b721-5cbc-8a37-df64d4bd3047")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 416.56 41.91 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 431.8 34.29)
+			(xy 431.8 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d752fe32-1161-54a5-9a64-748604bc0442")
+	)
+	(global_label "DOUT_B_3V"
+		(shape passive)
+		(at 431.8 31.75 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9b609b27-824a-5ffd-8d40-3d72b2b2dda9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 431.8 31.75 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 431.8 41.91)
+			(xy 431.8 44.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "aa475641-63d0-5a00-8674-40e3decf96ac")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 431.8 44.45 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e80faa00-e46c-5cac-a834-75b07dfee9fb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 431.8 44.45 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 459.74 20.32)
+			(xy 457.2 20.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ddc9be36-7e47-5d2e-8b78-c1acecd7aef7")
+	)
+	(global_label "THO_A"
+		(shape passive)
+		(at 457.2 20.32 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "5e222775-6ba8-5419-b7d0-5daad5b41c54")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 457.2 20.32 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 459.74 25.4)
+			(xy 457.2 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "af5245e3-a2f1-5b65-95bf-1200707194e8")
+	)
+	(global_label "AMP_H_A"
+		(shape passive)
+		(at 457.2 25.4 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "bf2c3284-e9a0-5bfa-b877-7e788d04e99d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 457.2 25.4 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 474.98 22.86)
+			(xy 477.52 22.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0ce11333-6b2d-52b4-9423-aee3749eb718")
+	)
+	(global_label "EN_G_A"
+		(shape passive)
+		(at 477.52 22.86 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "076f9b6c-f0bc-544f-8c69-e305d07bf921")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 477.52 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 510.54 20.32)
+			(xy 508 20.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "92abb53a-7da0-5626-8aae-1800dae56440")
+	)
+	(global_label "THO_B"
+		(shape passive)
+		(at 508 20.32 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3653978f-6b2d-5201-9012-949b4d94043e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 508 20.32 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 510.54 25.4)
+			(xy 508 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "22da0e29-2674-53b1-98c2-6fa3b5571a4c")
+	)
+	(global_label "AMP_H_B"
+		(shape passive)
+		(at 508 25.4 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "99b8fe42-847c-53e8-8788-b4a31cdeadd4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 508 25.4 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 525.78 22.86)
+			(xy 528.32 22.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a340e015-002f-5090-b075-ad939e6024b8")
+	)
+	(global_label "EN_G_B"
+		(shape passive)
+		(at 528.32 22.86 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a5952e45-b5cd-5360-9607-b1170c6153b4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 528.32 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 548.64 27.94)
+			(xy 548.64 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6e250dc-34ef-5034-a3bc-6af36431b9a5")
+	)
+	(global_label "V12F"
+		(shape passive)
+		(at 548.64 25.4 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "c6358d1f-49ad-5435-b911-9818c900d0a4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 548.64 25.4 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 548.64 43.18)
+			(xy 548.64 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0526f1c2-365f-5c61-a190-003cefaa9fce")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 548.64 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e0043419-1b18-5b56-b114-d31dc589a8f2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 548.64 45.72 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 574.04 29.21)
+			(xy 574.04 26.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c29b89f1-49cc-5ec2-88f8-e1f5d6c191b7")
+	)
+	(global_label "V12F"
+		(shape passive)
+		(at 574.04 26.67 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "bd2e4c56-52bc-544d-8cf5-60d2e31d2805")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 574.04 26.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 574.04 36.83)
+			(xy 574.04 39.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c319917a-a85f-56d7-9510-7f1098298952")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 574.04 39.37 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e2b0c662-4d39-5492-97e5-4fc37187e189")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 574.04 39.37 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:MCP3208-CI-P")
+		(at 53.34 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ec71e699-6861-5379-81f2-e9110df4c4db")
+		(property "Reference" "U7"
+			(at 48.26 27.305 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "MCP3208-CI/P"
+			(at 48.26 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "usb-power-hub:DIP-16_W7.62mm"
+			(at 55.88 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://akizukidenshi.com/goodsaffix/MCP3208.pdf"
+			(at 55.88 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Microchip MCP3208-CI/P; Akizuki g100238 (Hand (DIP16)); register: usb-power-hub library.json"
+			(at 53.34 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "MCP3208-CI/P"
+			(at 53.34 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Microchip"
+			(at 53.34 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Akizuki" "g100238"
+			(at 53.34 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Hand (DIP16)"
+			(at 53.34 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c3fbd70d-0b36-5854-9750-d2eb53bbf15f")
+		)
+		(pin "2"
+			(uuid "3e16351c-bf48-5688-8f3b-faf502f00cd7")
+		)
+		(pin "3"
+			(uuid "cf8a1d6a-f794-5a3e-a777-769a5a33bf26")
+		)
+		(pin "4"
+			(uuid "ac1ae1f4-3a90-530e-85e3-9ca148334c27")
+		)
+		(pin "5"
+			(uuid "8ff8cccb-7ed0-584d-b288-c7631bb672cb")
+		)
+		(pin "6"
+			(uuid "0ae289e1-9cab-58a2-8da1-43b349b6a6bf")
+		)
+		(pin "7"
+			(uuid "437e14c3-c610-566b-85ae-951fc2034856")
+		)
+		(pin "8"
+			(uuid "e980f4d2-d32b-5d22-b3cd-d4113216ea56")
+		)
+		(pin "9"
+			(uuid "3d258a4c-3348-5fe6-bee9-60520d98610b")
+		)
+		(pin "10"
+			(uuid "f852bec7-d5e3-5a3b-84f4-8da2544b41f6")
+		)
+		(pin "11"
+			(uuid "1508439c-f721-5f22-8eff-02c9b29c0422")
+		)
+		(pin "12"
+			(uuid "23027017-92e0-5381-8eaf-5dd79a740e14")
+		)
+		(pin "13"
+			(uuid "111deaac-9dca-5671-9a3a-4b52de5dbbf1")
+		)
+		(pin "14"
+			(uuid "9e4ab918-cc9d-525c-9133-8f3ac74bd060")
+		)
+		(pin "15"
+			(uuid "8cbfea12-c2b8-572e-bd72-4a9bf2ff21f7")
+		)
+		(pin "16"
+			(uuid "8e25477f-cbc4-5d5d-902d-8766a03aa3e1")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "U7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:C")
+		(at 93.98 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "aeccdfcf-e474-58ba-8b00-e9d12546a658")
+		(property "Reference" "C30"
+			(at 94.615 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 94.615 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:C_0402_1005Metric"
+			(at 94.9452 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 93.98 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "100n X7R, ±10 %, 50 V, 0402; Samsung CL05B104KB54PNC; JLCPCB C307331 (Basic)"
+			(at 93.98 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 93.98 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 93.98 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 93.98 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 93.98 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2700c29e-34af-568c-8219-ec7b6000d025")
+		)
+		(pin "2"
+			(uuid "00a7039c-abae-560a-aa0d-49b31cd73639")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "C30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:C")
+		(at 109.22 33.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ca0be5c6-f084-50f5-832b-9cc9ad700c43")
+		(property "Reference" "C31"
+			(at 109.855 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 109.855 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:C_0402_1005Metric"
+			(at 110.1852 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "100n X7R, ±10 %, 50 V, 0402; Samsung CL05B104KB54PNC; JLCPCB C307331 (Basic)"
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3d8c7f96-ecc7-56f5-aa4e-43420a8f6906")
+		)
+		(pin "2"
+			(uuid "329ba92d-0155-5b9d-99bb-07545976f12a")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "C31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:MCP3208-CI-P")
+		(at 149.86 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "90efa0b9-2456-5460-8bd4-7be6421353f4")
+		(property "Reference" "U17"
+			(at 144.78 27.305 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "MCP3208-CI/P"
+			(at 144.78 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "usb-power-hub:DIP-16_W7.62mm"
+			(at 152.4 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://akizukidenshi.com/goodsaffix/MCP3208.pdf"
+			(at 152.4 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Microchip MCP3208-CI/P; Akizuki g100238 (Hand (DIP16)); register: usb-power-hub library.json"
+			(at 149.86 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "MCP3208-CI/P"
+			(at 149.86 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Microchip"
+			(at 149.86 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Akizuki" "g100238"
+			(at 149.86 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Hand (DIP16)"
+			(at 149.86 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "024ac94e-b73d-516a-b505-4227b39dc565")
+		)
+		(pin "2"
+			(uuid "963055fe-02fa-5860-8878-b8d5c722032b")
+		)
+		(pin "3"
+			(uuid "a2676222-3994-596a-a6e6-de4f532f0724")
+		)
+		(pin "4"
+			(uuid "79fd6a00-a177-528f-8a7c-7249f5617fca")
+		)
+		(pin "5"
+			(uuid "c9587856-5e5a-5240-b84b-15e2cd0e916a")
+		)
+		(pin "6"
+			(uuid "d69ea49a-d967-5774-a91d-7c4f9fea6dbd")
+		)
+		(pin "7"
+			(uuid "ab6ec5be-6f57-5288-8856-172f2373794a")
+		)
+		(pin "8"
+			(uuid "8ab99111-d03a-5e58-be48-1543a2da9d90")
+		)
+		(pin "9"
+			(uuid "67407437-7d2b-547f-be4b-d60d4f666c76")
+		)
+		(pin "10"
+			(uuid "8a030c1b-91be-54cb-89e0-8d48a7f8b838")
+		)
+		(pin "11"
+			(uuid "921048fd-2b08-5cee-b10d-5fe72194566a")
+		)
+		(pin "12"
+			(uuid "b161bf92-ce44-57cb-a185-474c2c8cdb3f")
+		)
+		(pin "13"
+			(uuid "1a4ec618-38d4-5c2b-825d-97df901d3a07")
+		)
+		(pin "14"
+			(uuid "85df934a-5a6f-53c1-ad26-ffbc62e9d036")
+		)
+		(pin "15"
+			(uuid "c1ac9069-3add-5a04-98f2-aad0aa32737a")
+		)
+		(pin "16"
+			(uuid "1582f413-eb3c-516c-99d6-44d05f66a7bc")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "U17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:C")
+		(at 190.5 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b543aee6-7f55-5d3e-9cd5-ebbb2b10bf81")
+		(property "Reference" "C32"
+			(at 191.135 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 191.135 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:C_0402_1005Metric"
+			(at 191.4652 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 190.5 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "100n X7R, ±10 %, 50 V, 0402; Samsung CL05B104KB54PNC; JLCPCB C307331 (Basic)"
+			(at 190.5 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 190.5 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 190.5 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 190.5 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 190.5 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "33da05b2-e82e-598c-8ba3-f302994c6115")
+		)
+		(pin "2"
+			(uuid "5b8469a4-42c5-5e3f-ba78-9bf2793c78a7")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "C32")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:C")
+		(at 205.74 33.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "81ec55fa-989b-500c-b4e1-e9f5125ed599")
+		(property "Reference" "C33"
+			(at 206.375 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 206.375 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:C_0402_1005Metric"
+			(at 206.7052 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 205.74 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "100n X7R, ±10 %, 50 V, 0402; Samsung CL05B104KB54PNC; JLCPCB C307331 (Basic)"
+			(at 205.74 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 205.74 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 205.74 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 205.74 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 205.74 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a1c5eadb-b31e-5a72-9ecf-19d7579247c7")
+		)
+		(pin "2"
+			(uuid "4af92f38-43a6-512d-a3b7-d342ec3a629b")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "C33")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:2N7002")
+		(at 241.3 38.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "68620fe2-de2e-51e8-bc85-a684d7f4fd80")
+		(property "Reference" "Q50"
+			(at 246.38 36.195 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2N7002"
+			(at 246.38 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:SOT-23"
+			(at 246.38 40.005 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/a141b8bd86b14475955ac8c4d3eea0a8.pdf?productCode=C8545"
+			(at 246.38 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Description" "JSCJ (JCET) 2N7002; JLCPCB C8545 (Basic); register: usb-power-hub library.json"
+			(at 241.3 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "2N7002"
+			(at 241.3 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "JSCJ (JCET)"
+			(at 241.3 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C8545"
+			(at 241.3 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 241.3 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "183e0166-56dc-5ebf-a61a-c2e1f133d17e")
+		)
+		(pin "2"
+			(uuid "9edea1a7-5b1a-5f7c-9970-32642301ae4c")
+		)
+		(pin "3"
+			(uuid "eb1a8182-f5f6-51e0-b891-0ae11068663d")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "Q50")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 261.62 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ea8e42b6-2a4c-5710-a379-10254fef5195")
+		(property "Reference" "R27"
+			(at 263.652 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1.5k"
+			(at 261.62 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 259.842 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 261.62 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1.5k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1501TCE; JLCPCB C25867 (Basic)"
+			(at 261.62 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 261.62 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1501TCE"
+			(at 261.62 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 261.62 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25867"
+			(at 261.62 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8c8faf01-5689-51c4-aa4a-b157df24239f")
+		)
+		(pin "2"
+			(uuid "c6b8f7cf-a1c2-52ef-bf4f-ba7efc22685a")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "R27")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:2N7002")
+		(at 294.64 35.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "34bbd6f3-83ac-516a-b3ae-8f005629775f")
+		(property "Reference" "Q51"
+			(at 299.72 33.655 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2N7002"
+			(at 299.72 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:SOT-23"
+			(at 299.72 37.465 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/a141b8bd86b14475955ac8c4d3eea0a8.pdf?productCode=C8545"
+			(at 299.72 39.37 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Description" "JSCJ (JCET) 2N7002; JLCPCB C8545 (Basic); register: usb-power-hub library.json"
+			(at 294.64 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "2N7002"
+			(at 294.64 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "JSCJ (JCET)"
+			(at 294.64 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C8545"
+			(at 294.64 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 294.64 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e9b4bc95-649d-586c-884b-64fd0dc1b72c")
+		)
+		(pin "2"
+			(uuid "f7c0a5b9-252f-50ff-a52f-c86f2296310f")
+		)
+		(pin "3"
+			(uuid "fef428a7-35bf-50c3-b17c-970e73811d71")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "Q51")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 314.96 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "51184a62-3538-5b20-a5c7-5d44a5371db3")
+		(property "Reference" "R28"
+			(at 316.992 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1.5k"
+			(at 314.96 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 313.182 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 314.96 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1.5k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1501TCE; JLCPCB C25867 (Basic)"
+			(at 314.96 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 314.96 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1501TCE"
+			(at 314.96 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 314.96 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25867"
+			(at 314.96 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "5586365f-dc51-5219-8f54-268209b66d50")
+		)
+		(pin "2"
+			(uuid "6ddd9dfe-c135-5398-b1a3-e7c4740f259c")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "R28")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:2N7002")
+		(at 350.52 38.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "63e6cc4a-02d0-5766-aea2-23d47e0a2f77")
+		(property "Reference" "Q52"
+			(at 355.6 36.195 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2N7002"
+			(at 355.6 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:SOT-23"
+			(at 355.6 40.005 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/a141b8bd86b14475955ac8c4d3eea0a8.pdf?productCode=C8545"
+			(at 355.6 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Description" "JSCJ (JCET) 2N7002; JLCPCB C8545 (Basic); register: usb-power-hub library.json"
+			(at 350.52 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "2N7002"
+			(at 350.52 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "JSCJ (JCET)"
+			(at 350.52 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C8545"
+			(at 350.52 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 350.52 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f48205db-fabc-5e47-9914-32f12bd304ae")
+		)
+		(pin "2"
+			(uuid "467582ad-03bc-5eea-b5a4-9b5259751ecf")
+		)
+		(pin "3"
+			(uuid "caacc52d-773e-5cd1-9cb2-5dcb492e323e")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "Q52")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 370.84 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a2058256-d960-54c4-972e-20f2c011c189")
+		(property "Reference" "R29"
+			(at 372.872 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1.5k"
+			(at 370.84 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 369.062 30.48 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 370.84 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1.5k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1501TCE; JLCPCB C25867 (Basic)"
+			(at 370.84 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 370.84 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1501TCE"
+			(at 370.84 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 370.84 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25867"
+			(at 370.84 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1dccb1e3-6294-5ce8-9f12-31e0e7651ad8")
+		)
+		(pin "2"
+			(uuid "fa30a357-c54d-58ff-b393-5c84915e23fc")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "R29")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 386.08 35.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "2030343a-513f-5a79-9d80-cff12f8c3e25")
+		(property "Reference" "R30"
+			(at 388.112 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "10k"
+			(at 386.08 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 384.302 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 386.08 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "10k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1002TCE; JLCPCB C25744 (Basic)"
+			(at 386.08 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 386.08 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1002TCE"
+			(at 386.08 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 386.08 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25744"
+			(at 386.08 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "de18f6e0-790e-53a5-a0c7-47ddcae48c32")
+		)
+		(pin "2"
+			(uuid "d3c2ad18-bdf2-5820-a3d6-aa5e0125ca67")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "R30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 401.32 38.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "66427379-6f2e-5e12-aa35-a0ecda43c80d")
+		(property "Reference" "R31"
+			(at 403.352 38.1 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "15k"
+			(at 401.32 38.1 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 399.542 38.1 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 401.32 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "15k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1502TCE; JLCPCB C25756 (Basic)"
+			(at 401.32 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 401.32 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1502TCE"
+			(at 401.32 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 401.32 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25756"
+			(at 401.32 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "43e2d93d-11f4-5b46-b9f3-3aa6cf20f1f7")
+		)
+		(pin "2"
+			(uuid "60070934-c2ca-58de-832e-d3b882516606")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "R31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 416.56 35.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d52ce3b4-0ac1-5a13-87d1-381284f0da54")
+		(property "Reference" "R32"
+			(at 418.592 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "10k"
+			(at 416.56 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 414.782 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 416.56 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "10k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1002TCE; JLCPCB C25744 (Basic)"
+			(at 416.56 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 416.56 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1002TCE"
+			(at 416.56 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 416.56 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25744"
+			(at 416.56 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "03142f50-3df1-5d66-860e-79b9c382f445")
+		)
+		(pin "2"
+			(uuid "b332c89d-0a07-517a-9650-f9cbbb86296c")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "R32")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 431.8 38.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "3431434d-f101-5bfb-9fc9-15ec0b11ff8f")
+		(property "Reference" "R33"
+			(at 433.832 38.1 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "15k"
+			(at 431.8 38.1 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 430.022 38.1 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 431.8 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "15k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1502TCE; JLCPCB C25756 (Basic)"
+			(at 431.8 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 431.8 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1502TCE"
+			(at 431.8 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 431.8 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25756"
+			(at 431.8 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "cf726c9b-f51e-529b-b46d-ce0f524a667d")
+		)
+		(pin "2"
+			(uuid "7c72e995-a6a3-5f95-98cd-31b4cd368e8d")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "R33")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:LM393DR2G")
+		(at 467.36 22.86 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "e8318e62-1256-5350-811f-08b42ace4505")
+		(property "Reference" "U30"
+			(at 471.17 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LM393DR2G"
+			(at 473.71 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 467.36 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/0a7f69005bd54ef2bf3e8b1a5a2f8965.pdf?productCode=C7955"
+			(at 467.36 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "onsemi LM393DR2G; JLCPCB C7955 (Basic); register: usb-power-hub library.json"
+			(at 467.36 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "LM393DR2G"
+			(at 467.36 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "onsemi"
+			(at 467.36 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C7955"
+			(at 467.36 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 467.36 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "dda9b97f-8373-565b-84cd-ef24b95184e8")
+		)
+		(pin "2"
+			(uuid "f225fe36-b3f6-527a-b4e4-c558546a4b4c")
+		)
+		(pin "3"
+			(uuid "f3bd34f7-e328-5b03-ae61-feb7b192458c")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "U30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:LM393DR2G")
+		(at 518.16 22.86 0)
+		(unit 2)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "4d333d13-08b8-5c39-99fb-3ce8f3b695b6")
+		(property "Reference" "U30"
+			(at 521.97 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LM393DR2G"
+			(at 524.51 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 518.16 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/0a7f69005bd54ef2bf3e8b1a5a2f8965.pdf?productCode=C7955"
+			(at 518.16 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "onsemi LM393DR2G; JLCPCB C7955 (Basic); register: usb-power-hub library.json"
+			(at 518.16 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "LM393DR2G"
+			(at 518.16 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "onsemi"
+			(at 518.16 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C7955"
+			(at 518.16 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 518.16 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "5"
+			(uuid "0901cea7-ef4d-5e78-be58-a9afe09c80f7")
+		)
+		(pin "6"
+			(uuid "c67773fd-52e7-5a4a-b06d-bfe33694ce82")
+		)
+		(pin "7"
+			(uuid "b43f79d9-aa5a-5309-aaf5-af6c0f3434c7")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "U30")
+					(unit 2)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:LM393DR2G")
+		(at 551.18 35.56 0)
+		(unit 3)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "c404fd8b-62d4-5e5e-82e3-c5db5c4fa16a")
+		(property "Reference" "U30"
+			(at 554.99 31.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LM393DR2G"
+			(at 557.53 39.37 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 551.18 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/0a7f69005bd54ef2bf3e8b1a5a2f8965.pdf?productCode=C7955"
+			(at 551.18 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "onsemi LM393DR2G; JLCPCB C7955 (Basic); register: usb-power-hub library.json"
+			(at 551.18 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "LM393DR2G"
+			(at 551.18 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "onsemi"
+			(at 551.18 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C7955"
+			(at 551.18 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 551.18 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "80a8750e-57cd-56fd-adc4-adb33b40fbbe")
+		)
+		(pin "8"
+			(uuid "1a2d81ac-180b-562a-b346-cb2236f2582c")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "U30")
+					(unit 3)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:C")
+		(at 574.04 33.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "32bd58a9-d663-54d9-98a9-339a3f834c79")
+		(property "Reference" "C34"
+			(at 574.675 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 574.675 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "usb-power-hub:C_0402_1005Metric"
+			(at 575.0052 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 574.04 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "100n X7R, ±10 %, 50 V, 0402; Samsung CL05B104KB54PNC; JLCPCB C307331 (Basic)"
+			(at 574.04 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 574.04 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 574.04 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 574.04 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 574.04 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "038c8c4e-b725-599c-b182-88d12d33c29c")
+		)
+		(pin "2"
+			(uuid "891342d9-5d09-5ad3-ac0c-44251aa184d3")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4"
+					(reference "C34")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

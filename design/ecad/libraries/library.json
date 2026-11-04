@@ -558,6 +558,17 @@
       "datasheet": {"title": "EIA chip sizes (generic)", "revision": "-", "url": "", "pins": "2-terminal", "land": "KiCad IPC-7351 nominal footprints"},
       "land": {"kind": "generic", "deferred": "P2: each value's LCSC part is bound in the schematic; its sheet's dimensions are checked then."},
       "pins": {"1": ["terminal", "~"], "2": ["terminal", "~"]}
+    },
+    {
+      "id": "PWR_FLAG",
+      "refs": "#FLG01-#FLG04 (schematic only)",
+      "mpn": null, "manufacturer": null,
+      "order": {"vendor": "none", "code": "", "class": "Schematic only"},
+      "symbol": {"base": "power:PWR_FLAG"},
+      "footprint": {"none": "ERC marker on V5L, V12F, VDDA and V5A, nets whose supply arrives through a passive part (CIRCUIT_DESIGN_Rev0.4_netlist.md); not a part, no footprint"},
+      "datasheet": {"title": "KiCad 9.0.8 power.kicad_sym", "revision": "-", "url": "", "pins": "1 power output", "land": "-"},
+      "land": {"kind": "none"},
+      "pins": {"1": ["power flag", "~"]}
     }
   ]
 }

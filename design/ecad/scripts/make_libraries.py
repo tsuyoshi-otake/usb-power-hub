@@ -9,7 +9,8 @@ Input: design/ecad/libraries/library.json, the parts register (one entry per sym
 - design/ecad/libraries/usb-power-hub.kicad_sym: every symbol, flattened. A stock symbol is
   copied from KiCad's library with its `extends` chain resolved, renamed to the register id,
   and given the register's Value, Footprint, Datasheet and sourcing properties. Two symbols
-  are drawn here (CH335F, the USB-C module), from the register's pin lists.
+  are drawn here (CH335F, the USB-C module), from the register's pin lists. One is
+  schematic-only (PWR_FLAG, footprint `none`): it has no Footprint and no footprint file.
 - design/ecad/libraries/usb-power-hub.pretty/: one file per footprint. A stock footprint is
   KiCad's file with its CRLF line endings written as LF: KiCad's Windows install ships CRLF,
   and the repository stores LF (.gitattributes `eol=lf`), so a checkout must hold the same
@@ -100,6 +101,8 @@ def prop(name, value, at=(0, 0, 0), hide=True):
 
 def part_footprint(part):
     fp = part["footprint"]
+    if "none" in fp:                           # a schematic-only symbol (PWR_FLAG)
+        return []
     if "make" in fp:
         return [fp["name"]]
     stock = fp["stock"]
@@ -109,7 +112,8 @@ def part_footprint(part):
 def footprint_property(part):
     if "footprint_property" in part["symbol"]:
         return part["symbol"]["footprint_property"]
-    return f"{NICK}:{part_footprint(part)[0]}"
+    names = part_footprint(part)
+    return f"{NICK}:{names[0]}" if names else ""
 
 
 def sourcing_props(part):
@@ -142,8 +146,9 @@ def set_properties(sym, part):
         "Footprint": footprint_property(part),
         "Datasheet": part["datasheet"]["url"] or "~",
         "Description": description(part),
-        "ki_fp_filters": " ".join(fps),
     }
+    if fps:
+        values["ki_fp_filters"] = " ".join(fps)
     keep = []
     for node in sym:
         if isinstance(node, list) and node[:1] == ["property"]:
@@ -544,6 +549,8 @@ def write_footprints(parts, pretty):
         old.unlink()
     for part in parts:
         fp = part["footprint"]
+        if "none" in fp:
+            continue
         if "make" in fp:
             node = GENERATORS[fp["make"]](fp["name"], fp["params"], part)
             (pretty / f"{fp['name']}.kicad_mod").write_text(sx.dumps(node) + "\n", encoding="utf-8",

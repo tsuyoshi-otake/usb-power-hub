@@ -306,7 +306,12 @@
     },
     "net_colors": null,
     "netclass_assignments": null,
-    "netclass_patterns": []
+    "netclass_patterns": [
+      {
+        "netclass": "USB_HS",
+        "pattern": "USB_*"
+      }
+    ]
   },
   "pcbnew": {
     "last_paths": {

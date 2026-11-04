@@ -28,11 +28,16 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > history) — together with the
 > requirements set in `requirements/`
 > (`product.md`, `verification.md`, `parts.md`). That is currently the whole of
-> the design. There is **no netlist, no captured part, no layout, no
-> manufacturing output**. Capture has started in KiCad 9.0.8 (D32, issue #6): a
+> the design. There is **no layout and no manufacturing output**. Capture has
+> started in KiCad 9.0.8 (D32, issue #6): a
 > generated project skeleton exists in `design/ecad/source/` (4-layer JLC04161H-7628
 > stackup, 100 × 72 mm outline, §5.3 starting rules, the USB_HS net class), written by
-> `design/ecad/scripts/make_project.py`; its schematic is still empty. The project
+> `design/ecad/scripts/make_project.py`. The schematic is captured (P2, D34): six
+> sub-sheets and 294 components, every passive bound to a Basic LCSC part, ERC with 0
+> violations. `make_schematic.py` writes it from
+> `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md`, and `check_schematic.py` compares the
+> exported netlist with that list, with the circuit document's §6.2 and with
+> `requirements/parts.md`. The project
 > library exists (P1): a symbol and a footprint for every Rev0.4 part in
 > `design/ecad/libraries/`, each land measured by `check_libraries.py` against the
 > datasheet numbers recorded in `library.json`. Candidate parts have been looked up in the JLCPCB
@@ -143,7 +148,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D33 live in circuit §10)
+│                               #   created, decisions D1–D34 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -575,7 +580,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D33; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D34; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -605,7 +610,9 @@ withdrawn and not reused).
   on J4 (OI-29), and D26 set how J1's current is declared (OI-25). D27 named the
   JLC04161H-7628 stackup and the provisional USB pair geometry, without impedance
   control for the prototype. D33 chose the module headers, PH-1x40SG soldered without
-  sockets (OI-23). Each is labelled
+  sockets (OI-23). D34 set the values left to capture (issue #6 P2); its desk check moved
+  the LM393s to V12F and Q13's gate behind 100 kΩ, and widened the OC trip tolerance to
+  1.110–1.221 A. Each is labelled
   "Claude (delegated)", and the user may revert any one.
 
 ### 10.5 Still undecided — record the decision before layout starts
@@ -620,7 +627,7 @@ withdrawn and not reused).
 OI-1 – OI-15 were found by review of the mockup on 2026-08-16; OI-16 – OI-22 by the
 review that produced Rev0.2 on 2026-11-03; OI-23 – OI-30 by the Rev0.3 redesign under
 the sourcing rule D13 (2026-11-03); OI-31 by the Rev0.4 change to Basic parts only
-(D22, 2026-11-03). Every issue not struck through is **blocking**.
+(D22, 2026-11-03); OI-32 by the capture (issue #6 P2, 2026-11-04). Every issue not struck through is **blocking**.
 Numbers are stable; close them in Git with evidence, do not renumber.
 
 - "Closed by decision" means the design intent is settled but nothing is built or
@@ -660,13 +667,14 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D23, replacing D17's on-chip ADC): two external MCP3208, clocked at 1 MHz by the RP2040 PIO. | Rev0.4 §3.3 |
 | OI-23 | ~~Board fit: area settled, header height not chosen.~~ **Closed by decision** (D24 for the area; D33, Claude delegated, 2026-11-04, for the header): PH-1x40SG headers, soldered, insulator ≥ 2.30 mm, leaving ≥ 0.80 mm above a 1.5 mm part under a module. The study (`design/experiments/oi-23-placement/`, 21 tests, exits 0) now reads the space under each USB-C module from the module and receptacle drawings. Its area bound credits each module's outline less its header insulators: at K = 1.0 (no routing space) 2,931 mm², 1.5 % under 85 × 35 mm (2,975 mm²), which it exceeds from K = 1.025, so 85 × 35 mm stays excluded for any routable layout. The pre-D33 figure, 3,332 mm² at K = 1.0, credited only 130 mm² per module and was not a lower bound. At 100 × 72 mm the block placement passes every check at K = 1.6 (headroom to K = 1.74), with the under-module parts in one 19.0 × 3.4 mm strip per module, clear of the receptacle. Not settled on paper: the module board's thickness and the receptacle's 1.06 mm overhang (V-MECH-01). Reopen if V-MECH-01 fails. | Rev0.4 §10 D33, §11; study README |
 | OI-24 | ~~CH335F module outline and pin map unknown.~~ **Closed by decision** (D31, user, 2026-11-04): the Akizuki module (AE-QFN28-DIP(CH335F)), for which Akizuki published no drawing, is replaced by the bare CH335F (C5137013), machine-placed. Its package drawing (QFN28_4X4X0.75-0.4, §5.6) and pin table are in the WCH CH334/335 datasheet V2.5; U6's land is drawn from that drawing before layout (G21). D28 had left the module to be measured before layout. Reopen if D31 is reverted. | Rev0.4 §6.6, §10 D31; `requirements/parts.md` U6 |
-| OI-25 | ~~J1 current is misdeclared.~~ **Closed by decision** (D26, Claude delegated, 2026-11-03): the CH335F stays self-powered at its default 100 mA, and the RP2040 function declares bMaxPower 200 mA. That covers its 126 mA typical share of J1's ≈ 0.21 A (172 mA with every OP07 at its maximum). USB still charges the upstream port only 100 mA, so the board is specified for 500 mA upstream ports and not for bus-powered hubs. Options (a) and (b) are recorded as rejected in D26. Reopen if V-HOST-01 measures more than 0.30 A from J1. | Rev0.4 §7.1, §10 |
+| OI-25 | ~~J1 current is misdeclared.~~ **Closed by decision** (D26, Claude delegated, 2026-11-03): the CH335F stays self-powered at its default 100 mA, and the RP2040 function declares bMaxPower 200 mA. That covers its 127 mA typical share of J1's ≈ 0.21 A (192 mA with every OP07 and LM393 at its maximum, since D34). USB still charges the upstream port only 100 mA, so the board is specified for 500 mA upstream ports and not for bus-powered hubs. Options (a) and (b) are recorded as rejected in D26. Reopen if V-HOST-01 measures more than 0.30 A from J1. | Rev0.4 §7.1, §10 |
 | OI-26 | **HS signal integrity through the modules is unverified.** Each HS path passes through an Akizuki USB-C module, its 2.54 mm headers and its layout: J1 upstream, J2 or J3 downstream. Since D31 the hub is on the board, so a path crosses one module instead of two. The fallback is that DUTs enumerate at FS. | Rev0.4 §3.3; V-HOST-01 |
-| OI-27 | ~~OP07 single-supply operation is extrapolated.~~ **Closed by decision** (D28, user, 2026-11-04): no bench; desk-checked, and the first board confirms. TI SLOS099F specifies the gain on a single 15 V supply with the output at 1.4–11.4 V into ≥ 500 kΩ, so the gate headroom at 1 A is 1.63–1.96 V (it was read as 0.03–0.36 V against a 3.0 V limit). The 4.4–5.25 V common mode sits ≥ 4.40 V from V− and ≥ 5.37 V from V+, wider than the specified ±15 V and ±3 V conditions. Loop stability into the 645 pF gate is not settled on paper and is accepted as bring-up risk. Reopen if V-MEAS-00 fails at bring-up. | Rev0.4 §3.2, §10 D28 |
+| OI-27 | ~~OP07 single-supply operation is extrapolated.~~ **Closed by decision** (D28, user, 2026-11-04): no bench; desk-checked, and the first board confirms. TI SLOS099F specifies the gain on a single 15 V supply with the output at 1.4–11.4 V into ≥ 500 kΩ, so the gate headroom at 1 A is 1.63–1.96 V (it was read as 0.03–0.36 V against a 3.0 V limit). The 4.4–5.25 V common mode sits ≥ 4.40 V from V− and ≥ 5.28 V from V+ (D34), wider than the specified ±15 V and ±3 V conditions. Loop stability into the 645 pF gate is not settled on paper and is accepted as bring-up risk. Reopen if V-MEAS-00 fails at bring-up. | Rev0.4 §3.2, §10 D28 |
 | OI-28 | ~~R_M short-time overload is unverified.~~ **Closed by decision** (D28, user, 2026-11-04): the Faithful Link MFU datasheet rates it for 2.5 × RCWV for 5 s (6.25 W, ΔR ≤ 1 %) and for 4 × RCWV pulses (16 W, 1 s on / 25 s off, 10,000 cycles). The stuck-MID fault puts 2.35 W in it for ≤ 10 ms, or until the watchdog fires (timeout ≤ 5 s). Its < 0.1 % shift after the fault is checked on the first board. Reopen if V-MEAS-00 fails at bring-up. | Rev0.4 §4, §10 D28 |
 | OI-29 | ~~No input fuse on J4.~~ **Closed by decision** (D25, Claude delegated, 2026-11-03): F1 = Bourns MF-R300 (Akizuki g112630; 3.00 A hold, 2.49 A at 40 °C; 6.00 A trip; 30 V), ahead of the J4 TVS. Its 0.08 Ω (R1max) costs up to 0.16 V at 2 A, which moves into OI-27 and V-MEAS-00. No fuse or PTC is Basic, so it is hand-soldered. Reopen if V-SAFE-02 fails. | Rev0.4 §3.1, §7.2; `requirements/parts.md` |
 | OI-30 | ~~Two Preferred Extended parts need the user's decision.~~ **Closed by decision** (D22, user, 2026-11-03): Basic parts only. STM32F103C8T6 (C8734) and SRV05-4 (C7420376) are removed; D23 replaces the MCU with the PGA2040 and two MCP3208, and D± of J1–J3 lose their ESD protection. D29 (user, 2026-11-04) has since replaced the PGA2040 with the bare RP2040, one of the two Extended parts (the other is D31's CH335F). | Rev0.4 §9, §10 D22/D23 |
 | OI-31 | ~~PGA2040 and MCP3208 assumptions unverified.~~ **Closed by decision** (D28, user, 2026-11-04), from Pimoroni's schematic and the datasheets. The supply input is the VBUS pad, 3.0–5.5 V, into an on-module NCP115; on V3V3 it leaves ≥ 3.208 V on the 3V3 pad, above the RP2040's 3.135 V USB_VDD minimum. The 27 Ω pair is on the module. The W25Q64JVXGIQ flash has a 64-bit unique ID (4Bh). The RP2040 resets its GPIO with a 50–80 kΩ pull-down, against which the 10 kΩ hold pull-ups give ≥ 2.70 V, above the 2N7002's 2.5 V maximum threshold. Not settled on paper and accepted as bring-up risk: the MCP3208's INL at V<sub>REF</sub> = 3.3 V (typical only) and the stretched sample (≤ 0.21 LSB computed). The fallback for the sample phase is double conversion at 8 kSPS; an INL failure reopens D23. **D29 (user, 2026-11-04) removed the PGA2040,** so the module items above (supply input and NCP115, 27 Ω pair, W25Q64JV, pad positions) are history. The bare RP2040's support circuit was desk-checked instead (Rev0.4 §3.3, §6.3, §7.1) and is confirmed on the first board (V-MEAS-06); before layout, U1's land is drawn from the RP2040 datasheet's Figure 167 (Rev0.4 §12 item 2, G20). The MCP3208 items and the reset hold stand. | Rev0.4 §3.2, §3.3, §6.5, §7.1, §10 D28/D29; V-MEAS-06 |
+| OI-32 | **J1's inrush is not limited.** Found at capture (issue #6 P2). The J1 side has, at nominal values, 12 µF directly on V5L (C2, C5, C27), 10.2 µF on V5A behind 10 Ω, and 44 µF on V3V3 and VDDA behind the AMS1117, which does not limit its own inrush: about 260 µC at plug-in before the MAU104 starts, ≈ 7 µF of the 10 µF parts at 5 V DC bias aside. USB 2.0 §7.2.4.1 allows 10 µF directly across VBUS, or surge limiting that matches it; USB-IF's compliance test uses 50 µC. Neither text has been read into this repository yet. A soft-start AO3401A on J1's VBUS (Basic, already on the board) is the candidate; it is a circuit change and needs its own decision. A PC port that resets on the surge would show up in V-HOST-01. | Rev0.4 §6.1, §7.1; `CIRCUIT_DESIGN_Rev0.4_netlist.md` sheet `power` |
 
 ---
 

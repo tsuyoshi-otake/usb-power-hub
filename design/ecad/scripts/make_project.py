@@ -4,15 +4,17 @@ Run with KiCad's own Python, which carries the pcbnew module, from the repositor
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py
 
-It writes three files:
+It writes two files:
 - usb-power-hub.kicad_pcb: 4 copper layers; the JLC04161H-7628 stackup (D27), read from
   design/experiments/stackup-impedance/stackups.json, which holds JLCPCB's published table;
   leaded HASL (D30); 1.6 mm nominal thickness; the 100 x 72 mm outline (D24), lower-left
   corner at (50, 122) mm on the sheet, which is also the drill and placement origin; the
   title block.
 - usb-power-hub.kicad_pro: the CLAUDE.md 5.3 starting rules as board constraints, and two
-  net classes: Default, and USB_HS with D27's provisional pair, W 0.31 / S 0.15 mm.
-- usb-power-hub.kicad_sch: an empty root sheet with the same title block.
+  net classes: Default, and USB_HS with D27's provisional pair, W 0.31 / S 0.15 mm, which
+  every net named USB_* joins (the captured D+/D- nets, issue #6 P2).
+The schematic files are make_schematic.py's; this script does not touch them, but shares
+its title block and UUID namespace with them.
 UUIDs are derived from names (uuid5), so a re-run writes the same bytes. KiCad's local-state
 file (.kicad_prl) is deleted; it is gitignored and KiCad recreates it.
 
@@ -27,7 +29,8 @@ What it CANNOT see (CLAUDE.md 8):
   release);
 - the VBUS trunk width, which needs a current and temperature-rise calculation before
   routing (issue #6, P4);
-- net-class assignments, which need the captured net names (P2);
+- which nets are USB pairs: USB_HS is assigned by the name pattern USB_*, and
+  check_schematic.py checks that exactly the netlist document's D+/D- nets carry it;
 - the solder-mask thickness and the dielectric loss tangent, which JLCPCB's stackup table
   does not give. KiCad adds its defaults, 0.01 mm per mask and tan d 0.02, so its stackup
   editor sums to 1.6062 mm, while the board keeps 1.6 mm, the thickness ordered (D27).
@@ -79,6 +82,7 @@ CLASSES = {
                "via_drill": 0.25, "diff_pair_width": USB_PAIR[0],
                "diff_pair_gap": USB_PAIR[1]},
 }
+NETCLASS_PATTERNS = [("USB_HS", "USB_*")]    # the netlist document names every D+/D- net USB_*
 
 
 def mm(v):
@@ -176,6 +180,8 @@ def edit_project(pro_path):
             c["priority"] = 0
         classes.append(c)
     pro["net_settings"]["classes"] = classes
+    pro["net_settings"]["netclass_patterns"] = [{"netclass": c, "pattern": p}
+                                                for c, p in NETCLASS_PATTERNS]
     pro_path.write_text(json.dumps(pro, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
@@ -191,27 +197,6 @@ def fix_uuids(path, prefix):
     text = re.sub(r'\(uuid "[0-9a-fA-F-]{36}"\)', sub, path.read_text(encoding="utf-8"))
     path.write_text(text, encoding="utf-8", newline="\n")
     return n
-
-
-def write_schematic(sch_path):
-    root = uuid.uuid5(UUID_NS, "sch/root")
-    comments = "".join(f'\t\t(comment {i + 1} "{c}")\n' for i, c in enumerate(COMMENTS))
-    sch_path.write_text(
-        "(kicad_sch\n"
-        "\t(version 20250114)\n"
-        '\t(generator "eeschema")\n'
-        '\t(generator_version "9.0")\n'
-        f'\t(uuid "{root}")\n'
-        '\t(paper "A3")\n'
-        "\t(title_block\n"
-        f'\t\t(title "{TITLE}")\n\t\t(date "{DATE}")\n\t\t(rev "{REV}")\n' + comments +
-        "\t)\n"
-        "\t(lib_symbols)\n"
-        "\t(sheet_instances\n"
-        '\t\t(path "/"\n\t\t\t(page "1")\n\t\t)\n'
-        "\t)\n"
-        "\t(embedded_fonts no)\n"
-        ")\n", encoding="utf-8", newline="\n")
 
 
 API_RULES = {  # pcbnew design-settings attribute -> RULES key, read back in a fresh process
@@ -278,16 +263,19 @@ def check(pcb_path, pro_path):
         for k, v in vals.items():
             if name not in got or abs(got[name].get(k, -1) - v) > 1e-9:
                 fails.append(f"net class {name}.{k} != {v}")
+    patterns = [(p.get("netclass"), p.get("pattern"))
+                for p in pro["net_settings"].get("netclass_patterns") or []]
+    if patterns != NETCLASS_PATTERNS:
+        fails.append(f"netclass patterns {patterns}, want {NETCLASS_PATTERNS}")
     return fails
 
 
 def paths(out=OUT):
-    return (out / f"{NAME}.kicad_pcb", out / f"{NAME}.kicad_pro", out / f"{NAME}.kicad_sch",
-            out / f"{NAME}.kicad_prl")
+    return out / f"{NAME}.kicad_pcb", out / f"{NAME}.kicad_pro", out / f"{NAME}.kicad_prl"
 
 
 def run_check(out):
-    pcb, pro, _, prl = paths(out)
+    pcb, pro, prl = paths(out)
     fails = check(pcb, pro)
     if prl.exists():
         prl.unlink()                         # LoadBoard may recreate the local-state file
@@ -306,7 +294,7 @@ def main():
     if sys.argv[1:]:
         raise SystemExit("usage: make_project.py [--check [DIR]]")
     OUT.mkdir(parents=True, exist_ok=True)
-    pcb, pro, sch, prl = paths()
+    pcb, pro, prl = paths()
     for p in (pcb, pro):
         if p.exists():
             p.unlink()                       # regenerated from scratch every run
@@ -318,10 +306,9 @@ def main():
         raise SystemExit("pcbnew could not re-save the board")
     n = fix_uuids(pcb, "pcb")
     edit_project(pro)                        # last, so no SaveBoard overwrites it
-    write_schematic(sch)
     if prl.exists():
         prl.unlink()
-    print(f"wrote {pcb.name}, {pro.name}, {sch.name} in {OUT.relative_to(ROOT).as_posix()};"
+    print(f"wrote {pcb.name}, {pro.name} in {OUT.relative_to(ROOT).as_posix()};"
           f" {n} board uuid(s) fixed")
     th = sum(t for _, _, t, _, _ in stackup())
     print(f"stackup {STACKUP_ID}: copper + dielectric {th:.4f} mm; finish {FINISH};"

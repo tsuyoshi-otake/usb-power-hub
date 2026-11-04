@@ -16,7 +16,8 @@ say) and never the generator's `params`, and it measures footprints as KiCad loa
     register gives a [datasheet, symbol] pair, exactly the symbol spelling. Value, Footprint,
     Datasheet, MPN, LCSC or Akizuki code, Class, in_bom and the designator letters are the
     register's.
- 3. Footprints: exactly one file per footprint the register names. A stock one is a
+ 3. Footprints: exactly one file per footprint the register names (a schematic-only symbol,
+    footprint `none`, names none and must have an empty Footprint). A stock one is a
     byte-for-byte copy of KiCad's once KiCad's CRLF is read as LF; every one loads in pcbnew; its numbered pads are its
     symbol's pins; its courtyard contains every pad (and, if generated, its F.Fab outline).
     Then a land check per `land.kind`:
@@ -509,6 +510,8 @@ REQUIRED = ("id", "refs", "order", "symbol", "footprint", "datasheet", "land", "
 
 def footprint_names(part):
     fp = part["footprint"]
+    if "none" in fp:                           # schematic-only (PWR_FLAG)
+        return [], None
     if "make" in fp:
         return [fp["name"]], None
     stock = fp["stock"] if isinstance(fp["stock"], list) else [fp["stock"]]
@@ -570,7 +573,7 @@ def check_symbols(rep, parts, sym_path, pretty):
         pins_of[who] = set(got)
         props = {p[1]: p[2] for p in sx.find(sym, "property")}
         names, _ = footprint_names(part)
-        fp_prop = part["symbol"].get("footprint_property", f"{NICK}:{names[0]}")
+        fp_prop = part["symbol"].get("footprint_property", f"{NICK}:{names[0]}" if names else "")
         rep.check(props.get("Footprint") == fp_prop, who, f"Footprint {props.get('Footprint')!r}, expected {fp_prop!r}")
         if fp_prop:
             rep.check((pretty / f"{fp_prop.split(':')[1]}.kicad_mod").exists(), who, f"{fp_prop} is not in the library")

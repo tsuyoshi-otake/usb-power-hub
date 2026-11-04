@@ -145,8 +145,19 @@ print(f"without F1, old basis: headroom {5.0-1.0*(RSW+RS['HIGH']+RWIRE)-1.3-VOL_
 print(f"V-MEAS-00 low supply: J4 4.75 V less F1 at 2 A = {4.75-2*RF1:.2f} V")
 
 print("\n== Sec. 3.2 OP07 on V12F, against SLOS099F (D28 desk check)")
-V12_MIN = 12.0 * (1 - 0.03 - 0.05 * 1.2) - 10.0 * 30e-3   # MAU104 -3 % max, J1 at -5 % x 1.2 line
-                                         # regulation, less 10 ohm at the 30 mA maximum load
+# V12F at its lowest: MAU104 -3 % max, J1 at -5 % x 1.2 line regulation, less the 10 ohm filter
+# at the maximum load. Since D34 that load is 6 x OP07 (5 mA max), 3 x LM393 (2.5 mA, the 30 V
+# row as a bound) and U4's feed resistor, which itself depends on V12F (solved below).
+I_OP07_MAX, I_LM393_MAX = 6 * 5e-3, 3 * 2.5e-3
+R_FEED_U4 = 1.5e3                        # V12F -> V_INJ, U4's cathode resistor
+VREF431 = (2.475, 2.525)                 # CJ431 V_ref
+IREF431_MAX = 4e-6 + 1.2e-6              # CJ431 I_ref max at 25 C plus its deviation over temperature
+VINJ_MIN = VREF431[0] * (1 + 33e3 * 0.99 / (15e3 * 1.01))
+VINJ_MAX = VREF431[1] * (1 + 33e3 * 1.01 / (15e3 * 0.99)) + IREF431_MAX * 33e3 * 1.01
+V12_RAW_MIN = 12.0 * (1 - 0.03 - 0.05 * 1.2)
+V12_MIN = V12_RAW_MIN
+for _ in range(50):                      # fixed point: the U4 feed current depends on V12F
+    V12_MIN = V12_RAW_MIN - 10.0 * (I_OP07_MAX + I_LM393_MAX + (V12_MIN - VINJ_MIN) / (R_FEED_U4 * 0.99))
 VOH_AVD = 15.0 - 11.4                    # the same row's upper end sits 3.6 V below V+
 CM_LO, CM_HI = 4.4, 5.25                 # mirror input common mode (port supply range)
 print(f"V12F min {V12_MIN:.2f} V -> linear output {VOL_AVD:.1f}..{V12_MIN-VOH_AVD:.2f} V;"
@@ -223,15 +234,23 @@ vmax = 3.3 * (5.1e3 * 1.1) / (5.1e3 * 1.1 + 33e3 * 0.99)
 print(f"{vmin:.3f}..{vmax:.3f} V (Default vRd window 0.25-0.61 V)")
 
 print("\n== Sec. 7.1 J1 load (typical) and AMS1117")
-loads = {"CH335F": 85, "RP2040 + W25Q128JV flash with USB, estimate": 30, "MAU104 input": 70,
-         "LM393 x3": 3, "LEDs": 5, "AMS1117 Iq": 5, "CJ431 x2 + dividers": 2,
+def mau_in(ma_12v):
+    """J1 current in mA for a V12 load in mA: 12 V out of 5 V in at the MAU104's 78 %."""
+    return ma_12v * 12.0 / 0.78 / 5.0
+
+
+# Since D34 the three LM393s run from V12F, so their 0.4 mA typical (LM393/D, 5 V row) each is
+# a MAU104 load; their bound is the 30 V row's 2.5 mA max.
+loads = {"CH335F": 85, "RP2040 + W25Q128JV flash with USB, estimate": 30,
+         "MAU104 input (6 x OP07, 3 x LM393 typ)": 70 + mau_in(3 * 0.4),
+         "LEDs": 5, "AMS1117 Iq": 5, "CJ431 x2 + dividers": 2,
          "MCP3208 x2 (0.4 mA max each)": 1, "SPI level shifters, 3 x 5 V / 1.5 kohm": 10}
-print(f"total {sum(loads.values())} mA")
+print(f"total {sum(loads.values()):.0f} mA (MAU104 input {loads['MAU104 input (6 x OP07, 3 x LM393 typ)']:.1f} mA)")
 hub = loads["CH335F"]
 func = sum(loads.values()) - hub
-mau_extra = 6 * 2.5 * 12.0 / 0.78 / 5.0     # every OP07 at 5 mA max instead of 2.5 typ; MAU104 78 %
-print(f"hub {hub} mA (declares 100 mA); MCU function {func} mA typ, {func + mau_extra:.0f} mA with"
-      f" every OP07 at max (J1 then {hub + func + mau_extra:.0f} mA) -> function declares 200 mA (D26),"
+mau_extra = mau_in(6 * 2.5 + 3 * (2.5 - 0.4))   # every OP07 at 5 mA max, every LM393 at 2.5 mA max
+print(f"hub {hub} mA (declares 100 mA); MCU function {func:.0f} mA typ, {func + mau_extra:.0f} mA with"
+      f" every OP07 and LM393 at max (J1 then {hub + func + mau_extra:.0f} mA) -> function declares 200 mA (D26),"
       f" declarations total {100 + 200} mA")
 v3v3 = {"RP2040 + W25Q128JV flash, estimate": 30, "LEDs, Rp, pull-ups, VDDA, CJ431 U3 (as Rev0.3)": 15,
         "HOLD pull-ups 4 x 3.3 V / 10 kohm": 1.3, "MCP3208 V_REF x2": 0.3}
@@ -299,3 +318,147 @@ for rpd in (50e3, 80e3):
           f" vs 2N7002 V_th max 2.5 V at 250 uA (it then sinks only Q17/Q18's 1 Mohm return,"
           f" <= {5.25/1e6*1e6:.2f} uA at a 5.25 V port)")
 print(f"MAU104 load: 6 x OP07 at 2.5 typ / 5 max mA = {6*2.5:.0f} / {6*5:.0f} mA")
+
+# ---- D34: capture values (issue #6 P2) ---------------------------------------
+# Datasheets read for D34 (via LCSC, 2026-11-04): onsemi LM393/D Rev. 25 (C7955); JSCJ CJ431
+# (C3113); AOS AO3400A Rev 3 (C20917); JSCJ 2N7002 (C8545); S9012 (C8543); KT-0805G (C2297);
+# NCD0805R1 (C84256). The facts used are recorded in requirements/parts.md.
+print("\n== Sec. 3.2 LM393 supply (D34): V5L or V12F")
+VICR_25, VICR_T = 1.5, 2.0              # common mode tops out at V_CC - 1.5 V (25 C), - 2.0 V (0-70 C)
+V_NODE_OVR = 5.25 * ROUT["HIGH"] / (ROUT["HIGH"] + R1 + RDS)   # overranged HIGH node at J4 5.25 V
+for name, vcc in (("V5L min", V5L_MIN), ("V12F min", V12_MIN)):
+    print(f"on {name} {vcc:.2f} V: common mode to {vcc-VICR_25:.2f} V (25 C) / {vcc-VICR_T:.2f} V (0-70 C)"
+          f" vs the {VTH:.2f} V threshold; input absolute maximum = V_CC (LM393/D note 1) vs an"
+          f" overranged node at {V_NODE_OVR:.2f} V -> margin {vcc-V_NODE_OVR:+.2f} V")
+print(f"V12F min with the LM393s and U4's feed on it: {V12_MIN:.2f} V (OP07 {I_OP07_MAX*1e3:.0f} mA +"
+      f" LM393 {I_LM393_MAX*1e3:.1f} mA + U4 feed {(V12_MIN-VINJ_MIN)/(R_FEED_U4*0.99)*1e3:.2f} mA through 10 ohm)")
+V12_MAX = 12.0 * (1 + 0.03 + 0.05 * 1.2)
+i_mau = I_OP07_MAX + I_LM393_MAX + (V12_MAX - VINJ_MIN) / (R_FEED_U4 * 0.99)
+print(f"MAU104 load at most {i_mau*1e3:.1f} mA (V12 {V12_MAX:.2f} V max, no filter drop) vs its 84 mA rating")
+
+print("\n== Sec. 4.1 / Sec. 6.1 CJ431 cathode currents (I_K(min) 1 mA max) and V_INJ")
+ik_u4 = ((V12_MIN - VINJ_MAX) / (R_FEED_U4 * 1.01) - VINJ_MAX / (48e3 * 0.99)
+         - 6 * (VINJ_MAX - 4.4) / (1e6 * 0.99))
+ik_u4_max = (V12_MAX - VINJ_MIN) / (R_FEED_U4 * 0.99)
+print(f"V_INJ {VINJ_MIN:.3f}..{VINJ_MAX:.3f} V (V_ref, 33 k / 15 k at 1 %, I_ref <= {IREF431_MAX*1e6:.1f} uA);"
+      f" U4 I_K >= {ik_u4*1e3:.2f} mA at V12F min, <= {ik_u4_max*1e3:.2f} mA ({ik_u4_max*VINJ_MAX*1e3:.0f} mW)")
+inj_min = (VINJ_MIN - 5.25) / (RINJ * 1.01)
+print(f"pedestal injection at V_INJ min and a 5.25 V port: {inj_min*1e6:.2f} uA = {inj_min/(VOS/R1):.2f} x"
+      f" the {VOS/R1*1e6:.2f} uA needed")
+ik_u3 = ((V3V3_MIN - VREF431[1]) / (510 * 1.01), (V3V3_MAX - VREF431[0]) / (510 * 0.99))
+print(f"U3 I_K {ik_u3[0]*1e3:.2f}..{ik_u3[1]*1e3:.2f} mA from V3V3 through 510 ohm (no capacitor at either CJ431)")
+
+print("\n== Sec. 3.2 / Sec. 3.4 comparator threshold TH_REF (D34): VDDA - 1 k - TH_REF - 5.1 k + 510 ohm - GND")
+RA, RB = 1e3, 5.1e3 + 510.0
+ratio = (RB / (RA + RB), RB * 0.99 / (RA * 1.01 + RB * 0.99), RB * 1.01 / (RA * 0.99 + RB * 1.01))
+RTH = RA * RB / (RA + RB)
+R_IN = 15e3                               # per comparator, TH_REF -> + input
+IIB = (250e-9, 400e-9)                    # LM393 I_IB max, 25 C / 0-70 C; flows out of the pins (note 7)
+VIO = (5e-3, 9e-3)                        # LM393 V_IO max, 25 C / 0-70 C
+print(f"TH_REF nominal {VDDA*ratio[0]:.4f} V; ratio {ratio[1]:.5f}..{ratio[2]:.5f} (+-{100*(ratio[2]/ratio[0]-1):.2f} %);"
+      f" Thevenin {RTH:.0f} ohm with 1 uF -> {RTH*1e-6*1e3:.2f} ms")
+print(f"bias at 25 C: 6 inputs x {IIB[0]*1e9:.0f} nA into {RTH:.0f} ohm = {6*IIB[0]*RTH*1e3:.2f} mV,"
+      f" plus {IIB[0]*R_IN*1e3:.2f} mV across each 15 k; at the - input {IIB[0]*ROUT['HIGH']*1e3:.2f} mV"
+      f" across R_OUT HIGH (constant, removed by zero calibration)")
+print(f"power-up: until V12F is up, + input current <= {VDDA*ratio[2]*1.015/R_IN*1e3:.2f} mA through 15 k"
+      " (LM393/D note 1 limits the input to V_CC; not settled on paper, checked at bring-up)")
+
+
+def oc_trip(t_hot):
+    """OC trip current bounds in A: initial tolerances, plus drift over t_hot degrees from 25 C."""
+    vio = VIO[1] if t_hot else VIO[0]
+    iib = IIB[1] if t_hot else IIB[0]
+    drift_k = (2 * 100e-6 + 100e-6) * t_hot          # R_OUT/R1 ratio and R_H, +-100 ppm/C each
+    k_lo = RS["HIGH"] * 0.995 * ROUT["HIGH"] * 0.99 / (R1 * 1.01) * (1 - drift_k)
+    k_hi = RS["HIGH"] * 1.005 * ROUT["HIGH"] * 1.01 / (R1 * 0.99) * (1 + drift_k)
+    vth_lo = V3V3_MIN * ratio[1]
+    vth_hi = V3V3_MAX * ratio[2] + 6 * iib * RTH + iib * R_IN
+    ped_lo = (VINJ_MIN - 5.25) / (RINJ * 1.01) * ROUT["HIGH"] * 0.99
+    ped_hi = (VINJ_MAX - 4.4) / (RINJ * 0.99) * ROUT["HIGH"] * 1.01
+    vos_out = VOS * ROUT["HIGH"] / R1
+    lo = (vth_lo - vio - ped_hi - iib * ROUT["HIGH"] - vos_out) / k_hi
+    hi = (vth_hi + vio - ped_lo + vos_out) / k_lo
+    return lo, hi
+
+
+it_nom = (VDDA * ratio[0] - PED["HIGH"]) / K["HIGH"]
+lo25, hi25 = oc_trip(0)
+lo70, hi70 = oc_trip(45)
+lo40, hi40 = oc_trip(15)
+print(f"OC trip nominal {it_nom:.3f} A; at 25 C {lo25:.3f}..{hi25:.3f} A ({100*(lo25/it_nom-1):+.1f} / {100*(hi25/it_nom-1):+.1f} %);"
+      f" over 0-70 C {oc_trip(25)[0]:.3f}..{hi70:.3f} A")
+print(f"F1 at 40 C: both trips at their highest {2*hi40:.2f} A vs I_hold {IHOLD_F1[40]:.2f} A -> margin"
+      f" {IHOLD_F1[40]-2*hi40:+.2f} A; dissipation {(2*hi40)**2*RF1:.2f} W at R1max")
+
+print("\n== Sec. 3.2 / Sec. 3.4 comparator hysteresis (D34): 15 pF output -> + input, 220 pF + input -> GND")
+C_FB, C_IN = 15e-12, 220e-12
+for name, swing in (("bypass gate (4.4..5.25 V port, V_OL 0.4 V)", (4.4 - 0.4, 5.25)),
+                    ("EN_G (OC)", (3.1 * 100 / 110 * 0.98 - 0.4, 3.349 * 100 / 110 * 1.02))):
+    print(f"{name}: kick {swing[0]*C_FB/(C_FB+C_IN)*1e3:.0f}..{swing[1]*C_FB/(C_FB+C_IN)*1e3:.0f} mV,"
+          f" decaying with tau {R_IN*(C_FB+C_IN)*1e6:.2f} us; lowest + input"
+          f" {V3V3_MIN*ratio[1]-swing[1]*C_FB/(C_FB+C_IN):.2f} V (>= -0.3 V)")
+print(f"extra load on the output node: {C_FB*C_IN/(C_FB+C_IN)*1e12:.1f} pF (bypass gate C_iss 645 pF)")
+
+print("\n== Sec. 3.4 soft start (D34): R_on 100 k, C_M 2 x 10 nF gate-to-VSUP, R_GS 1 Mohm")
+R_ON, R_GS, C_M = 100e3, 1e6, 2 * 10e-9
+for vs in (4.4, 4.75, 5.0, 5.25):
+    vgs = -vs * R_GS / (R_ON + R_GS)
+    rds = 0.060 + max(0.0, (4.5 + vgs) / 2.0) * (0.085 - 0.060)   # linear between the -4.5 / -2.5 V rows
+    print(f"V_S {vs:.2f} V: final V_GS {vgs:.2f} V -> R_DS(on) <= {rds*1e3:.1f} mOhm"
+          f" (linear between the AO3401A -4.5 V and -2.5 V rows, an over-estimate)")
+VPL = (0.5, 2.5)                          # |V_GS| on the Miller plateau: V_th min ... a generous bound
+t_ss = []
+for vs in (4.4, 5.25):
+    for vpl in VPL:
+        for cm, ron in ((C_M * 0.9, R_ON * 0.99), (C_M * 1.1, R_ON * 1.01)):
+            i_net = (vs - vpl) / ron - vpl / R_GS
+            t_ss.append(cm * vs / i_net)
+print(f"turn-on ramp {min(t_ss)*1e3:.2f}..{max(t_ss)*1e3:.2f} ms (V_S 4.4..5.25 V, plateau |V_GS| 0.5..2.5 V,"
+      f" C_M +-10 %, R_on +-1 %) vs >= 1 ms (REQ-PORT-08); inrush into 10 uF <= {CPORT*5.25/min(t_ss)*1e3:.0f} mA")
+
+print("\n== Sec. 3.4 fast turn-off (D34): DIS rise, Q16 base drive, charge to move")
+CISS_Q13, CISS_Q15 = 630e-12, 50e-12      # AO3400A typ; 2N7002 max
+R_DIS, R_DISG = 10e3, 100e3
+tau_old = R_DIS * (CISS_Q13 + CISS_Q15)
+print(f"Q13 gate on DIS directly (Rev0.4 as drawn): tau {tau_old*1e6:.1f} us -> 2.5 V (2N7002 V_th max) after"
+      f" {tau_old*math.log(V3V3_MIN/(V3V3_MIN-2.5))*1e6:.1f} us")
+v_inf = V3V3_MIN * R_DISG / (R_DIS + R_DISG)
+tau_new = (R_DIS * R_DISG / (R_DIS + R_DISG)) * CISS_Q15
+print(f"Q13 gate through 100 k: DIS steps to {v_inf:.2f} V with tau {tau_new*1e9:.0f} ns -> 2.5 V after"
+      f" {tau_new*math.log(v_inf/(v_inf-2.5))*1e6:.2f} us; Q13 itself follows with tau"
+      f" {(R_DIS+R_DISG)*CISS_Q13*1e6:.0f} us (discharge is not time-critical)")
+R_B, R_BE, VBE = 5.1e3, 100e3, 0.75
+HFE = (200, 350)                          # S9012 C8543 is rank H (LCSC model "S9012 2T1(RANGE:200-350)"): 200-350 at -50 mA
+for vs in (4.4, 5.25):
+    ib = (vs - VBE) / (R_B * 1.01) - VBE / R_BE
+    print(f"V_S {vs:.2f} V: I_B {ib*1e3:.2f} mA -> I_C {HFE[0]*ib*1e3:.0f}..{HFE[1]*ib*1e3:.0f} mA"
+          " (S9012 I_C max 500 mA)")
+q_off = C_M * 1.1 * (5.25 + 5.25 * R_GS / (R_ON + R_GS) - 0.0) + 2 * 7e-9
+ib_min = (4.4 - VBE) / (R_B * 1.01) - VBE / R_BE
+print(f"charge to move: C_M from -{5.25*R_GS/(R_ON+R_GS):.2f} V to +5.25 V (VSUP collapsing into a short)"
+      f" + 2 x Q_g 7 nC = {q_off*1e9:.0f} nC -> {q_off/(HFE[0]*ib_min)*1e6:.1f} us at the lowest I_C")
+dvdt = 5.25 / (SPAN["HIGH"] * CPORT)
+print(f"C_M current while VSUP falls into a short ({dvdt/1e6:.1f} V/us from tau {SPAN['HIGH']*CPORT*1e6:.1f} us):"
+      f" {C_M*1.1*dvdt*1e3:.0f} mA vs Q16 >= {HFE[0]*ib_min*1e3:.0f} mA")
+t_off = 1.3e-6 + tau_new * math.log(v_inf / (v_inf - 2.5)) + q_off / (HFE[0] * ib_min)
+print(f"OC to open: LM393 1.3 us + DIS {tau_new*math.log(v_inf/(v_inf-2.5))*1e6:.2f} us + gate {q_off/(HFE[0]*ib_min)*1e6:.1f} us"
+      f" = {t_off*1e6:.1f} us vs 10 us (REQ-PORT-05)")
+
+print("\n== Sec. 3.4 EN_G and the 2N7002s it drives (Q12, Q14)")
+for voh in (3.1, V3V3_MAX):
+    print(f"EN {voh:.2f} V -> EN_G {voh*100e3*0.99/(10e3*1.01+100e3*0.99):.2f}..{voh*100e3*1.01/(10e3*0.99+100e3*1.01):.2f} V"
+          f" vs 2N7002 V_th max 2.5 V at 250 uA; Q14 sinks DIS's {V3V3_MAX/R_DIS*1e3:.2f} mA")
+print(f"LM393 sinking EN_G: {V3V3_MAX/(10e3*0.99)*1e3:.2f} mA through the 10 k vs its 6 mA minimum")
+
+print("\n== Sec. 6.4 LEDs (D34): 510 ohm from a GPIO")
+for name, vf in (("green KT-0805G, V_F 2.6..3.1 V +-0.05 at 5 mA", (2.55, 3.15)),
+                 ("red NCD0805R1, V_F 1.5..2.6 V at 20 mA", (1.5, 2.6))):
+    lo = max(0.0, (3.1 - vf[1]) / (510 * 1.01))
+    hi = (V3V3_MAX - vf[0]) / (510 * 0.99)
+    print(f"{name}: {lo*1e3:.2f}..{hi*1e3:.2f} mA (pin 3.1..{V3V3_MAX} V; V_F at the stated current is a bound)")
+
+print("\n== Sec. 3.2 leakage onto a bypass gate held OFF by 1 Mohm (LOW and MID accuracy)")
+IOL_MAX, IDSS_2N7002 = 1e-6, 80e-9       # LM393 I_OL max at V_O 30 V, 0-70 C; 2N7002 I_DSS at 60 V
+print(f"datasheet bounds at their own (harsher) conditions: LM393 I_OL {IOL_MAX*1e9:.0f} nA + 2N7002 I_DSS"
+      f" {IDSS_2N7002*1e9:.0f} nA -> V_GS {-(IOL_MAX+IDSS_2N7002)*1e6:.2f} V vs AO3401A V_th -0.5 V min;"
+      f" typical I_OL 0.1 nA -> {-(0.1e-9+IDSS_2N7002)*1e6*1e3:.0f} mV (checked by V-MEAS-01)")

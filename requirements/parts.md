@@ -19,7 +19,8 @@ parts meet them.
   (circuit Rev0.4 §7.4).
 - **Avoid special or hard-to-source parts**, and **reduce part types and count** (the user's
   restated list, 2026-11-03; quoted in circuit Rev0.4's header). One part per value and one
-  voltage rating per value: 41 machine-placed types.
+  voltage rating per value: 40 machine-placed types (the capture, D34, dropped the 1 nF
+  C1523).
 - **No Preferred Extended either** (D22, user, 2026-11-03). Rev0.3's two Preferred Extended
   parts are removed; see "Removed in Rev0.4" below.
 - **Two exceptions, both Extended, both the user's:**
@@ -28,7 +29,7 @@ parts meet them.
   - the CH335F, C5137013 (D31, 2026-11-04; 「IC 単体にする (推奨)」), which replaces the
     hand-soldered Akizuki CH335F module.
 
-  Every other machine-placed part is Basic, so the PCBA is not Extended-only (39 of 41 types
+  Every other machine-placed part is Basic, so the PCBA is not Extended-only (38 of 40 types
   Basic). A third exception needs the user's decision.
 
 ## How the numbers were obtained
@@ -66,7 +67,7 @@ parts meet them.
 - **Recheck** immediately before upload and again before payment (CLAUDE.md §4.1):
 
 ```
-python tools/jlc_stock.py C2040 C5137013 C97521 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25197 C25756 C26083 C25076 C25077 C1664 C1530 C15850 C45783 C307331 C52923 C1523 C15195 C1548 C25092
+python tools/jlc_stock.py C2040 C5137013 C97521 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25197 C25756 C26083 C25076 C25077 C1664 C1530 C15850 C45783 C307331 C52923 C15195 C1548 C25092
 ```
 
 Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it, or **Akizuki**
@@ -190,7 +191,8 @@ record is in Git at commit `3e11f68`.
 - g117732 MCP3204-BI/P (¥770): 4 channels, and each ADC needs 5 (three amplifiers, two aux).
 - g100769 RGEF300 (3.0 A hold, 5.1 A trip, ¥30): rated 16 V, and only a selection guide is
   at hand, with no resistance figures. g101344 VTP210GU (2.1 A) and g112629 MF-R185
-  (1.85 A): hold current below the 2.33 A that the OC trips allow.
+  (1.85 A): hold current below the 2.33 A that the OC trips allow at their nominal 1.16 A
+  (2.46 A at their highest, D34).
 - Nucleo-32 boards: D± on pins, but too few free I/O. Nucleo-F303K8: no USB. Nucleo-64:
   82.5 × 70 mm.
 
@@ -310,6 +312,15 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - 1.3 µs response at 5 mV overdrive, 300 ns large-signal.
   - Supply 2–36 V; common mode 0 to V<sub>CC</sub> − 1.5 V; V<sub>OS</sub> ±5 mV max.
   - Open-collector output, sink ≥ 6 mA (16 typ).
+  - *D34 (onsemi LM393/D Rev. 25, April 2014, via LCSC C7955, fetched 2026-11-04):* note 1:
+    below a 36 V supply, an input's absolute maximum equals the supply voltage, so the LM393s
+    run from V12F (Rev0.4 §3.2). Common mode 0 to V<sub>CC</sub> − 1.5 V at 25 °C,
+    V<sub>CC</sub> − 2.0 V over temperature. V<sub>IO</sub> ±5 / ±9 mV max, I<sub>IB</sub>
+    250 / 400 nA max (25 °C / over temperature). I<sub>CC</sub> 0.4 typ / 1.0 max mA for both
+    comparators at 25 °C, 2.5 mA max at V<sub>CC</sub> = 30 V. Output leakage 0.1 nA typ at
+    V<sub>O</sub> = 5 V, 25 °C; 1 µA max at V<sub>O</sub> = 30 V over temperature.
+  - *To confirm on the first board:* the comparators' power-up with TH_REF ahead of V12F
+    (V-MEAS-00), and the OFF bypass gates' leakage (V-MEAS-01).
 - *Verified (AO3401A):*
   - R<sub>DS(on)</sub> 47 / 60 mΩ at −4.5 V, 60 / 85 mΩ at −2.5 V.
   - V<sub>GS(th)</sub> −0.5 / −0.9 / −1.3 V at −250 µA; Q<sub>g</sub> 7 nC at 4.5 V;
@@ -320,11 +331,23 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
     and C<sub>rss</sub> multiplied by the drain node) is stable; the datasheet does not settle it.
 - *Verified (2N7002, JSCJ / JCET datasheet, September 2016, via LCSC C8545, fetched 2026-11-04):*
   V<sub>th(GS)</sub> 1.0 min / 2.5 max V at 250 µA. Rev0.4 §3.2's reset hold gives its gate
-  ≥ 2.70 V.
+  ≥ 2.70 V. *D34 (the same sheet, page 2):* I<sub>DSS</sub> 80 nA max at V<sub>DS</sub> = 60 V;
+  I<sub>GSS</sub> ±80 nA at ±20 V; C<sub>iss</sub> 50 pF max.
   - *To confirm on the first board (V-MEAS-06):* the HOLD gates (Q19, Q20, Q39, Q40) stay
     ≥ 2.5 V with blank flash and with RUN held low.
 - *Verified (AO3400A):* R<sub>DS(on)</sub> 19 / 32 mΩ at 4.5 V; V<sub>GS(th)</sub> 0.65 / 1.05 /
-  1.45 V.
+  1.45 V. *D34 (via LCSC C20917, fetched 2026-11-04):* C<sub>iss</sub> 630 pF typ, Q<sub>g</sub>
+  6 / 7 nC at 4.5 V. That gate on DIS_x directly took 10.0 µs to reach 2.5 V, so it sits
+  behind 100 kΩ (DISG_x, Rev0.4 §3.4).
+- *Verified (S9012, JSCJ, via LCSC C8543, fetched 2026-11-04; D34):* PNP, I<sub>C</sub> −500 mA,
+  V<sub>CEO</sub> −30 V (LCSC listing). h<sub>FE</sub> 120–400 at V<sub>CE</sub> = −1 V,
+  I<sub>C</sub> = −50 mA, in ranks L 120–200, H 200–350, J 300–400. C8543 is listed by LCSC
+  as "S9012 2T1(RANGE:200-350)", rank H; Rev0.4 §3.4 uses 200–350. *To confirm:* the rank
+  marking on the reel.
+- *Verified (LEDs, D34):* KT-0805G (C2297) V<sub>F</sub> 2.6–3.1 V at 5 mA, the only
+  V<sub>F</sub> figure on its sheet; NCD0805R1 (C84256) V<sub>F</sub> 1.5–2.6 V at 20 mA. At
+  510 Ω from a 3.3 V GPIO, the green's current is not guaranteed (Rev0.4 §6.4). *To confirm:*
+  V-HOST-01.
 - *Verified (AMS1117):*
   - Dropout 1.1 / 1.3 V at 800 mA; 90 °C/W.
   - Minimum load 5 / 10 mA; I<sub>q</sub> 5 / 11 mA; output 3.251–3.349 V.
@@ -337,6 +360,9 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - 2.475 / 2.5 / 2.525 V; catalogue lists the ±0.5 % rank.
   - I<sub>K(min)</sub> 0.45 / 1 mA.
   - Deviation over −25 to 85 °C: 4.5 typ / 17 max mV.
+  - *D34:* I<sub>ref</sub> ≤ 4 µA, plus ≤ 1.2 µA over temperature, in the V_INJ divider's
+    spread. The sheet's text states no load-capacitance limit, and neither CJ431 has a
+    capacitor (Rev0.4 §4.1). *To confirm:* V-MEAS-00.
 - *Verified (SMBJ6.5CA):* V<sub>RWM</sub> 6.5 V, V<sub>BR</sub> 7.22–7.98 V, clamp 11.2 V,
   I<sub>R</sub> 500 µA max. It sits only on non-measured rails (J1, J4 VBUS) because of that
   leakage.
@@ -352,31 +378,36 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
 
 ### Passives (Basic, by value)
 
+Each Use is the binding in `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md` (D34, issue #6
+P2), which lists every reference; counts are for both channels. The tolerance and TCR are
+the MPN's, from UNI-ROYAL's code: in `0402WGF100JTCE` the `F` is ±1 % and the `J` in `100J`
+is the decimal multiplier (10 Ω), not ±5 %. LCSC's listing parameters disagreed with the MPN
+for some rows and were not used.
+
 | Value | Use | LCSC | Package | Stock | Note |
 |---|---|---|---|---:|---|
-| 510 Ω ±1 % ±100 ppm | R_L shunt; U3 CJ431 feed from V3V3 | C17734 | 0805 | 2,198,725 | 0.125 W; stuck-LOW 47 mW |
+| 510 Ω ±1 % ±100 ppm | R_L shunt (×2, Kelvin land); U3 CJ431 feed from V3V3; TH_REF divider bottom, part 2; LED resistors (×4) | C17734 | 0805 | 2,198,725 | 0.125 W; stuck-LOW 47 mW |
 | 100 Ω ±1 % ±100 ppm | Mirror R1 (×6) | C25076 | 0402 | 6,307,501 | — |
 | 1.5 kΩ ±1 % ±100 ppm | R_OUT LOW, MID (×4); U4 feed; SCLK/CS/DIN pull-ups to V5L (×3) | C25867 | 0402 | 1,516,858 | — |
 | 2.4 kΩ ±1 % ±100 ppm | R_OUT HIGH (×2) | C22940 | 0603 | 1,117,935 | — |
 | 22 Ω ±1 % ±100 ppm † | USB D± series, part 1 of 27 Ω (×2) | C25092 | 0402 | 2,697,334 | No 27 Ω is Basic (C25100 is Extended) |
 | 5.1 Ω ±1 % ±200 ppm † | USB D± series, part 2 of 27 Ω (×2) | C25197 | 0603 | 131,418 | No 0402 5.1 Ω is Basic; 22 + 5.1 = 27.1 Ω, 26.83–27.37 Ω |
-| 10 kΩ | +IN guard (×6), EN series, DIS pull-up, HOLD pull-ups (×4), DOUT divider top (×2), U1 RUN pull-up † | C25744 | 0402 | 16,208,659 | — |
-| 15 kΩ | U4 divider (33 k / 15 k → 8.0 V); V_J4 divider bottom; DOUT divider bottom (×2) | C25756 | 0402 | 2,494,056 | — |
-| 33 kΩ | Rp (×4); U4 divider; V_J4 divider top (5.5 V → 1.72 V) | C25779 | 0402 | 2,369,774 | No 36 kΩ is Basic |
-| 5.1 kΩ | Rd on J1, J4 CC (×4) | C25905 | 0402 | 4,938,551 | — |
-| 100 kΩ | EN_G pull-down, event series | C25741 | 0402 | 7,841,979 | — |
-| 1 MΩ | Bypass gate return (×4), pedestal R_INJ (×6) | C26083 | 0402 | 2,794,209 | — |
-| 1 kΩ | ADC series, discharge, gate resistors, LEDs; Y1 XOUT, BOOTSEL (QSPI_SS to SW3) † | C11702 | 0402 | 21,568,761 | — |
-| 10 Ω | V12 filter; V5A filter | C25077 | 0402 | 3,068,120 | ±5 % (MPN …100J…); not in a measured path |
-| 330 pF C0G | C_N on R_OUT LOW, MID | C1664 | 0603 | 691,081 | — |
-| 220 pF X7R | C_N on R_OUT HIGH | C1530 | 0402 | 1,340,537 | No Basic C0G 220 pF found |
-| 10 µF 25 V X5R | Port capacitor (×2); VDDA; V5A; bulk, including V3V3 at U1 †; U6 VDD33 ‡ | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
+| 10 kΩ ±1 % ±100 ppm | +IN guard (×6), EN series (×2), DIS pull-up (×2), HOLD pull-ups (×4), DOUT divider top (×2), U1 RUN pull-up † | C25744 | 0402 | 16,208,659 | — |
+| 15 kΩ ±1 % ±100 ppm | U4 divider (33 k / 15 k → 8.0 V); V_J4 divider bottom; DOUT divider bottom (×2); comparator thresholds CMP_L, CMP_M, CMP_OC (×6) | C25756 | 0402 | 2,494,056 | — |
+| 33 kΩ ±1 % ±100 ppm | Rp (×4); U4 divider; V_J4 divider top (5.5 V → 1.72 V) | C25779 | 0402 | 2,369,774 | No 36 kΩ is Basic |
+| 5.1 kΩ ±1 % ±100 ppm | Rd on J1, J4 CC (×4); TH_REF divider bottom, part 1; R_B, Q16 base (×2) | C25905 | 0402 | 4,938,551 | — |
+| 100 kΩ ±1 % ±100 ppm | R_on (×2); EN_G pull-down (×2); OC_x sense of EN_G (×2); DISG, Q13 gate series (×2); R_BE (×2); event series (×4) | C25741 | 0402 | 7,841,979 | — |
+| 1 MΩ ±1 % ±100 ppm | R_GS, port switch off (×2); bypass gate return (×4); pedestal R_INJ (×6) | C26083 | 0402 | 2,794,209 | — |
+| 1 kΩ ±1 % ±100 ppm | ADC series (×10); gate resistors (×6); discharge load (×2); TH_REF divider top; Y1 XOUT, BOOTSEL (QSPI_SS to SW3) † | C11702 | 0402 | 21,568,761 | — |
+| 10 Ω ±1 % ±200 ppm | V12 filter; V5A filter | C25077 | 0402 | 3,068,120 | Not in a measured path |
+| 330 pF C0G | C_N on R_OUT LOW, MID (×4) | C1664 | 0603 | 691,081 | — |
+| 220 pF X7R | C_N on R_OUT HIGH (×2); comparator hysteresis divider (×6) | C1530 | 0402 | 1,340,537 | No Basic C0G 220 pF found |
+| 10 µF 25 V X5R | Port capacitor (×2); VDDA; V5A; U2 input; V3V3 at U1 †; U6 VDD33 ‡ | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
 | 22 µF 25 V | VBUS_IN bulk; V12F filter (2 ×); V3V3 (AMS1117 output) | C45783 | 0805 | 3,579,516 | — |
-| 100 nF 50 V | All decoupling (one rating for every rail), including U1's 10 power pins and U8 †, and U6 VDD33 ‡ | C307331 | 0402 | 20,893,452 | — |
-| 1 µF 25 V | Regulator, CJ431; U1 VREG_VIN and VREG_VOUT †; U6 V5 ‡ | C52923 | 0402 | 10,715,829 | — |
-| 15 pF C0G ±5 % 50 V † | Y1 load (×2) | C1548 | 0402 | 1,311,598 | As Raspberry Pi's reference |
-| 1 nF | Comparator hysteresis, soft-start Miller | C1523 | 0402 | 2,345,349 | Values set at capture |
-| 10 nF | Comparator hysteresis, soft-start Miller | C15195 | 0402 | 5,868,443 | Values set at capture |
+| 100 nF 50 V | All decoupling (one rating for every rail), 25 in all: U1's 10 power pins and U8 †, U6 VDD33 ‡, U7, U17, U30, and each channel's U10–U13 | C307331 | 0402 | 20,893,452 | — |
+| 1 µF 25 V | U5 MAU104 input and output; TH_REF filter; U1 VREG_VIN and VREG_VOUT †; U6 V5 ‡ | C52923 | 0402 | 10,715,829 | — |
+| 15 pF C0G ±5 % 50 V † | Y1 load (×2); comparator hysteresis, output to +IN (×6) | C1548 | 0402 | 1,311,598 | As Raspberry Pi's reference |
+| 10 nF | C_M, soft-start Miller, 2 × 10 nF per port (×4) | C15195 | 0402 | 5,868,443 | — |
 
 **Removed in Rev0.4 (D22):**
 
@@ -435,8 +466,9 @@ part's own drawing, and so stay open:
   (3.5 mm), a provisional choice: the screw and the heat-set insert are not chosen (OI-5).
   *To confirm:* V-MECH-01.
 - **Passives:** the R and C footprints are KiCad's IPC-7351 nominal 0402 / 0603 / 0805. Each
-  value's own sheet is checked when it is bound in the schematic (P2). That includes R_L's
-  510 Ω (C17734), whose Kelvin land is checked against generic EIA 0805 dimensions for now.
+  value's own sheet was read when it was bound in the schematic (P2, D34): its body
+  dimensions are in the Passives table above, and `check_schematic.py` checks each body
+  against its land. That includes R_L's 510 Ω (C17734) on its Kelvin land.
 
 ---
 
