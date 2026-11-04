@@ -2,7 +2,7 @@
 
 **State: WIP. No part is chosen.** First pass 2026-11-03 (Rev0.2). Reworked the same day for
 circuit Rev0.3 under the user's sourcing rule D13, and for Rev0.4 under D22 (Basic parts only);
-amended 2026-11-04 for D29 (the bare RP2040). Every row is a *candidate* until a reviewer
+amended 2026-11-04 for D29 (the bare RP2040) and D31 (the bare CH335F). Every row is a *candidate* until a reviewer
 marks it confirmed against the actual PCBA order (CLAUDE.md Section 4.1).
 
 This is the single place for candidates, stock and datasheet facts. The circuit document
@@ -19,12 +19,17 @@ parts meet them.
   (circuit Rev0.4 §7.4).
 - **Avoid special or hard-to-source parts**, and **reduce part types and count** (the user's
   restated list, 2026-11-03; quoted in circuit Rev0.4's header). One part per value and one
-  voltage rating per value: 40 machine-placed types.
+  voltage rating per value: 41 machine-placed types.
 - **No Preferred Extended either** (D22, user, 2026-11-03). Rev0.3's two Preferred Extended
   parts are removed; see "Removed in Rev0.4" below.
-- **One exception: the RP2040, C2040, Extended** (D29, user, 2026-11-04; 「素の RP2040
-  (推奨)」). It replaces the hand-soldered PGA2040 module. Every other machine-placed part is
-  Basic, so the PCBA is not Extended-only (39 of 40 types Basic).
+- **Two exceptions, both Extended, both the user's:**
+  - the RP2040, C2040 (D29, 2026-11-04; 「素の RP2040 (推奨)」), which replaces the
+    hand-soldered PGA2040 module;
+  - the CH335F, C5137013 (D31, 2026-11-04; 「IC 単体にする (推奨)」), which replaces the
+    hand-soldered Akizuki CH335F module.
+
+  Every other machine-placed part is Basic, so the PCBA is not Extended-only (39 of 41 types
+  Basic). A third exception needs the user's decision.
 
 ## How the numbers were obtained
 
@@ -53,13 +58,15 @@ parts meet them.
     AMS1117-3.3 AMS (no revision marking); CJ431 JSCJ "M, Oct 2017". (Rev0.3 also read
     STM32F103C8T6 DS5319 Rev 18 and SRV05-4 Rev 2.1; both parts are removed in Rev0.4.)
   - Microchip MCP3204/3208 DS21298E (2008), fetched from microchip.com on 2026-11-03.
+  - D31 (2026-11-04): the CH334/CH335 datasheet V2.5 re-read for the bare chip. Its package
+    drawing (§5.6) is an image, so the page was rendered from the PDF and read visually.
   - Other sources: CH334/CH335 datasheet V2.5 (WCH; copy at
     `https://akizukidenshi.com/goodsaffix/CH334_335.pdf`); MAU104 Minmax REV:0 2005/04; the
     Akizuki product pages for the module and shunt facts.
 - **Recheck** immediately before upload and again before payment (CLAUDE.md §4.1):
 
 ```
-python tools/jlc_stock.py C2040 C97521 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25197 C25756 C26083 C25076 C25077 C1664 C1530 C15850 C45783 C307331 C52923 C1523 C15195 C1548 C25092
+python tools/jlc_stock.py C2040 C5137013 C97521 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25197 C25756 C26083 C25076 C25077 C1664 C1530 C15850 C45783 C307331 C52923 C1523 C15195 C1548 C25092
 ```
 
 Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it, or **Akizuki**
@@ -73,14 +80,15 @@ Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it,
 |---|---|---|---|---:|---:|---|
 | U7, U17 | 12-bit 8-channel SPI ADC, DIP16 | g100238 | MCP3208-CI/P (Microchip) | 733 | ¥500 | 2026-11-03 |
 | J1–J4 | USB Type-C receptacle DIP kit (simple), 4 per board | g113080 | AE-USB2.0-TYPE-C | 711 | ¥350 | 2026-11-03 |
-| U6 | CH335F 4-port USB hub breakout module kit | g129556 | AE-QFN28-DIP(CH335F) | 453 | ¥420 | 2026-11-03 |
 | U5 | 1 W isolated DC-DC, 12 V 84 mA | g104132 | MAU104 (Minmax) | 178 | ¥520 | 2026-11-03 |
 | RS10, RS20 | Current-sense chip resistor 0.1 Ω 1 W ±0.5 % | g109588 | TSL1TTER100D (KOA) | 374 | ¥130 | 2026-11-03 |
 | RS11, RS21 | Metal-film resistor 10 Ω 1 W ±1 % (1/4 W size) | g108805 | MFU100F10RB (Faithful Link) | 175 bags of 100 | ¥600 / bag | 2026-11-03 |
 | F1 | Resettable fuse (PTC), 3.00 A hold / 6.00 A trip, 30 V, radial | g112630 | MF-R300 (Bourns) | 2,865 | ¥40 | 2026-11-03 |
 
 The thinnest is the MAU104, at 178 pcs. The PGA2040 (g116762, 41 pcs on 2026-11-03), U1
-until D29, is no longer used; its record is in Git at commit `6774bc5`.
+until D29, is no longer used; its record is in Git at commit `6774bc5`. Nor is the CH335F
+module (AE-QFN28-DIP(CH335F), g129556, ¥420, 453 pcs on 2026-11-03), U6 until D31; its
+record is in Git at commit `3e11f68`.
 
 - *Verified (MCP3208, Microchip DS21298E):*
   - 12-bit, 8 single-ended channels, SPI; V<sub>DD</sub> 2.7–5.5 V; V<sub>REF</sub> 0.25 V to
@@ -108,15 +116,6 @@ until D29, is no longer used; its record is in Git at commit `6774bc5`.
     downstream port (J2, J3: add Rp).
   - Rated 48 V, 5 A. Board ≈ 20 mm wide, the dimension that makes the J2–J3 pitch ≥ 20 mm.
   - SBU is not brought out.
-- *Verified (CH335F module page; CH335 datasheet):*
-  - DIP30, 3.3–5 V; HS upstream and downstream, MTT.
-  - **Needs an external 12 MHz crystal** (load capacitors built into the chip).
-  - V5 4.5–5.25 V, 85 mA typical.
-  - PSELF strap on pin 1/LED1 (pulled up = self-powered by default); PGANG on pin 3/LED2.
-  - PWREN1–4# on pins 4, 2, 10, 5; OVCUR1–4# on pins 24, 23, 19, 18.
-  - EEPROM-configurable descriptor; default MaxPower 0x32 (100 mA).
-  - *To confirm (OI-24):* the module's outline, its pin-to-function map, and whether the
-    QFN28 comes mounted. Akizuki publishes no module drawing.
 - *Verified (MAU104 datasheet, Minmax REV:0 2005/04):*
   - Output 12 V, 84 mA max, 1.5 mA min load. Accuracy ±1 % typ / ±3 % max.
   - Line regulation ±1.2 % per 1 % V<sub>in</sub>; load regulation 7 % max (20–100 % load).
@@ -172,13 +171,14 @@ until D29, is no longer used; its record is in Git at commit `6774bc5`.
 ## Machine-placed parts (JLCPCB)
 
 All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for D29 on
-2026-11-04 (marked †).
+2026-11-04 (marked †), and for D31 the same day (marked ‡).
 
 ### Active parts
 
 | Ref | MPN | LCSC | Package | Stock | Class | Role |
 |---|---|---|---|---:|---|---|
-| U1 † | RP2040 | C2040 | LQFN-56 (7 × 7) | 5,845 | **Extended** (D29, the only exception) | MCU |
+| U1 † | RP2040 | C2040 | LQFN-56 (7 × 7) | 5,845 | **Extended** (D29) | MCU |
+| U6 ‡ | CH335F | C5137013 | QFN-28 (4 × 4) | 4,937 | **Extended** (D31) | USB 2.0 HS hub, 4 downstream ports (MTT) |
 | U8 † | W25Q128JVSIQ | C97521 | SOIC-8 208 mil | 75,419 | Basic | QSPI flash; its unique ID is the USB serial number |
 | U10–U12, U20–U22 | OP07CDR | C7433 | SOIC-8 | 248,598 | Basic | Mirror amplifiers |
 | U13, U23, U30 | LM393DR2G | C7955 | SOIC-8 | 357,235 | Basic | Range and OC comparators |
@@ -220,6 +220,35 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
     23, 24 and 25.
   - *To confirm on the first board (V-MEAS-06):* DVDD, the USB series resistance, Y1's start-up
     and frequency; before layout, the land against Figure 167 (Rev0.4 G20).
+- *Verified (CH335F, WCH CH334/CH335 datasheet V2.5, Akizuki copy; read 2026-11-04 for D31):*
+  - Package (§5.6, QFN28_4×4×0.75-0.4, read visually): body 4.0 ± 0.1 mm, height
+    0.75 ± 0.05 mm, pitch 0.4 mm; terminals 0.20 ± 0.05 mm wide and 0.35 ± 0.1 mm long; ePad
+    2.7 ± 0.2 mm square with a chamfer at the pin 1 corner. The ePad is pin 0, GND
+    (Table 1-3).
+  - Pins (Table 1-3): 1 LED1/PSELF, 2 PWREN2#, 3 LED2/PGANG, 4 PWREN1#, 5 PWREN4#/SUSP,
+    6 DM1, 7 DP1, 8 DM2, 9 DP2, 10 PWREN3#, 11 XI, 12 XO, 13 DM3, 14 DP3, 15 DM4, 16 DP4,
+    17 RESET#/CDP, 18 OVCUR4#, 19 OVCUR3#, 20 DMU, 21 DPU, 22 LED3/SCL, 23 OVCUR2#,
+    24 OVCUR1#, 25 LED4/SDA, 26 V5, 27 GND, 28 VDD33.
+  - Supply (§4.1, §4.2): V5 4.5–5.25 V with the internal LDO, absolute maximum 5.5 V;
+    VDD33 3.2–3.5 V from the LDO, which can supply 20 mA to outside loads. V5 needs ≥ 1 µF;
+    VDD33 0.1 µF + 10 µF, or 1 µF (Table 1-3). Operating current 85 mA typical with HS
+    upstream and 4 HS downstream, 25 mA with 4 FS downstream.
+  - Clock: a 12 MHz crystal on XI/XO, load capacitors on chip (Features list).
+  - USB: 1.5 kΩ upstream pull-up and the downstream ports' pull-downs on chip (Features list),
+    so an unused port's DM/DP pins need nothing.
+  - RESET#/CDP: internal pull-up of about 25 kΩ and a power-on reset (§3.2). Left undriven at
+    power-up it enables no CDP (Table 3-2); the datasheet recommends leaving it unconnected
+    when no external reset is needed.
+  - Straps: LED1/PSELF and LED2/PGANG have internal pull-ups; undriven, the hub is
+    self-powered and in GANG mode (Table 1-3, §3.3). Without an EEPROM the internal
+    configuration holds: 4 ports, MaxPower 32h (100 mA), SELF_POWER 1 (§3.5).
+  - OVCUR1–4#: with the default OC_LEVEL = 0, a 2.4 V threshold and a weak internal pull-up,
+    24 µA (§3.1, §4.2). PWREN1–4# are outputs.
+  - ESD: 6 kV HBM on the USB signal pins (§4.1). −40 to 85 °C. No thermal resistance is
+    given.
+  - *To confirm before layout (Rev0.4 G21):* U6's land against the §5.6 drawing.
+  - *To confirm on the first boards:* U6's joints on leaded HASL (V-MFG-03); Y2 against the
+    built-in load capacitors (G9).
 - *Verified (W25Q128JVSIQ, Winbond W25Q128JV Rev. J, 2024-04-25, via LCSC C97521, read
   2026-11-04):* 2.7–3.6 V; SOIC-8 208 mil (body 5.18–5.38 mm, lead span 7.70–8.10 mm, height
   ≤ 2.16 mm); the -IQ part has QE fixed to 1; a factory-set 64-bit unique ID read by 4Bh;
@@ -277,8 +306,8 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - *To confirm (G9):* Y2 against the CH335F's built-in load capacitors.
   - *To confirm (V-MEAS-06):* Y1 on the RP2040 XOSC at ≈ 10.5 pF load: start-up and
     frequency (Rev0.4 §6.3). Fallback: ABM8-272-T3 (C20625731, Extended, 7,921 on 2026-11-04,
-    the same SMD3225-4P land), which would be a second Extended part and needs the user's
-    decision.
+    the same SMD3225-4P land), which would be a third Extended part (after D29 and D31)
+    and needs the user's decision.
 
 ### Passives (Basic, by value)
 
@@ -300,10 +329,10 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
 | 10 Ω | V12 filter; V5A filter | C25077 | 0402 | 3,068,120 | ±5 % (MPN …100J…); not in a measured path |
 | 330 pF C0G | C_N on R_OUT LOW, MID | C1664 | 0603 | 691,081 | — |
 | 220 pF X7R | C_N on R_OUT HIGH | C1530 | 0402 | 1,340,537 | No Basic C0G 220 pF found |
-| 10 µF 25 V X5R | Port capacitor (×2); VDDA; V5A; bulk, including V3V3 at U1 † | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
+| 10 µF 25 V X5R | Port capacitor (×2); VDDA; V5A; bulk, including V3V3 at U1 †; U6 VDD33 ‡ | C15850 | 0805 | 7,996,245 | Effective ≈ 7 µF at 5 V DC bias; bandwidth figures assume 10 µF |
 | 22 µF 25 V | VBUS_IN bulk; V12F filter (2 ×); V3V3 (AMS1117 output) | C45783 | 0805 | 3,579,516 | — |
-| 100 nF 50 V | All decoupling (one rating for every rail), including U1's 10 power pins and U8 † | C307331 | 0402 | 20,893,452 | — |
-| 1 µF 25 V | Regulator, CJ431; U1 VREG_VIN and VREG_VOUT † | C52923 | 0402 | 10,715,829 | — |
+| 100 nF 50 V | All decoupling (one rating for every rail), including U1's 10 power pins and U8 †, and U6 VDD33 ‡ | C307331 | 0402 | 20,893,452 | — |
+| 1 µF 25 V | Regulator, CJ431; U1 VREG_VIN and VREG_VOUT †; U6 V5 ‡ | C52923 | 0402 | 10,715,829 | — |
 | 15 pF C0G ±5 % 50 V † | Y1 load (×2) | C1548 | 0402 | 1,311,598 | As Raspberry Pi's reference |
 | 1 nF | Comparator hysteresis, soft-start Miller | C1523 | 0402 | 2,345,349 | Values set at capture |
 | 10 nF | Comparator hysteresis, soft-start Miller | C15195 | 0402 | 5,868,443 | Values set at capture |
@@ -321,6 +350,12 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
 | Was | Part | Code | Class | Now |
 |---|---|---|---|---|
 | U1 | PGA2040 RP2040 module (Pimoroni), hand-soldered | Akizuki g116762 | Akizuki | Bare RP2040 C2040 (Extended, the D29 exception), with U8, Y1 and passives machine-placed |
+
+**Removed in Rev0.4 (D31, 2026-11-04):**
+
+| Was | Part | Code | Class | Now |
+|---|---|---|---|---|
+| U6 | AE-QFN28-DIP(CH335F) USB hub module, hand-soldered | Akizuki g129556 | Akizuki | Bare CH335F C5137013 (Extended, the D31 exception), with its 1 µF, 100 nF and 10 µF machine-placed |
 
 **Rejected in the Basic catalogue:**
 - C25334 0.1 Ω 1206: **±800 ppm/°C**, which alone would use 0.8 % of the 1 % budget over
@@ -345,7 +380,7 @@ All Extended. The full Rev0.2 rows, with stock and datasheet notes, are in Git h
 | Buck / buck-boost | TPS62130, TPS62933, TPS63070 class | None needed |
 | 3.3 V regulators | TPS7A20 class, SY8089 class | AMS1117-3.3 |
 | MCU + flash | RP2040 + W25Q | Again RP2040 (C2040, D29) + W25Q128JVSIQ; Rev0.3 had STM32F103C8T6, Rev0.4 first the PGA2040 module |
-| USB hub + 24 MHz crystal | USB2514B variants + X322524MOB4SI | CH335F module (Akizuki) + C9002 |
+| USB hub + 24 MHz crystal | USB2514B variants + X322524MOB4SI | CH335F (C5137013, D31; the Akizuki module until then) + C9002 |
 | ADC | ADS131M02 / M04 / M06 | 2 × MCP3208 (Akizuki); Rev0.3 had the STM32 ADC |
 | Current-sense amplifier | INA190A2 | OP07CDR + AO3401A mirror |
 | Sense mux | TMUX6209, ADG1209, TMUX1109 | Not needed (topology C) |

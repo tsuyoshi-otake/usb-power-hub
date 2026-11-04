@@ -1,4 +1,4 @@
-# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29 and D30) — non-authoritative
+# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29, D30 and D31) — non-authoritative
 
 **Question.** What does a first prototype cost? The order is JLCPCB fabricating **5 bare
 PCBs** and assembling **2** of them, plus the Akizuki parts the user solders by hand onto
@@ -8,30 +8,37 @@ Since D29 (2026-11-04) the MCU is a bare RP2040 (C2040), machine-placed with its
 crystal and passives, instead of the hand-soldered PGA2040 module (¥1,680 each). The figures
 below are the re-run's, with a price snapshot fetched on 2026-11-04. Since D30 (the same day)
 the finish is leaded HASL instead of ENIG, and the plan ships by OCS Express, the cheapest
-quoted, instead of UPS (the user: 「UPSじゃなくていい」).
+quoted, instead of UPS (the user: 「UPSじゃなくていい」). Since D31 (the same day) the hub is a
+bare CH335F (C5137013), machine-placed, instead of the hand-soldered Akizuki module.
 
 **Answer** (at 160 yen/USD; Japanese import tax, M2 inserts and the enclosure print are not
 included):
 
 | Case | JLCPCB order | Akizuki parts | Total, 2 units | Per unit |
 |---|---:|---:|---:|---:|
-| **Economic PCBA** (recommended) | $55.69 = 8,910 yen | 8,570 – 9,050 yen | **17,480 – 17,960 yen** | 8,740 – 8,980 yen |
-| Standard PCBA | $154.80 = 24,768 yen | 8,570 – 9,050 yen | 33,338 – 33,818 yen | 16,669 – 16,909 yen |
+| **Economic PCBA** (recommended) | $61.01 = 9,761 yen | 7,660 – 7,900 yen | **17,421 – 17,661 yen** | 8,710 – 8,830 yen |
+| Standard PCBA | $158.58 = 25,373 yen | 7,660 – 7,900 yen | 33,033 – 33,273 yen | 16,516 – 16,636 yen |
 
 With the PGA2040 (before D29), ENIG and UPS, the Economic case was 21,883 – 22,843 yen for
 2 units. D29 saved 1,209 – 1,689 yen of that (20,674 – 21,154 yen, still with ENIG and UPS).
 That saving is per unit: the module cost 1,680 yen each, and the RP2040, its flash, crystal
 and passives cost about $3.8 per board, plus one $3.07 Extended feeder fee per order. D30's
-leaded HASL saves $17.40 and OCS Express $2.56 per order: $19.96, 3,194 yen. Akizuki now
-charges 550 yen shipping, because the subtotal falls below 11,000 yen.
+leaded HASL saves $17.40 and OCS Express $2.56 per order: $19.96, 3,194 yen. With D29 and
+D30 but the CH335F module, the Economic case was 17,480 – 17,960 yen. D31 adds $5.32
+(851 yen) to the JLCPCB order: the two chips ($2.23), a second Extended feeder fee ($3.07)
+and 23 more joints per board ($0.07), less $0.06 on the 0402 lines. It removes
+910 – 1,150 yen from the Akizuki order: the two modules (840 yen) and one header strip per
+board (70 yen), plus one socket strip per board (240 yen) in the socketed case. The net is
+59 – 299 yen less. Akizuki charges 550 yen shipping, because the subtotal is below
+11,000 yen.
 
 The Akizuki range is pin headers only, or headers plus sockets for the modules. The lid
 panel PCB adds $4.00 (640 yen) if it is ordered in the same JLCPCB order.
 
 Economic PCBA is the recommendation. It charges no feeder fee for Basic parts and $3.07 per
-Extended part type; since D29 the board has one, the RP2040. It saves $99.11 (about
-15,900 yen) against Standard. Standard is the fallback if the order form refuses this board
-for Economic (see "What this cannot see").
+Extended part type; since D31 the board has two, the RP2040 and the CH335F. It saves $97.57
+(about 15,600 yen) against Standard. Standard is the fallback if the order form refuses this
+board for Economic (see "What this cannot see").
 
 This directory is an estimate, not a quote (CLAUDE.md §2: `design/experiments/` is
 non-authoritative). The real price is the one shown after the Gerber, BOM and CPL are
@@ -42,9 +49,9 @@ the board is WIP and has no layout.
 
 | File | What it is |
 |---|---|
-| `cost_estimate.py` | The estimate: `python -I -B design/experiments/cost-estimate/cost_estimate.py`. `--fetch` refreshes the price snapshot through `tools/jlc_stock.py`. Exits 1 if the BOM disagrees with the OI-23 placement study, or a part is not Basic and not an approved exception (`APPROVED_EXTENDED`: C2040, D29). |
-| `test_cost_estimate.py` | 12 tests. Five corrupt the BOM, the study, the code list or a part's class and expect the check to fail (CLAUDE.md §8). |
-| `jlc_prices.json` | JLCPCB assembly-parts API snapshot, 2026-11-04: class, stock, price tiers, attrition (`lossNumber`) and minimum quantity (`leastPatchNumber`) for the 40 machine-placed codes. |
+| `cost_estimate.py` | The estimate: `python -I -B design/experiments/cost-estimate/cost_estimate.py`. `--fetch` refreshes the price snapshot through `tools/jlc_stock.py`. Exits 1 if the BOM disagrees with the OI-23 placement study, or a part is not Basic and not an approved exception (`APPROVED_EXTENDED`: C2040, D29; C5137013, D31). |
+| `test_cost_estimate.py` | 13 tests. Six corrupt the BOM, the study, the code list, a part's class or the list of approved exceptions and expect the check to fail (CLAUDE.md §8). |
+| `jlc_prices.json` | JLCPCB assembly-parts API snapshot, 2026-11-04: class, stock, price tiers, attrition (`lossNumber`) and minimum quantity (`leastPatchNumber`) for the 41 machine-placed codes. |
 
 ## JLCPCB, Economic PCBA (2 assembled of 5)
 
@@ -54,20 +61,21 @@ the board is WIP and has no layout.
 | Finish: leaded HASL (D30) | 0.00 | quote page; LeadFree HASL is +5.20, ENIG +17.40 |
 | PCBA setup | 8.18 | price page |
 | Stencil | 1.53 | price page |
-| SMT joints: 650 per board × 2 × $0.0016 | 2.08 | price page; joints from the study's package counts (the QFN-56 counted as 57, its ePad included) |
-| Extended-part feeder fee: 1 type (C2040, D29) × $3.07 | 3.07 | price page |
+| SMT joints: 673 per board × 2 × $0.0016 | 2.15 | price page; joints from the study's package counts (each QFN counted with its ePad: the QFN-56 as 57, the QFN-28 as 29) |
+| Extended-part feeder fee: 2 types (C2040, D29; C5137013, D31) × $3.07 | 6.14 | price page |
 | Confirm Parts Placement | 0.45 | price page; CLAUDE.md §4.2 requires placement checking |
-| Components, with attrition | 25.15 | API snapshot |
+| Components, with attrition | 27.32 | API snapshot |
 | Shipping to Japan, OCS Express | 7.23 | quote page, PCB-only parcel (0.24 kg); UPS Worldwide Express Saver was 9.79, DHL 17.62 |
-| **Total** | **55.69** | |
+| **Total** | **61.01** | |
 
 Standard PCBA keeps the joint and placement-confirmation fees. Setup rises to 25.56 and the
-stencil to 8.21, and it adds feeder loading (40 types × 1.53 = 61.20), packing 0.50 and the
-fixture 16.42. Its total is $154.80.
+stencil to 8.21, and it adds feeder loading (41 types × 1.53 = 62.73), packing 0.50 and the
+fixture 16.42. Its total is $158.58.
 
 The dearest machine-placed lines are the W25Q128JVSIQ flash ($4.92 for 2 at its 1–9 piece
-price), the PSM712 ($3.11), the AO3401A (14 per board, $3.08), the 22 µF capacitors ($2.21),
-the RP2040 ($2.18) and the OP07 ($1.34). The 0402 resistors cost cents in total.
+price), the PSM712 ($3.11), the AO3401A (14 per board, $3.08), the CH335F ($2.23), the
+22 µF capacitors ($2.21), the RP2040 ($2.18) and the OP07 ($1.34). The 0402 resistors cost
+cents in total.
 
 ## Akizuki (2 units, prices tax included)
 
@@ -75,22 +83,22 @@ the RP2040 ($2.18) and the OP07 ($1.34). The 0402 resistors cost cents in total.
 |---|---|---:|---:|---:|
 | MCP3208-CI/P | g100238 | 500 | 4 | 2,000 |
 | AE-USB2.0-TYPE-C | g113080 | 350 | 8 | 2,800 |
-| AE-QFN28-DIP(CH335F) | g129556 | 420 | 2 | 840 |
 | MAU104 | g104132 | 520 | 2 | 1,040 |
 | TSL1TTER100D | g109588 | 130 | 4 | 520 |
 | MF-R300 | g112630 | 40 | 2 | 80 |
 | MFU100F10RB, bag of 100 (4 needed) | g108805 | 600 | 1 | 600 |
-| Pin header 1 × 40, PH-1x40SG (allowance) | 100167 | 35 | 4 | 140 |
+| Pin header 1 × 40, PH-1x40SG (allowance) | 100167 | 35 | 2 | 70 |
 | Shipping: the subtotal is below 11,000 yen | — | — | — | 550 |
-| **Headers only** | | | | **8,570** |
-| Plus pin sockets 1 × 40, FH2.54-40U1GF8.5-0.5 (allowance) | 110073 | 120 | 4 | +480 |
+| **Headers only** | | | | **7,660** |
+| Plus pin sockets 1 × 40, FH2.54-40U1GF8.5-0.5 (allowance) | 110073 | 120 | 2 | +240 |
 
 The part prices are the ones `requirements/parts.md` recorded on 2026-11-03. The headers and
 sockets are not selected yet (parts.md "Not yet selected"); their lines are an allowance at
-prices read on 2026-11-03. Since D29 the modules need 58 header pins per board (four USB-C
-modules × 7 and the CH335F's 30), so the allowance is 2 strips of 40 per board, down from 4.
-Below an 11,000 yen subtotal Akizuki charges 550 yen per parcel (Sagawa) or 600 yen
-(Yamato). Without the PGA2040 the 2-unit order is below it; 4 units would be above.
+prices read on 2026-11-03. Since D31 the modules need 28 header pins per board (four USB-C
+modules × 7), so the allowance is 1 strip of 40 per board. It was 2 strips while the CH335F
+module's 30 pins were on the board (D29), and 4 before D29. The CH335F module (g129556,
+¥420) is no longer bought. Below an 11,000 yen subtotal Akizuki charges 550 yen per parcel
+(Sagawa) or 600 yen (Yamato). The 2-unit order is below it; 4 units would be above.
 
 ## Inputs and their dates
 
@@ -104,8 +112,9 @@ Below an 11,000 yen subtotal Akizuki charges 550 yen per parcel (Sagawa) or 600 
 - **JLCPCB PCBA fees:** `jlcpcb.com/help/article/pcb-assembly-price`, "Last updated on Oct 22,
   2026", read on 2026-11-03.
 - **Component prices:** `jlc_prices.json`, fetched on 2026-11-04 (its `checked_utc`) from the
-  same API as `tools/jlc_stock.py`, for D29's 40 codes. The 2026-11-03 snapshot it replaced
-  is in Git history.
+  same API as `tools/jlc_stock.py`, for D29's 40 codes. For D31 the same day, C5137013 was
+  queried alone and added with the same fields; the other 40 entries were not re-fetched.
+  The 2026-11-03 snapshot it replaced is in Git history.
 - **Economic PCBA limits:** JLCPCB blog, "How to Reduce Prototype PCB Assembly Cost (With Real
   Quotes)", `jlcpcb.com/blog/reduce-pcb-assembly-cost-prototype`, published 2026-10-13,
   updated 2026-10-14, read on 2026-11-03.
@@ -115,17 +124,17 @@ Below an 11,000 yen subtotal Akizuki charges 550 yen per parcel (Sagawa) or 600 
 - **Exchange rate:** 160 yen/USD as a planning value. A web search on 2026-11-03 found no
   November rate. Its results gave 158.27 on 2026-10-11 (30rates.com) and a 2026 high of 163.85
   on 2026-07-28 (valutafx.com). Neither page was opened, so both figures are second-hand. Every
-  ±5 yen moves the Economic total by about ±280 yen.
+  ±5 yen moves the Economic total by about ±305 yen.
 
 ## Counting
 
-- **Joints and part count** come from the OI-23 study's package counts per block (241
-  machine-placed parts, 650 joints per board). The script refuses to run if the BOM's package
+- **Joints and part count** come from the OI-23 study's package counts per block (239
+  machine-placed parts, 673 joints per board). The script refuses to run if the BOM's package
   totals disagree with the study.
 - **0402 values:** Rev0.4 numbers the passives at capture. The counts per value follow the
-  "Use" column of parts.md, and U1's circuit (Rev0.4 §6.5) is counted in full. The 34
-  positions that column does not attribute to a value (decoupling, comparator thresholds,
-  the OC network, hub straps) are priced at the dearest 0402 code, the 100 nF.
+  "Use" column of parts.md, and U1's and U6's circuits (Rev0.4 §6.5, §6.6) are counted in
+  full. The 29 positions that column does not attribute to a value (decoupling, comparator
+  thresholds, the OC network) are priced at the dearest 0402 code, the 100 nF.
 - **Order quantity per code:** need for 2 boards plus `lossNumber`, at least
   `leastPatchNumber`. This is the reading of the API fields, not a documented JLCPCB rule.
 
@@ -134,7 +143,7 @@ Below an 11,000 yen subtotal Akizuki charges 550 yen per parcel (Sagawa) or 600 
 - **Whether Economic PCBA accepts this board.** The quote form decides only after an upload.
   The JLCPCB blog post (Inputs) lists what forces Standard.
   - This board avoids most of them: parts on Top only, nothing below 0402, no IC pitch below
-    0.4 mm (the RP2040's LQFN-56 is exactly 0.4 mm, D29), 2 boards (at most 50), a single
+    0.4 mm (the RP2040's LQFN-56 and the CH335F's QFN-28 are exactly 0.4 mm, D29, D31), 2 boards (at most 50), a single
     board rather than a V-cut panel, 1.6 mm and 4 layers, and no gold fingers, castellations
     or edge plating.
   - The post names "special stack-ups". That item is settled by D27: on the quote page
@@ -148,22 +157,23 @@ Below an 11,000 yen subtotal Akizuki charges 550 yen per parcel (Sagawa) or 600 
     combination is not confirmed. The blog says Standard is forced by "a thickness, solder
     mask color, and surface finish combination outside the Economic options", but does not
     list the options (re-read 2026-11-04).
-  - If it forces Standard, the order is the Standard case: about 15,900 yen more.
+  - If it forces Standard, the order is the Standard case: about 15,600 yen more.
 - **The real BOM.** The schematic is not captured. The 0402 count is an estimate. The 0402
   line is cents; an added active part is not. If Y1 fails on the first board, its fallback
-  (ABM8-272-T3, C20625731) is a second Extended type: another $3.07 per order, and the user's
+  (ABM8-272-T3, C20625731) is a third Extended type: another $3.07 per order, and the user's
   decision (Rev0.4 §6.3).
 - **The PCBA parcel's shipping.** Only the PCB-only parcel was priced.
-- **Rework from HASL.** D30's leaded HASL is not flat, and U1 is a 0.4 mm-pitch QFN with an
-  ePad. A bridged or open U1 joint costs a rework or a new board (V-MFG-03); no allowance is
-  included.
+- **Rework from HASL.** D30's leaded HASL is not flat, and U1 and U6 are 0.4 mm-pitch QFNs
+  with ePads. A bridged or open joint on either costs a rework or a new board (V-MFG-03); no
+  allowance is included.
 - **Japanese import tax.** Not included. The rule as understood, not checked against Japan
   Customs today: for personal use, the taxable value is 60 % of the price, and a taxable value of
-  10,000 yen or less is exempt. On that rule the Economic order (≈ 5,300 yen taxable) is
-  exempt. The Standard order (≈ 14,900 yen) would pay about 1,500 yen of consumption tax plus
+  10,000 yen or less is exempt. On that rule the Economic order (≈ 5,900 yen taxable) is
+  exempt. The Standard order (≈ 15,200 yen) would pay about 1,500 yen of consumption tax plus
   the courier's fee.
 - **Possible extra JLCPCB charges.** X-ray inspection applies to leadless packages. The
-  RP2040's LQFN-56 is one, so expect it now: 2 × $1.64, not included in the totals. Standard
+  RP2040's LQFN-56 and the CH335F's QFN-28 are two, so expect it: 2 × $1.64 if it is charged
+  per board, not included in the totals. Standard
   PCBA may also add stencil or fixture storage ($4.93 each).
 - **Discounts.** The "Special Offer" base price and the new-customer coupons shown on the page
   can change or expire. Neither the coupons nor any other discount is applied.

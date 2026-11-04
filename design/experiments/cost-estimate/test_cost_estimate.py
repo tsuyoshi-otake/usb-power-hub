@@ -47,19 +47,28 @@ class Bom(unittest.TestCase):
         totals["0402"] = sum(n for _, n in ce.EST_0402.values()) - 1
         self.assertTrue(any(e.startswith("0402") for e in ce.check_bom(totals)))
 
-    def test_codes_are_the_40_in_parts_md(self):
+    def test_codes_are_the_41_in_parts_md(self):
         bom = list(ce.EXACT) + list(ce.EST_0402)
         md = parts_md_codes()
-        self.assertEqual(len(md), 40)
+        self.assertEqual(len(md), 41)
         self.assertEqual(sorted(bom), sorted(md))
         self.assertNotEqual(sorted(bom[1:]), sorted(md))      # a dropped code would show
 
-    def test_snapshot_is_basic_except_the_approved_exception(self):
+    def test_snapshot_is_basic_except_the_approved_exceptions(self):
         snap = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
         codes = list(ce.EXACT) + list(ce.EST_0402)
         self.assertEqual(ce.class_errors(snap, codes), [])
-        self.assertEqual(ce.extended_codes(snap, codes), ["C2040"])
-        self.assertEqual(ce.APPROVED_EXTENDED, {"C2040": "D29"})
+        self.assertEqual(ce.extended_codes(snap, codes), ["C2040", "C5137013"])
+        self.assertEqual(ce.APPROVED_EXTENDED, {"C2040": "D29", "C5137013": "D31"})
+
+    def test_an_exception_needs_its_decision(self):
+        snap = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
+        saved = ce.APPROVED_EXTENDED.pop("C5137013")
+        try:
+            errs = ce.class_errors(snap, list(ce.EXACT))
+        finally:
+            ce.APPROVED_EXTENDED["C5137013"] = saved
+        self.assertTrue(any(e.startswith("C5137013: expand") for e in errs), errs)
 
     def test_an_unapproved_extended_part_is_caught(self):
         snap = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
@@ -88,11 +97,11 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(ce.order_qty(17, 2, {"lossNumber": 5, "leastPatchNumber": 0}), 39)
 
     def test_economic_fees(self):
-        fees = ce.pcba_fees(1090, 40, 2, 1)["Economic"]
-        self.assertAlmostEqual(sum(fees.values()), 8.18 + 1.53 + 1090 * 0.0016 + 3.07 + 0.45,
+        fees = ce.pcba_fees(1090, 41, 2, 2)["Economic"]
+        self.assertAlmostEqual(sum(fees.values()), 8.18 + 1.53 + 1090 * 0.0016 + 2 * 3.07 + 0.45,
                                places=6)
-        none = ce.pcba_fees(1090, 40, 2, 0)["Economic"]
-        self.assertAlmostEqual(sum(fees.values()) - sum(none.values()), 3.07, places=6)
+        none = ce.pcba_fees(1090, 41, 2, 0)["Economic"]
+        self.assertAlmostEqual(sum(fees.values()) - sum(none.values()), 2 * 3.07, places=6)
 
     def test_akizuki_free_shipping_threshold(self):
         seen = set()

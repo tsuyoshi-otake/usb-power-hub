@@ -16,7 +16,8 @@ It answers two questions for CIRCUIT_DESIGN_Rev0.4.md:
    - only parts no taller than UNDER_MAX_H sit under a module;
    - the connectors sit on their edges, and the J2-J3 pitch is at least 20 mm;
    - the MAU104 keeps SEP_MAU from the analog front end and the ADCs;
-   - a USB corridor runs from the CH335F to J2 and J3 without crossing the analog front end.
+   - a USB corridor runs from the hub region (R_HUB) to J2 and J3 without crossing the
+     analog front end.
    It exits 1 if any check fails.
 
 What it CANNOT see (write these next to any result quoted from it):
@@ -24,11 +25,13 @@ What it CANNOT see (write these next to any result quoted from it):
   layout prove that a region routes;
 - real footprints: courtyards are IPC-7351-nominal planning values (COURTYARD), and passive
   counts come from the Rev0.4 circuit text and requirements/parts.md, numbered at capture;
-- the CH335F module outline (measured from Akizuki's product photo against a ruler, OI-24).
-  U1 (the bare RP2040, D29) and U8 are SMD parts in R_MCU; their courtyards come from the
-  RP2040 datasheet's Figure 167 and the Winbond SOIC-8 208-mil drawing, not from a footprint;
-- the Full-Speed link from CH335F port 1 to U1: it has no corridor of its own and shares the
-  routing allowance K (the HS corridor to J2/J3 is checked);
+- U1 (the bare RP2040, D29) and U8 are SMD parts in R_MCU, and U6 (the bare CH335F, D31)
+  in R_HUB; their courtyards come from the RP2040 datasheet's Figure 167, the Winbond
+  SOIC-8 208-mil drawing and the CH334/335 datasheet's QFN28_4x4 drawing, not from a
+  footprint;
+- the Full-Speed link from CH335F port 1 to U1, and the upstream HS pair from J1 to U6: they
+  have no corridor of their own and share the routing allowance K (the HS corridor to J2/J3
+  is checked);
 - heights, except through the under-module rule; enclosure, thermal and EMC behaviour;
 - the placement inside each region (for example, that the shunt ladder keeps away from the
   USB corridor). The SVG draws regions, not parts.
@@ -55,6 +58,8 @@ COURTYARD = {
     "3225": (16.7, 3.70, 0.80),      # Crystal_SMD_3225-4Pin: 4.5 x 3.7
     "QFN-56": (68.1, 8.25, 0.90),    # RP2040: 7.75 outer pad span (DS Fig. 167) + 0.25 each
                                      # side; height not printed in the DS, 0.9 assumed
+    "QFN-28": (27.6, 5.25, 0.80),    # CH335F QFN28_4x4 (CH334/335 DS V2.5 Sec. 5.6): 4.0 body,
+                                     # pads 0.375 beyond it as U1's, + 0.25 each side; A 0.80 max
     "SOIC-8-208": (56.4, 5.88, 2.16),  # W25Q128JVSIQ: lead span 8.10 max + 0.5 pad + 0.25,
                                      # body 5.38 max + 0.25 each side; A 2.16 max (Winbond 10.1)
     "TACT": (43.0, 6.10, 3.50),      # TS-1187A 5.1 x 5.1 body, legs out: ~7.0 x 6.1
@@ -97,7 +102,8 @@ COMMON = {
     # 22 ohm x 2, 1 k x 2 (XOUT, BOOTSEL), 10 k (RUN); 5.1 ohm x 2 (0603); 10 uF at U1
     "MCU": [("QFN-56", 1), ("SOIC-8-208", 1), ("3225", 1), ("0402", 20), ("0603", 2),
             ("0805", 1)],
-    "HUB": [("3225", 1), ("0402", 5), ("0805", 1)],       # Y2, decoupling, straps
+    # U6 CH335F, Y2; 1 uF at V5, 100 nF + 10 uF at VDD33 (D31, Rev0.4 Sec. 6.6; no straps)
+    "HUB": [("QFN-28", 1), ("3225", 1), ("0402", 2), ("0805", 1)],
     "FID": [("FID", 1)],
 }
 
@@ -139,19 +145,16 @@ def height(block):
 # ~14.8-16.3; the 1 x 7 pin row at y 13.1. Free under it: between the tab columns, and the
 # strip between the lower tabs and the pin row.
 USBC_UNDER = [(5.8, 0.5, 8.5, 7.9), (0.5, 8.4, 19.0, 3.3)]
-# CH335F module (photo estimate): 38.5 x 10.2 mm, two rows of 15 pins 7.62 mm apart.
-CH335_UNDER = [(0.5, 2.64, 37.5, 4.92)]
 
 HAND = {  # name: (w, h, under-rects in local frame)
     "USBC": (20.0, 15.0, USBC_UNDER),
-    "CH335F": (38.5, 10.2, CH335_UNDER),
     "DIP16": (9.8, 20.85, []),            # DIP-16_W7.62mm courtyard
     "MAU104": (20.0, 6.6, []),            # 19.5 x 6.1 SIP body, courtyard
     "PTC": (13.0, 5.0, []),               # MF-R300 radial 12.0 x 3.0 body, leads 5.1 mm
 }
 HAND_PARTS = {  # designator: kind
     "J1": "USBC", "J2": "USBC", "J3": "USBC", "J4": "USBC",
-    "U6": "CH335F", "U7": "DIP16", "U17": "DIP16", "U5": "MAU104",
+    "U7": "DIP16", "U17": "DIP16", "U5": "MAU104",
     "F1": "PTC",
 }
 
@@ -185,7 +188,6 @@ PLACE = {
     "J2": (18.0, 0.0, 0), "J3": (46.0, 0.0, 0),        # OUT A / OUT B, front edge
     "J4": (7.5, 57.0, 180), "J1": (66.0, 57.0, 180),   # PWR IN / HOST, back edge
     "U7": (55.5, 19.0, 0), "U17": (65.8, 19.0, 0),     # ADCs next to the front ends
-    "U6": (89.3, 19.0, 90),                            # CH335F, right edge, upstream end at J1
     "U5": (82.0, 30.0, 90),                            # MAU104, digital side
     "F1": (1.0, 50.5, 0),                              # J4 input fuse, ahead of D6 (D25)
 }
@@ -207,12 +209,15 @@ REGIONS = {  # top-side SMD regions: name -> ((x, y, w, h), [blocks])
     "R_PWR4": ((14.5, 50.5, 13.0, 6.0), ["TVS4"]),
     "R_MCU": ((28.0, 50.0, 23.0, 21.5), ["MCU"]),           # U1, U8, Y1 (D29)
     "R_LDO": ((51.5, 50.0, 14.0, 21.5), ["LDO", "OC"]),
+    # U6, Y2 (D31): the strip the CH335F module held, right edge from the corridor to J1;
+    # what the hub block leaves free carries the upstream pair from J1
+    "R_HUB": ((89.3, 19.0, 10.2, 38.5), ["HUB"]),
     "R_F1": ((1.0, 8.5, 3.0, 3.0), ["FID"]),
     "R_F2": ((96.0, 8.5, 3.0, 3.0), ["FID2"]),
     "R_F3": ((1.0, 61.0, 3.0, 3.0), ["FID3"]),
 }
 UNDER = {  # under-module assignments: designator -> [blocks]
-    "J2": ["PORT_A"], "J3": ["PORT_B"], "J4": ["J4IN"], "J1": ["J1IN"], "U6": ["HUB"],
+    "J2": ["PORT_A"], "J3": ["PORT_B"], "J4": ["J4IN"], "J1": ["J1IN"],
 }
 ANALOG = ["R_AFEA", "R_AFEB", "U7", "U17"]   # MAU104 keeps SEP_MAU from these
 
@@ -312,13 +317,13 @@ def check_layout():
         g = gap(mau, r)
         if g < SEP_MAU:
             fails.append(f"MAU104 is {g:.1f} mm from {n} (< {SEP_MAU})")
-    # USB corridor: reaches the CH335F and both port pin rows, crosses no analog region
+    # USB corridor: reaches the hub region and both port pin rows, crosses no analog region
     cor = KEEPOUT["USB_CORRIDOR"]
     for n in ("R_AFEA", "R_AFEB"):
         if gap(cor, rects[n]) < 0:
             fails.append(f"USB corridor crosses {n}")
-    if gap(cor, hand_rect("U6")) > CLEAR + 1e-9:
-        fails.append("USB corridor does not reach the CH335F")
+    if gap(cor, rects["R_HUB"]) > CLEAR + 1e-9:
+        fails.append("USB corridor does not reach the hub (R_HUB)")
     for d in ("J2", "J3"):
         if gap(cor, hand_rect(d)) > CLEAR + 1e-9:
             fails.append(f"USB corridor does not reach {d}")

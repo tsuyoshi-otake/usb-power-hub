@@ -54,6 +54,7 @@ BOARD_AREA_CM2 = 10.0 * 7.2
 # Actives and the passives with an exact count: Rev0.4 §6.2 designators and parts.md.
 EXACT = {
     "C2040": ("RP2040", "QFN-56", 1),
+    "C5137013": ("CH335F USB hub", "QFN-28", 1),
     "C97521": ("W25Q128JVSIQ flash", "SOIC-8-208", 1),
     "C7433": ("OP07CDR", "SOIC-8", 6),
     "C7955": ("LM393DR2G", "SOIC-8", 3),
@@ -79,38 +80,41 @@ EXACT = {
 }
 # 0402 passives: positions are numbered at capture, so these counts come from parts.md's
 # "Use" column. The positions not attributed to a value (decoupling, comparator thresholds,
-# the OC network, hub straps) are REMAINDER_0402 and are priced at the dearest 0402 code.
+# the OC network) are REMAINDER_0402 and are priced at the dearest 0402 code.
 # U1's circuit (Rev0.4 Sec. 6.5, D29) is attributed in full: 100 nF x 11, 1 uF x 2,
-# 15 pF x 2, 22 ohm x 2, 1 kohm x 2, 10 kohm x 1.
+# 15 pF x 2, 22 ohm x 2, 1 kohm x 2, 10 kohm x 1. So is U6's (Sec. 6.6, D31): 1 uF at V5
+# and 100 nF at VDD33; its 10 uF is one of the seven C15850.
 EST_0402 = {
     "C25076": ("100 ohm", 6), "C25867": ("1.5 kohm", 8), "C25744": ("10 kohm", 17),
     "C25756": ("15 kohm", 4), "C25779": ("33 kohm", 6), "C25905": ("5.1 kohm", 4),
     "C25741": ("100 kohm", 6), "C26083": ("1 Mohm", 10), "C11702": ("1 kohm", 20),
-    "C25077": ("10 ohm", 2), "C1530": ("220 pF", 2), "C307331": ("100 nF", 19),
-    "C52923": ("1 uF", 6), "C1523": ("1 nF", 4), "C15195": ("10 nF", 2),
+    "C25077": ("10 ohm", 2), "C1530": ("220 pF", 2), "C307331": ("100 nF", 20),
+    "C52923": ("1 uF", 7), "C1523": ("1 nF", 4), "C15195": ("10 nF", 2),
     "C1548": ("15 pF C0G (Y1 load)", 2), "C25092": ("22 ohm (USB 27 ohm, part 1)", 2),
 }
 PINS = {"0402": 2, "0603": 2, "0805": 2, "SOT-23": 3, "SOIC-8": 8, "SOT-223": 4, "SMB": 2,
-        "3225": 4, "TACT": 4, "QFN-56": 57, "SOIC-8-208": 8}   # QFN-56: 56 pins + the ePad
+        "3225": 4, "TACT": 4, "QFN-56": 57, "QFN-28": 29,
+        "SOIC-8-208": 8}                         # each QFN: its pins + the ePad
 # The sourcing rule is Basic only (D13, D22). The user's exceptions, each with its decision:
-APPROVED_EXTENDED = {"C2040": "D29"}
+APPROVED_EXTENDED = {"C2040": "D29", "C5137013": "D31"}
 NOT_MACHINE = {"TSL-KELVIN", "AXIAL-10", "TC2030", "FID"}   # hand parts and bare lands
 
 # ---- Akizuki, per board unless noted (requirements/parts.md, 2026-11-03, tax incl.) -----
-AKIZUKI = [  # (part, code, yen each, per board); the PGA2040 (g116762) left with D29
+AKIZUKI = [  # (part, code, yen each, per board); the PGA2040 (g116762) left with D29 and
+    # the CH335F module (g129556) with D31
     ("MCP3208-CI/P", "g100238", 500, 2),
     ("AE-USB2.0-TYPE-C", "g113080", 350, 4),
-    ("AE-QFN28-DIP(CH335F)", "g129556", 420, 1),
     ("MAU104", "g104132", 520, 1),
     ("TSL1TTER100D", "g109588", 130, 2),
     ("MF-R300", "g112630", 40, 1),
 ]
 AKIZUKI_ONCE = [("MFU100F10RB, bag of 100 (4 needed)", "g108805", 600)]
 # Not selected (parts.md "Not yet selected"): an allowance, read off Akizuki on 2026-11-03.
-# 58 module pins per board since D29: 4 USB-C modules x 7 + the CH335F's 30, so 2 strips.
-HEADER_ALLOWANCE = [("pin header 1x40, PH-1x40SG", "100167", 35, 2),
+# 28 module pins per board since D31: 4 USB-C modules x 7, so 1 strip (58 and 2 strips
+# while the CH335F module's 30 pins were on the board).
+HEADER_ALLOWANCE = [("pin header 1x40, PH-1x40SG", "100167", 35, 1),
                     ("pin socket 1x40, FH2.54-40U1GF8.5-0.5 (if modules are socketed)",
-                     "110073", 120, 2)]
+                     "110073", 120, 1)]
 AKIZUKI_FREE_SHIPPING_YEN = 11000                     # subtotal, tax incl.
 AKIZUKI_SHIPPING_YEN = 550                             # Sagawa, per parcel (from 2025-10-01)
 

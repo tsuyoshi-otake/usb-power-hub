@@ -87,6 +87,11 @@ class LayoutChecks(unittest.TestCase):
         self.m.KEEPOUT["USB_CORRIDOR"] = (x, y + 4.0, w, h)
         self.assertFailure("USB corridor crosses R_AFEA")
 
+    def test_corridor_misses_hub(self):
+        r, bl = self.m.REGIONS["R_HUB"]
+        self.m.REGIONS["R_HUB"] = ((r[0], r[1] + 2.0, r[2], r[3] - 2.0), bl)   # 2.5 mm off
+        self.assertFailure("USB corridor does not reach the hub (R_HUB)")
+
     def test_necessary_area_rejects_85x35(self):
         req = self.m.necessary_area(1.0)[0]
         self.assertGreater(req, 85 * 35)

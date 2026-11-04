@@ -24,6 +24,8 @@
 <text x="171.0" y="14.0" fill="#fff">MCU: MCU</text>
 <rect x="309.0" y="3.0" width="84.0" height="129.0" fill="#3c8d5a" stroke="#9fe0b0"/>
 <text x="312.0" y="14.0" fill="#fff">LDO: LDO, OC</text>
+<rect x="535.8" y="87.0" width="61.2" height="231.0" fill="#3c8d5a" stroke="#9fe0b0"/>
+<text x="538.8" y="98.0" fill="#fff">HUB: HUB</text>
 <rect x="6.0" y="363.0" width="18.0" height="18.0" fill="#3c8d5a" stroke="#9fe0b0"/>
 <text x="9.0" y="374.0" fill="#fff">F1</text>
 <rect x="576.0" y="363.0" width="18.0" height="18.0" fill="#3c8d5a" stroke="#9fe0b0"/>
@@ -60,9 +62,6 @@
 <text x="336.0" y="314.0" fill="#ffd24a">U7 DIP16</text>
 <rect x="394.8" y="192.9" width="58.8" height="125.1" fill="none" stroke="#ffd24a"/>
 <text x="397.8" y="314.0" fill="#ffd24a">U17 DIP16</text>
-<rect x="535.8" y="87.0" width="61.2" height="231.0" fill="none" stroke="#ffd24a"/>
-<text x="538.8" y="314.0" fill="#ffd24a">U6 CH335F</text>
-<rect x="551.6" y="90.0" width="29.5" height="225.0" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
 <rect x="492.0" y="132.0" width="39.6" height="120.0" fill="none" stroke="#ffd24a"/>
 <text x="495.0" y="248.0" fill="#ffd24a">U5 MAU104</text>
 <rect x="6.0" y="99.0" width="78.0" height="30.0" fill="none" stroke="#ffd24a"/>

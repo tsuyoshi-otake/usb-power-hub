@@ -1,11 +1,11 @@
 # USB Power-Control Hub — Verification Plan
 
-**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28, D29
-and D30 on 2026-11-04. Nothing below has
+**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28, D29,
+D30 and D31 on 2026-11-04. Nothing below has
 been executed — no board exists.
 
 Every requirement in `requirements/product.md` is covered by at least one entry here, and
-every entry cites the requirements it proves. Design-review gates G1 – G20 live in
+every entry cites the requirements it proves. Design-review gates G1 – G21 live in
 `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 8; entries here reference them rather than
 restate them. CLAUDE.md Section 8 ("Functional" gate) requires these to pass before release.
 
@@ -232,8 +232,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
     - a different JEDEC ID reopens U8's part (parts.md); equal unique IDs reopen REQ-HOST-02's
       serial-number source;
     - a missed start-up or a frequency outside the limit reopens Y1 (circuit §6.3). The
-      fallback, ABM8-272-T3 (C20625731), fits the same land but is a second Extended part, so
-      it needs the user's decision (D29).
+      fallback, ABM8-272-T3 (C20625731), fits the same land but would be a third Extended part
+      (after D29 and D31), so it needs the user's decision.
 
 ### V-MEAS-01 — Range, accuracy and sample rate against a reference
 - **Covers:** REQ-MEAS-01, REQ-MEAS-05, REQ-MEAS-08
@@ -361,11 +361,12 @@ pass counts. Entries that rely on a script note this under *Limits*.
 
 ### V-MECH-01 — Outline, connectors, fastening
 - **Covers:** REQ-MECH-01, REQ-MECH-02, REQ-MECH-03, REQ-MECH-04, REQ-MECH-05
-- **When:** Design review (mechanical overlay with real module outlines, OI-23) + Bring-up
-  (real parts)
+- **When:** Design review (mechanical overlay with the real USB-C module outlines and header
+  height, OI-23) + Bring-up (real parts)
 - **Method:**
-  - Run `python -I design/experiments/oi-23-placement/placement_study.py` with the measured
-    module outlines and the chosen header height entered (design review). It must exit 0.
+  - Run `python -I design/experiments/oi-23-placement/placement_study.py` with the chosen
+    header height entered (design review). It must exit 0. Since D31 no outline in it comes
+    from a photo: the CH335F module's did (OI-24).
   - Measure the Gerber outline and the fabricated board.
   - Insert the two widest cables on hand into J2 and J3 together, lid fitted.
   - Count mounting points and measure thread engagement or insert depth.
@@ -400,29 +401,31 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Open each hand-soldered part's Akizuki page and record its stock.
   - Compare each BOM line's class with the rule.
 - **Pass:**
-  - Every BOM line is Basic with ≥ 500 assembly stock, except one: C2040 (RP2040), the
-    Extended line D29 allows, which also needs ≥ 500. No other Extended line, and no Preferred
-    Extended line (D22, D29).
+  - Every BOM line is Basic with ≥ 500 assembly stock, except two: C2040 (RP2040, D29) and
+    C5137013 (CH335F, D31), the Extended lines the user allowed, which also need ≥ 500. No
+    other Extended line, and no Preferred Extended line (D22, D29, D31).
   - Every hand-soldered part shows stock ≥ the build quantity.
 - **Limits:** `jlc_stock.py` sees the class and stock only, not suitability. It was shown
   failing (exit 1) on a non-existent code on 2026-11-03. Akizuki stock is read by hand,
   because there is no checked tool.
 
-### V-MFG-03 — U1's joints on leaded HASL, at bring-up (D30)
+### V-MFG-03 — U1's and U6's joints on leaded HASL, at bring-up (D30, D31)
 - **Covers:** REQ-MECH-01 (finish), REQ-MFG-01
 - **When:** Bring-up, on both PCBA boards, on arrival and before the first power-up.
 - **Method:**
-  - Inspect U1's 56 pins from all four sides under ≥ 10× magnification.
-  - Unpowered, measure V3V3 and DVDD to GND at their test pads.
+  - Inspect U1's 56 pins and U6's 28 pins from all four sides under ≥ 10× magnification.
+  - Unpowered, measure V3V3, DVDD, V5L and VDD33_HUB to GND at their test pads.
 - **Pass:**
-  - No bridge between adjacent U1 pins, and every visible toe is wetted.
-  - V3V3 and DVDD each read ≥ 100 Ω to GND (a hard short reads a few ohms).
-  - The board then passes V-MEAS-06's U1 checks, which exercise the supply, USB, QSPI and
-    crystal pins.
-- **Failing:** a bridge or open is reworked under the microscope. If both boards need it,
-  D30 reopens: ENIG for the next order is the user's decision.
-- **Limits:** the ePad and the inner ends of the pads are not visible; an open there shows
-  only as a V-MEAS-06 failure.
+  - No bridge between adjacent U1 or U6 pins, and every visible toe is wetted.
+  - V3V3, DVDD, V5L and VDD33_HUB each read ≥ 100 Ω to GND (a hard short reads a few ohms).
+  - At the first power-up, VDD33_HUB reads 3.2–3.5 V (U6's LDO, CH334/335 datasheet §4.2).
+  - The board then passes V-MEAS-06's U1 checks, which exercise U1's supply, USB, QSPI and
+    crystal pins, and V-HOST-01's hub enumeration, which exercises U6's supply, crystal and
+    USB pins.
+- **Failing:** a bridge or open is reworked under the microscope. If both boards need it on
+  either QFN, D30 reopens: ENIG for the next order is the user's decision.
+- **Limits:** the two ePads and the inner ends of the pads are not visible; an open there
+  shows only as a V-MEAS-06 or V-HOST-01 failure.
 
 ## Safety and fail-safe
 

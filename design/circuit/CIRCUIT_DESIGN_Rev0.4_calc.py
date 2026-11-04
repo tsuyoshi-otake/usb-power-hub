@@ -251,6 +251,20 @@ for case, i in I_DVDD.items():
     print(f"DVDD {case} {i} mA max vs the on-chip regulator's 100 mA: {100/i:.1f} x;"
           f" its loss (V3V3 max - 1.1 V) x I = {(V3V3_MAX-1.1)*i:.0f} mW")
 
+print("\n== Sec. 7.1 / Sec. 6.6 U6, the bare CH335F (D31), on V5L")
+V5L_MIN, V5L_MAX, V5L_CORNER = 4.5, 5.25, 5.5   # design range (Sec. 3.2); the USB-C 5.5 V corner
+V5_OP = (4.5, 5.25)                             # CH334/335 DS V2.5 Sec. 4.2, internal LDO on
+V5_ABS = 5.5                                    # DS Sec. 4.1, absolute maximum
+print(f"V5 {V5_OP[0]}-{V5_OP[1]} V on V5L {V5L_MIN}-{V5L_MAX} V: margin {V5L_MIN-V5_OP[0]:+.2f} V low,"
+      f" {V5_OP[1]-V5L_MAX:+.2f} V high; at the {V5L_CORNER} V corner {V5_ABS-V5L_CORNER:+.2f} V"
+      f" to the {V5_ABS} V absolute maximum")
+for v in (5.0, V5L_MAX):
+    print(f"U6 at {hub} mA from {v} V: {v*hub:.0f} mW, of which its LDO (V5 - 3.3 V) {(v-3.3)*hub:.0f} mW")
+i3_hub = i3 + hub
+p_alt = (5.0 - 3.3) * i3_hub / 1e3
+print(f"not adopted, V5 and VDD33 fed from V3V3 (DS Sec. 6.1): U6 {3.3*hub:.0f} mW, but V3V3 carries"
+      f" {i3_hub:.1f} mA and the AMS1117 {p_alt:.3f} W -> {p_alt*90:.1f} C rise at 90 C/W")
+
 print("\n== Sec. 3.3 USB series termination per line: 22 ohm (C25092) + 5.1 ohm (C25197), both +-1 %")
 r_nom = 22.0 + 5.1
 r_lo, r_hi = 0.99 * r_nom, 1.01 * r_nom
