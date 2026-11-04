@@ -1,7 +1,7 @@
 # USB Power-Control Hub — Product Requirements
 
 **State: WIP — MANUFACTURING PROHIBITED.** Opened 2026-11-03. Revised for circuit Rev0.4
-on 2026-11-03; amended 2026-11-04 for D29 (the bare RP2040).
+on 2026-11-03; amended 2026-11-04 for D29 (the bare RP2040) and D30 (leaded HASL).
 
 This file is the authority for **what** the product must do (CLAUDE.md Section 2).
 **How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.4.md`. **How each requirement is
@@ -134,7 +134,7 @@ REQ-PORT-04) and are not reused.
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
-| REQ-MECH-01 | PCB 100 × 72 mm, 1.6 mm, 4 layers, ENIG, JLCPCB stackup JLC04161H-7628 named on the order. The outline stays within 100 × 100 mm (JLCPCB's base price tier as quoted on 2026-11-03, the user's condition in D24). A block placement is checked; the measured module outlines are still OI-23 / OI-24. | Settled (4 layers, ≤ 100 × 100 mm) / Delegated (100 × 72 mm, stackup) | D10, D24, D27, CLAUDE.md §10.3 |
+| REQ-MECH-01 | PCB 100 × 72 mm, 1.6 mm, 4 layers, leaded HASL (D30; not RoHS), JLCPCB stackup JLC04161H-7628 named on the order. The outline stays within 100 × 100 mm (JLCPCB's base price tier as quoted on 2026-11-03, the user's condition in D24). A block placement is checked; the measured module outlines are still OI-23 / OI-24. | Settled (4 layers, ≤ 100 × 100 mm, finish) / Delegated (100 × 72 mm, stackup) | D10, D24, D27, D30, CLAUDE.md §10.3 |
 | REQ-MECH-02 | Two USB-C plugs fit J2 and J3 at the same time, verified with real cables. Design input: J2–J3 centre pitch ≥ 18 mm. The J2/J3 modules are 20 mm wide, so side-by-side placement gives ≥ 20 mm. | Settled (requirement, OI-1) / Delegated (18 mm) | OI-1, D21 |
 | REQ-MECH-03 | ≥ 3 mounting points, at least one near each connector end; insertion force is not carried by solder joints. The connector modules' mechanical pins are soldered, and the modules sit on the PCB, not on their header pins alone. | Settled | CLAUDE.md §7 |
 | REQ-MECH-04 | Fasteners have ≥ 4 mm thread engagement or use heat-set inserts. | Settled (rule) / Delegated (heat-set M2 ×4) | CLAUDE.md §7, D21 |
@@ -144,7 +144,7 @@ REQ-PORT-04) and are not reused.
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
-| REQ-MFG-01 | JLCPCB PCBA places SMD parts on Top only, the MCU U1, its flash U8 and crystal Y1 included (D29). The user hand-solders the Akizuki modules and large parts after delivery: through-hole pins are soldered from Bottom, and the two large SMD shunts on Top. No part body on Bottom; ENIG. | Settled | D13, D29; changes CLAUDE.md §1 "Top-side assembly" |
+| REQ-MFG-01 | JLCPCB PCBA places SMD parts on Top only, the MCU U1, its flash U8 and crystal Y1 included (D29). The user hand-solders the Akizuki modules and large parts after delivery: through-hole pins are soldered from Bottom, and the two large SMD shunts on Top. No part body on Bottom; leaded HASL (D30). | Settled | D13, D29, D30; changes CLAUDE.md §1 "Top-side assembly" |
 | REQ-MFG-02 | ≥ 3 global fiducials, 1 mm copper / 2 mm mask opening. | Settled | CLAUDE.md §10.3 |
 | REQ-MFG-03 | SWD reachable by a fixture with mechanical datums, for debug; programming does not need it (REQ-BOOT-02). Method: Tag-Connect TC2030-NL footprint. | Settled (need, OI-8) / Delegated (method) | OI-8, D21 |
 | REQ-MFG-04 | Test pads on VBUS_IN, VSUP_A, VSUP_B, VBUS_A, VBUS_B, V5L, V5A, V12F, V_INJ, V3V3, VDDA and GND; since D29 also on U1's DVDD, RUN and one GPOUT clock pin (GPIO21, 23, 24 or 25), which V-MEAS-06 reads. | Delegated (D21) / Settled (the D29 pads) | D21, D29 |
@@ -163,6 +163,7 @@ REQ-PORT-04) and are not reused.
 
 - **Two cables:** J1 to the PC for data and control, and J4 to a 5 V USB-C supply for port
   power. Without J4 the ports cannot turn on.
+- **Not RoHS-compliant:** the PCB finish is leaded HASL (D30).
 - **Port voltage is J4's voltage minus up to 0.40 V at 1 A** (0.20 V at 0.5 A, 0.48 V when
   the other port also draws 1 A; the input fuse F1 is shared). It is not regulated, and
   below 4.75 V it is outside USB 2.0's downstream-port range (circuit §3.1).

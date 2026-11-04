@@ -135,7 +135,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D29 live in circuit §10)
+│                               #   created, decisions D1–D30 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -487,7 +487,9 @@ voltage/temperature/TCR rating without analysis; selecting a part only because
 it is in stock today; skipping placement confirmation; ordering an incomplete
 board to save a review cycle.
 
-ENIG is the assumed finish (flat surface for fine-pitch QFN and 0201). Recheck
+The finish is **leaded HASL** (D30, user, 2026-11-04), not ENIG. HASL is not flat: U1, the
+0.4 mm-pitch RP2040 QFN with an ePad, is the part it puts at risk, and V-MFG-03 inspects
+its joints on the first boards. Recheck
 the live quote and capability page at every release — limits, fees, lead time,
 inventory, and auto-confirmation deadlines change.
 
@@ -536,7 +538,7 @@ of what the mockup claimed and what was wrong with it; do not design from it.
 traced to a V-* entry in `requirements/verification.md`). This list is the
 summary; where the two differ, `product.md` wins and this list is the defect.
 
-- Board thickness 1.6 mm, ENIG. **Outline 100 × 72 mm, 4 layers (D10, D24),** inside
+- Board thickness 1.6 mm, leaded HASL (D30; ENIG until then). **Outline 100 × 72 mm, 4 layers (D10, D24),** inside
   100 × 100 mm. Stackup JLC04161H-7628, no impedance control for the prototype (D27).
   JLCPCB machine-places Top SMD only; the large Akizuki parts are hand-soldered
   (D13, REQ-MFG-01).
@@ -564,7 +566,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D29; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D30; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -574,7 +576,9 @@ withdrawn and not reused).
   confirms (D28, 2026-11-04, 「試験キットは買わない、基板で確かめる。君が机上で確認すればいい」),
   and the bare RP2040 (C2040) as the one Extended part, machine-placed, replacing D23's
   PGA2040 module (D29, 2026-11-04: 「このPGAてさ生のRP2040より高くない?」,
-  「いいよ、大きな設計変更になってもいいよ」, and the choice 「素の RP2040 (推奨)」).
+  「いいよ、大きな設計変更になってもいいよ」, and the choice 「素の RP2040 (推奨)」),
+  and leaded HASL instead of ENIG (D30, 2026-11-04: 「ENIGいらないよ、」, then the choice
+  「有鉛 HASL (推奨)」).
   D1 (PD sink) and D11 (USB2514B) were also user decisions; both are superseded because
   their parts are Extended.
 - **Under the delegation:** on 2026-11-03 the user delegated the open choices

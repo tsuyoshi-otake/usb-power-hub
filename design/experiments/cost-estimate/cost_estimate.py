@@ -35,12 +35,12 @@ JPY_PER_USD = 160.0     # planning rate; ~158 on 2026-10-11, 2026 high 163.85 (R
 # 4 layers, 100 x 72 mm, 1.6 mm, 5 pcs, FR4 TG135, green, 1 oz / 0.5 oz, 3-4 day build.
 PCB_BASE_USD = 8.00                                      # shown as "Special Offer"
 PCB_FINISH_USD = {"HASL (with lead)": 0.00, "LeadFree HASL": 5.20, "ENIG": 17.40}
-PCB_FINISH = "ENIG"                                      # CLAUDE.md §9 assumes ENIG
+PCB_FINISH = "HASL (with lead)"                          # D30 (user, 2026-11-04); was ENIG
 LID_PCB_USD = 4.00      # the lid panel: 2 layers, 100 x 72 mm, 5 pcs, HASL (CLAUDE.md §7)
 # Shipping to Japan for the PCB-only parcel (0.24 kg). A PCBA parcel is heavier; the real
 # figure appears only after the Gerber and BOM are uploaded.
 SHIP_JP_USD = {"OCS Express": 7.23, "UPS Worldwide Express Saver": 9.79, "DHL Express": 17.62}
-SHIP_PLAN = "UPS Worldwide Express Saver"
+SHIP_PLAN = "OCS Express"            # the cheapest quoted; the user: not UPS (2026-11-04)
 
 # ---- JLCPCB PCBA fees, jlcpcb.com/help/article/pcb-assembly-price ("Oct 22, 2026") ------
 ECONOMIC = {"setup": 8.18, "stencil": 1.53, "joint": 0.0016, "extended_feeder": 3.07}

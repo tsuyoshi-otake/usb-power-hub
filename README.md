@@ -26,10 +26,10 @@ the host PC over a plain COM port.
 - **Control:** an RP2040 with its own flash and crystal, machine-placed (D29), behind a CH335F hub, enumerating as a driverless CDC-ACM COM
   port. Commands such as `PORT A ON`, `PORT B CYCLE 2000` and `STREAM ON` are listed in
   `requirements/product.md` Section 4.1.
-- **Board:** 100 × 72 mm, 4 layers, 1.6 mm FR-4, ENIG (D24). The earlier 85 × 35 mm
+- **Board:** 100 × 72 mm, 4 layers, 1.6 mm FR-4 (D24), leaded HASL (D30). The earlier 85 × 35 mm
   cannot hold the Rev0.4 parts. JLCPCB's instant quote on 2026-11-03 (4 layers, 5 pcs,
-  default options) was $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; ENIG adds $16.90 and
-  $17.40 at the two sizes. Recheck the live quote before ordering. The stackup is
+  default options, leaded HASL) was $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; ENIG would
+  add $16.90 and $17.40 at the two sizes. Recheck the live quote before ordering. The stackup is
   JLC04161H-7628, named on the order, without impedance control for the prototype (D27).
   - JLCPCB machine-places the small parts and the RP2040, all JLCPCB **Basic** except the
     RP2040 itself (Extended, the one exception, D29).
@@ -52,7 +52,7 @@ Read in this order:
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
 | `design/experiments/stackup-impedance/` | The stackup study behind D27: JLCPCB's 4-layer stackups, the 90 Ω USB pair width on each, and a model checked against JLCPCB's single-ended calculator. A non-authoritative study, not design data. |
-| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03 and re-run 2026-11-04 for D29: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
+| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03 and re-run 2026-11-04 for D29 and D30: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
 | `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the board-size decisions D10 and D24 (100 × 72 mm). |
 
 Decisions are D-numbers in the circuit document's §10. Its "By" column says whether the

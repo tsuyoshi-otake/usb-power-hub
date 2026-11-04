@@ -1,7 +1,7 @@
 # USB Power-Control Hub — Verification Plan
 
-**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28 and
-D29 on 2026-11-04. Nothing below has
+**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28, D29
+and D30 on 2026-11-04. Nothing below has
 been executed — no board exists.
 
 Every requirement in `requirements/product.md` is covered by at least one entry here, and
@@ -407,6 +407,22 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - **Limits:** `jlc_stock.py` sees the class and stock only, not suitability. It was shown
   failing (exit 1) on a non-existent code on 2026-11-03. Akizuki stock is read by hand,
   because there is no checked tool.
+
+### V-MFG-03 — U1's joints on leaded HASL, at bring-up (D30)
+- **Covers:** REQ-MECH-01 (finish), REQ-MFG-01
+- **When:** Bring-up, on both PCBA boards, on arrival and before the first power-up.
+- **Method:**
+  - Inspect U1's 56 pins from all four sides under ≥ 10× magnification.
+  - Unpowered, measure V3V3 and DVDD to GND at their test pads.
+- **Pass:**
+  - No bridge between adjacent U1 pins, and every visible toe is wetted.
+  - V3V3 and DVDD each read ≥ 100 Ω to GND (a hard short reads a few ohms).
+  - The board then passes V-MEAS-06's U1 checks, which exercise the supply, USB, QSPI and
+    crystal pins.
+- **Failing:** a bridge or open is reworked under the microscope. If both boards need it,
+  D30 reopens: ENIG for the next order is the user's decision.
+- **Limits:** the ePad and the inner ends of the pads are not visible; an open there shows
+  only as a V-MEAS-06 failure.
 
 ## Safety and fail-safe
 
