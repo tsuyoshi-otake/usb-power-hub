@@ -215,6 +215,13 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   criterion, found three gaps. "No sustained oscillation" is now ±1 % within 100 µs. "The
   flash is a W25Q64JV" is now JEDEC ID EFh 4017h. A LOW sweep to 430 µA could not run past the
   365 µA hardware up-range.
+- **Name a source only after finding, in this session, the text that came from it.** Verified
+  2026-11-04 (D35, #7): a draft cited "TI TPS2553-Q1 §10.2" for USB's 10 µF ∥ 44 Ω rule; a
+  search of the session transcript showed the excerpt came from TI SLVS798G and NXP AN11392
+  web-search results. Say "as web-search excerpts" when the primary text was not read.
+- **After replacing a line of an ASCII diagram, compare its branch column with the old
+  line's.** Verified 2026-11-04 (D35): the new §3.1 line put `┬` at column 44 while the
+  branches below sit at 45; a script comparing `str.index("┬")` with HEAD's line found it.
 - **Quote the user verbatim, typos included, and quote every message that set the rule.**
   Verified 2026-11-03: the Rev0.3 header had "corrected" 「デカくい」 to 「デカい」 and dropped one
   line of the user's message; an independent verifier caught it.

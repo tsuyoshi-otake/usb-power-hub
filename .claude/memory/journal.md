@@ -805,3 +805,33 @@ Section 13 (board) only once verified.
 
   Each is now a bring-up item in verification.md. The cost estimate is not re-run for D34.
 - **Commit.** `d1c9fa1`.
+
+## 2026-11-04 - D35: J1 soft start, closes OI-32 (issue #7)
+
+- **Symptom.** OI-32, found at capture (P2 of #6): J1's VBUS fed V5L directly, so 78.6 µF
+  that follows V5L charged from the host with no limit, 294 µC at plug-in (5.9 × a 10 µF
+  load's 50 µC). P2's journal entry said "about 260 µC"; the calc showed that counting
+  every rail at 5 V overstated it (393 µC) and that the true figure, with each rail at its
+  own voltage, is 294 µC.
+- **Decision.** The user accepted the recommended fix (「OKお願いします」); Claude set the
+  values. Q53 AO3401A, source VBUS_J1, drain V5L; R34 33 k gate → GND; C35 100 nF
+  gate → drain (Miller); C36 + C37 2 × 1 µF gate → source; TP14 on VBUS_J1. No new part
+  type.
+- **Design reasoning.** Without the gate-source capacitors, C35 would hold the gate at 0 V
+  at the plug-in step and the FET would turn fully on. C_GS ≈ 20 × C_M keeps the step at
+  −0.317 V (1.58 × inside V_th min). R·C_M = 3.3 ms keeps hold-off plus ramp ≤ 30.4 ms,
+  inside USB's 100 ms attach window.
+- **Incident: a source named from memory.** The first draft cited "TI TPS2553-Q1 §10.2" for
+  the 10 µF ∥ 44 Ω rule. A search of this session's transcript showed that the excerpt came
+  from TI SLVS798G (TPS2062A) and NXP AN11392, as web-search results. Fixed before commit.
+- **Incident: a diagram branch moved.** The new §3.1 diagram line put `┬` at column 44; the
+  branches below it sit at 45. Comparing with HEAD's line by script found it; fixed.
+- **Verification.** make_schematic 3992 checks PASS; ERC 0 on 7 sheets; all tests OK.
+  Rubric `.claude/goal-loop/oi-32-d35/rubric.md` (C1–C7), rubric-verifier (sonnet), round 1:
+  all pass. The verifier parsed the netlist itself (VBUS_J1 and GJ1 node sets exact) and
+  diffed the calc output against HEAD (only the 11 D35 lines added).
+- **Residual risk.** Not settled on paper: the MAU104's start-up current (passed by Q53 once
+  V5L is past the MAU104's start) and U6's time to attach. Both are in V-PWR-03. The
+  capacitive inrush bound, 152 mA, is above the 114 mA of USB's 44 Ω; it is a slow ramp,
+  not a surge, and V-PWR-03 records J1's peak. The cost estimate is not re-run for D35.
+- **Commit.** `30514a6`.
