@@ -44,20 +44,16 @@
 <text x="111.0" y="332.0" fill="#fff">USB_CORRIDOR</text>
 <rect x="108.0" y="342.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
 <text x="111.0" y="428.0" fill="#ffd24a">J2 USBC</text>
-<rect x="142.8" y="381.6" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
-<rect x="111.0" y="361.8" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="111.0" y="362.4" width="114.0" height="20.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
 <rect x="276.0" y="342.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
 <text x="279.0" y="428.0" fill="#ffd24a">J3 USBC</text>
-<rect x="310.8" y="381.6" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
-<rect x="279.0" y="361.8" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="279.0" y="362.4" width="114.0" height="20.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
 <rect x="45.0" y="0.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
 <text x="48.0" y="86.0" fill="#ffd24a">J4 USBC</text>
-<rect x="79.2" y="3.0" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
-<rect x="48.0" y="50.4" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="48.0" y="49.2" width="114.0" height="20.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
 <rect x="396.0" y="0.0" width="120.0" height="90.0" fill="none" stroke="#ffd24a"/>
 <text x="399.0" y="86.0" fill="#ffd24a">J1 USBC</text>
-<rect x="430.2" y="3.0" width="51.0" height="47.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
-<rect x="399.0" y="50.4" width="114.0" height="19.8" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
+<rect x="399.0" y="49.2" width="114.0" height="20.4" fill="none" stroke="#ffd24a" stroke-dasharray="4,3"/>
 <rect x="333.0" y="192.9" width="58.8" height="125.1" fill="none" stroke="#ffd24a"/>
 <text x="336.0" y="314.0" fill="#ffd24a">U7 DIP16</text>
 <rect x="394.8" y="192.9" width="58.8" height="125.1" fill="none" stroke="#ffd24a"/>

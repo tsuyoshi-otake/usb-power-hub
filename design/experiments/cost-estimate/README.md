@@ -1,4 +1,4 @@
-# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29, D30 and D31) — non-authoritative
+# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29, D30, D31 and D33) — non-authoritative
 
 **Question.** What does a first prototype cost? The order is JLCPCB fabricating **5 bare
 PCBs** and assembling **2** of them, plus the Akizuki parts the user solders by hand onto
@@ -9,15 +9,17 @@ crystal and passives, instead of the hand-soldered PGA2040 module (¥1,680 each)
 below are the re-run's, with a price snapshot fetched on 2026-11-04. Since D30 (the same day)
 the finish is leaded HASL instead of ENIG, and the plan ships by OCS Express, the cheapest
 quoted, instead of UPS (the user: 「UPSじゃなくていい」). Since D31 (the same day) the hub is a
-bare CH335F (C5137013), machine-placed, instead of the hand-soldered Akizuki module.
+bare CH335F (C5137013), machine-placed, instead of the hand-soldered Akizuki module. Since D33
+(the same day) the USB-C modules are soldered on PH-1x40SG pin headers without sockets, and
+the header count includes each module's four mechanical pins: 44 pins per board.
 
 **Answer** (at 160 yen/USD; Japanese import tax, M2 inserts and the enclosure print are not
 included):
 
 | Case | JLCPCB order | Akizuki parts | Total, 2 units | Per unit |
 |---|---:|---:|---:|---:|
-| **Economic PCBA** (recommended) | $61.01 = 9,761 yen | 7,660 – 7,900 yen | **17,421 – 17,661 yen** | 8,710 – 8,830 yen |
-| Standard PCBA | $158.58 = 25,373 yen | 7,660 – 7,900 yen | 33,033 – 33,273 yen | 16,516 – 16,636 yen |
+| **Economic PCBA** (recommended) | $61.01 = 9,761 yen | 7,695 yen | **17,456 yen** | 8,728 yen |
+| Standard PCBA | $158.58 = 25,373 yen | 7,695 yen | 33,068 yen | 16,534 yen |
 
 With the PGA2040 (before D29), ENIG and UPS, the Economic case was 21,883 – 22,843 yen for
 2 units. D29 saved 1,209 – 1,689 yen of that (20,674 – 21,154 yen, still with ENIG and UPS).
@@ -27,13 +29,14 @@ leaded HASL saves $17.40 and OCS Express $2.56 per order: $19.96, 3,194 yen. Wit
 D30 but the CH335F module, the Economic case was 17,480 – 17,960 yen. D31 adds $5.32
 (851 yen) to the JLCPCB order: the two chips ($2.23), a second Extended feeder fee ($3.07)
 and 23 more joints per board ($0.07), less $0.06 on the 0402 lines. It removes
-910 – 1,150 yen from the Akizuki order: the two modules (840 yen) and one header strip per
-board (70 yen), plus one socket strip per board (240 yen) in the socketed case. The net is
-59 – 299 yen less. Akizuki charges 550 yen shipping, because the subtotal is below
-11,000 yen.
+875 – 995 yen from the Akizuki order: the two modules (840 yen) and one header strip per two
+units (35 yen), plus one socket strip (120 yen) in the socketed case. The net is 24 – 144 yen
+less. As first recorded, D31's figures counted 7 header pins per USB-C module instead of 11
+and gave 910 – 1,150 and 59 – 299 yen, and an Economic case of 17,421 – 17,661 yen; D33
+corrected the count and dropped the socketed case. Akizuki charges 550 yen shipping,
+because the subtotal is below 11,000 yen.
 
-The Akizuki range is pin headers only, or headers plus sockets for the modules. The lid
-panel PCB adds $4.00 (640 yen) if it is ordered in the same JLCPCB order.
+The lid panel PCB adds $4.00 (640 yen) if it is ordered in the same JLCPCB order.
 
 Economic PCBA is the recommendation. It charges no feeder fee for Basic parts and $3.07 per
 Extended part type; since D31 the board has two, the RP2040 and the CH335F. It saves $97.57
@@ -50,7 +53,7 @@ the board is WIP and has no layout.
 | File | What it is |
 |---|---|
 | `cost_estimate.py` | The estimate: `python -I -B design/experiments/cost-estimate/cost_estimate.py`. `--fetch` refreshes the price snapshot through `tools/jlc_stock.py`. Exits 1 if the BOM disagrees with the OI-23 placement study, or a part is not Basic and not an approved exception (`APPROVED_EXTENDED`: C2040, D29; C5137013, D31). |
-| `test_cost_estimate.py` | 13 tests. Six corrupt the BOM, the study, the code list, a part's class or the list of approved exceptions and expect the check to fail (CLAUDE.md §8). |
+| `test_cost_estimate.py` | 14 tests. Six corrupt the BOM, the study, the code list, a part's class or the list of approved exceptions and expect the check to fail (CLAUDE.md §8). One checks that the header strips follow the study's pin count (44 per board, D33) and that a changed count reaches it. |
 | `jlc_prices.json` | JLCPCB assembly-parts API snapshot, 2026-11-04: class, stock, price tiers, attrition (`lossNumber`) and minimum quantity (`leastPatchNumber`) for the 41 machine-placed codes. |
 
 ## JLCPCB, Economic PCBA (2 assembled of 5)
@@ -87,18 +90,19 @@ cents in total.
 | TSL1TTER100D | g109588 | 130 | 4 | 520 |
 | MF-R300 | g112630 | 40 | 2 | 80 |
 | MFU100F10RB, bag of 100 (4 needed) | g108805 | 600 | 1 | 600 |
-| Pin header 1 × 40, PH-1x40SG (allowance) | 100167 | 35 | 2 | 70 |
+| Pin header 1 × 40, PH-1x40SG (D33): 88 pins | g100167 | 35 | 3 | 105 |
 | Shipping: the subtotal is below 11,000 yen | — | — | — | 550 |
-| **Headers only** | | | | **7,660** |
-| Plus pin sockets 1 × 40, FH2.54-40U1GF8.5-0.5 (allowance) | 110073 | 120 | 2 | +240 |
+| **Total** | | | | **7,695** |
 
-The part prices are the ones `requirements/parts.md` recorded on 2026-11-03. The headers and
-sockets are not selected yet (parts.md "Not yet selected"); their lines are an allowance at
-prices read on 2026-11-03. Since D31 the modules need 28 header pins per board (four USB-C
-modules × 7), so the allowance is 1 strip of 40 per board. It was 2 strips while the CH335F
-module's 30 pins were on the board (D29), and 4 before D29. The CH335F module (g129556,
-¥420) is no longer bought. Below an 11,000 yen subtotal Akizuki charges 550 yen per parcel
-(Sagawa) or 600 yen (Yamato). The 2-unit order is below it; 4 units would be above.
+The part prices are the ones `requirements/parts.md` recorded on 2026-11-03; the header's
+was read on 2026-11-04 (D33). The header pins come from the OI-23 study: each USB-C module
+takes 11, its 1 × 7 row and two 1 × 2 mechanical pieces (REQ-MECH-03). A board takes 44,
+and two units 88, cut from 3 strips of 40. No sockets are bought (D33). Before D33 the
+allowance left out the mechanical pins: it counted 28 pins and 1 strip per board since D31,
+and 58 pins and 2 strips per board while the CH335F module's 30 pins were on the board. The
+CH335F module (g129556, ¥420) is no longer bought. Below an 11,000 yen subtotal Akizuki
+charges 550 yen per parcel (Sagawa) or 600 yen (Yamato). The 2-unit order is below it;
+4 units would be above.
 
 ## Inputs and their dates
 
@@ -119,8 +123,8 @@ module's 30 pins were on the board (D29), and 4 before D29. The CH335F module (g
   Quotes)", `jlcpcb.com/blog/reduce-pcb-assembly-cost-prototype`, published 2026-10-13,
   updated 2026-10-14, read on 2026-11-03.
 - **Akizuki:** `requirements/parts.md` (2026-11-03). Shipping rule:
-  `akizukidenshi.com/catalog/pages/buy.aspx`, read on 2026-11-03. Header and socket prices from
-  the Akizuki search page on 2026-11-03.
+  `akizukidenshi.com/catalog/pages/buy.aspx`, read on 2026-11-03. The header's price and
+  stock from its product page (`/catalog/g/g100167/`) on 2026-11-04 (D33).
 - **Exchange rate:** 160 yen/USD as a planning value. A web search on 2026-11-03 found no
   November rate. Its results gave 158.27 on 2026-10-11 (30rates.com) and a 2026 high of 163.85
   on 2026-07-28 (valutafx.com). Neither page was opened, so both figures are second-hand. Every

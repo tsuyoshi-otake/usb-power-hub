@@ -28,8 +28,11 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > history) — together with the
 > requirements set in `requirements/`
 > (`product.md`, `verification.md`, `parts.md`). That is currently the whole of
-> the design. There is **no netlist, no schematic capture, no layout, no
-> manufacturing output**. Candidate parts have been looked up in the JLCPCB
+> the design. There is **no netlist, no captured part, no layout, no
+> manufacturing output**. Capture has started in KiCad 9.0.8 (D32, issue #6): a
+> generated project skeleton exists in `design/ecad/source/` (4-layer JLC04161H-7628
+> stackup, 100 × 72 mm outline, §5.3 starting rules, the USB_HS net class), written by
+> `design/ecad/scripts/make_project.py`; its schematic is still empty. Candidate parts have been looked up in the JLCPCB
 > assembly pool and at Akizuki (`requirements/parts.md`, dated stock), but **none
 > is confirmed**:
 > no footprint is verified and no order-time stock check has been done. Nothing
@@ -119,8 +122,9 @@ usb-power-hub/
 ├─ design/
 │  ├─ circuit/                  # CIRCUIT_DESIGN_Rev<X.Y>.md — the schematic, as a document,
 │  │                            #   and its _calc.py, which reproduces the document's numbers
-│  ├─ ecad/                     # captured schematic + PCB
-│  │  ├─ source/                #   exported source snapshots
+│  ├─ ecad/                     # captured schematic + PCB (KiCad until the EasyEDA import, D32)
+│  │  ├─ scripts/               #   generators and checks run with KiCad's Python
+│  │  ├─ source/                #   the KiCad project (source of truth, D32)
 │  │  ├─ libraries/             #   project-only symbols and footprints
 │  │  ├─ previews/              #   2D/3D and vendor placement previews
 │  │  └─ reports/               #   ERC, DRC, unrouted-net output
@@ -136,7 +140,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D31 live in circuit §10)
+│                               #   created, decisions D1–D33 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -568,7 +572,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D31; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D33; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -583,7 +587,9 @@ withdrawn and not reused).
   「有鉛 HASL (推奨)」), and the bare CH335F (C5137013) as the second Extended part,
   machine-placed, replacing D15's Akizuki module (D31, 2026-11-04:
   「ええ、CH335FはLCSCに在庫無いの?」, 「こんなモジュール実装するのデカくない?」, and the
-  choice 「IC 単体にする (推奨)」).
+  choice 「IC 単体にする (推奨)」), and the ECAD workflow, amending D2: capture and lay out
+  in KiCad 9.0.8 until the design is complete, then import into EasyEDA (D32, 2026-11-04:
+  「いったんローカルでKiCadで完成まで目指してそのご、EasyEDAにインポートしよう」).
   D1 (PD sink) and D11 (USB2514B) were also user decisions; both are superseded because
   their parts are Extended.
 - **Under the delegation:** on 2026-11-03 the user delegated the open choices
@@ -595,14 +601,12 @@ withdrawn and not reused).
   chose the 100 × 72 mm outline from the OI-23 study, and D25 put the MF-R300 input fuse
   on J4 (OI-29), and D26 set how J1's current is declared (OI-25). D27 named the
   JLC04161H-7628 stackup and the provisional USB pair geometry, without impedance
-  control for the prototype. Each is labelled
+  control for the prototype. D33 chose the module headers, PH-1x40SG soldered without
+  sockets (OI-23). Each is labelled
   "Claude (delegated)", and the user may revert any one.
 
 ### 10.5 Still undecided — record the decision before layout starts
 
-- **OI-23 (remainder):** choose the USB-C module header height, then re-run the
-  placement study with it. The board area itself is settled by D24, and OI-24 is closed
-  by D31: the bare CH335F's datasheet has its package drawing and pin table.
 - USB VID/PID. Do not ship a squatted VID.
 - Whether the mockup's placement is kept at all. Assume not.
 
@@ -651,7 +655,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-20 | ~~No stocked HIGH shunt meets the specification.~~ **Closed by decision** (D17/D20): R_H = 0.1 Ω ±0.5 % ±100 ppm/°C KOA TSL1TTER100D (Akizuki, 374 pcs), inside the ±1 % budget. The Basic 0.1 Ω part (±800 ppm/°C) is rejected. | Rev0.4 §4.2; `requirements/parts.md` |
 | OI-21 | ~~No accuracy requirement exists.~~ **Closed by decision** (D20): ±(1 % of reading + 3 LSB of the active range) within ±10 °C of calibration, after gain and zero calibration. | REQ-MEAS-05; Rev0.4 §4.2 |
 | OI-22 | ~~The ADC has no clock.~~ **Closed by decision** (D23, replacing D17's on-chip ADC): two external MCP3208, clocked at 1 MHz by the RP2040 PIO. | Rev0.4 §3.3 |
-| OI-23 | **Board fit: area settled, header height not chosen.** The placement study (`design/experiments/oi-23-placement/`, 16 tests) proved that 85 × 35 mm cannot hold Rev0.4: even with no routing space and every low part credited under a module, it needs 3,332 mm² (F1 included, D25; 3,518 mm² with the CH335F module before D31, 3,780 mm² with the PGA2040 before D29) against 2,975 mm². D24 set 100 × 72 mm, where a block placement passes every check at routing factor K = 1.6 (headroom to K = 1.74). Still open: the header height behind the study's 1.5 mm under-module rule is not chosen. Re-run the study with it; it must still exit 0. D31 removed the photo-measured CH335F module outline (OI-24). | Rev0.4 §11; study README |
+| OI-23 | ~~Board fit: area settled, header height not chosen.~~ **Closed by decision** (D24 for the area; D33, Claude delegated, 2026-11-04, for the header): PH-1x40SG headers, soldered, insulator ≥ 2.30 mm, leaving ≥ 0.80 mm above a 1.5 mm part under a module. The study (`design/experiments/oi-23-placement/`, 21 tests, exits 0) now reads the space under each USB-C module from the module and receptacle drawings. Its area bound credits each module's outline less its header insulators: at K = 1.0 (no routing space) 2,931 mm², 1.5 % under 85 × 35 mm (2,975 mm²), which it exceeds from K = 1.025, so 85 × 35 mm stays excluded for any routable layout. The pre-D33 figure, 3,332 mm² at K = 1.0, credited only 130 mm² per module and was not a lower bound. At 100 × 72 mm the block placement passes every check at K = 1.6 (headroom to K = 1.74), with the under-module parts in one 19.0 × 3.4 mm strip per module, clear of the receptacle. Not settled on paper: the module board's thickness and the receptacle's 1.06 mm overhang (V-MECH-01). Reopen if V-MECH-01 fails. | Rev0.4 §10 D33, §11; study README |
 | OI-24 | ~~CH335F module outline and pin map unknown.~~ **Closed by decision** (D31, user, 2026-11-04): the Akizuki module (AE-QFN28-DIP(CH335F)), for which Akizuki published no drawing, is replaced by the bare CH335F (C5137013), machine-placed. Its package drawing (QFN28_4X4X0.75-0.4, §5.6) and pin table are in the WCH CH334/335 datasheet V2.5; U6's land is drawn from that drawing before layout (G21). D28 had left the module to be measured before layout. Reopen if D31 is reverted. | Rev0.4 §6.6, §10 D31; `requirements/parts.md` U6 |
 | OI-25 | ~~J1 current is misdeclared.~~ **Closed by decision** (D26, Claude delegated, 2026-11-03): the CH335F stays self-powered at its default 100 mA, and the RP2040 function declares bMaxPower 200 mA. That covers its 126 mA typical share of J1's ≈ 0.21 A (172 mA with every OP07 at its maximum). USB still charges the upstream port only 100 mA, so the board is specified for 500 mA upstream ports and not for bus-powered hubs. Options (a) and (b) are recorded as rejected in D26. Reopen if V-HOST-01 measures more than 0.30 A from J1. | Rev0.4 §7.1, §10 |
 | OI-26 | **HS signal integrity through the modules is unverified.** Each HS path passes through an Akizuki USB-C module, its 2.54 mm headers and its layout: J1 upstream, J2 or J3 downstream. Since D31 the hub is on the board, so a path crosses one module instead of two. The fallback is that DUTs enumerate at FS. | Rev0.4 §3.3; V-HOST-01 |

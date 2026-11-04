@@ -84,6 +84,7 @@ Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it,
 | RS10, RS20 | Current-sense chip resistor 0.1 Ω 1 W ±0.5 % | g109588 | TSL1TTER100D (KOA) | 374 | ¥130 | 2026-11-03 |
 | RS11, RS21 | Metal-film resistor 10 Ω 1 W ±1 % (1/4 W size) | g108805 | MFU100F10RB (Faithful Link) | 175 bags of 100 | ¥600 / bag | 2026-11-03 |
 | F1 | Resettable fuse (PTC), 3.00 A hold / 6.00 A trip, 30 V, radial | g112630 | MF-R300 (Bourns) | 2,865 | ¥40 | 2026-11-03 |
+| — | Pin header 1 × 40, 2.54 mm, for J1–J4 (D33): 44 pins per board, cut into pieces | g100167 | PH-1x40SG (Useconn) | 8,000 | ¥35 | 2026-11-04 |
 
 The thinnest is the MAU104, at 178 pcs. The PGA2040 (g116762, 41 pcs on 2026-11-03), U1
 until D29, is no longer used; its record is in Git at commit `6774bc5`. Nor is the CH335F
@@ -152,6 +153,25 @@ record is in Git at commit `3e11f68`.
     bent flat (then 12 × 18.3 mm of board).
   - *To confirm:* the lead style (kinked or straight) on the parts Akizuki ships, for the
     hole size and the courtyard.
+- *Verified (PH-1x40SG, Useconn drawing PH-1xXXSG rev. B, Akizuki product page g100167, read
+  2026-11-04; D33):*
+  - Insulator 2.50 mm tall and 2.50 mm wide, 2.54 mm per pin; general tolerance ±0.2 mm on
+    two-decimal dimensions, so ≥ 2.30 mm tall. Glass-filled PBT, UL 94V-0.
+  - Pins sq 0.64 ± 0.02 mm, 11.6 mm long: 6.10 mm on one side of the insulator, 3.00 mm on
+    the other. Recommended hole ø1.02 mm.
+  - 3 A per contact, contact resistance 20 mΩ max, −40 to +105 °C.
+  - Use: each USB-C module (AE-USB2.0-TYPE-C) takes its 1 × 7 row and two 1 × 2 pieces for
+    the mechanical pins at x 2.38 / 17.62 mm, y 2.94 / 5.48 mm (module drawing), 11 pins
+    per module and 44 per board. With the 3.00 mm side in the 1.6 mm board, 1.40 mm stands
+    out of Bottom.
+  - The insulator stands on the board under the module. The OI-23 study keeps parts under a
+    module ≤ 1.5 mm, 0.80 mm below the 2.30 mm minimum (≥ 0.5 mm required).
+  - *To confirm on the first board (V-MECH-01):* the module board's thickness, which Akizuki
+    does not publish. The receptacle (Hirose CX70M-24P1, mid-mounted in the module's notch)
+    reaches 2.36 mm below the module's top face, so it hangs below the module by 2.36 mm
+    less that thickness; the layout keeps the zone under it empty.
+  - Sockets (FH2.54-40U1GF8.5-0.5, g110073) are not used: they add a contact pair to the D±
+    and port current paths and raise each module (D33).
 
 **Rejected at Akizuki:**
 - g110697 0.1 Ω 5 W metal plate: ±350 ppm/°C.
@@ -392,7 +412,7 @@ All Extended. The full Rev0.2 rows, with stock and datasheet notes, are in Git h
 
 ## Not yet selected
 
-- **Pin headers and sockets for the modules and the DIP16 ADCs (OI-23).** These are Akizuki
-  parts; their height decides what fits underneath. The OI-23 study assumes 2.5 mm header
-  plastic and allows parts up to 1.5 mm tall under a module; the chosen header must keep that.
+- ~~**Pin headers and sockets for the modules and the DIP16 ADCs (OI-23).**~~ Selected by
+  D33: PH-1x40SG (g100167) under the USB-C modules, no sockets, and the DIP16 ADCs soldered
+  directly (see the hand-soldered parts above).
 - **Heat-set M2 inserts** (mechanical; not under D13).

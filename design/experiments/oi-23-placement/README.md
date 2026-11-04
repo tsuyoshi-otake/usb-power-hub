@@ -6,11 +6,21 @@
 Re-run 2026-11-04 for D29: the PGA2040 module is replaced by a bare RP2040 (U1), its flash
 (U8) and crystal (Y1), all SMD in a new region R_MCU where the module sat. Re-run the same
 day for D31: the Akizuki CH335F module is replaced by the bare chip (U6), SMD with Y2 and its
-capacitors in a new region R_HUB, the right-edge strip the module held. The answers below
-did not change; the figures are the D31 re-run's.
+capacitors in a new region R_HUB, the right-edge strip the module held. The answers did
+not change.
+
+Re-run the same day for D33: the USB-C modules sit on PH-1x40SG pin headers, whose
+insulator is 2.50 mm (≥ 2.30 mm), and the space under the modules is now read off the
+Akizuki module drawing and the Hirose receptacle drawing. The layout puts the under-module
+parts in a strip that avoids the receptacle, which hangs below the module. The area bound
+credits each module's whole outline less its header insulators, which is larger than the
+earlier credit, so the first answer is now conditional. The figures below are the D33
+re-run's.
 
 **Answer.**
-- **No: 85 × 35 mm cannot hold Rev0.4, under any layout.**
+- **No: 85 × 35 mm cannot hold Rev0.4 with any routing space from 2.5 % of the courtyard
+  area up (K ≥ 1.025).** With none at all (K = 1.0), the bound is 1.5 % below the board's
+  area, so area alone no longer proves it. No layout routes at K = 1.0.
 - A block placement at **100 × 72 mm** passes every check below.
 - D24 (2026-11-03) adopts 100 × 72 mm. The user's condition was 「100x100未満ならいいんだっけ」:
   stay inside JLCPCB's 100 × 100 mm price tier. The size inside it came from this study
@@ -25,10 +35,10 @@ outline drawing or a layout.
 | File | What it is |
 |---|---|
 | `placement_study.py` | The study. Standard library only: `python -I design/experiments/oi-23-placement/placement_study.py --svg layout_100x72.svg`. Exits 1 if a layout check fails. |
-| `test_placement_study.py` | 16 tests. Fourteen corrupt one aspect of the layout and expect the checker to name the failure (CLAUDE.md §8); two check that the area bound's printed terms add up and that only low parts earn the under-module credit. |
+| `test_placement_study.py` | 21 tests. Sixteen corrupt one aspect of the layout, the header or the module geometry and expect the checker to name the failure (CLAUDE.md §8); one checks that the unchanged layout passes; four check the area bound: its printed terms add up, only low parts earn the under-module credit, the space under a module is its outline less the header insulators, and the K from which it exceeds 85 × 35 mm. |
 | `layout_100x72.svg` | The block placement, drawn by the script. The front edge (OUT A / OUT B) is at the bottom. |
 
-## Result 1 — 85 × 35 mm is impossible
+## Result 1 — 85 × 35 mm is too small for any routing allowance from K = 1.025
 
 The script adds up three things:
 - every courtyard, both the hand-soldered parts and the SMD;
@@ -41,14 +51,21 @@ a lower bound on the board area any layout would need.
 
 | K (region area per courtyard area) | Needed | Against 85 × 35 (2,975 mm²) |
 |---:|---:|---:|
-| 1.0 (no routing space at all) | 3,332 mm² | 1.12 × |
-| 1.4 | 4,062 mm² | 1.37 × |
-| 1.6 (planning value) | 4,426 mm² | 1.49 × |
-| 2.0 | 5,156 mm² | 1.73 × |
+| 1.0 (no routing space at all) | 2,931 mm² | 0.99 × |
+| 1.4 | 3,660 mm² | 1.23 × |
+| 1.6 (planning value) | 4,025 mm² | 1.35 × |
+| 2.0 | 4,754 mm² | 1.60 × |
 
-K = 1.0 is physically impossible to build, and it still needs 12 % more area than the board
-has. That makes the K = 1.0 row a proof, not an estimate. (Before D29, with the PGA2040, it
-was 3,780 mm², 1.27 ×; before D31, with the CH335F module, 3,518 mm², 1.18 ×.)
+K = 1.0 is physically impossible to build: it leaves no room for a single trace. There the
+bound is 2,931 mm², 1.5 % under the board's area; from K = 1.025 it exceeds it. Every real
+layout needs more routing space than that, so 85 × 35 mm stays excluded, but the K = 1.0 row
+is not a proof on its own.
+
+Before D33 the bound credited only 130 mm² under each USB-C module and gave 3,332 mm²
+(1.12 ×) at K = 1.0, which this README called a proof. That credit was not the most
+favourable one, so the figure was not a lower bound. The earlier figures used the same
+credit: 3,780 mm² (1.27 ×) before D29, with the PGA2040, and 3,518 mm² (1.18 ×) before D31,
+with the CH335F module.
 
 The inputs:
 - **Hand-soldered: 1,806 mm².** Four USB-C modules at 20 × 15 mm (Akizuki drawing), two
@@ -60,9 +77,15 @@ The inputs:
   RP2040 datasheet's 7.75 mm pad span), one QFN-28 (U6, 5.25 × 5.25 mm: the CH334/335
   datasheet's 4.0 mm body with U1's 0.375 mm pad extension and a 0.25 mm margin), one SOIC-8
   208 mil (U8, 9.6 × 5.88 mm from the Winbond drawing), and the rest as listed in the script.
-- **Space under modules: 519 mm²,** all of it credited: the parts no taller than 1.5 mm would
-  fill 1,116 mm² even at K = 1.0. That is 130 mm² under each USB-C module, between its
-  shell tabs and pins. The CH335F module's 184 mm² between its pin rows left with it (D31).
+- **Space under modules: 921 mm²,** all of it credited: the parts no taller than 1.5 mm would
+  fill 1,116 mm² even at K = 1.0. That is 230.2 mm² under each USB-C module: its
+  20 × 15 mm outline less the PH-1x40SG insulators of its 1 × 7 row (17.78 × 2.50 mm) and
+  of its two 1 × 2 mechanical pieces (5.08 × 2.50 mm each). It includes the receptacle zone.
+  There the Hirose CX70M-24P1 hangs below the module by 2.36 mm less the module board's
+  thickness, which Akizuki does not publish, so whether a 1.5 mm part fits there depends on
+  that thickness. Counting it is the most favourable reading, which keeps the bound a bound.
+  Before D33 the credit was 519 mm²: 130 mm² per module, part of it under the receptacle.
+  The CH335F module's 184 mm² between its pin rows left with it (D31).
 
 Rev0.4 §11 had estimated the SMD content at 1,100–1,200 mm² without counting it. The count
 gave 1,516 mm² excluding the shunts before D29, 1,695 mm² with U1's circuit, and gives
@@ -100,11 +123,17 @@ gave 1,516 mm² excluding the shunts before D29, 1,695 mm² with U1's circuit, a
 
 Under the modules: the port-side parts (discharge FET, port capacitor, CC ESD, Rp) sit under
 J2 and J3, and the input parts under J4 and J1. Only parts no taller than 1.5 mm go there.
+Since D33 they go in one 19.0 × 3.4 mm strip per module (65 mm²), between the shell tabs
+and the 1 × 7 header insulator, where the whole insulator height is free. Nothing goes
+under the receptacle. The port blocks fill 80 % of the strip at K = 1.6.
 
 Checks that pass:
 - every rectangle lies inside the board with ≥ 0.3 mm to the edge;
 - no two rectangles are closer than 0.5 mm;
 - every block is placed exactly once;
+- the header's lowest insulator, 2.30 mm, leaves 0.80 mm above a 1.5 mm part (≥ 0.5 mm
+  required, D33), and each module's under-module strip clears its header insulators, its
+  receptacle, the receptacle's pins and its shell tabs;
 - J1 and J4 sit on the back edge, J2 and J3 on the front edge; the J2–J3 pitch is
   28 mm (≥ 20 mm);
 - the MAU104 keeps ≥ 6 mm from the front ends and the ADCs;
@@ -128,6 +157,11 @@ Checks that pass:
 - **Placement inside a region.** For example, it does not check that the shunt ladder keeps
   away from the USB corridor, or that the 12 V trace from the MAU104 reaches the front ends
   cleanly.
+- **The USB-C module's board thickness, and the receptacle's overhang.** Akizuki publishes
+  no thickness, so how far the receptacle hangs below the module is unknown, and the layout
+  keeps that zone empty. The receptacle overhangs the module's front edge by 1.06 mm (module
+  drawing), so with the module flush with the board edge it stands 1.06 mm outside the
+  outline. Both are enclosure questions (V-MECH-01).
 - **Mechanical, thermal and EMC behaviour.** It checks no heights except the under-module
   rule. The enclosure, the lid PCB and the mockup all follow the board size and must be redone
   if it changes.

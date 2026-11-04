@@ -106,12 +106,24 @@ class Arithmetic(unittest.TestCase):
     def test_akizuki_free_shipping_threshold(self):
         seen = set()
         for units in (1, 2, 4):
-            yen, rows = ce.akizuki_cost(units, False)
+            yen, rows = ce.akizuki_cost(units, ce.header_pins_per_board(STUDY))
             ship = rows[-1][2]
             free = yen - ship >= ce.AKIZUKI_FREE_SHIPPING_YEN
             self.assertEqual(ship, 0 if free else ce.AKIZUKI_SHIPPING_YEN, units)
             seen.add(free)
         self.assertEqual(seen, {True, False})          # both branches exercised
+
+    def test_header_strips_follow_the_study(self):
+        pins = ce.header_pins_per_board(STUDY)
+        self.assertEqual(pins, 44)                     # 4 modules x (7 + 2 x 2), D33
+        rows = ce.akizuki_cost(2, pins)[1]
+        self.assertEqual([q for p, c, y, q in rows if c == "g100167"], [3])   # 88 of 120
+        old = STUDY.HDR_PINS_USBC
+        try:
+            STUDY.HDR_PINS_USBC = 7                    # the pre-D33 count, no mechanical pins
+            self.assertEqual(ce.header_pins_per_board(STUDY), 28)
+        finally:
+            STUDY.HDR_PINS_USBC = old
 
 
 if __name__ == "__main__":

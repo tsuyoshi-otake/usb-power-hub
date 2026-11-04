@@ -1,0 +1,22 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "d22f7430-a824-5395-8835-5937190d797a")
+	(paper "A3")
+	(title_block
+		(title "USB Power-Control Hub")
+		(date "2026-11-04")
+		(rev "Rev0.4")
+		(comment 1 "WIP - MANUFACTURING PROHIBITED")
+		(comment 2 "Source: design/circuit/CIRCUIT_DESIGN_Rev0.4.md")
+		(comment 3 "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
+	)
+	(lib_symbols)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

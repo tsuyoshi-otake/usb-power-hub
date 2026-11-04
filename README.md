@@ -4,10 +4,10 @@ A 2-channel switched USB-C hub that measures each downstream port's current from
 0.1 µA to 1 A, so a device under test can be power-profiled and power-cycled from
 the host PC over a plain COM port.
 
-> **Status: WIP — MANUFACTURING PROHIBITED.** The design exists only as documents.
-> There is no schematic capture, no layout, no manufacturing output, no firmware,
-> and nothing has been built or measured. Do not order anything from this
-> repository.
+> **Status: WIP — MANUFACTURING PROHIBITED.** The design exists as documents and a
+> generated, still empty KiCad project skeleton. No part is captured; there is no layout,
+> no manufacturing output, no firmware, and nothing has been built or measured. Do not
+> order anything from this repository.
 
 ## What it is meant to do
 
@@ -50,9 +50,10 @@ Read in this order:
 | `requirements/verification.md` | How each requirement is proven (V-* IDs: method, pass criterion, limits). |
 | `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.3 are in Git history. |
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
+| `design/ecad/` | The KiCad 9 project (D32): `source/` holds the project, the source of truth until the EasyEDA import; `scripts/` holds its generator and checks. Only a skeleton so far: stackup, outline, rules, net classes, an empty schematic. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
 | `design/experiments/stackup-impedance/` | The stackup study behind D27: JLCPCB's 4-layer stackups, the 90 Ω USB pair width on each, and a model checked against JLCPCB's single-ended calculator. A non-authoritative study, not design data. |
-| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03 and re-run 2026-11-04 for D29, D30 and D31: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
+| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03 and re-run 2026-11-04 for D29, D30, D31 and D33: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
 | `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the board-size decisions D10 and D24 (100 × 72 mm). |
 
 Decisions are D-numbers in the circuit document's §10. Its "By" column says whether the
@@ -88,11 +89,20 @@ python -m http.server 8000 --directory mockup
 
 ## Building and programming
 
-Not possible yet. Schematic capture (KiCad, decision D2) starts after the items in
-the circuit document's §12 are done (first: choosing the USB-C module header height and
-re-running the OI-23 placement study with it; then drawing the RP2040's and the CH335F's
-lands from their datasheets, G20 and G21). The front-end checks are made on the first assembled board, not on a
-bench beforehand (decision D28). Firmware does not exist.
+Not possible yet. The board is captured and laid out in KiCad 9.0.8 until the design is
+complete, then imported into EasyEDA (decision D32, issue #6). The module headers are
+chosen (D33), so the next capture step is drawing the RP2040's and the CH335F's lands from
+their datasheets (G20, G21; the circuit document's §12). The front-end checks are made on
+the first assembled board, not on a bench beforehand (decision D28). Firmware does not
+exist.
+
+The KiCad project skeleton is generated, not hand-edited. With KiCad 9.0's own Python,
+from the repository root:
+
+```sh
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py       # writes and checks design/ecad/source
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_make_project.py  # the check's negative tests
+```
 
 ## Repository
 

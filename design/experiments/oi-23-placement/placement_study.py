@@ -6,14 +6,20 @@ Usage (standard library only):
 It answers two questions for CIRCUIT_DESIGN_Rev0.4.md:
 1. Necessary area. Could ANY layout of 85 x 35 mm (D10, before D24) hold the part set? It sums every
    courtyard, subtracts every square millimetre that could hold SMD parts under a raised
-   module, and compares the result with the board area. Routing space is zero in the most
-   favourable case (K = 1.0), so a fail there is a proof, not an estimate.
+   module, and compares the result with the board area. It prints the bound for a sweep of
+   the routing factor K and the smallest K at which the bound exceeds 85 x 35: with any
+   routing allowance above that, no layout of 85 x 35 exists. At K = 1.0 (no routing space
+   at all) the bound is just below 85 x 35, since D33 counted the space under the modules
+   from their drawings.
 2. A concrete block placement (LAYOUT, 100 x 72 mm, adopted as D24). It checks that:
    - every rectangle lies inside the board;
    - no two rectangles overlap;
    - each SMD region holds the courtyards of its blocks times the routing factor K;
    - every package fits the region's smaller side;
-   - only parts no taller than UNDER_MAX_H sit under a module;
+   - only parts no taller than UNDER_MAX_H sit under a module, and UNDER_MAX_H plus
+     UNDER_CLEAR stays within the module header's lowest insulator (D33);
+   - the rectangle under each USB-C module clears its header insulators and everything
+     that hangs below the module (receptacle body, receptacle pins, shell tabs);
    - the connectors sit on their edges, and the J2-J3 pitch is at least 20 mm;
    - the MAU104 keeps SEP_MAU from the analog front end and the ADCs;
    - a USB corridor runs from the hub region (R_HUB) to J2 and J3 without crossing the
@@ -33,6 +39,12 @@ What it CANNOT see (write these next to any result quoted from it):
   have no corridor of their own and share the routing allowance K (the HS corridor to J2/J3
   is checked);
 - heights, except through the under-module rule; enclosure, thermal and EMC behaviour;
+- the USB-C module's board thickness, which Akizuki does not publish. It sets how far the
+  mid-mounted receptacle hangs below the module (2.36 mm less the thickness), so the layout
+  puts nothing under the receptacle, while the area bound credits that space as if parts fit;
+- that the receptacle overhangs the module's front edge by 1.06 mm (drawing), so with the
+  module flush with the board edge it stands 1.06 mm proud of the outline: an enclosure
+  question (CLAUDE.md Sec. 7), not checked here;
 - the placement inside each region (for example, that the shunt ladder keeps away from the
   USB corridor). The SVG draws regions, not parts.
 """
@@ -41,7 +53,10 @@ import sys
 
 K = 1.6               # routing factor: region area per courtyard area (planning value)
 K_SWEEP = (1.0, 1.4, 1.6, 2.0)
-UNDER_MAX_H = 1.5     # mm: tallest part allowed under a module on 2.5 mm header plastic
+UNDER_MAX_H = 1.5     # mm: tallest part allowed under a module on its header insulator
+HEADER_PLASTIC_MIN = 2.30  # mm: PH-1x40SG insulator 2.50 mm, general tolerance +-0.2 (D33)
+UNDER_CLEAR = 0.5     # mm: planning value, not measured: solder under the part, board bow and
+                      # the module's own flatness, between a part and the module's underside
 SEP_MAU = 6.0         # mm: MAU104 courtyard to analog front end and ADC courtyards
 CLEAR = 0.5           # mm: minimum gap between rectangles
 EDGE = 0.3            # mm: rectangle to board edge (CLAUDE.md 5.3 copper to edge)
@@ -140,14 +155,39 @@ def height(block):
 
 
 # ---- hand-soldered parts and their under-module areas -------------------------------------
-# USB-C module (AE-USB2.0-TYPE-C drawing): 20 x 15 mm, receptacle edge at local y = 0.
-# Mechanical 2 x 2 pins at x 2.38 / 17.62, y 2.94 / 5.48; shell tabs at x ~3.8-5.3 and
-# ~14.8-16.3; the 1 x 7 pin row at y 13.1. Free under it: between the tab columns, and the
-# strip between the lower tabs and the pin row.
-USBC_UNDER = [(5.8, 0.5, 8.5, 7.9), (0.5, 8.4, 19.0, 3.3)]
+# USB-C module AE-USB2.0-TYPE-C, 20 x 15 mm (Akizuki drawing AE-USB2.0-TYPE-C_dimm_20190206;
+# the shapes below were read off its vector paths). Local frame: x = 0 at the VBUS end of the
+# 1 x 7 row, y = 0 at the module board's front edge. The receptacle, a Hirose CX70M-24P1
+# (drawing JDC3-611479), sits mid-mounted in a 9.3 x 5.7 mm notch at that edge and overhangs
+# it by 1.06 mm. Its body reaches 2.36 mm below the module's top face (Hirose's mounting
+# view: 0.8 mm board + 1.56 mm), its six through-hole pins and four shell tabs pass through.
+# Every module pin is on a PH-1x40SG piece (D33): the 1 x 7 row at y 13.1, x 2.38 + 2.54 i,
+# and two 1 x 2 mechanical pieces at x 2.38 and 17.62, y 2.94 / 5.48, soldered to the board
+# (REQ-MECH-03). Their insulators stand on the board under the module.
+USBC_W, USBC_D = 20.0, 15.0
+HDR_W, HDR_PITCH = 2.50, 2.54      # PH-1x40SG insulator width and pin pitch (D33 drawing)
+HDR_PINS_USBC = 7 + 2 * 2          # header pins per USB-C module
+USBC_INSULATORS = [
+    (2.38 - HDR_PITCH / 2, 13.1 - HDR_W / 2, 7 * HDR_PITCH, HDR_W),         # 1 x 7 row
+    (2.38 - HDR_W / 2, 4.21 - HDR_PITCH, HDR_W, 2 * HDR_PITCH),            # mechanical, left
+    (17.62 - HDR_W / 2, 4.21 - HDR_PITCH, HDR_W, 2 * HDR_PITCH),           # mechanical, right
+]
+USBC_BELOW = [  # what hangs below the module's underside: (name, local rectangle)
+    ("receptacle body", (5.45, 0.0, 9.14, 5.78)),
+    ("receptacle pins", (7.51, 5.83, 5.02, 0.80)),
+    ("shell tab", (3.78, 0.39, 1.40, 2.50)), ("shell tab", (3.78, 5.41, 1.40, 2.52)),
+    ("shell tab", (14.86, 0.39, 1.40, 2.50)), ("shell tab", (14.86, 5.41, 1.40, 2.52)),
+]
+USBC_OBSTACLES = [("header insulator", r) for r in USBC_INSULATORS] + USBC_BELOW
+# The layout's SMD space under a module, at the full insulator height: the strip between the
+# shell tabs (y <= 7.93) and the 1 x 7 insulator (y >= 11.85).
+USBC_UNDER = [(0.5, 8.2, 19.0, 3.4)]
+# The area bound's space under a module: its whole outline less the header insulators, the
+# receptacle zone included. That is the most favourable reading, so the bound stays a bound.
+CREDIT_SPACE = {"USBC": USBC_W * USBC_D - sum(w * h for _, _, w, h in USBC_INSULATORS)}
 
-HAND = {  # name: (w, h, under-rects in local frame)
-    "USBC": (20.0, 15.0, USBC_UNDER),
+HAND = {  # name: (w, h, under-rects in local frame, used by the layout)
+    "USBC": (USBC_W, USBC_D, USBC_UNDER),
     "DIP16": (9.8, 20.85, []),            # DIP-16_W7.62mm courtyard
     "MAU104": (20.0, 6.6, []),            # 19.5 x 6.1 SIP body, courtyard
     "PTC": (13.0, 5.0, []),               # MF-R300 radial 12.0 x 3.0 body, leads 5.1 mm
@@ -159,8 +199,8 @@ HAND_PARTS = {  # designator: kind
 }
 
 
-def under_area(kind):
-    return sum(w * h for _, _, w, h in HAND[kind][2])
+def under_space(kind):
+    return CREDIT_SPACE.get(kind, 0.0)
 
 
 # ---- 1. necessary area ----------------------------------------------------------------------
@@ -169,15 +209,25 @@ def necessary_area(k, mh=4 * 7 * 7):
 
     The under-module credit is the most favourable one: every single part no taller than
     UNDER_MAX_H may sit under a module (counted per part, not per block), up to the space
-    there is. A real layout gets less, so a board smaller than this bound cannot work.
+    there is (CREDIT_SPACE). A real layout gets less, so a board smaller than this bound
+    cannot work.
     """
     hand = sum(HAND[kd][0] * HAND[kd][1] for kd in HAND_PARTS.values())
     smd = sum(need(b, k) for b in BLOCKS)
-    space = sum(under_area(kd) for kd in HAND_PARTS.values())
+    space = sum(under_space(kd) for kd in HAND_PARTS.values())
     qualifying = sum(COURTYARD[p][0] * n * (1.0 if b.startswith("FID") else k)
                      for b in BLOCKS for p, n in BLOCKS[b] if COURTYARD[p][2] <= UNDER_MAX_H)
     credit = min(space, qualifying)
     return hand + mh + smd - credit, hand, smd, credit, space, qualifying
+
+
+def break_even_k(area, lo=1.0, hi=3.0):
+    """Smallest K on a 0.001 grid from lo at which the bound exceeds `area`, else None."""
+    for n in range(round((hi - lo) * 1000) + 1):
+        k = round(lo + n / 1000, 3)
+        if necessary_area(k)[0] > area:
+            return k
+    return None
 
 
 # ---- 2. the concrete layout (100 x 72 mm) --------------------------------------------------
@@ -256,6 +306,18 @@ def gap(a, b):
 
 def check_layout():
     fails = []
+    # D33: the header keeps the under-module rule, and the space the layout uses under a
+    # USB-C module clears its insulators and whatever hangs below it
+    if UNDER_MAX_H + UNDER_CLEAR > HEADER_PLASTIC_MIN + 1e-9:
+        fails.append(f"header plastic {HEADER_PLASTIC_MIN} mm is below {UNDER_MAX_H} mm"
+                     f" parts + {UNDER_CLEAR} mm clearance")
+    for ur in USBC_UNDER:
+        x, y, w, h = ur
+        if x < 0 or y < 0 or x + w > USBC_W or y + h > USBC_D:
+            fails.append(f"under-module rectangle {ur} leaves the USB-C module")
+        for name, ob in USBC_OBSTACLES:
+            if gap(ur, ob) <= 0.0:
+                fails.append(f"under-module rectangle {ur} overlaps the module's {name}")
     rects = {d: hand_rect(d) for d in PLACE}
     rects.update(KEEPOUT)
     rects.update({n: r for n, (r, _) in REGIONS.items()})
@@ -379,6 +441,13 @@ def main():
               f" {credit:.0f} = {req:.0f} mm2 -> {req/2975:.2f} x the 85 x 35 board;"
               f" smallest 100-wide board {req/100:.1f} mm deep"
               f" (credit = min(space {space:.0f}, low parts {qualifying:.0f}))")
+    print(f"the bound exceeds the 85 x 35 board from K = {break_even_k(2975):.3f}"
+          f" (space under each USB-C module: {under_space('USBC'):.1f} mm2, its outline"
+          f" less the header insulators)")
+    print(f"\nheader PH-1x40SG (D33): insulator >= {HEADER_PLASTIC_MIN:.2f} mm; parts under a"
+          f" module <= {UNDER_MAX_H:.2f} mm leave >= {HEADER_PLASTIC_MIN - UNDER_MAX_H:.2f} mm"
+          f" (>= {UNDER_CLEAR} required); {HDR_PINS_USBC} pins per USB-C module,"
+          f" {HDR_PINS_USBC * 4} per board")
     fails, rects, pitch = check_layout()
     print(f"\n== 2. layout {W:.0f} x {H:.0f} mm, K={K}")
     for n, (rc, bl) in REGIONS.items():

@@ -109,12 +109,11 @@ AKIZUKI = [  # (part, code, yen each, per board); the PGA2040 (g116762) left wit
     ("MF-R300", "g112630", 40, 1),
 ]
 AKIZUKI_ONCE = [("MFU100F10RB, bag of 100 (4 needed)", "g108805", 600)]
-# Not selected (parts.md "Not yet selected"): an allowance, read off Akizuki on 2026-11-03.
-# 28 module pins per board since D31: 4 USB-C modules x 7, so 1 strip (58 and 2 strips
-# while the CH335F module's 30 pins were on the board).
-HEADER_ALLOWANCE = [("pin header 1x40, PH-1x40SG", "100167", 35, 1),
-                    ("pin socket 1x40, FH2.54-40U1GF8.5-0.5 (if modules are socketed)",
-                     "110073", 120, 1)]
+# Module headers (D33): PH-1x40SG strips of 40, broken into pieces; no sockets. Price and
+# stock read off Akizuki on 2026-11-04. The pins per board come from the OI-23 study: 11 per
+# USB-C module, the 1 x 7 row and two 1 x 2 mechanical pieces (REQ-MECH-03).
+HEADER = ("pin header 1x40, PH-1x40SG (D33)", "g100167", 35)
+HEADER_STRIP_PINS = 40
 AKIZUKI_FREE_SHIPPING_YEN = 11000                     # subtotal, tax incl.
 AKIZUKI_SHIPPING_YEN = 550                             # Sagawa, per parcel (from 2025-10-01)
 
@@ -222,11 +221,17 @@ def pcba_fees(n_joints_total: int, n_types: int, n_boards: int,
     return {"Economic": eco, "Standard": std}
 
 
-def akizuki_cost(n_units: int, with_sockets: bool) -> tuple[int, list[tuple]]:
+def header_pins_per_board(study) -> int:
+    """Module header pins per board: pins per USB-C module x the modules the study places."""
+    return study.HDR_PINS_USBC * sum(1 for k in study.HAND_PARTS.values() if k == "USBC")
+
+
+def akizuki_cost(n_units: int, header_pins: int) -> tuple[int, list[tuple]]:
+    """Akizuki order for n_units; header_pins per board, cut from shared 40-pin strips."""
     rows = [(p, c, y, k * n_units) for p, c, y, k in AKIZUKI]
     rows += [(p, c, y, 1) for p, c, y in AKIZUKI_ONCE]
-    allowance = HEADER_ALLOWANCE if with_sockets else HEADER_ALLOWANCE[:1]
-    rows += [(p + " [allowance]", c, y, k * n_units) for p, c, y, k in allowance]
+    strips = math.ceil(header_pins * n_units / HEADER_STRIP_PINS)
+    rows.append((f"{HEADER[0]}, {header_pins * n_units} pins", HEADER[1], HEADER[2], strips))
     sub = sum(y * q for _, _, y, q in rows)
     ship = 0 if sub >= AKIZUKI_FREE_SHIPPING_YEN else AKIZUKI_SHIPPING_YEN
     rows.append(("shipping (free from 11,000 yen)", "-", ship, 1))
@@ -269,7 +274,8 @@ def main(argv: list[str]) -> int:
         return 1
     ext = extended_codes(parts, codes)
 
-    totals = package_totals(load_study().BLOCKS)
+    study = load_study()
+    totals = package_totals(study.BLOCKS)
     errs = check_bom(totals)
     if errs:
         print("BOM disagrees with the placement study: " + "; ".join(errs), file=sys.stderr)
@@ -301,26 +307,19 @@ def main(argv: list[str]) -> int:
         print(f"JLCPCB order (PCB + PCBA + parts + {SHIP_PLAN} ${ship:.2f}):"
               f" ${totals_usd[tier]:.2f} = {totals_usd[tier]*JPY_PER_USD:,.0f} yen")
 
-    print(f"\n== Akizuki, hand-soldered parts for {BOARDS_PCBA} units")
-    for socketed in (False, True):
-        yen, arows = akizuki_cost(BOARDS_PCBA, socketed)
-        label = "headers and sockets" if socketed else "headers only"
-        if socketed:
-            print(f"with {label}: {yen:,} yen")
-            continue
-        for p, c, y, q in arows:
-            print(f"  {p:<62} {c:>8} {y:>5} x {q:>2} = {y*q:>6,}")
-        print(f"with {label}: {yen:,} yen")
-    aki_lo, _ = akizuki_cost(BOARDS_PCBA, False)
-    aki_hi, _ = akizuki_cost(BOARDS_PCBA, True)
+    pins = header_pins_per_board(study)
+    print(f"\n== Akizuki, hand-soldered parts for {BOARDS_PCBA} units"
+          f" ({pins} module header pins per board)")
+    aki, arows = akizuki_cost(BOARDS_PCBA, pins)
+    for p, c, y, q in arows:
+        print(f"  {p:<62} {c:>8} {y:>5} x {q:>2} = {y*q:>6,}")
+    print(f"Akizuki order: {aki:,} yen")
 
     print(f"\n== Total at {JPY_PER_USD:.0f} yen/USD (excludes Japanese import tax, M2 inserts,"
           " enclosure print)")
     for tier, usd in totals_usd.items():
-        lo = usd * JPY_PER_USD + aki_lo
-        hi = usd * JPY_PER_USD + aki_hi
-        print(f"{tier}: {lo:,.0f} - {hi:,.0f} yen for {BOARDS_PCBA} units"
-              f" ({lo/BOARDS_PCBA:,.0f} - {hi/BOARDS_PCBA:,.0f} yen per unit)")
+        tot = usd * JPY_PER_USD + aki
+        print(f"{tier}: {tot:,.0f} yen for {BOARDS_PCBA} units ({tot/BOARDS_PCBA:,.0f} yen per unit)")
     print(f"lid PCB, if ordered with it: +${LID_PCB_USD:.2f} = {LID_PCB_USD*JPY_PER_USD:,.0f} yen")
     return 0
 

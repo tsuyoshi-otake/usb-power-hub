@@ -361,12 +361,15 @@ pass counts. Entries that rely on a script note this under *Limits*.
 
 ### V-MECH-01 — Outline, connectors, fastening
 - **Covers:** REQ-MECH-01, REQ-MECH-02, REQ-MECH-03, REQ-MECH-04, REQ-MECH-05
-- **When:** Design review (mechanical overlay with the real USB-C module outlines and header
-  height, OI-23) + Bring-up (real parts)
+- **When:** Design review (mechanical overlay with the real USB-C module outlines and the
+  PH-1x40SG header, D33) + Bring-up (real parts)
 - **Method:**
-  - Run `python -I design/experiments/oi-23-placement/placement_study.py` with the chosen
-    header height entered (design review). It must exit 0. Since D31 no outline in it comes
-    from a photo: the CH335F module's did (OI-24).
+  - Run `python -I design/experiments/oi-23-placement/placement_study.py` (design review). It
+    must exit 0 with the D33 header (insulator ≥ 2.30 mm) and its under-module strips. Since
+    D31 no outline in it comes from a photo: the CH335F module's did (OI-24).
+  - Before soldering one USB-C module, measure its board thickness and how far its
+    receptacle hangs below the board (calipers). After soldering, measure the gap between
+    each module's underside and the tallest part under it (feeler gauge).
   - Measure the Gerber outline and the fabricated board.
   - Insert the two widest cables on hand into J2 and J3 together, lid fitted.
   - Count mounting points and measure thread engagement or insert depth.
@@ -377,6 +380,9 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Both plugs seat fully together.
   - ≥ 3 mounting points, one near each connector end; ≥ 4 mm engagement or heat-set inserts.
   - After 50 cycles, no solder-joint cracking and no module movement.
+  - Under every module, ≥ 0.5 mm between its underside and the tallest part under it, and
+    the receptacle's lowest point clear of the board. A failure reopens D33 (the header
+    height) and the study's under-module strip.
 
 ## Manufacturing and test
 

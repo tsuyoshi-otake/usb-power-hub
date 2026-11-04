@@ -92,9 +92,32 @@ class LayoutChecks(unittest.TestCase):
         self.m.REGIONS["R_HUB"] = ((r[0], r[1] + 2.0, r[2], r[3] - 2.0), bl)   # 2.5 mm off
         self.assertFailure("USB corridor does not reach the hub (R_HUB)")
 
-    def test_necessary_area_rejects_85x35(self):
-        req = self.m.necessary_area(1.0)[0]
-        self.assertGreater(req, 85 * 35)
+    def test_header_too_low(self):
+        self.m.HEADER_PLASTIC_MIN = 1.9                # 1.5 mm parts + 0.5 mm need 2.0
+        self.assertFailure("header plastic 1.9 mm is below")
+
+    def test_under_rect_over_receptacle(self):
+        self.m.USBC_UNDER.append((5.8, 0.5, 8.5, 7.9))  # the pre-D33 rectangle
+        self.assertFailure("overlaps the module's receptacle body")
+
+    def test_under_rect_over_insulator(self):
+        self.m.USBC_UNDER[0] = (0.5, 8.6, 19.0, 3.4)   # 12.0 > the row's 11.85
+        self.assertFailure("overlaps the module's header insulator")
+
+    def test_under_rect_off_module(self):
+        self.m.USBC_UNDER[0] = (1.5, 8.2, 19.0, 3.4)   # to x = 20.5
+        self.assertFailure("leaves the USB-C module")
+
+    def test_credit_space_is_outline_less_insulators(self):
+        self.assertAlmostEqual(self.m.under_space("USBC"),
+                               20 * 15 - (7 * 2.54 * 2.5 + 2 * (2 * 2.54) * 2.5), places=6)
+
+    def test_necessary_area_rejects_85x35_with_routing(self):
+        k = self.m.break_even_k(85 * 35)
+        self.assertIsNotNone(k)
+        self.assertGreater(self.m.necessary_area(k)[0], 85 * 35)
+        self.assertLessEqual(self.m.necessary_area(round(k - 0.001, 3))[0], 85 * 35)
+        self.assertLess(k, 1.05)                       # any real routing space excludes it
 
     def test_necessary_area_terms_add_up(self):
         for k in self.m.K_SWEEP:
