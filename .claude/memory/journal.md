@@ -714,3 +714,51 @@ Section 13 (board) only once verified.
   board's thickness and the receptacle's 1.06 mm front overhang. The rules in the skeleton
   are starting values, not JLCPCB's current capabilities.
 - **Commit.** `8b8dded` (design); this entry and the rules.md update follow.
+
+## 2026-11-04 - P1 of issue #6: project symbol and footprint library
+
+- **Request.** The user: 「P1へ」 (the second phase of D32, issue #6).
+- **Result.** `design/ecad/libraries/` holds:
+  - `library.json`, the parts register: 31 entries with pins, land facts and datasheet pages;
+  - 31 flattened symbols;
+  - 28 footprints, 20 KiCad stock and 8 generated: U1 (G20), U6 (G21), the three Kelvin
+    shunts, F1, U5 and the USB-C module.
+
+  `make_libraries.py` writes it, `check_libraries.py` measures it against the register's
+  datasheet facts only (never the generator's `params`), and `test_check_libraries.py`
+  corrupts copies in 18 ways.
+- **Incident 1: nothing loaded.** Every generated footprint and the symbol library failed to
+  load: `FootprintLoad` returned None. Root cause: `sexpr.py` quoted node heads. Fix: heads
+  bare. Verified: all files loaded and the check passed.
+- **Incident 2: a misread figure.** `parts.md` gave the RP2040 pad as 0.20 × 1.175 mm.
+  Reading Figure 167 again showed that 1.175 is the corner distance (3.875 − 2.70); the pad is
+  0.875 mm long. Corrected, and a side-span check was added.
+- **Incident 3: the DRC parser expected English.** It parsed English messages, but
+  `kicad-cli` prints Japanese here. Fixed by parsing the net names.
+- **Incident 4: CRLF (verifier round 1, C9 fail).**
+  - The stock copies kept KiCad's CRLF. The verifier simulated the `eol=lf` checkout: 27
+    byte-copy FAILs.
+  - Fix: write copies LF, compare against KiCad's file read as LF, and reject CR in the
+    library (`check_line_endings`). A new test puts KiCad's CRLF back and must fail.
+  - Verified on a `git checkout-index` export of the staged tree: 1941 checks, PASS.
+  - The same round found the mounting holes and the TSL1 derived land missing from
+    `parts.md`; both were added.
+- **Verification.**
+  - Rubric `.claude/goal-loop/kicad-p1/rubric.md` (C1–C9), rubric-verifier (sonnet).
+  - Round 1 failed C9 (above).
+  - Before round 2, the wording of C5, C7 and C8 was aligned with the documented contract: the
+    CH335F rotation note, R_H joined by its electrode, and LF normalization.
+  - Round 2 passed all nine. Its ungraded remark, the CH335F pad reach (0.35 mm past nominal,
+    0.30 mm past maximum), was corrected; the check and the 19 tests were re-run.
+- **Residual risk.** These rest on less than the part's own drawing (listed in `parts.md`,
+  "Symbols and footprints"):
+  - the AMS1117 tab;
+  - the AOS SOT-23 proxy;
+  - the NCD0805R1 cathode;
+  - the BLM18 proxy;
+  - the TSL1 derived land;
+  - the mounting-hole screw (OI-5);
+  - the passives, deferred to P2.
+
+  No land is proven on a board or in the JLCPCB placement preview.
+- **Commit.** `db6da2a` (library); this entry and the rules.md update follow.

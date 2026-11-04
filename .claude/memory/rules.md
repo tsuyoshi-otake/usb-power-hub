@@ -237,6 +237,32 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   (`copper_edge_clearance`, `track_dangling`), exit 0 without the flag, 5 with it. `sch erc`
   has the same flag. Pass it, and also count `violations`, `unconnected_items`,
   `schematic_parity` and, for ERC, `sheets[*].violations` in the JSON report.
+- **Write S-expression node heads bare.** A generated `.kicad_mod` or `.kicad_sym` whose
+  heads were quoted (`("footprint" ...)`) did not load: `pcbnew.FootprintLoad` returned None
+  and `kicad-cli` could not read the library (2026-11-04, #6 P1). Writing every head bare
+  fixed all of them.
+- **`kicad-cli` messages follow the locale (Japanese on this box).** A regex for the English
+  "Pad … of …" in the DRC JSON matched nothing (2026-11-04). Parse structured fields such as
+  the net names in `[...]`, not the description text.
+- **`FOOTPRINT.GetNetTiePadGroups()` is not iterable from Python** (a bare SWIG vector,
+  probed 2026-11-04). Read `net_tie_pad_groups` from the file's S-expression instead.
+- **KiCad's Windows install ships CRLF; the repository stores LF.** The 20 stock footprints
+  copied byte for byte kept CRLF. An LF copy, which is what `eol=lf` gives a checkout, failed
+  27 byte-copy checks: a verifier simulated this on 2026-11-04 (#6 P1).
+  - Write copies with `.replace(b"\r\n", b"\n")`, and compare against the vendor file
+    normalized the same way.
+  - Reject CR bytes in the checked tree.
+  - To prove a checker on the committed bytes, stage the files and run it on
+    `git checkout-index -a --prefix=<dir>/`. That passed, 1941 checks.
+- **KiCad's `TL431DBZ` symbol is TI's SOT-23 order (1 K, 2 REF); JSCJ's CJ431 is 1 REF,
+  2 CATHODE, 3 ANODE, which is KiCad's `TL432DBZ`** (CJ431 page 1 and the stock symbol, read
+  2026-11-04). Never pick a TL431-family symbol by name: compare the pin numbers with the
+  maker's own sheet.
+- **A land drawing's figure can be a corner distance, not a pad length.** Check each figure
+  against the span arithmetic before recording it. RP2040 Figure 167's 1.175 mm is
+  3.875 − 2.70, the pad corner to the side's end. The pad length is (7.75 − 6.00) / 2 =
+  0.875 mm (read visually 2026-11-04). KiCad's stock `QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm`
+  has the same copper; only its paste windows differ (1.29 vs 1.28 mm).
 
 ## Delegated verifiers
 
