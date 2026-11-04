@@ -762,3 +762,46 @@ Section 13 (board) only once verified.
 
   No land is proven on a board or in the JLCPCB placement preview.
 - **Commit.** `db6da2a` (library); this entry and the rules.md update follow.
+
+## 2026-11-04 - P2 of issue #6: schematic captured, checked against the capture list (D34)
+
+- **Work.** The Rev0.4 schematic is captured in KiCad 9.0.8: six sub-sheets, 294
+  components, every passive bound to a Basic part.
+  - `CIRCUIT_DESIGN_Rev0.4_netlist.md` is the capture list.
+  - `make_schematic.py` writes the schematic from it.
+  - `check_schematic.py` compares the list with the register, §6.2, parts.md, ERC and the
+    exported netlist: 3928 checks.
+  - `test_check_schematic.py` corrupts copies in 18 ways.
+- **D34 (Claude, delegated).** Capture needed values, and their desk check
+  (`_calc.py`) changed three circuit details:
+  - the LM393s move to V12F (LM393/D note 1: an input's maximum is its supply; −0.54 V of
+    margin on V5L);
+  - Q13's gate sits behind 100 kΩ (its 630 pF on DIS_x took 10.0 µs of the 10 µs
+    turn-off);
+  - the comparators take TH_REF on +; the OC tolerance becomes 1.110–1.221 A at 25 °C.
+- **Incident 1: the exported net class is always "Default".** The checker read the class
+  from the exported netlist, and every net came back "Default". Root cause: kicad-cli 9.0.8
+  writes `(class "Default")` even with `netclass_patterns` or explicit assignments in
+  `.kicad_pro` (tested both ways). Fix: resolve classes with pcbnew's
+  `GetEffectiveNetClass`, which gives USB_HS for `USB_A_N`. Verified by a negative test that
+  breaks the pattern.
+- **Incident 2: a checker crash looked like a failure.** A negative test (an order missing
+  from the passive table) made `check_schematic.py` exit with a KeyError traceback, not a
+  FAIL line. Fixed with lookups that report a FAIL. A test that only checks for a non-zero
+  exit would have passed it.
+- **Incident 3: a header parse.** Adding an intro paragraph to parts.md's Passives table
+  made the checker read the header and separator rows as data. It now reads columns by
+  header name.
+- **Finding: OI-32 (blocking).** J1 has about 260 µC of capacitance at plug-in with no
+  inrush limit, against USB 2.0's 10 µF. Recorded, not fixed: it needs its own decision.
+- **Verification.** Rubric `.claude/goal-loop/kicad-p2/rubric.md` (C1–C8), rubric-verifier
+  (sonnet), round 1: all eight pass. The verifier checked all 803 pins with its own
+  parser, made two corruptions of its own, and both failed as meant.
+- **Residual risk.** Not settled on paper:
+  - LM393 power-up with TH_REF ahead of V12F (≤ 0.19 mA into an unpowered input);
+  - the OFF bypass gates' leakage (−1.08 V bound, −80 mV typical);
+  - the green LED's current;
+  - CJ431 stability with no capacitor.
+
+  Each is now a bring-up item in verification.md. The cost estimate is not re-run for D34.
+- **Commit.** `d1c9fa1`.

@@ -92,6 +92,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   search API answered "Access Denied" to the same session.
 - **No public page read gave the shipping charge to Japan.** The shipping page lists only
   promotions, so LCSC's charge is known only at checkout (2026-11-03).
+- **Read a passive's tolerance and TCR from its MPN, not from LCSC's listing parameters.**
+  Some listings disagreed with the MPN (2026-11-04, #6 P2). In UNI-ROYAL's code, as in
+  `0402WGF100JTCE`, the `F` is ±1 % and the `J` in `100J` is the decimal multiplier (10 Ω),
+  not ±5 %.
 
 ## Datasheet text extraction
 
@@ -263,6 +267,18 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   3.875 − 2.70, the pad corner to the side's end. The pad length is (7.75 − 6.00) / 2 =
   0.875 mm (read visually 2026-11-04). KiCad's stock `QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm`
   has the same copper; only its paste windows differ (1.29 vs 1.28 mm).
+- **An exported netlist does not carry net classes.** Verified 2026-11-04 (#6 P2):
+  `kicad-cli 9.0.8 sch export netlist` wrote `(class "Default")` on every net, both with
+  `netclass_patterns` and with explicit `netclass_assignments` in `.kicad_pro`. Resolve a
+  class with pcbnew: `LoadBoard(pcb).GetDesignSettings().m_NetSettings
+  .GetEffectiveNetClass(name).GetName()` gave USB_HS for `USB_A_N`.
+- **Put PWR_FLAG in the project library.** This box has no global sym-lib-table, so
+  `power:PWR_FLAG` does not resolve. A project-library copy gave ERC 0 violations on 7
+  sheets (#6 P2). Removing a flag gave `power_pin_not_driven`, so ERC does see it.
+- **A negative test must look for the checker's FAIL line, not only its exit status.**
+  A corrupted input made `check_schematic.py` die with a KeyError traceback, which also
+  exits 1 (2026-11-04, #6 P2). Assert the summary line (`N checks, M failed: FAIL`) and
+  the failing item's name.
 
 ## Delegated verifiers
 
