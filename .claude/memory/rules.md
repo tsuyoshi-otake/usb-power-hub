@@ -306,6 +306,68 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   exits 1 (2026-11-04, #6 P2). Assert the summary line (`N checks, M failed: FAIL`) and
   the failing item's name.
 
+## Freerouting 2.5.0 (from autoroute.py)
+
+- **The DSN `(autoroute_settings ...)` scope is applied, and its CLI twins are not.**
+  - `--router.scoring.*` flags gave scores identical to a run without them.
+  - The same costs in the DSN changed the result:
+    - layer direction preferences (In2 horizontal, B.Cu vertical, against 4.0) cut the
+      analog L3/L4 parallel overlaps from 16 to 4;
+    - `via_costs 100` cut DRC's unconnected count from 6 to 2.
+  - Placement: after the last `(layer ...)` scope, before `(boundary`. Placed before the
+    layers it gave a parse error and a NullPointerException.
+  - Verified 2026-11-06, #6 P4.
+- **The router is deterministic.**
+  - The same DSN, jar, JRE and arguments gave the same session byte for byte, apart from
+    the session name on lines 1–2.
+  - One trial per setting is therefore enough, and the committed session is reproducible.
+  - Verified twice: full3a/full4p, and the trial full8_v100 against the official
+    autoroute.py run (b7a6c3b).
+- **The router's unrouted count is not DRC's.**
+  - For b7a6c3b's session the router reported 18 unrouted and 820 violations.
+  - DRC on the same session found 2 unconnected and 0 violations.
+  - Judge only by `check_routing.py` / DRC.
+- **The session file is written only when the router stops.**
+  - It stops after 10 passes without improvement, or at `max_passes`.
+  - Killing it (or TaskStop on its Bash task) leaves no `.ses`, and can leave the JVM
+    running; list java.exe afterwards.
+  - A background Bash task can end while its python and java children run on. Wait on the
+    output file or the PID, not on the task.
+- **`-l en` with file logging on writes `<cwd>/en/freerouting.log`.**
+  - Pass `--logging.file.enabled=false`.
+  - Even then an empty `en/` was left in the repo and failed rubric C8 (2026-11-06).
+- **With neck-down off, the router still narrows a wire to 0.10–0.12 mm at a 0.4 mm-pitch
+  pin.** `--router.neck_width_um=150` holds it at the board minimum, so DRC's track-width
+  rule passes (#6 P4).
+- **Match the right log line in a wait loop.** `Fanout stage completed` also matches
+  `stage completed`; match `Auto-routing stage completed`.
+- **For the last few defects, a patch after the session is cheaper than another sweep.**
+  - The patch is a document table of remove rows and drawn rows.
+  - A remove row that finds nothing stops the build, so a stale patch cannot apply silently
+    to a new session.
+  - The last 2 unconnected and 3 overlaps were found with a scratch 0.1 mm grid A*. Its
+    obstacles were other nets' copper, the DSN keepouts, the hole clearance and D36. DRC
+    then proved the result.
+  - Off-grid endpoints make 44° segments, so set end points by hand to exactly 45° or 90°.
+  - The first grid search left out the 0.25 mm hole clearance for tracks, and DRC caught it.
+
+## KiCad 9 routing checks
+
+- **Solve a net's copper resistance only on the island that holds the first pad.**
+  - Any isolated island of the net makes the full conductance matrix singular, and the
+    check reported "no copper path".
+  - BFS from pad a; inf if pad b is not reached. Verified by `test_port_net_island_elsewhere`
+    (#6 P4).
+- **Compare a 45° design rule with a tolerance (0.1°).** About 20 exact-45° crossings
+  measured 44.99…° and failed without it (#6 P4).
+- **A connector pad without paste is `PAD_ATTRIB_CONN`, not SMD.** Include it when
+  collecting surface pads; an SMD-only GND fanout missed J5's pad 5.
+- **`PCB_VIA.GetWidth()` takes a layer in KiCad 9** (`GetWidth(pcbnew.F_Cu)`).
+- **A track's class name is `PCB_TRACK`.** A test that expected `SEGMENT` in a FAIL line
+  failed once the checker printed `GetClass()` (#6 P4).
+- **Check what a note parser will read as a designator.** check_pcb.py read "at P3" in a
+  placement note as part P3, and failed (#6 P4).
+
 ## Delegated verifiers
 
 - **Tell a verifier to delete nothing.** A rubric that said "delete it when done" let a

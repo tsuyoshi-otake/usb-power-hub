@@ -891,3 +891,72 @@ Section 13 (board) only once verified.
   - The heights under the modules are planning values (V-MECH-01).
   - Rubric C6 needed the verifier to read the module overhang as allowed; see rules.md.
 - **Commit.** `b486758`.
+
+## 2026-11-06 - P4 of issue #6: Rev0.4 routed, D36 L3/L4 rule
+
+- **Goal.** P4: route the placed board to DRC 0 errors and 0 unrouted, with the USB pairs,
+  the Kelvin taps, the analog blocks and the zones as CLAUDE.md 5 asks.
+- **Decision D36** (user, 2026-11-06, 「交差のみ許可 (推奨)」).
+  - With L4 closed to signals in the analog blocks, the router left 76–78 connections
+    unrouted.
+  - New rule: in the analog blocks, L3 and L4 signals may cross at ≥ 45° but never run along
+    each other.
+- **Design.** Each piece has one job:
+  - `ROUTING_Rev0.4.md` holds everything drawn by hand: the plane, pairs, Kelvin taps,
+    trunks, escapes, GND fanout, pours, classes, keepouts, router layer preferences and
+    costs, and the patch;
+  - `route.py` applies it;
+  - `autoroute.py` runs Freerouting 2.5.0 on a jar and a JRE pinned by SHA-256, and commits
+    the session with its digests;
+  - `make_pcb.py` refuses a session made from other input, then applies the session, the
+    patch and the zones;
+  - `check_routing.py` checks DRC, the pairs, the Kelvin taps, D36, the class layers and the
+    port-path copper.
+- **Root causes found on the way.**
+  - The CLI scoring flags were ignored; the DSN autoroute_settings work.
+  - The port check's "no copper path" was a singular matrix caused by an island.
+  - The 45° comparisons failed on float error.
+  - J5's paste-less pad is CONN, not SMD.
+  - VSUP_A's 1.0 mm track came within 0.415 mm of pair A, so its first 0.5 mm is now 0.60 mm.
+  - V5L got its own 0.31 mm class: IPC-2221 needs 0.306 mm on an inner layer for 0.277 A at
+    ΔT 10 °C.
+- **Sweep** (DRC unconnected / analog parallels):
+
+  | Setting | Unconnected | Parallels | Note |
+  |---|---:|---:|---|
+  | default | 6 | 0 | 4 other DRC errors |
+  | layer cost 2.0 | 6 | 13 | |
+  | cheaper rip-up | 11 | 0 | |
+  | **via_costs 100** | **2** | **3** | 0 other DRC; adopted |
+
+  The official run took 17 min (56 passes) and reproduced the trial byte for byte, apart
+  from the session name.
+- **Patch.**
+  - ADC_CC2 and EVTG_L_A, left unrouted, are drawn: ADC_CC2 81 mm with 2 vias, EVTG_L_A on
+    F.Cu.
+  - ADC_DIN_3V, INP_L_B and HOLD_L_B are redrawn so they cross at ≥ 45°.
+  - A scratch grid A* found the paths; DRC proved them.
+- **Verification.**
+  - make_pcb.py twice: 44 files hashed, byte-identical.
+  - check_pcb.py: 12,694 checks PASS.
+  - check_routing.py: 3,945 checks PASS, 0 unconnected, 187 In2/B.Cu crossings, ports A
+    29.76 / B 35.25 mΩ.
+  - kicad-cli DRC: 0/0/0.
+  - Tests OK: test_check_routing 16, test_check_pcb 24, test_make_project 11,
+    test_check_libraries 19, test_check_schematic 19.
+  - Rubric `.claude/goal-loop/kicad-p4/rubric.md` (C1–C8), graded by rubric-verifier
+    (sonnet):
+    - round 1 failed C4(d): the 0.20 mm V5L track into U6 pin 26 carries 85 mA at the pin's
+      own width, which the criterion had not excepted. It is now in the Widths table and the
+      criterion.
+    - round 1 failed C8: a stray empty `en/` left by Freerouting, now removed.
+    - round 2 passed.
+- **Residual risk.**
+  - D36's 187 crossings take L3's return off L4 for each crossing's width. The effect is not
+    computed (V-MEAS-01).
+  - The HS pair impedance is D27's model value; the modules are OI-26's.
+  - One GND net, with no quiet ADC tie.
+  - The port voltage includes module wiring that is not known on paper.
+  - The patch is bound to this session: a new session needs a new table.
+- **Learning.** rules.md: "Freerouting 2.5.0" and "KiCad 9 routing checks".
+- **Commit.** `b7a6c3b`.
