@@ -30,6 +30,9 @@ This directory is a trial, not design data (CLAUDE.md §2: `design/experiments/`
 non-authoritative). The block positions are a proposal. Nothing here is a footprint, an
 outline drawing or a layout.
 
+The placement that issue #6 P3 made from this proposal is `design/ecad/PLACEMENT_Rev0.4.md`;
+its *Deviations from the study* lists where the real footprints did not fit these blocks.
+
 ## Files
 
 | File | What it is |

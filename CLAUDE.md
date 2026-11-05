@@ -28,7 +28,7 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > history) — together with the
 > requirements set in `requirements/`
 > (`product.md`, `verification.md`, `parts.md`). That is currently the whole of
-> the design. There is **no layout and no manufacturing output**. Capture has
+> the design. There is **no routing and no manufacturing output**. Capture has
 > started in KiCad 9.0.8 (D32, issue #6): a
 > generated project skeleton exists in `design/ecad/source/` (4-layer JLC04161H-7628
 > stackup, 100 × 72 mm outline, §5.3 starting rules, the USB_HS net class), written by
@@ -37,7 +37,11 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > passive bound to a Basic LCSC part, ERC with 0 violations. `make_schematic.py` writes it from
 > `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md`, and `check_schematic.py` compares the
 > exported netlist with that list, with the circuit document's §6.2 and with
-> `requirements/parts.md`. The project
+> `requirements/parts.md`. The parts are placed (P3): `make_pcb.py` builds the board from
+> the exported netlist and `design/ecad/PLACEMENT_Rev0.4.md`, and `check_pcb.py` checks it
+> against that document, the capture list's placement notes and DRC (0 violations; every
+> net still unrouted, which is P4). `design/ecad/README.md` gives the order to run the
+> generators in. The project
 > library exists (P1): a symbol and a footprint for every Rev0.4 part in
 > `design/ecad/libraries/`, each land measured by `check_libraries.py` against the
 > datasheet numbers recorded in `library.json`. Candidate parts have been looked up in the JLCPCB

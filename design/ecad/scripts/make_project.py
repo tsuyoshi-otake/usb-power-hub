@@ -14,7 +14,9 @@ It writes two files:
   net classes: Default, and USB_HS with D27's provisional pair, W 0.31 / S 0.15 mm, which
   every net named USB_* joins (the captured D+/D- nets, issue #6 P2).
 The schematic files are make_schematic.py's; this script does not touch them, but shares
-its title block and UUID namespace with them.
+its title block and UUID namespace with them. make_pcb.py rebuilds the board with every part
+placed, from make_board() and insert_stackup() here, so it runs after this script
+(design/ecad/README.md).
 UUIDs are derived from names (uuid5), so a re-run writes the same bytes. KiCad's local-state
 file (.kicad_prl) is deleted; it is gitignored and KiCad recreates it.
 
@@ -309,7 +311,7 @@ def main():
     if prl.exists():
         prl.unlink()
     print(f"wrote {pcb.name}, {pro.name} in {OUT.relative_to(ROOT).as_posix()};"
-          f" {n} board uuid(s) fixed")
+          f" {n} board uuid(s) fixed; the board is bare: run make_pcb.py to place the parts")
     th = sum(t for _, _, t, _, _ in stackup())
     print(f"stackup {STACKUP_ID}: copper + dielectric {th:.4f} mm; finish {FINISH};"
           f" net classes {', '.join(CLASSES)}")

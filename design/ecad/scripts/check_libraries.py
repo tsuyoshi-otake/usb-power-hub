@@ -40,7 +40,8 @@ say) and never the generator's `params`, and it measures footprints as KiCad loa
     stores LF, so these are the bytes a checkout holds.
  5. kicad-cli exports every symbol and every footprint to SVG (it parses them).
  6. DRC: every footprint is placed on a scratch copy of the project board (its rules, its
-    stackup; a larger outline), each pad number on its own net, and `kicad-cli pcb drc` must
+    stackup; a larger outline; the board's own parts removed), each pad number on its own
+    net, and `kicad-cli pcb drc` must
     report no violation. Unconnected items are expected (a switch has two pads per pin) and
     are not counted.
 Exit status: 0 = every check passed; 1 = at least one failed; each failure prints as
@@ -709,6 +710,14 @@ def check_drc(rep, srcdir, pretty, fp_names):
         (t / "fp-lib-table").write_text(
             f'(fp_lib_table (version 7) (lib (name "{NICK}")(type "KiCad")(uri "{pretty.resolve().as_posix()}")'
             '(options "")(descr "")))\n', encoding="utf-8", newline="\n")
+        # Only the rules and the stackup are wanted: since P3 the project board also carries
+        # the placed parts (make_pcb.py), whose unrouted nets are not this check's business.
+        # They are cut from the copy's text; removing them through pcbnew breaks its later
+        # FootprintLoad calls (KiCad 9.0.8: "'SwigPyObject' object has no attribute").
+        tree = sx.loads((t / "sandbox.kicad_pcb").read_text(encoding="utf-8"))
+        tree[:] = [n for n in tree if not (isinstance(n, list) and n
+                                           and n[0] in ("footprint", "segment", "arc", "via", "zone"))]
+        (t / "sandbox.kicad_pcb").write_text(sx.dumps(tree), encoding="utf-8", newline="\n")
         board = pcbnew.LoadBoard(str(t / "sandbox.kicad_pcb"))
         for d in list(board.GetDrawings()):
             if d.GetLayer() == pcbnew.Edge_Cuts:

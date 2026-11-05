@@ -26,7 +26,7 @@
 	)
 	(attr through_hole)
 	(fp_line
-		(start -2.49 -13.1)
+		(start -2.49 -12.6)
 		(end -2.49 2.01)
 		(stroke
 			(width 0.12)
@@ -45,7 +45,7 @@
 	)
 	(fp_line
 		(start 17.73 2.01)
-		(end 17.73 -13.1)
+		(end 17.73 -12.6)
 		(stroke
 			(width 0.12)
 			(type solid)

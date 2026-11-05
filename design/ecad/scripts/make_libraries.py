@@ -512,10 +512,13 @@ def gen_usbc_module(name, p, part):
                 "(OI-23 study), so parts <= 1.5 mm may sit in the strip under the module",
                 "USB Type-C module Akizuki", ["through_hole"], (r((mx0 + mx1) / 2), r(my1 + 1.2)),
                 (r((mx0 + mx1) / 2), r(my0 - 2.2)))
-    s = 0.11
-    fp.append(line((r(mx0 - s), my0), (r(mx0 - s), r(my1 + s)), "F.SilkS", 0.12))
+    # The outline in silk on three sides. The receptacle edge sits on the board edge (the
+    # receptacle overhangs it), so the side lines stop `edge` short of it: silk there would be
+    # clipped by the board edge (DRC silk_edge_clearance; min_copper_edge_clearance 0.3 mm).
+    s, edge = 0.11, 0.5
+    fp.append(line((r(mx0 - s), r(my0 + edge)), (r(mx0 - s), r(my1 + s)), "F.SilkS", 0.12))
     fp.append(line((r(mx0 - s), r(my1 + s)), (r(mx1 + s), r(my1 + s)), "F.SilkS", 0.12))
-    fp.append(line((r(mx1 + s), r(my1 + s)), (r(mx1 + s), my0), "F.SilkS", 0.12))
+    fp.append(line((r(mx1 + s), r(my1 + s)), (r(mx1 + s), r(my0 + edge)), "F.SilkS", 0.12))
     fp.append(poly([(-1.3, 0), (-1.8, -0.3), (-1.8, 0.3)], "F.SilkS", 0.12))
     for (x, y, rw, rh) in court:
         a, b = tr(x, y), tr(x + rw, y + rh)
