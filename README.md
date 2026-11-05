@@ -94,8 +94,9 @@ Not possible yet. The board is captured and laid out in KiCad 9.0.8 until the de
 complete, then imported into EasyEDA (decision D32, issue #6). The module headers are
 chosen (D33) and every part has a symbol and a footprint, the RP2040's and the CH335F's
 lands drawn from their datasheets (G20, G21). The schematic is captured (issue #6 P2,
-D34) and includes J1's soft start (D35, issue #7). The parts are placed (P3), so the next
-step is routing (P4). The front-end checks are made on
+D34) and includes J1's soft start (D35, issue #7). The parts are placed (P3) and routed
+(P4, under D36's L3/L4 rule): DRC reports 0 violations and 0 unconnected items. The next step
+is the manufacturing outputs (P5): Gerber, drill, BOM and CPL. The front-end checks are made on
 the first assembled board, not on a bench beforehand (decision D28). Firmware does not
 exist.
 
@@ -109,11 +110,15 @@ The KiCad project, its libraries, its schematic and its board are generated, not
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_libraries.py   # its negative tests
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_schematic.py         # writes the schematic, runs ERC and check_schematic.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_schematic.py   # its negative tests
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_pcb.py               # places the parts, runs check_pcb.py and DRC
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/autoroute.py --java <java.exe> --jar <freerouting-2.5.0.jar>  # only when its input changed
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_pcb.py               # places and routes, runs check_pcb.py and check_routing.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_pcb.py         # its negative tests
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_routing.py
 ```
 
-`make_project.py` writes a bare board, so `make_pcb.py` runs after it.
+`make_project.py` writes a bare board, so `make_pcb.py` runs after it. `autoroute.py` needs
+Freerouting 2.5.0 and a Java runtime, which are not in the repository
+(`design/ecad/README.md`).
 
 ## Repository
 

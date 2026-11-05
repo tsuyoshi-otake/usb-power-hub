@@ -51,7 +51,7 @@ each courtyard outline.
     mapped by the table.
 12. DRC (`kicad-cli pcb drc --schematic-parity --severity-all`): no violation of any
     severity and no schematic-parity item. Unconnected items are counted, not failed:
-    nothing is routed before P4.
+    routing is check_routing.py's (P4).
 Exit status: 0 = every check passed; 1 = at least one failed. Each failure prints as
 `FAIL <who>: <what>`.
 
@@ -575,7 +575,7 @@ def main(argv):
     for line in rep.fails:
         print(line)
     print(f"{len(fps)} footprints, {n_notes} placement notes measured, "
-          f"{unconnected if unconnected is not None else '?'} unconnected items (routing is P4)")
+          f"{unconnected if unconnected is not None else '?'} unconnected items (check_routing.py judges them)")
     print(f"{rep.count} checks, {len(rep.fails)} failed: {'FAIL' if rep.fails else 'PASS'}")
     return 1 if rep.fails else 0
 

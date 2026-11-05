@@ -1,0 +1,289 @@
+"""Negative tests for check_routing.py (CLAUDE.md 8: a checker never observed failing is not
+evidence).
+
+Run with KiCad's Python from the repository root, after make_pcb.py has written the routed
+board:
+
+    "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_routing.py
+
+Each test copies design/ecad/source and design/ecad/libraries into a temporary directory,
+copies the routing and placement documents beside them, corrupts the copies, and runs
+check_routing.py on them in a new process. The unchanged copy must pass. Every corruption
+must fail, and the failure must be named in the output. The repository's files are never
+modified. Each run includes DRC, about 10 s.
+
+Not covered here:
+- The In1 zone's net and layer type (make_pcb.py builds them from the zones table).
+- The In1 fill rule under the pairs: removing fill also breaks DRC's zone connectivity first.
+"""
+import importlib.util
+import pathlib
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+import uuid
+
+HERE = pathlib.Path(__file__).resolve().parent
+CHECK = HERE / "check_routing.py"
+ECAD = HERE.parent
+DOCS = {"doc": ECAD / "ROUTING_Rev0.4.md", "placement": ECAD / "PLACEMENT_Rev0.4.md"}
+ORIGIN = (50.0, 122.0)
+
+_spec = importlib.util.spec_from_file_location("sexpr", HERE / "sexpr.py")
+sx = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(sx)
+
+
+def run_check(board=None, **edit_text):
+    """Copy, corrupt, check. Returns (exit status, output).
+
+    board(tree): edit the board's parsed S-expression in place.
+    doc / placement = edit(text): return the corrupted text.
+    """
+    with tempfile.TemporaryDirectory(prefix="routetest-") as tmp:
+        t = pathlib.Path(tmp)
+        src = t / "source"
+        shutil.copytree(ECAD / "source", src)
+        shutil.copytree(ECAD / "libraries", t / "libraries")
+        args = []
+        for key, path in DOCS.items():
+            dst = t / path.name
+            text = path.read_text(encoding="utf-8")
+            if key in edit_text:
+                new = edit_text[key](text)
+                assert new != text, f"the {key} corruption changed nothing"
+                text = new
+            dst.write_text(text, encoding="utf-8", newline="\n")
+            args += [f"--{key}", str(dst)]
+        if board:
+            p = src / "usb-power-hub.kicad_pcb"
+            tree = sx.loads(p.read_text(encoding="utf-8"))
+            before = sx.dumps(tree)
+            board(tree)
+            assert sx.dumps(tree) != before, "the board corruption changed nothing"
+            p.write_text(sx.dumps(tree) + "\n", encoding="utf-8", newline="\n")
+        r = subprocess.run([sys.executable, "-I", "-B", str(CHECK), "--src", str(src), *args],
+                           capture_output=True, text=True, encoding="utf-8", timeout=900)
+        return r.returncode, r.stdout + r.stderr
+
+
+# ---- board edits (sheet coordinates in the file; the helpers take the board frame) -----------
+
+
+def sheet(x, y):
+    return round(ORIGIN[0] + x, 6), round(ORIGIN[1] - y, 6)
+
+
+def net_code(tree, name):
+    return next(n[1] for n in sx.find(tree, "net") if len(n) > 2 and n[2] == name)
+
+
+def segments(tree, name, layer=None):
+    code = net_code(tree, name)
+    return [s for s in sx.find(tree, "segment") if sx.first(s, "net")[1] == code
+            and (layer is None or sx.first(s, "layer")[1] == layer)]
+
+
+def ends(seg):
+    return [sx.first(seg, "start"), sx.first(seg, "end")]
+
+
+def segments_on(tree, layer):
+    return [s for s in sx.find(tree, "segment") if sx.first(s, "layer")[1] == layer]
+
+
+def add_segment(tree, name, a, b, width, layer):
+    tree.append(["segment", ["start", *sheet(*a)], ["end", *sheet(*b)], ["width", width],
+                 ["layer", layer], ["net", net_code(tree, name)], ["uuid", str(uuid.uuid4())]])
+
+
+def add_via(tree, name, at_sheet):
+    tree.append(["via", ["at", *at_sheet], ["size", 0.45], ["drill", 0.25], ["layers", "F.Cu", "B.Cu"],
+                 ["net", net_code(tree, name)], ["uuid", str(uuid.uuid4())]])
+
+
+def remove(tree, items):
+    ids = {id(i) for i in items}
+    tree[:] = [x for x in tree if id(x) not in ids]
+
+
+# ---- document edits ---------------------------------------------------------------------------
+
+
+def sub_once(pattern, repl):
+
+    def edit(text):
+        new, n = re.subn(pattern, repl, text, count=1, flags=re.M)
+        assert n == 1, pattern
+        return new
+    return edit
+
+
+def kelvin_net():
+    text = DOCS["doc"].read_text(encoding="utf-8")
+    m = re.search(r"^\| (\w+) \| F\.Cu \| 0\.20 \| [^|]* \| Kelvin tap \|", text, re.M)
+    assert m, "no Kelvin tap row in the routing document"
+    return m.group(1)
+
+
+class CheckTest(unittest.TestCase):
+    def assertFailsWith(self, status_out, *needles):
+        status, out = status_out
+        self.assertEqual(status, 1, out)
+        self.assertRegex(out, r"\d+ checks, [1-9]\d* failed: FAIL")
+        for n in needles:
+            self.assertIn(n, out)
+
+    def test_unchanged_copy_passes(self):
+        status, out = run_check()
+        self.assertEqual(status, 0, out)
+        self.assertRegex(out, r"\d+ checks, 0 failed: PASS")
+
+    # ---- DRC and the plane --------------------------------------------------------------------
+
+    def test_routed_segment_removed(self):
+        def edit(tree):
+            remove(tree, segments(tree, "ADC_CS")[:1])
+        self.assertFailsWith(run_check(board=edit), "FAIL DRC unconnected")
+
+    def test_track_on_in1(self):
+        self.assertFailsWith(run_check(board=lambda t: add_segment(t, "GND", (5.0, 70.0), (8.0, 70.0), 0.2, "In1.Cu")),
+                             "FAIL In1.Cu: 1 track(s) on the plane layer")
+
+    # ---- the pairs ----------------------------------------------------------------------------
+
+    def test_pair_width_changed(self):
+        def edit(tree):
+            s = next(s for s in segments(tree, "USB_UP_P") if sx.first(s, "width")[1] == 0.31)
+            sx.first(s, "width")[1] = 0.25
+        self.assertFailsWith(run_check(board=edit), "FAIL pair UP: USB_UP_P track 0.25 mm wide")
+
+    def test_pair_conductor_off_centreline(self):
+        def edit(tree):
+            # the long westward run of USB_A_P at y 17.67: 0.05 mm further from N
+            y = sheet(0, 17.67)[1]
+            s = next(s for s in segments(tree, "USB_A_P", "F.Cu")
+                     if all(abs(e[2] - y) < 1e-6 for e in ends(s)) and abs(ends(s)[0][1] - ends(s)[1][1]) > 30)
+            for e in ends(s):
+                e[2] = round(e[2] + 0.05, 6)
+        self.assertFailsWith(run_check(board=edit), "FAIL pair A: USB_A_P 0.280 mm from the centreline")
+
+    def test_tuning_bump_too_tall(self):
+        def edit(tree):
+            x = sheet(97.1, 0)[0]
+            for s in segments(tree, "USB_UP_P", "F.Cu"):
+                for e in ends(s):
+                    if abs(e[1] - x) < 1e-6:
+                        e[1] = round(x - 0.2, 6)
+        self.assertFailsWith(run_check(board=edit), "FAIL pair UP: USB_UP_P 0.900 mm from the centreline")
+
+    def test_tune_height_lowered_in_document(self):
+        doc = sub_once(r"\| P 97\.8,31\.0 97\.8,47\.82 0\.47 \|", "| P 97.8,31.0 97.8,47.82 0.30 |")
+        self.assertFailsWith(run_check(doc=doc), "FAIL pair UP: USB_UP_P", "want 0.23 to 0.53")
+
+    def test_tuning_bumps_removed(self):
+        def edit(tree):
+            xa, ya = sheet(97.0, 47.82)
+            xb, yb = sheet(97.6, 31.0)
+            bumps = [s for s in segments(tree, "USB_UP_P", "F.Cu")
+                     if all(xa - 1e-6 <= e[1] <= xb + 1e-6 and ya - 1e-6 <= e[2] <= yb + 1e-6 for e in ends(s))]
+            assert len(bumps) >= 30, len(bumps)
+            remove(tree, bumps)
+            add_segment(tree, "USB_UP_P", (97.57, 31.0), (97.57, 47.82), 0.31, "F.Cu")
+        self.assertFailsWith(run_check(board=edit), "FAIL pair UP: P 66.5", "skew 3.1")
+
+    def test_copper_near_pair(self):
+        # 0.415 mm from USB_A_P's edge, on F.Cu, away from any other copper of the corridor
+        self.assertFailsWith(run_check(board=lambda t: add_segment(t, "V3V3", (50.0, 17.0), (51.0, 17.0), 0.2, "F.Cu")),
+                             "FAIL pair A: PCB_TRACK V3V3 within 0.5 mm of USB_A_P on F.Cu")
+
+    # ---- Kelvin taps, the analog rule, classes, the port path ---------------------------------
+
+    def test_via_on_kelvin_tap(self):
+        net = kelvin_net()
+
+        def edit(tree):
+            add_via(tree, net, ends(segments(tree, net)[0])[0][1:3])
+        self.assertFailsWith(run_check(board=edit), f"FAIL Kelvin {net}: 1 via(s)")
+
+    def test_b_cu_under_analog_in2_track(self):
+        def edit(tree):
+            # the first In2 track inside AFE_A (x 0.5-33.6, y 19-49.5) of a net other than V3V3,
+            # copied onto B.Cu as a V3V3 track (a net over its own B.Cu track is exempt)
+            other = net_code(tree, "V3V3")
+            for s in sx.find(tree, "segment"):
+                if sx.first(s, "layer")[1] != "In2.Cu" or sx.first(s, "net")[1] == other:
+                    continue
+                (x0, y0), (x1, y1) = ((e[1] - ORIGIN[0], ORIGIN[1] - e[2]) for e in ends(s))
+                if all(1.0 < x < 33.0 and 20.0 < y < 49.0 for x, y in ((x0, y0), (x1, y1))):
+                    c = [x for x in s if not (isinstance(x, list) and x and x[0] in ("layer", "uuid", "net"))]
+                    tree.append(c + [["layer", "B.Cu"], ["net", other], ["uuid", str(uuid.uuid4())]])
+                    return
+            raise AssertionError("no In2 track inside AFE_A")
+        self.assertFailsWith(run_check(board=edit), "FAIL analog: In2 ")
+
+    def test_crossing_in_analog_allowed(self):
+        """D36: a 90-degree In2 crossing over a B.Cu track in AFE_A is allowed and counted."""
+        def crossings(out):
+            m = re.search(r"(\d+) In2/B\.Cu crossing\(s\) there", out)
+            self.assertIsNotNone(m, out)
+            return int(m.group(1))
+
+        def edit(tree):
+            # the middle of the first straight B.Cu track inside AFE_A longer than 2 mm, not V3V3,
+            # crossed at 90 degrees by a 0.6 mm In2 track of V3V3
+            other = net_code(tree, "V3V3")
+            for s in segments_on(tree, "B.Cu"):
+                if sx.first(s, "net")[1] == other:
+                    continue
+                (x0, y0), (x1, y1) = ((e[1] - ORIGIN[0], ORIGIN[1] - e[2]) for e in ends(s))
+                if not all(1.0 < x < 33.0 and 20.0 < y < 49.0 for x, y in ((x0, y0), (x1, y1))):
+                    continue
+                if x0 == x1 and abs(y1 - y0) > 2.0:
+                    a, b = ((x0 - 0.3, (y0 + y1) / 2), (x0 + 0.3, (y0 + y1) / 2))
+                elif y0 == y1 and abs(x1 - x0) > 2.0:
+                    a, b = (((x0 + x1) / 2, y0 - 0.3), ((x0 + x1) / 2, y0 + 0.3))
+                else:
+                    continue
+                tree.append(["segment", ["start", *sheet(*a)], ["end", *sheet(*b)], ["width", 0.2],
+                             ["layer", "In2.Cu"], ["net", other], ["uuid", str(uuid.uuid4())]])
+                return
+            raise AssertionError("no straight B.Cu track inside AFE_A")
+        base = crossings(run_check()[1])
+        status, out = run_check(board=edit)
+        self.assertNotIn("FAIL analog", out)
+        self.assertEqual(crossings(out), base + 1, out)
+
+    def test_class_layer_broken(self):
+        def edit(tree):
+            s = segments(tree, "VBUS_J1", "F.Cu")[0]
+            sx.first(s, "layer")[1] = "In2.Cu"
+        self.assertFailsWith(run_check(board=edit), "FAIL class J1_POWER: ")
+
+    def test_port_trunk_removed(self):
+        def edit(tree):
+            # SRC_A's 1.20 mm trunk between the switch FETs (ROUTING_Rev0.4.md, x 1.2)
+            x = sheet(1.2, 0)[0]
+            trunk = [s for s in segments(tree, "SRC_A", "F.Cu")
+                     if sx.first(s, "width")[1] == 1.2 and all(abs(e[1] - x) < 1e-6 for e in ends(s))]
+            assert len(trunk) == 1, trunk
+            remove(tree, trunk)
+        self.assertFailsWith(run_check(board=edit), "FAIL port A: SRC_A Q10.2 -> Q11.2: no copper path")
+
+    def test_port_net_island_elsewhere(self):
+        """A stray island of a port net leaves the path's resistance computable."""
+        status, out = run_check(board=lambda t: add_segment(t, "SRC_A", (5.0, 70.0), (6.0, 70.0), 0.2, "F.Cu"))
+        self.assertEqual(status, 1, out)
+        self.assertIn("FAIL DRC", out)
+        self.assertNotIn("FAIL port A", out)
+
+    def test_port_path_limit_lowered(self):
+        doc = sub_once(r"<!-- port_path:begin limit=40 -->", "<!-- port_path:begin limit=1 -->")
+        self.assertFailsWith(run_check(doc=doc), "FAIL port A: ", "limit 1")
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

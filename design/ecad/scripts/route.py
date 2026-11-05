@@ -1,0 +1,661 @@
+"""Route the Rev0.4 board from the routing document (issue #6 P4; CLAUDE.md 5.1, 5.3, 5.4).
+
+A library, not a script. make_pcb.py owns the board file and calls it after placing the parts;
+autoroute.py calls it to build Freerouting's input. Both parse the documents with
+make_pcb.doc_tables and hand this module the tables.
+
+The routed board is built in this order (design/ecad/ROUTING_Rev0.4.md):
+1. `plane()`: In1.Cu becomes a plane layer holding the document's In1 zone (GND).
+2. `apply_rows()`: the hand-drawn tracks and vias of the `route` table and, for both channels,
+   the `channel_route` table; channel B is channel A moved by dx, with the placement's
+   Ref A -> Ref B map and `_A` -> `_B` in the net names.
+3. `gnd_fanout()`: every GND SMD pad gets a short stub and a via to the plane, and each exposed
+   pad of the `epad` table a pattern of vias.
+4. `import_session()`: the committed Freerouting session (routing/usb-power-hub.ses): the
+   tracks and vias the router added. `export_dsn()` writes the router's input from the board of
+   steps 1-3 with the document's classes and keepouts; its SHA-256 is recorded next to the
+   session, so a session made from another input is refused.
+5. `pours()`: the remaining zones, then every zone is filled.
+"""
+import hashlib
+import math
+import re
+
+import pcbnew
+
+ORIGIN = (50.0, 122.0)            # the board's lower-left corner on the sheet (make_project.py)
+LAYERS = {"F.Cu": pcbnew.F_Cu, "In1.Cu": pcbnew.In1_Cu, "In2.Cu": pcbnew.In2_Cu, "B.Cu": pcbnew.B_Cu}
+PAD_RE = re.compile(r"([A-Z]+\d+)\.(\w+)$")
+mm = pcbnew.FromMM
+
+
+def to_sheet(x, y):
+    return pcbnew.VECTOR2I(mm(ORIGIN[0] + x), mm(ORIGIN[1] - y))
+
+
+def to_frame(vec):
+    return pcbnew.ToMM(vec.x) - ORIGIN[0], ORIGIN[1] - pcbnew.ToMM(vec.y)
+
+
+# ---- the routing document ------------------------------------------------------------------
+def _num(text, what):
+    try:
+        return float(text)
+    except ValueError:
+        raise SystemExit(f"{what}: {text!r} is not a number") from None
+
+
+def _row(r, kind):
+    net, layer, width, pts = r["Net"], r["Layer"], r["Width"], r["Points"].split()
+    if layer == "remove":
+        if kind != "patch" or not pts:
+            raise SystemExit(f"{kind}: a remove row belongs to the patch table and takes points: {r}")
+        return dict(net=net, layer=layer, points=pts, why=r.get("Why", ""))
+    if layer == "via":
+        if len(pts) != 1:
+            raise SystemExit(f"{kind}: a via row takes one point: {r}")
+        d, drill = (_num(v, f"{kind} {net} via") for v in width.split("/"))
+        return dict(net=net, layer=layer, via=(d, drill), points=pts, why=r.get("Why", ""))
+    if layer not in LAYERS or layer == "In1.Cu":
+        raise SystemExit(f"{kind}: {net} on {layer!r}; tracks go on F.Cu, In2.Cu or B.Cu")
+    if len(pts) < 2:
+        raise SystemExit(f"{kind}: a track row takes two points or more: {r}")
+    return dict(net=net, layer=layer, width=_num(width, f"{kind} {net} width"), points=pts,
+                why=r.get("Why", ""))
+
+
+def channel_b(row, refs, dx):
+    """Channel A's row moved to channel B: x + dx, Ref A -> Ref B, net _A -> _B."""
+    if not row["net"].endswith("_A"):
+        raise SystemExit(f"channel_route: net {row['net']} is not a channel-A net (_A)")
+    pts = []
+    for p in row["points"]:
+        m = PAD_RE.match(p)
+        if m:
+            if m.group(1) not in refs:
+                raise SystemExit(f"channel_route: {m.group(1)} has no channel-B part")
+            pts.append(f"{refs[m.group(1)]}.{m.group(2)}")
+        else:
+            x, y = p.split(",")
+            pts.append(f"{round(_num(x, 'x') + dx, 4)},{y}")
+    return dict(row, net=row["net"][:-2] + "_B", points=pts)
+
+
+def _tune(p):
+    """The pairs table's Tune cell: "-", or "<P|N> x,y x,y <height>": that conductor carries
+    tuning bumps up to <height> mm away from its partner, along the centreline between the
+    two points."""
+    if p["Tune"] == "-":
+        return None
+    c = p["Tune"].split()
+    if len(c) != 4 or c[0] not in ("P", "N"):
+        raise SystemExit(f"pair {p['Pair']}: Tune {p['Tune']!r}, want '<P|N> x,y x,y <height>'")
+    span = [tuple(_num(v, p["Pair"]) for v in t.split(",")) for t in c[1:3]]
+    return dict(net=p[c[0]], span=span, height=_num(c[3], p["Pair"]))
+
+
+def read(tables, refs, dx):
+    """The routing document's tables -> {zones, pairs, rows, classes, keepouts, epads}.
+
+    tables: make_pcb.doc_tables of ROUTING_Rev0.4.md; refs: the placement's Ref A -> Ref B
+    (plus the modules); dx: the placement's channel offset.
+    """
+    need = ("zones", "pairs", "route", "channel_route", "epad", "classes", "keepouts", "router_layers",
+            "router_costs")
+    missing = [k for k in need if k not in tables]
+    if missing:
+        raise SystemExit(f"ROUTING: no table {', '.join(missing)}")
+    rows = [_row(r, "route") for r in tables["route"][1]]
+    patch = [_row(r, "patch") for r in tables["patch"][1]] if "patch" in tables else []
+    chan = [_row(r, "channel_route") for r in tables["channel_route"][1]]
+    rows += chan + [channel_b(r, refs, dx) for r in chan]
+    zones = []
+    for z in tables["zones"][1]:
+        zones.append(dict(name=z["Zone"], net=z["Net"], layer=z["Layer"], stage=z["Stage"],
+                          clearance=_num(z["Clearance"], z["Zone"]), min_width=_num(z["Min width"], z["Zone"]),
+                          pads=z["Pads"], priority=int(z["Priority"])))
+    pairs = []
+    for p in tables["pairs"][1]:
+        pts = [tuple(_num(v, p["Pair"]) for v in t.split(",")) for t in p["Centreline"].split()]
+        pairs.append(dict(name=p["Pair"], nets=(p["P"], p["N"]), centreline=pts, tune=_tune(p)))
+    classes = []
+    for c in tables["classes"][1]:
+        via = tuple(_num(v, c["Class"]) for v in c["Via"].split("/")) if c["Via"] != "-" else None
+        layers = None if c["Layers"] == "all" else c["Layers"].split(",")
+        for layer in layers or ():
+            if layer not in LAYERS or layer == "In1.Cu":
+                raise SystemExit(f"class {c['Class']}: layer {layer!r}")
+        classes.append(dict(name=c["Class"], nets=c["Nets"].split(), width=_num(c["Width"], c["Class"]),
+                            clearance=_num(c["Clearance"], c["Class"]), via=via, layers=layers))
+    analog = tables["keepouts"][0].get("analog", "").split(",")
+    if analog == [""]:
+        raise SystemExit("ROUTING: the keepouts table names no analog blocks (analog=...)")
+    keepouts = []
+    for k in tables["keepouts"][1]:
+        keepouts.append(dict(name=k["Keepout"], layers=k["Layers"].split(","), kind=k["Kind"],
+                             around=k["Around"].split(), buffer=k["Buffer"]))
+    epads = {e["Pad"]: _num(e["Offset"], e["Pad"]) for e in tables["epad"][1]}
+    router_layers = []
+    for x in tables["router_layers"][1]:
+        if x["Layer"] not in LAYERS or x["Layer"] == "In1.Cu" or x["Direction"] not in ("horizontal", "vertical"):
+            raise SystemExit(f"router_layers: {x['Layer']} {x['Direction']}")
+        router_layers.append(dict(layer=x["Layer"], direction=x["Direction"], against=_num(x["Against"], x["Layer"])))
+    router_costs = []
+    for x in tables["router_costs"][1]:
+        if x["Setting"] not in ("via_costs", "plane_via_costs", "start_ripup_costs") or not x["Value"].isdigit():
+            raise SystemExit(f"router_costs: {x['Setting']} {x['Value']}")
+        router_costs.append((x["Setting"], int(x["Value"])))
+    return dict(zones=zones, pairs=pairs, rows=rows, classes=classes, keepouts=keepouts, epads=epads,
+                analog=analog, router_layers=router_layers, router_costs=router_costs, patch=patch)
+
+
+# ---- board items ---------------------------------------------------------------------------
+def pad_position(board, token, net):
+    ref, num = PAD_RE.match(token).groups()
+    fp = board.FindFootprintByReference(ref)
+    if fp is None:
+        raise SystemExit(f"route: no part {ref}")
+    pads = [p for p in fp.Pads() if p.GetNumber() == num]
+    if len(pads) != 1:
+        raise SystemExit(f"route: {token} names {len(pads)} pads")
+    if pads[0].GetNetname() != net:
+        raise SystemExit(f"route: {token} is on {pads[0].GetNetname()}, not {net}")
+    return pads[0].GetPosition()
+
+
+def _point(board, token, net):
+    if PAD_RE.match(token):
+        return pad_position(board, token, net)
+    x, y = token.split(",")
+    return to_sheet(_num(x, "x"), _num(y, "y"))
+
+
+def add_via(board, net, at, d, drill):
+    v = pcbnew.PCB_VIA(board)
+    v.SetPosition(at)
+    v.SetWidth(mm(d))
+    v.SetDrill(mm(drill))
+    v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+    v.SetNet(net)
+    board.Add(v)
+    return v
+
+
+def add_track(board, net, a, b, width, layer):
+    t = pcbnew.PCB_TRACK(board)
+    t.SetStart(a)
+    t.SetEnd(b)
+    t.SetWidth(mm(width))
+    t.SetLayer(layer)
+    t.SetNet(net)
+    board.Add(t)
+    return t
+
+
+def apply_patch(board, rows):
+    """The patch table, after the session: at each point of a remove row, the via of its net
+    centred exactly there is deleted, or else every track of its net through the point (and it
+    fails if there is neither: the patch was written for another session); then the other rows
+    are drawn like the route table's. Returns (tracks, vias, removed)."""
+    removed = 0
+    for r in (r for r in rows if r["layer"] == "remove"):
+        for p in r["points"]:
+            at = to_sheet(*(_num(v, f"patch {r['net']}") for v in p.split(",")))
+            own = [t for t in board.GetTracks() if t.GetNetname() == r["net"]]
+            hit = [t for t in own if t.GetClass() == "PCB_VIA" and t.GetPosition() == at] or \
+                [t for t in own if t.GetClass() != "PCB_VIA" and t.HitTest(at, 0)]
+            if not hit:
+                raise SystemExit(f"patch: no {r['net']} track or via at {p}: the patch was written for another session")
+            for t in hit:
+                board.Remove(t)
+            removed += len(hit)
+    n_t, n_v = apply_rows(board, [r for r in rows if r["layer"] != "remove"])
+    return n_t, n_v, removed
+
+
+def apply_rows(board, rows):
+    n_t = n_v = 0
+    for r in rows:
+        net = board.FindNet(r["net"])
+        if net is None:
+            raise SystemExit(f"route: no net {r['net']}")
+        pts = [_point(board, p, r["net"]) for p in r["points"]]
+        if r["layer"] == "via":
+            add_via(board, net, pts[0], *r["via"])
+            n_v += 1
+            continue
+        for a, b in zip(pts, pts[1:]):
+            add_track(board, net, a, b, r["width"], LAYERS[r["layer"]])
+            n_t += 1
+    return n_t, n_v
+
+
+def _zone(board, z, outline):
+    zone = pcbnew.ZONE(board)
+    zone.SetLayer(LAYERS[z["layer"]])
+    net = board.FindNet(z["net"])
+    if net is None:
+        raise SystemExit(f"zone {z['name']}: no net {z['net']}")
+    zone.SetNet(net)
+    o = zone.Outline()
+    o.NewOutline()
+    for x, y in outline:
+        o.Append(mm(ORIGIN[0] + x), mm(ORIGIN[1] - y))
+    zone.SetLocalClearance(mm(z["clearance"]))
+    zone.SetMinThickness(mm(z["min_width"]))
+    zone.SetPadConnection({"solid": pcbnew.ZONE_CONNECTION_FULL,
+                           "thermal": pcbnew.ZONE_CONNECTION_THERMAL}[z["pads"]])
+    zone.SetAssignedPriority(z["priority"])
+    zone.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
+    zone.SetZoneName(z["name"])
+    board.Add(zone)
+    return zone
+
+
+def board_outline(size, inset):
+    """The outline (board frame; size = make_project.SIZE_MM) moved in by inset."""
+    w, h = size
+    return [(inset, inset), (w - inset, inset), (w - inset, h - inset), (inset, h - inset)]
+
+
+EDGE = 0.30                        # copper to the routed edge (make_project.py RULES)
+
+
+def plane(board, zones, size):
+    """In1.Cu becomes a plane layer with the document's plane-stage zones (board-wide)."""
+    board.SetLayerType(pcbnew.In1_Cu, pcbnew.LT_POWER)
+    for z in zones:
+        if z["stage"] == "plane":
+            _zone(board, z, board_outline(size, EDGE))
+
+
+def pours(board, zones, size):
+    """The document's pour-stage zones (board-wide), then every zone filled."""
+    for z in zones:
+        if z["stage"] == "pour":
+            _zone(board, z, board_outline(size, EDGE))
+    fill(board)
+
+
+def fill(board):
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+
+
+# ---- GND fanout ----------------------------------------------------------------------------
+FAN_VIA = (0.45, 0.25)
+FAN_STUB = 0.20
+FAN_CLR, FAN_HOLE_CLR = 0.15, 0.25
+FAN_HS_CLR = 0.50                  # the HS pairs keep 0.5 mm of coplanar clearance
+FAN_GRID = 2.0
+FAN_STEPS = 14                     # candidate rings 0.1 mm apart
+FAN_DIRECTIONS = 16
+
+
+class _Copper:
+    """The board's copper items, bucketed on a grid: (net, item, frame box, hole or None)."""
+
+    def __init__(self, board):
+        self.items, self.grid = [], {}
+        for f in board.GetFootprints():
+            for p in f.Pads():
+                hole = None
+                if p.GetDrillSize().x > 0:
+                    hole = (pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y),
+                            pcbnew.ToMM(p.GetDrillSize().x) / 2)
+                self.add(p, hole)
+        for t in board.GetTracks():
+            hole = None
+            if t.GetClass() == "PCB_VIA":
+                hole = (pcbnew.ToMM(t.GetPosition().x), pcbnew.ToMM(t.GetPosition().y),
+                        pcbnew.ToMM(t.GetDrillValue()) / 2)
+            self.add(t, hole)
+
+    def add(self, item, hole):
+        bb = item.GetBoundingBox()
+        box = tuple(pcbnew.ToMM(v) for v in (bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom()))
+        k = len(self.items)
+        self.items.append((item.GetNetname(), item, box, hole))
+        for gx in range(int(box[0] // FAN_GRID), int(box[2] // FAN_GRID) + 1):
+            for gy in range(int(box[1] // FAN_GRID), int(box[3] // FAN_GRID) + 1):
+                self.grid.setdefault((gx, gy), []).append(k)
+
+    def near(self, box):
+        seen = set()
+        for gx in range(int(box[0] // FAN_GRID), int(box[2] // FAN_GRID) + 1):
+            for gy in range(int(box[1] // FAN_GRID), int(box[3] // FAN_GRID) + 1):
+                for k in self.grid.get((gx, gy), ()):
+                    if k not in seen:
+                        seen.add(k)
+                        yield self.items[k]
+
+
+def _clear(cu, net, shape, box, layers, hs, hole=None):
+    for inet, item, ibox, ihole in cu.near(box):
+        if ibox[0] > box[2] or ibox[2] < box[0] or ibox[1] > box[3] or ibox[3] < box[1]:
+            continue
+        if hole and ihole and math.hypot(ihole[0] - hole[0], ihole[1] - hole[1]) < \
+                ihole[2] + hole[2] + FAN_HOLE_CLR + 0.01:
+            return False
+        if inet == net:
+            continue
+        clr = FAN_HS_CLR if inet in hs else FAN_CLR
+        for layer in layers:
+            if item.IsOnLayer(layer) and item.GetEffectiveShape(layer).Collide(shape, mm(clr + 0.01)):
+                return False
+    return True
+
+
+def gnd_fanout(board, epads, hs_nets):
+    """GND vias: each exposed pad of `epads` gets a centre via and four at the offset; every
+    other GND surface pad (SMD, or a connector pad without paste such as J5's) gets a 0.45/0.25
+    via on the nearest free spot of 16 directions, outward
+    first, and a 0.2 mm stub to it. Returns (vias, pads left without one)."""
+    gnd = board.FindNet("GND")
+    cu = _Copper(board)
+    x0, y0, x1, y1 = (pcbnew.ToMM(v) for v in (board.GetBoardEdgesBoundingBox().GetLeft(),
+                                                board.GetBoardEdgesBoundingBox().GetTop(),
+                                                board.GetBoardEdgesBoundingBox().GetRight(),
+                                                board.GetBoardEdgesBoundingBox().GetBottom()))
+    all_layers = list(LAYERS.values())
+    n, failed = 0, []
+    pads = []
+    for f in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        for p in sorted(f.Pads(), key=lambda p: p.GetNumber()):
+            key = f"{f.GetReference()}.{p.GetNumber()}"
+            if key in epads:
+                if p.GetNetname() != "GND":
+                    raise SystemExit(f"epad {key} is on {p.GetNetname()}, not GND")
+                c, off = p.GetPosition(), mm(epads[key])
+                for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+                    v = add_via(board, gnd, pcbnew.VECTOR2I(c.x + dx * off, c.y + dy * off), *FAN_VIA)
+                    cu.add(v, (pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y), FAN_VIA[1] / 2))
+                    n += 1
+            elif p.GetNetname() == "GND" and p.GetAttribute() in (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN):
+                pads.append((key, p))
+    r = FAN_VIA[0] / 2
+    for key, p in pads:
+        cx, cy = pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y)
+        fp = p.GetParentFootprint()
+        fx, fy = pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y)
+        bb = p.GetBoundingBox()
+        hx, hy = pcbnew.ToMM(bb.GetWidth()) / 2, pcbnew.ToMM(bb.GetHeight()) / 2
+        out = math.atan2(cy - fy, cx - fx) if (cx, cy) != (fx, fy) else 0.0
+        dirs = sorted((k * 2 * math.pi / FAN_DIRECTIONS for k in range(FAN_DIRECTIONS)),
+                      key=lambda a: abs(math.remainder(a - out, 2 * math.pi)))
+        cands = []
+        for step in range(FAN_STEPS):
+            for a in dirs:
+                ux, uy = math.cos(a), math.sin(a)
+                edge = min(hx / abs(ux) if abs(ux) > 1e-9 else 1e9, hy / abs(uy) if abs(uy) > 1e-9 else 1e9)
+                d = edge + 0.10 + r + 0.1 * step
+                cands.append((d, cx + ux * d, cy + uy * d))
+        cands.sort(key=lambda t: t[0])
+        for _, x, y in cands:
+            if not (x0 + r + EDGE <= x <= x1 - r - EDGE and y0 + r + EDGE <= y <= y1 - r - EDGE):
+                continue
+            circ = pcbnew.SHAPE_CIRCLE(pcbnew.VECTOR2I(mm(x), mm(y)), mm(r))
+            box = (x - r - 1, y - r - 1, x + r + 1, y + r + 1)
+            if not _clear(cu, "GND", circ, box, all_layers, hs_nets, (x, y, FAN_VIA[1] / 2)):
+                continue
+            seg = pcbnew.SHAPE_SEGMENT(pcbnew.VECTOR2I(mm(cx), mm(cy)), pcbnew.VECTOR2I(mm(x), mm(y)), mm(FAN_STUB))
+            sbox = (min(cx, x) - 1, min(cy, y) - 1, max(cx, x) + 1, max(cy, y) + 1)
+            if not _clear(cu, "GND", seg, sbox, [pcbnew.F_Cu], hs_nets):
+                continue
+            v = add_via(board, gnd, pcbnew.VECTOR2I(mm(x), mm(y)), *FAN_VIA)
+            cu.add(v, (x, y, FAN_VIA[1] / 2))
+            t = add_track(board, gnd, pcbnew.VECTOR2I(mm(cx), mm(cy)), pcbnew.VECTOR2I(mm(x), mm(y)),
+                          FAN_STUB, pcbnew.F_Cu)
+            cu.add(t, None)
+            n += 1
+            break
+        else:
+            failed.append(key)
+    return n, failed
+
+
+# ---- Freerouting ---------------------------------------------------------------------------
+def _rects(poly, buf):
+    out = []
+    for (xa, ya), (xb, yb) in zip(poly, poly[1:]):
+        ln = math.hypot(xb - xa, yb - ya)
+        if ln == 0:
+            continue
+        ux, uy = (xb - xa) / ln, (yb - ya) / ln
+        nx, ny = -uy, ux
+        a, b = (xa - ux * buf, ya - uy * buf), (xb + ux * buf, yb + uy * buf)
+        out.append([(a[0] + nx * buf, a[1] + ny * buf), (b[0] + nx * buf, b[1] + ny * buf),
+                    (b[0] - nx * buf, b[1] - ny * buf), (a[0] - nx * buf, a[1] - ny * buf)])
+    return out
+
+
+def _poly_set(polys):
+    s = pcbnew.SHAPE_POLY_SET()
+    for poly in polys:
+        s.NewOutline()
+        for x, y in poly:
+            s.Append(mm(x), mm(y))
+    return s
+
+
+def _clip(polys, boxes):
+    """The parts of polys inside the (x, y, w, h) boxes, as polygons (board frame)."""
+    a = _poly_set(polys)
+    a.Simplify()
+    b = _poly_set([[(x, y), (x + w, y), (x + w, y + h), (x, y + h)] for x, y, w, h in boxes])
+    b.Simplify()
+    a.BooleanIntersection(b)
+    out = []
+    for i in range(a.OutlineCount()):
+        o = a.Outline(i)
+        out.append([(pcbnew.ToMM(o.CPoint(j).x), pcbnew.ToMM(o.CPoint(j).y)) for j in range(o.PointCount())])
+    return out
+
+
+def keepout_polygons(routing, regions, pad_frame):
+    """[(layer, kind, polygon)] in the board frame, from the document's keepout rules.
+
+    regions: {name: (x, y, w, h)} of the placement; pad_frame(token, net) -> (x, y) for pad
+    points of B.Cu rows."""
+    out = []
+    for k in routing["keepouts"]:
+        polys = []
+        if k["around"] == ["pair-tracks"]:
+            # around the drawn 0.31 mm conductors of the pairs (not the 0.20 mm lead-ins at
+            # U6), so the tuning bumps and the ends at the modules are covered
+            m = re.fullmatch(r"w/2\+([\d.]+)", k["buffer"])
+            if not m:
+                raise SystemExit(f"keepout {k['name']}: buffer {k['buffer']!r}, want w/2+<mm>")
+            nets = {n for p in routing["pairs"] for n in p["nets"]}
+            for r in routing["rows"]:
+                if r["net"] in nets and r["layer"] != "via" and r["width"] > 0.2:
+                    pts = [pad_frame(t, r["net"]) if PAD_RE.match(t) else tuple(map(float, t.split(",")))
+                           for t in r["points"]]
+                    polys += _rects(pts, r["width"] / 2 + float(m.group(1)))
+        elif k["around"][0] == "B.Cu-rows":
+            # "B.Cu-rows" or "B.Cu-rows in REGION ..." ("in analog": the analog blocks): around
+            # the document's B.Cu tracks, clipped to the named placement regions when given
+            m = re.fullmatch(r"w/2\+([\d.]+)", k["buffer"])
+            if not m:
+                raise SystemExit(f"keepout {k['name']}: buffer {k['buffer']!r}, want w/2+<mm>")
+            within = k["around"][2:] if k["around"][1:2] == ["in"] else None
+            if within == ["analog"]:
+                within = routing["analog"]
+            if len(k["around"]) > 1 and not within:
+                raise SystemExit(f"keepout {k['name']}: want 'B.Cu-rows' or 'B.Cu-rows in REGION ...'")
+            for name in within or ():
+                if name not in regions:
+                    raise SystemExit(f"keepout {k['name']}: no placement region {name}")
+            for r in routing["rows"]:
+                if r["layer"] == "B.Cu":
+                    pts = [pad_frame(t, r["net"]) if PAD_RE.match(t) else tuple(map(float, t.split(",")))
+                           for t in r["points"]]
+                    rects = _rects(pts, r["width"] / 2 + float(m.group(1)))
+                    polys += rects if within is None else _clip(rects, [regions[n] for n in within])
+        else:
+            for name in k["around"]:
+                if name not in regions:
+                    raise SystemExit(f"keepout {k['name']}: no placement region {name}")
+                x, y, w, h = regions[name]
+                polys.append([(x, y), (x + w, y), (x + w, y + h), (x, y + h)])
+        for layer in k["layers"]:
+            if layer != "signal" and layer not in LAYERS:
+                raise SystemExit(f"keepout {k['name']}: layer {layer!r}")
+            out += [(layer, k["kind"], p) for p in polys]
+    return out
+
+
+def _um(x, y):
+    return f"{(ORIGIN[0] + x) * 1000:.0f} {-(ORIGIN[1] - y) * 1000:.0f}"
+
+
+def _class_names(text, i):
+    """Net names of a DSN (class ...) body from offset i: (names, offset of the first '(')."""
+    names = []
+    while True:
+        while text[i].isspace():
+            i += 1
+        if text[i] in "()":
+            return names, i
+        if text[i] == '"':
+            j = text.index('"', i + 1) + 1
+        else:
+            j = i
+            while not text[j].isspace() and text[j] not in '()"':
+                j += 1
+        names.append(text[i:j])
+        i = j
+
+
+def post_dsn(text, routing, keepouts):
+    """KiCad's DSN -> the router's input: the document's classes (their nets moved out of
+    KiCad's classes), their via padstacks, and the keepouts."""
+    moved = {n for c in routing["classes"] for n in c["nets"]}
+    out, pos = [], 0
+    for m in re.finditer(r"\(class (\S+) ", text):
+        if m.start() < pos:
+            continue
+        names, i = _class_names(text, m.end())
+        out.append(text[pos:m.end()] + " ".join(n for n in names if n not in moved) + "\n      ")
+        pos = i
+    text = "".join(out) + text[pos:]
+    vias, blocks = [], []
+    for c in routing["classes"]:
+        circuit = ""
+        if c["via"]:
+            d, drill = (round(v * 1000) for v in c["via"])
+            name = f"Via[0-3]_{d}:{drill}_um"
+            if name not in text and name not in vias:
+                vias.append(name)
+                shapes = "".join(f"      (shape (circle {L} {d}))\n" for L in LAYERS)
+                text = text.replace("  )\n  (network", f'    (padstack "{name}"\n{shapes}      (attach off)\n    )\n'
+                                    "  )\n  (network", 1)
+            circuit += f'        (use_via "{name}")\n'
+        if c["layers"]:
+            circuit += f'        (use_layer {" ".join(c["layers"])})\n'
+        if circuit:
+            circuit = f"      (circuit\n{circuit}      )\n"
+        blocks.append(f"    (class {c['name']} {' '.join(c['nets'])}\n{circuit}      (rule\n"
+                      f"        (width {c['width'] * 1000:.0f})\n        (clearance {c['clearance'] * 1000:.0f})\n"
+                      f"      )\n    )\n")
+    i = text.index("  (wiring")
+    j = text.rindex("  )\n", 0, i)
+    text = text[:j] + "".join(blocks) + text[j:]
+    m = re.search(r'^    \(via "Via\[0-3\]_450:250_um"[^)\n]*\)$', text, re.M)
+    if m is None:
+        raise SystemExit("DSN: no structure via line naming the 0.45/0.25 via")
+    line = m.group(0)[:-1] + "".join(f' "{v}"' for v in vias) + ")"
+    # the router's costs and layer preferences (router_costs, router_layers), read after the layer
+    # scopes; fanout, routing and vias stay on, the optimizer off, as autoroute.py's arguments say
+    rules = "".join(f"      ({k} {v})\n" for k, v in routing["router_costs"])
+    rules += "".join(f"      (layer_rule {x['layer']} (active on) (preferred_direction {x['direction']})"
+                    f" (preferred_direction_trace_costs 1.0) (against_preferred_direction_trace_costs {x['against']}))\n"
+                    for x in routing["router_layers"])
+    if text.count("    (boundary") != 1:
+        raise SystemExit("DSN: no single structure boundary to put the autoroute settings before")
+    text = text.replace("    (boundary", "    (autoroute_settings\n      (fanout on)\n      (autoroute on)\n"
+                        "      (postroute off)\n      (vias on)\n" + rules + "    )\n    (boundary", 1)
+    m = re.search(r'^    \(via "Via\[0-3\]_450:250_um"[^)\n]*\)$', text, re.M)
+    ko = "".join(f'    ({kind} "" (polygon {layer} 0  {"  ".join(_um(x, y) for x, y in poly + [poly[0]])}))\n'
+                 for layer, kind, poly in keepouts)
+    return text[:m.start()] + ko + line + text[m.end():]
+
+
+def dsn_digest(text):
+    """SHA-256 of a DSN without its first line, which names the file it was written to."""
+    return hashlib.sha256(text.split("\n", 1)[1].encode("utf-8")).hexdigest()
+
+
+def import_session(board, text, sx):
+    """Add the routed (not protected) wires and vias of a Specctra session. Returns counts."""
+    text = re.sub(r'\(string_quote\s+"\)', "", text)
+    routes = sx.first(sx.loads(text), "routes")
+    res = sx.first(routes, "resolution")
+    scale = {"um": 1e-3, "mm": 1.0, "mil": 0.0254}[str(res[1])] / float(res[2])
+    vias = {}
+    for ps in sx.find(sx.first(routes, "library_out") or ["library_out"], "padstack"):
+        m = re.search(r"_(\d+):(\d+)_um", ps[1])
+        vias[ps[1]] = (int(m.group(1)) / 1000, int(m.group(2)) / 1000)
+    layers = {board.GetLayerName(i): i for i in LAYERS.values()}
+
+    def protected(node):
+        t = sx.first(node, "type")
+        return t is not None and str(t[1]) == "protect"
+    n_t = n_v = 0
+    added = []
+    for net in sx.find(sx.first(routes, "network_out"), "net"):
+        ni = board.FindNet(str(net[1]))
+        if ni is None:
+            raise SystemExit(f"session: no net {net[1]} on the board")
+        for w in sx.find(net, "wire"):
+            if protected(w):
+                continue
+            path = sx.first(w, "path")
+            layer, width = layers[str(path[1])], float(path[2]) * scale
+            pts = [pcbnew.VECTOR2I(mm(float(path[i]) * scale), mm(-float(path[i + 1]) * scale))
+                   for i in range(3, len(path), 2)]
+            for a, b in zip(pts, pts[1:]):
+                # the router rounds a protected wire's end onto its grid and joins the two
+                # with a sub-micron stub; the board keeps the document's wire, so drop the stub
+                if (a - b).EuclideanNorm() < mm(STUB_MM):
+                    continue
+                add_track(board, ni, a, b, width, layer)
+                n_t += 1
+        for v in sx.find(net, "via"):
+            if protected(v):
+                continue
+            added.append(add_via(board, ni, pcbnew.VECTOR2I(mm(float(v[2]) * scale), mm(-float(v[3]) * scale)),
+                                 *vias[v[1]]))
+            n_v += 1
+    return n_t, n_v - drop_dangling(board, added)
+
+
+STUB_MM = 0.002
+
+
+def drop_dangling(board, vias):
+    """Remove the vias of `vias` that join fewer than two copper layers: a track end, a pad of
+    the net, or (for a plane net) the plane counts for its layer. Returns how many went."""
+    planes = {z.GetNetname() for z in board.Zones() if z.GetLayer() == pcbnew.In1_Cu}
+    by_net = {}
+    for t in board.GetTracks():
+        if t.GetClass() != "PCB_VIA":
+            by_net.setdefault(t.GetNetname(), []).append(t)
+    pads = {}
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            pads.setdefault(p.GetNetname(), []).append(p)
+    gone = 0
+    for v in vias:
+        at, r, net = v.GetPosition(), v.GetWidth(pcbnew.F_Cu) // 2, v.GetNetname()
+        hit = {pcbnew.In1_Cu} if net in planes else set()
+        for t in by_net.get(net, ()):
+            if min((t.GetStart() - at).EuclideanNorm(), (t.GetEnd() - at).EuclideanNorm()) <= r:
+                hit.add(t.GetLayer())
+        for p in pads.get(net, ()):
+            for layer in LAYERS.values():
+                if p.IsOnLayer(layer) and p.HitTest(at):
+                    hit.add(layer)
+        if len(hit) < 2:
+            board.Remove(v)
+            gone += 1
+    return gone

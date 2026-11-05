@@ -28,7 +28,7 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > history) — together with the
 > requirements set in `requirements/`
 > (`product.md`, `verification.md`, `parts.md`). That is currently the whole of
-> the design. There is **no routing and no manufacturing output**. Capture has
+> the design. There is **no manufacturing output**. Capture has
 > started in KiCad 9.0.8 (D32, issue #6): a
 > generated project skeleton exists in `design/ecad/source/` (4-layer JLC04161H-7628
 > stackup, 100 × 72 mm outline, §5.3 starting rules, the USB_HS net class), written by
@@ -39,9 +39,13 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > exported netlist with that list, with the circuit document's §6.2 and with
 > `requirements/parts.md`. The parts are placed (P3): `make_pcb.py` builds the board from
 > the exported netlist and `design/ecad/PLACEMENT_Rev0.4.md`, and `check_pcb.py` checks it
-> against that document, the capture list's placement notes and DRC (0 violations; every
-> net still unrouted, which is P4). `design/ecad/README.md` gives the order to run the
-> generators in. The project
+> against that document, the capture list's placement notes and DRC. The board is routed
+> (P4, D36): `make_pcb.py` adds the tracks, the zones and the patch of
+> `design/ecad/ROUTING_Rev0.4.md` and the Freerouting session in `design/ecad/routing/`
+> (written by `autoroute.py`). `check_routing.py` checks the result against that document:
+> DRC with 0 violations and 0 unconnected items, the USB pairs, the Kelvin taps, D36's
+> L3/L4 rule and the port-path copper. Nothing is routed by hand in KiCad, and no Gerber is
+> exported. `design/ecad/README.md` gives the order to run the generators in. The project
 > library exists (P1): a symbol and a footprint for every Rev0.4 part in
 > `design/ecad/libraries/`, each land measured by `check_libraries.py` against the
 > datasheet numbers recorded in `library.json`. Candidate parts have been looked up in the JLCPCB
@@ -152,7 +156,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D35 live in circuit §10)
+│                               #   created, decisions D1–D36 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -305,7 +309,9 @@ Layer assignment (4 layers, D10): L1 signal + parts / L2 solid GND / L3 power
 pours + low-speed signals / L4 GND + low-speed. **L2 MUST remain unbroken under
 every USB pair**, and every L1 USB pair references L2 only. L3 signals that cross
 under the analog block or a USB pair need a GND reference on L4 directly below.
-Confirm against the chosen JLCPCB 4-layer stackup before routing (Section 5.1).
+In the analog blocks an L3 and an L4 signal may cross at 45° or more, but never run
+along each other (D36, user, 2026-11-06); a crossing has a signal, not GND, below it
+for the crossing's width. Confirm against the chosen JLCPCB 4-layer stackup before routing (Section 5.1).
 
 ### 5.2 Placement
 
@@ -584,7 +590,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D35; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 10 (D1–D36; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -603,7 +609,9 @@ withdrawn and not reused).
   in KiCad 9.0.8 until the design is complete, then import into EasyEDA (D32, 2026-11-04:
   「いったんローカルでKiCadで完成まで目指してそのご、EasyEDAにインポートしよう」), and J1's
   soft start, an AO3401A between J1's VBUS and V5L, whose values Claude set (D35, 2026-11-04:
-  「OKお願いします」, accepting the recommended fix for OI-32).
+  「OKお願いします」, accepting the recommended fix for OI-32), and L3/L4 crossings in the
+  analog blocks (D36, 2026-11-06: the choice 「交差のみ許可 (推奨)」, after the router left
+  76–78 connections unrouted with L4 closed there).
   D1 (PD sink) and D11 (USB2514B) were also user decisions; both are superseded because
   their parts are Extended.
 - **Under the delegation:** on 2026-11-03 the user delegated the open choices

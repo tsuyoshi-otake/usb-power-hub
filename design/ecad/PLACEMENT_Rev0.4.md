@@ -235,7 +235,7 @@ checks them against each other.
 | U17 | 69.6 | 32 | 90 | ADC | as U7, above it |
 | U30 | 55.5 | 53 | 0 | LDO | over-current comparator, both channels |
 | Y1 | 48.3 | 57 | 90 | MCU | next to U1 at its pins 20/21 |
-| Y2 | 94 | 22.3 | 0 | HUB | next to U6 at its pins 11/12 |
+| Y2 | 94 | 21.8 | 0 | HUB | next to U6 at its pins 11/12; moved 0.5 mm down in P4, so the lead-ins of pairs A and B pass above it |
 <!-- place:end -->
 
 ## Channel parts

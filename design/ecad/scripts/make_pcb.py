@@ -1,37 +1,52 @@
-"""Place the Rev0.4 board from the placement document (issue #6 P3; CLAUDE.md 5.2).
+"""Place and route the Rev0.4 board from its documents (issue #6 P3, P4; CLAUDE.md 5).
 
 Run with KiCad's own Python from the repository root, after make_schematic.py:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_pcb.py [--no-check]
+    "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_pcb.py --dsn <out.dsn>
 
 Inputs:
 - the schematic in design/ecad/source; its netlist is exported with kicad-cli, so the board
   carries exactly what the schematic carries;
 - design/ecad/libraries/usb-power-hub.pretty, the project footprints;
-- design/ecad/PLACEMENT_Rev0.4.md, the position and rotation of every part.
+- design/ecad/PLACEMENT_Rev0.4.md, the position and rotation of every part;
+- design/ecad/ROUTING_Rev0.4.md, the plane, the hand-drawn tracks, the GND fanout, the zones,
+  and the classes and keepouts of the router;
+- design/ecad/routing/usb-power-hub.ses, the router's session, with routing/autoroute.json, the
+  SHA-256 of the router input it was made from (autoroute.py writes both).
 Output: design/ecad/source/usb-power-hub.kicad_pcb, rebuilt from nothing on every run:
 - the skeleton of make_project.py (outline, stackup, finish, title block), written by its own
   functions;
 - one footprint per netlist component: its footprint, Value, fields (hidden, on F.Fab), sheet
   path, BOM exclusion and pad nets, at the document's position and rotation, on F.Cu;
 - the reference designators hidden on F.SilkS; they stay on F.Fab. 300 designators at 1.0 mm
-  (CLAUDE.md 6) do not fit, and the silkscreen labels CLAUDE.md 6 requires come with routing
-  (P4).
-No tracks, vias or zones. The UUID generator is seeded, so the footprints come out in the same
-order, and make_project.fix_uuids derives every UUID from its position: a re-run writes the same
-bytes.
+  (CLAUDE.md 6) do not fit; the silkscreen labels CLAUDE.md 6 requires are P5's;
+- the routing, in route.py's order: the In1 plane, the hand-drawn tracks, the GND fanout, the
+  session's tracks and vias, the pours, and every zone filled.
+The UUID generator is seeded, so the items come out in the same order, and
+make_project.fix_uuids derives every UUID from its position: a re-run writes the same bytes.
+
+The session is imported only when the router input of this run (KiCad's DSN of the board before
+the session, with the document's classes and keepouts) has the SHA-256 autoroute.json records:
+a change to the schematic, the placement or the routing document before that step makes the
+session stale, and the script stops and asks for autoroute.py. --dsn writes that router input
+and stops; autoroute.py calls it so.
 
 Order: make_project.py writes a bare board when it runs, so this script runs after it, and
 after make_schematic.py. The board is built in a temporary directory: the source project is
 never loaded, so pcbnew cannot write its cache back to the .kicad_pro (see make_project.py),
 and the script stops if the .kicad_pro bytes changed anyway. Then it runs
-make_project.py --check and check_pcb.py, each in a new process, unless --no-check.
-Exit status: 0 = written and checked; 1 = a check failed or the document is malformed.
+make_project.py --check, check_pcb.py and check_routing.py, each in a new process, unless
+--no-check.
+Exit status: 0 = written and checked; 1 = a check failed or a document is malformed.
 
-What it CANNOT see: whether the placement is good. The document's Note column gives the
-reason for each position; check_pcb.py checks the rules it lists, and DRC the courtyards.
+What it CANNOT see: whether the placement or the routing is good. The documents give the reason
+for each position and track; check_pcb.py and check_routing.py check the rules they list, and
+DRC the clearances.
 """
+import hashlib
 import importlib.util
+import json
 import pathlib
 import re
 import shutil
@@ -47,7 +62,11 @@ ECAD = ROOT / "design" / "ecad"
 SRC = ECAD / "source"
 LIB = ECAD / "libraries" / "usb-power-hub.pretty"
 DOC = ECAD / "PLACEMENT_Rev0.4.md"
+ROUTING = ECAD / "ROUTING_Rev0.4.md"
 NAME = "usb-power-hub"
+SESSION = ECAD / "routing" / f"{NAME}.ses"
+RECORD = ECAD / "routing" / "autoroute.json"
+MODULE_PAIRS = {"J2": "J3"}                 # channel B's module; the channel table holds the rest
 CLI = pathlib.Path(sys.executable).resolve().parents[1] / "bin" / "kicad-cli.exe"
 SKIP_FIELDS = {"Footprint"}                 # the footprint itself carries it
 ROTATIONS = {0, 90, 180, 270}
@@ -63,6 +82,7 @@ def _load(name):
 
 sx = _load("sexpr")
 proj = _load("make_project")
+route = _load("route")
 
 
 # ---- the placement document ------------------------------------------------------------------
@@ -105,6 +125,17 @@ def read_placement(path):
         add(r["Ref A"], x, y, rot)
         add(r["Ref B"], round(x + dx, 4), y, rot)
     return place
+
+
+def read_routing(place_doc, routing_doc):
+    """(route.read of the routing document, {region: (x, y, w, h)} of the placement)."""
+    ptables = doc_tables(place_doc.read_text(encoding="utf-8"))
+    args, rows = ptables["channel"]
+    refs = {r["Ref A"]: r["Ref B"] for r in rows}
+    refs.update(MODULE_PAIRS)
+    routing = route.read(doc_tables(routing_doc.read_text(encoding="utf-8")), refs, float(args["dx"]))
+    regions = {r["Region"]: tuple(float(r[k]) for k in ("x", "y", "w", "h")) for r in ptables["regions"][1]}
+    return routing, regions
 
 
 # ---- the netlist ------------------------------------------------------------------------------
@@ -183,7 +214,32 @@ def add_footprint(board, nets, ref, comp, pins, at):
     return fp
 
 
-def build(pcb, comps, pins, place):
+def router_input(board, routing, regions, tmp):
+    """KiCad's DSN of the board as it stands, with the routing document's classes and keepouts."""
+    raw = tmp / "router-raw.dsn"
+    pcbnew.ExportSpecctraDSN(board, str(raw))
+    if not raw.exists():
+        raise SystemExit("pcbnew exported no DSN")
+
+    def pad_frame(token, net):
+        return route.to_frame(route.pad_position(board, token, net))
+    keepouts = route.keepout_polygons(routing, regions, pad_frame)
+    return route.post_dsn(raw.read_text(encoding="utf-8"), routing, keepouts)
+
+
+def session():
+    """The committed session's text, after checking it against its record."""
+    if not (SESSION.exists() and RECORD.exists()):
+        raise SystemExit(f"no router session in {SESSION.parent.relative_to(ROOT).as_posix()}: run autoroute.py")
+    record = json.loads(RECORD.read_text(encoding="utf-8"))
+    data = SESSION.read_bytes()
+    if hashlib.sha256(data).hexdigest() != record["ses_sha256"]:
+        raise SystemExit(f"{SESSION.name} is not the session {RECORD.name} records: run autoroute.py")
+    return data.decode("utf-8"), record
+
+
+def build(pcb, comps, pins, place, routing, regions, tmp, dsn_out=None):
+    """Write the placed and routed board to pcb; with dsn_out, write the router input instead."""
     # pcbnew writes the footprints sorted by UUID, and gives each new item a random one. Seeding
     # the generator makes the UUIDs, and so the footprint order, the same on every run;
     # make_project.fix_uuids then renumbers them by position in the file.
@@ -197,17 +253,43 @@ def build(pcb, comps, pins, place):
         board.Add(nets[name])
     for ref in sorted(comps, key=natural):
         add_footprint(board, nets, ref, comps[ref], pins, place[ref])
+    route.plane(board, routing["zones"], proj.SIZE_MM)
+    n_t, n_v = route.apply_rows(board, routing["rows"])
+    hs = {n for p in routing["pairs"] for n in p["nets"]}
+    n_f, unfanned = route.gnd_fanout(board, routing["epads"], hs)
+    print(f"routing document: {n_t} track segments, {n_v} vias; GND fanout: {n_f} vias,"
+          f" {len(unfanned)} pad(s) left to the router{': ' + ' '.join(unfanned) if unfanned else ''}")
+    dsn = router_input(board, routing, regions, tmp)
+    digest = route.dsn_digest(dsn)
+    if dsn_out is not None:
+        dsn_out.write_text(dsn, encoding="utf-8", newline="\n")
+        return digest
+    text, record = session()
+    if record["dsn_sha256"] != digest:
+        raise SystemExit(f"{SESSION.name} was routed from another router input ({record['dsn_sha256'][:12]},"
+                         f" this board {digest[:12]}): the schematic, the placement or the routing"
+                         f" document changed; run autoroute.py")
+    s_t, s_v = route.import_session(board, text, sx)
+    p_t, p_v, p_r = route.apply_patch(board, routing["patch"])
+    route.pours(board, routing["zones"], proj.SIZE_MM)
+    print(f"session: {s_t} track segments, {s_v} vias; patch: {p_t} track segments, {p_v} vias,"
+          f" {p_r} session item(s) removed; {len(list(board.Zones()))} zones filled")
     if not pcbnew.SaveBoard(str(pcb), board):
         raise SystemExit("pcbnew could not save the board")
+    return digest
 
 
 def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
-    if argv[1:] not in ([], ["--no-check"]):
-        raise SystemExit("usage: make_pcb.py [--no-check]")
+    dsn_out = None
+    if len(argv) == 3 and argv[1] == "--dsn":
+        dsn_out = pathlib.Path(argv[2]).resolve()
+    elif argv[1:] not in ([], ["--no-check"]):
+        raise SystemExit("usage: make_pcb.py [--no-check | --dsn <out.dsn>]")
     pcb, pro, prl = proj.paths(SRC)
     pro_before = pro.read_bytes()
     place = read_placement(DOC)
+    routing, regions = read_routing(DOC, ROUTING)
     with tempfile.TemporaryDirectory() as tmp:
         tmp = pathlib.Path(tmp)
         comps, pins = read_netlist(export_netlist(tmp))
@@ -218,7 +300,13 @@ def main(argv):
                              f" not in the netlist: {' '.join(unknown) or '-'}")
         work = tmp / "board"
         work.mkdir()
-        build(work / pcb.name, comps, pins, place)
+        # a copy of the project beside the board, so pcbnew loads its rules and net classes
+        # (the router input carries them) and any cache it writes lands in the copy
+        shutil.copyfile(pro, work / pro.name)
+        digest = build(work / pcb.name, comps, pins, place, routing, regions, tmp, dsn_out)
+        if dsn_out is not None:
+            print(f"wrote {dsn_out}: router input {digest}")
+            return 0
         shutil.copyfile(work / pcb.name, pcb)
     n = proj.fix_uuids(pcb, "pcb")
     if prl.exists():
@@ -232,7 +320,7 @@ def main(argv):
         return 0
     sys.stdout.flush()
     status = 0
-    for script, args in (("make_project.py", ["--check"]), ("check_pcb.py", [])):
+    for script, args in (("make_project.py", ["--check"]), ("check_pcb.py", []), ("check_routing.py", [])):
         status |= subprocess.run([sys.executable, "-I", "-B", str(HERE / script), *args]).returncode
     return 1 if status else 0
 
