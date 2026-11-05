@@ -243,6 +243,25 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   2026-11-04). The general `(thickness 1.6)` stays the nominal board thickness.
 - **Replace every `(uuid "...")` with uuid5 of its position for byte-identical re-runs.**
   Verified 2026-11-04: two runs of `make_project.py` gave the same SHA-256 for all three files.
+  That fixes the values, not the order: see the next rule for a board with footprints.
+- **SaveBoard writes footprints sorted by UUID, and pcbnew gives each new item a random one.**
+  The first `make_pcb.py` wrote a new footprint order on every run (2026-11-05, #6 P3: three
+  SHA-1s, 74,718 diff lines between two runs), and renumbering by position kept the order.
+  `pcbnew.KIID.SeedGenerator(n)` before creating anything fixed it: three runs, and the
+  sequence `make_project.py` -> `make_pcb.py`, gave one SHA-1.
+- **Do not `board.Remove()` footprints and then call `FootprintLoad` in the same process.**
+  In KiCad 9.0.8 the later `FootprintLoad` raised `AttributeError` on a `SwigPyObject`
+  (2026-11-05, #6 P3, check_libraries' DRC sandbox). Cutting the `footprint`, `segment`,
+  `arc`, `via` and `zone` nodes from the board's text before `LoadBoard` worked: 1957 checks
+  PASS.
+- **A footprint's silkscreen can lie outside its courtyard.** The RP2040 land's pin-1
+  triangle sits outside the courtyard, so a 0402 placed clear of the courtyard still gave DRC
+  `silk_over_copper` and `silk_overlap` (2026-11-05, #6 P3). Courtyard spacing does not guard
+  silk: run DRC with `--severity-all` after every placement change.
+- **`design/ecad/scripts/sexpr.py`'s `loads` returns the top node itself.** `tree[0]` is its
+  head symbol (`kicad_pcb`), not the node. A test that indexed `tree[0]` wrote broken boards,
+  `LoadBoard` returned None, and the checker crashed instead of failing (2026-11-05, #6 P3).
+  `check_pcb.py` now prints a FAIL line when the board does not load.
 - **`kicad-cli pcb drc` exits 0 even with violations unless `--exit-code-violations` is
   passed.** Verified 2026-11-04 on a copy with a track 0.05 mm from the edge: 2 violations
   (`copper_edge_clearance`, `track_dangling`), exit 0 without the flag, 5 with it. `sch erc`
@@ -311,6 +330,12 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   - its V-MEAS-06 negative control could not fail (a stiff pot source removes the droop);
   - its bench A back-fed a supply into the PC's USB VBUS.
   The main session's review against V-MEAS-00/06 and the design found all three.
+
+- **Write a rubric criterion's documented exceptions into the criterion itself.** C6 of the
+  P3 rubric asked that every courtyard lie inside its region; the four USB-C modules'
+  receptacles overhang the board edge by 1.06 mm, which the placement document allows. The
+  verifier had to interpret, and said so (2026-11-05, #6 P3). A literal reading would have
+  failed a correct board.
 
 ## Devin CLI
 

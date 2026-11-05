@@ -835,3 +835,59 @@ Section 13 (board) only once verified.
   capacitive inrush bound, 152 mA, is above the 114 mA of USB's 44 Ω; it is a slow ramp,
   not a surge, and V-PWR-03 records J1's peak. The cost estimate is not re-run for D35.
 - **Commit.** `30514a6`.
+
+## 2026-11-05 - P3 of issue #6: Rev0.4 placed on the 100 × 72 mm board
+
+- **Goal.** Place all 300 components of Rev0.4 (100 × 72 mm, 4 layers, Top only), with
+  four M2 corner holes and three fiducials. The board is generated from the schematic's
+  netlist and `design/ecad/PLACEMENT_Rev0.4.md` by `make_pcb.py`. `check_pcb.py` checks it
+  against that document, the capture list's notes and DRC. The user's go-ahead was
+  「消していいよ、P3へ」.
+- **Incident: notes that said "at" without being near.** The first placement's notes claimed
+  "at X" and "next to X" for parts up to 12.5 mm away. The capture list's "at U1 pin N" notes
+  were up to 6 mm off, because U8 blocked U1's west side.
+  - Root cause: notes were written as intent and never measured.
+  - Fix: a defined vocabulary. "at X pin N" means a same-net pad within 3.0 mm, centre to
+    centre; "at / next to / after X" means courtyards within 3.0 mm. check_pcb's check 11
+    measures every note.
+  - The MCU was placed by hand: U1 at rot 90, its decouplers in one column at x 36.75, U8
+    to the south-west, Y1 to the east.
+  - Notes were reworded where the geometry cannot meet them. A 3225 crystal's signal pads
+    are diagonal, and a SOT-23 cannot be within 3 mm of both CC pins.
+- **Incident: silk outside a courtyard.** U1's pin-1 triangle lies outside its courtyard.
+  C12 gave DRC silk_over_copper and silk_overlap; it was moved clear of the mark.
+- **Incident: check_libraries' sandbox broke.** Once the project board carried footprints,
+  `board.Remove` followed by `FootprintLoad` raised AttributeError (KiCad 9.0.8). The fix
+  cuts the nodes from the copy's text before LoadBoard.
+- **Incident: a test helper's wrong index.** `sexpr.loads` returns the top node, and the
+  tests used `tree[0]`. The broken boards they wrote made check_pcb crash. The index is
+  fixed, and check_pcb now FAILs when a board does not load.
+- **Incident: make_pcb was not deterministic.** Each run gave a new SHA-1, with 74,718 diff
+  lines between two runs.
+  - Root cause: SaveBoard sorts footprints by UUID, and new items get random UUIDs.
+    make_project.fix_uuids renumbers by position, so it kept the varying order.
+  - Fix: `pcbnew.KIID.SeedGenerator(6)` before building.
+  - Check: three runs, and make_project -> make_pcb, gave SHA-1 023b43a6….
+- **Smaller changes.**
+  - The module footprint's side silk stops 0.5 mm short of the receptacle edge
+    (silk_edge_clearance).
+  - The corner holes are described as 2.2 mm M2 clearance holes for the case's heat-set
+    inserts (D21), not as inserts.
+  - `design/ecad/README.md` is new. The capture list had pointed at it since P2.
+- **Verification.**
+  - make_pcb: 12,694 checks PASS. DRC: 0 violations, 0 parity items, 499 unconnected (not
+    routed).
+  - Tests OK: test_check_pcb 24, test_make_project 11, test_check_libraries 19,
+    test_check_schematic 19. check_schematic 3992 PASS, check_libraries 1957 PASS.
+  - Rubric `.claude/goal-loop/kicad-p3/rubric.md` (C1–C8), rubric-verifier (sonnet),
+    round 1: all pass.
+  - The verifier measured 245 notes with its own code (the largest pin distance 2.959 mm,
+    the largest courtyard gap 2.580 mm). The MAU104 is ≥ 11.85 mm from the analog parts.
+  - The verifier's own corruption (U8 turned 90° in both board and document) failed with
+    13 named items.
+- **Residual risk.**
+  - U1's west-side escapes (QSPI, the decoupler column, the USB pair's turn) may need vias.
+  - The 33.1 × 30.5 mm front ends are not proven routable.
+  - The heights under the modules are planning values (V-MECH-01).
+  - Rubric C6 needed the verifier to read the module overhang as allowed; see rules.md.
+- **Commit.** `b486758`.
