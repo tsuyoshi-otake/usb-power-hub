@@ -249,11 +249,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   SHA-1s, 74,718 diff lines between two runs), and renumbering by position kept the order.
   `pcbnew.KIID.SeedGenerator(n)` before creating anything fixed it: three runs, and the
   sequence `make_project.py` -> `make_pcb.py`, gave one SHA-1.
-- **Do not `board.Remove()` footprints and then call `FootprintLoad` in the same process.**
+- **Do not `board.Remove()` any item and then call `FootprintLoad` in the same process.**
   In KiCad 9.0.8 the later `FootprintLoad` raised `AttributeError` on a `SwigPyObject`
-  (2026-11-05, #6 P3, check_libraries' DRC sandbox). Cutting the `footprint`, `segment`,
-  `arc`, `via` and `zone` nodes from the board's text before `LoadBoard` worked: 1957 checks
-  PASS.
+  (2026-11-05, #6 P3, footprints; again 2026-11-06, #6 P5, Edge.Cuts drawings, in
+  check_libraries' DRC sandbox). Cut the `footprint`, `segment`, `arc`, `via`, `zone` and
+  every `gr_*` node from the board's text before `LoadBoard`: 3559 checks PASS.
 - **A footprint's silkscreen can lie outside its courtyard.** The RP2040 land's pin-1
   triangle sits outside the courtyard, so a 0402 placed clear of the courtyard still gave DRC
   `silk_over_copper` and `silk_overlap` (2026-11-05, #6 P3). Courtyard spacing does not guard
@@ -367,6 +367,43 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   failed once the checker printed `GetClass()` (#6 P4).
 - **Check what a note parser will read as a designator.** check_pcb.py read "at P3" in a
   placement note as part P3, and failed (#6 P4).
+
+## KiCad 9 silkscreen and manufacturing outputs
+
+- **JLCPCB's legend needs line ≥ 0.15 mm, height ≥ 1.0 mm and a line-to-height ratio of
+  1:6** (pcb-capabilities, Legend, read 2026-11-06). The ratio decides the stroke: 0.17 mm at
+  1.0 mm, 0.2 mm at 1.2 mm. KiCad's stock footprints draw silk at 0.12 mm, so a byte copy
+  fails the limit; `make_libraries.py` widens it and drops it on non-polar parts
+  (`silk_drop`) whose silk cannot keep 0.15 mm from their pads (#6 P5).
+- **Measure a label by its ink, not its text box.** `PCB_TEXT.GetEffectiveShape().BBox()`
+  is the stroked glyphs; the text box is larger. A leader start measured against the box
+  passed check_silk.py and was 0.2 mm short of the glyphs (2026-11-06, #6 P5).
+- **KiCad DRC flags `silk_overlap` when a leader touches its own label.** check_silk.py had
+  passed TP8's leader, which began inside the glyphs of VBUS_IN; `kicad-cli pcb drc` in
+  make_outputs.py found it. A leader now must start ≤ 0.3 mm from its glyphs without
+  touching them, and test_leader_touches_its_label proves the rule (#6 P5).
+- **Freerouting ignores the silkscreen.** Widening the stock footprints' silk changed the
+  DSN's digest, and a re-route gave the same session byte for byte (#6 P5). Labels are added
+  after the session and kept out of the router input, so they never invalidate it.
+- **The stackup's copper finish is not reachable from Python** (`m_FinishType` raised
+  AttributeError, 9.0.8). Read `(copper_finish "HAL SnPb")` from the board text.
+- **In a Gerber, y points up, so the sheet's y is negated.** The 100 × 72 mm outline at the
+  sheet's (50, 50)–(150, 122) spans y −122..−50 in the Edge.Cuts file (#6 P5).
+- **`kicad-cli pcb render` writes a little under the size asked** (1568 × 1120 for
+  1600 × 1152). Check a render's width floor and aspect, not its exact size.
+- **Fix creation dates to make an output set deterministic.** kicad-cli stamps Gerbers,
+  drill files, PDFs and JSON reports with the run time; replacing each with a same-length
+  1980-01-01 stamp and writing zip members with fixed times gave two runs identical
+  SHA256SUMS (#6 P5).
+- **One LCSC part can sit on two footprints.** C17734 (510 Ω) is both R_0805 and the Kelvin
+  0805 shunt land, so a JLCPCB BOM row is unique per (LCSC, Footprint), not per LCSC (#6 P5).
+- **`manufacturing/working/` is ignored by Git** (`.gitignore`: disposable candidates). A
+  candidate set is regenerated, never committed; its manifest records the sources' SHA-256
+  instead of a commit, and check_outputs.py fails a stale set.
+- **A negative test that picks "the first" item in file order breaks when the file is
+  re-saved.** SaveBoard orders segments by UUID; P5's re-save made test_check_routing pick a
+  0.7 mm stub ending on a via, whose B.Cu copy joined the via's net and was exempt (#6 P5).
+  Pick by a property (the longest) and keep a copied track off the original's endpoints.
 
 ## Delegated verifiers
 

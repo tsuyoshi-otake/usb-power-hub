@@ -960,3 +960,46 @@ Section 13 (board) only once verified.
   - The patch is bound to this session: a new session needs a new table.
 - **Learning.** rules.md: "Freerouting 2.5.0" and "KiCad 9 routing checks".
 - **Commit.** `b7a6c3b`.
+
+## 2026-11-06 — #6 P5: silkscreen labels and the candidate manufacturing set
+
+- **Symptom.** P4 left the board without CLAUDE.md §6 labels and no outputs existed
+  ("no Gerber is exported"). The stock footprints' silkscreen was 0.12 mm, under JLCPCB's
+  0.15 mm legend minimum.
+- **What was done.**
+  - Library: stock copies keep KiCad's bytes outside F.SilkS; each F.SilkS stroke is widened
+    to 0.15 mm, and `silk_drop` leaves out the silk of TestPoint, R 0402 and C 0402 (non-polar,
+    silk cannot keep 0.15 mm from their pads). check_libraries.py checks both (3,559 PASS).
+  - Labels: 32 rows in `PLACEMENT_Rev0.4.md`, *Silkscreen* (title, Rev0.4, HOST, OUT A, OUT B,
+    5V IN, every test pad's signal name; 5 leaders, 6 segments). `make_pcb.py` adds them after the session;
+    `check_silk.py` checks JLCPCB's limits (≥ 1.0 mm, ≥ 0.15 mm, 1:6), association, clearance
+    to pads, mask, edge, courtyards and other silk (2,522 PASS).
+  - Outputs: `make_outputs.py` writes `manufacturing/working/rev0.4/` (Gerber zip with drill,
+    JLCPCB BOM 254 parts / 41 lines, CPL, hand list 12, schematic and assembly PDFs, renders,
+    ERC/DRC JSON, WIP manifest, SHA256SUMS); `check_outputs.py` reads it with its own parsers
+    (3,278 PASS). The directory is ignored by Git (`.gitignore`, CLAUDE.md §2), so the set is
+    regenerated, not committed; the manifest records the sources' SHA-256.
+- **Root causes found on the way.**
+  - check_silk.py first measured leader starts against the text box; the DRC in
+    make_outputs.py then found TP8's leader inside its own glyphs (`silk_overlap`). Rule and
+    test added (`test_leader_touches_its_label`).
+  - check_libraries.py's DRC sandbox crashed (`SwigPyObject` in FootprintLoad) once the board
+    held `gr_text`: `board.Remove()` of Edge.Cuts items; now stripped in the text.
+  - Two older tests depended on the P4 board: test_check_pcb used C12's silk (now dropped,
+    moved to C1), test_check_routing took the first In2 segment in file order (UUID order
+    changed; it now takes the longest and copies its middle, since a copy ending on a via
+    joins that via's net and is exempt).
+- **Verification.**
+  - make_pcb.py: source byte-identical on re-run; check_pcb 12,694, check_routing 3,945,
+    check_silk 2,522, all PASS; DRC 0/0/0.
+  - make_outputs.py twice: identical SHA256SUMS.
+  - Tests OK: test_make_project 11, test_check_libraries 26, test_check_schematic 19,
+    test_check_pcb 24, test_check_routing 16, test_check_silk 27, test_check_outputs 23 (two each added after the verifier noted untested bounds: label width and rotation, preview size and aspect).
+  - Rubric `.claude/goal-loop/kicad-p5/rubric.md` (C1–C9), rubric-verifier (sonnet): round 1 passed C1–C9; it noted untested bounds (label width and rotation, preview size and aspect), and two tests each were then added.
+- **Residual risk.**
+  - The CPL's origin and angles are unverified until JLCPCB's placement preview
+    (easy-stick 14.18); no DFM or part mapping has seen the set.
+  - Pin 1 is shown only by the footprints' own marks; reference designators stay hidden.
+  - The open issues of CLAUDE.md §11 stand; the set is not orderable.
+- **Learning.** rules.md: "KiCad 9 silkscreen and manufacturing outputs".
+- **Commit.** `7fca00e`.
