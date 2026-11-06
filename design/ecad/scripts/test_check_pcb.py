@@ -180,11 +180,12 @@ class CheckTest(unittest.TestCase):
         self.assertFailsWith(run_check(board=edit), "FAIL C12.1: pad on B.Paste")
 
     def test_graphic_on_b_silk(self):
+        # C1, an 0805: the 0402s carry no silkscreen since P5 (library.json silk_drop)
         def edit(tree):
-            line = next(g for g in sx.find(footprint(tree, "C12"), "fp_line")
+            line = next(g for g in sx.find(footprint(tree, "C1"), "fp_line")
                         if sx.first(g, "layer")[1] == "F.SilkS")
             sx.first(line, "layer")[1] = "B.SilkS"
-        self.assertFailsWith(run_check(board=edit), "FAIL C12: items on ['B.Silkscreen']")
+        self.assertFailsWith(run_check(board=edit), "FAIL C1: items on ['B.Silkscreen']")
 
     # ---- regions, keepouts, modules, mechanics ------------------------------------------------
     def test_part_under_module_not_on_list(self):

@@ -1,4 +1,4 @@
-"""Place and route the Rev0.4 board from its documents (issue #6 P3, P4; CLAUDE.md 5).
+"""Place, route and label the Rev0.4 board from its documents (issue #6 P3-P5; CLAUDE.md 5, 6).
 
 Run with KiCad's own Python from the repository root, after make_schematic.py:
 
@@ -9,7 +9,8 @@ Inputs:
 - the schematic in design/ecad/source; its netlist is exported with kicad-cli, so the board
   carries exactly what the schematic carries;
 - design/ecad/libraries/usb-power-hub.pretty, the project footprints;
-- design/ecad/PLACEMENT_Rev0.4.md, the position and rotation of every part;
+- design/ecad/PLACEMENT_Rev0.4.md, the position and rotation of every part, and the
+  silkscreen labels (its silk table);
 - design/ecad/ROUTING_Rev0.4.md, the plane, the hand-drawn tracks, the GND fanout, the zones,
   and the classes and keepouts of the router;
 - design/ecad/routing/usb-power-hub.ses, the router's session, with routing/autoroute.json, the
@@ -20,9 +21,11 @@ Output: design/ecad/source/usb-power-hub.kicad_pcb, rebuilt from nothing on ever
 - one footprint per netlist component: its footprint, Value, fields (hidden, on F.Fab), sheet
   path, BOM exclusion and pad nets, at the document's position and rotation, on F.Cu;
 - the reference designators hidden on F.SilkS; they stay on F.Fab. 300 designators at 1.0 mm
-  (CLAUDE.md 6) do not fit; the silkscreen labels CLAUDE.md 6 requires are P5's;
+  (CLAUDE.md 6) do not fit;
 - the routing, in route.py's order: the In1 plane, the hand-drawn tracks, the GND fanout, the
-  session's tracks and vias, the pours, and every zone filled.
+  session's tracks and vias, the pours, and every zone filled;
+- the silk table's labels, each a text on F.SilkS with its leader segments. They are added
+  after the session, so they are not in the router input; the footprints' own silkscreen is.
 The UUID generator is seeded, so the items come out in the same order, and
 make_project.fix_uuids derives every UUID from its position: a re-run writes the same bytes.
 
@@ -36,13 +39,13 @@ Order: make_project.py writes a bare board when it runs, so this script runs aft
 after make_schematic.py. The board is built in a temporary directory: the source project is
 never loaded, so pcbnew cannot write its cache back to the .kicad_pro (see make_project.py),
 and the script stops if the .kicad_pro bytes changed anyway. Then it runs
-make_project.py --check, check_pcb.py and check_routing.py, each in a new process, unless
---no-check.
+make_project.py --check, check_pcb.py, check_routing.py and check_silk.py, each in a new
+process, unless --no-check.
 Exit status: 0 = written and checked; 1 = a check failed or a document is malformed.
 
-What it CANNOT see: whether the placement or the routing is good. The documents give the reason
-for each position and track; check_pcb.py and check_routing.py check the rules they list, and
-DRC the clearances.
+What it CANNOT see: whether the placement, the routing or the labels are good. The documents
+give the reason for each position, track and label; check_pcb.py, check_routing.py and
+check_silk.py check the rules they list, and DRC the clearances.
 """
 import hashlib
 import importlib.util
@@ -70,6 +73,7 @@ MODULE_PAIRS = {"J2": "J3"}                 # channel B's module; the channel ta
 CLI = pathlib.Path(sys.executable).resolve().parents[1] / "bin" / "kicad-cli.exe"
 SKIP_FIELDS = {"Footprint"}                 # the footprint itself carries it
 ROTATIONS = {0, 90, 180, 270}
+SILK_ROTATIONS = {0, 90}                    # left to right, bottom to top: one reading side
 UUID_SEED = 6                               # any fixed value; 6 is the issue number
 
 
@@ -125,6 +129,22 @@ def read_placement(path):
         add(r["Ref A"], x, y, rot)
         add(r["Ref B"], round(x + dx, 4), y, rot)
     return place
+
+
+def read_silk(path):
+    """[label dict] of the silk table: text, centre, rotation, glyph size, stroke, leader points."""
+    out = []
+    for r in doc_tables(path.read_text(encoding="utf-8"))["silk"][1]:
+        rot = int(r["Rot"])
+        if rot not in SILK_ROTATIONS:
+            raise SystemExit(f"silk {r['Label']}: rotation {rot} is not one of {sorted(SILK_ROTATIONS)}")
+        leader = [] if r["Leader"] == "-" else             [tuple(float(v) for v in pt.split(",")) for pt in r["Leader"].split()]
+        if len(leader) == 1 or any(len(pt) != 2 for pt in leader):
+            raise SystemExit(f"silk {r['Label']}: a leader needs two or more x,y points: {r['Leader']}")
+        out.append(dict(label=r["Label"], text=r["Text"], x=float(r["x"]), y=float(r["y"]), rot=rot,
+                        width=float(r["Width"]), height=float(r["Height"]), stroke=float(r["Stroke"]),
+                        leader=leader))
+    return out
 
 
 def read_routing(place_doc, routing_doc):
@@ -214,6 +234,28 @@ def add_footprint(board, nets, ref, comp, pins, at):
     return fp
 
 
+def add_silk(board, silk):
+    """Each label as a centred F.SilkS text; its leader as segments of the label's stroke."""
+    for s in silk:
+        t = pcbnew.PCB_TEXT(board)
+        t.SetText(s["text"])
+        t.SetLayer(pcbnew.F_SilkS)
+        t.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(s["width"]), pcbnew.FromMM(s["height"])))
+        t.SetTextThickness(pcbnew.FromMM(s["stroke"]))
+        t.SetTextAngleDegrees(s["rot"])
+        t.SetPosition(to_sheet(s["x"], s["y"]))
+        board.Add(t)
+        for a, b in zip(s["leader"], s["leader"][1:]):
+            seg = pcbnew.PCB_SHAPE(board)
+            seg.SetShape(pcbnew.SHAPE_T_SEGMENT)
+            seg.SetLayer(pcbnew.F_SilkS)
+            seg.SetWidth(pcbnew.FromMM(s["stroke"]))
+            seg.SetStart(to_sheet(*a))
+            seg.SetEnd(to_sheet(*b))
+            board.Add(seg)
+    return len(silk), sum(max(len(s["leader"]) - 1, 0) for s in silk)
+
+
 def router_input(board, routing, regions, tmp):
     """KiCad's DSN of the board as it stands, with the routing document's classes and keepouts."""
     raw = tmp / "router-raw.dsn"
@@ -238,7 +280,7 @@ def session():
     return data.decode("utf-8"), record
 
 
-def build(pcb, comps, pins, place, routing, regions, tmp, dsn_out=None):
+def build(pcb, comps, pins, place, routing, regions, silk, tmp, dsn_out=None):
     """Write the placed and routed board to pcb; with dsn_out, write the router input instead."""
     # pcbnew writes the footprints sorted by UUID, and gives each new item a random one. Seeding
     # the generator makes the UUIDs, and so the footprint order, the same on every run;
@@ -274,6 +316,8 @@ def build(pcb, comps, pins, place, routing, regions, tmp, dsn_out=None):
     route.pours(board, routing["zones"], proj.SIZE_MM)
     print(f"session: {s_t} track segments, {s_v} vias; patch: {p_t} track segments, {p_v} vias,"
           f" {p_r} session item(s) removed; {len(list(board.Zones()))} zones filled")
+    n_l, n_s = add_silk(board, silk)
+    print(f"silkscreen: {n_l} labels, {n_s} leader segments")
     if not pcbnew.SaveBoard(str(pcb), board):
         raise SystemExit("pcbnew could not save the board")
     return digest
@@ -290,6 +334,7 @@ def main(argv):
     pro_before = pro.read_bytes()
     place = read_placement(DOC)
     routing, regions = read_routing(DOC, ROUTING)
+    silk = read_silk(DOC)
     with tempfile.TemporaryDirectory() as tmp:
         tmp = pathlib.Path(tmp)
         comps, pins = read_netlist(export_netlist(tmp))
@@ -303,7 +348,7 @@ def main(argv):
         # a copy of the project beside the board, so pcbnew loads its rules and net classes
         # (the router input carries them) and any cache it writes lands in the copy
         shutil.copyfile(pro, work / pro.name)
-        digest = build(work / pcb.name, comps, pins, place, routing, regions, tmp, dsn_out)
+        digest = build(work / pcb.name, comps, pins, place, routing, regions, silk, tmp, dsn_out)
         if dsn_out is not None:
             print(f"wrote {dsn_out}: router input {digest}")
             return 0
@@ -320,7 +365,8 @@ def main(argv):
         return 0
     sys.stdout.flush()
     status = 0
-    for script, args in (("make_project.py", ["--check"]), ("check_pcb.py", []), ("check_routing.py", [])):
+    for script, args in (("make_project.py", ["--check"]), ("check_pcb.py", []), ("check_routing.py", []),
+                         ("check_silk.py", [])):
         status |= subprocess.run([sys.executable, "-I", "-B", str(HERE / script), *args]).returncode
     return 1 if status else 0
 

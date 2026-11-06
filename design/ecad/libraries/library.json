@@ -9,7 +9,8 @@
     "'footprint.params' holds design choices for a generated footprint; nothing checks them except the land check and the DRC run.",
     "'pins' maps each symbol pin number to the datasheet's pin name. A [datasheet, symbol] pair means the stock symbol spells the same pin differently; the check then compares the symbol's spelling exactly.",
     "Lengths in mm; [min, max] pairs are datasheet tolerances. Footprint coordinates: KiCad, x right, y down, top view.",
-    "PDF page numbers count from the first page of the file; printed page numbers can differ."
+    "PDF page numbers count from the first page of the file; printed page numbers can differ.",
+    "Silkscreen (P5): every F.SilkS stroke is at least 0.15 mm wide and at least 0.15 mm from the footprint's own mask openings, JLCPCB's legend limits (pcb-capabilities, Legend, read 2026-11-06). A stock footprint's 0.12 mm strokes are written at 0.15 mm; 'footprint.silk_drop' names the stock footprints whose silkscreen is left out because it cannot keep 0.15 mm from their pads: non-polar parts only."
   ],
   "parts": [
     {
@@ -509,7 +510,7 @@
       "mpn": null, "manufacturer": null,
       "order": {"vendor": "none", "code": "", "class": "Copper only"},
       "symbol": {"base": "Connector:TestPoint"},
-      "footprint": {"stock": "TestPoint:TestPoint_Pad_D1.0mm"},
+      "footprint": {"stock": "TestPoint:TestPoint_Pad_D1.0mm", "silk_drop": ["TestPoint_Pad_D1.0mm"]},
       "datasheet": {"title": "-", "revision": "-", "url": "", "pins": "-", "land": "1.0 mm round pad (design choice)"},
       "land": {"kind": "pads", "derivation": "design choice", "pads": [{"n": "1", "at": [0.0, 0.0], "size": [1.0, 1.0]}]},
       "pins": {"1": ["test pad", "1"]}
@@ -543,7 +544,7 @@
       "mpn": null, "manufacturer": null,
       "order": {"vendor": "JLCPCB", "code": "per value (requirements/parts.md Passives)", "class": "Basic"},
       "symbol": {"base": "Device:R", "footprint_property": ""},
-      "footprint": {"stock": ["Resistor_SMD:R_0402_1005Metric", "Resistor_SMD:R_0603_1608Metric", "Resistor_SMD:R_0805_2012Metric"]},
+      "footprint": {"stock": ["Resistor_SMD:R_0402_1005Metric", "Resistor_SMD:R_0603_1608Metric", "Resistor_SMD:R_0805_2012Metric"], "silk_drop": ["R_0402_1005Metric"]},
       "datasheet": {"title": "EIA chip sizes (generic)", "revision": "-", "url": "", "pins": "2-terminal", "land": "KiCad IPC-7351 nominal footprints"},
       "land": {"kind": "generic", "deferred": "P2: each value's LCSC part is bound in the schematic; its sheet's dimensions are checked then."},
       "pins": {"1": ["terminal", "~"], "2": ["terminal", "~"]}
@@ -554,7 +555,7 @@
       "mpn": null, "manufacturer": null,
       "order": {"vendor": "JLCPCB", "code": "per value (requirements/parts.md Passives)", "class": "Basic"},
       "symbol": {"base": "Device:C", "footprint_property": ""},
-      "footprint": {"stock": ["Capacitor_SMD:C_0402_1005Metric", "Capacitor_SMD:C_0603_1608Metric", "Capacitor_SMD:C_0805_2012Metric"]},
+      "footprint": {"stock": ["Capacitor_SMD:C_0402_1005Metric", "Capacitor_SMD:C_0603_1608Metric", "Capacitor_SMD:C_0805_2012Metric"], "silk_drop": ["C_0402_1005Metric"]},
       "datasheet": {"title": "EIA chip sizes (generic)", "revision": "-", "url": "", "pins": "2-terminal", "land": "KiCad IPC-7351 nominal footprints"},
       "land": {"kind": "generic", "deferred": "P2: each value's LCSC part is bound in the schematic; its sheet's dimensions are checked then."},
       "pins": {"1": ["terminal", "~"], "2": ["terminal", "~"]}

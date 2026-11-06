@@ -1,8 +1,8 @@
 # USB Power-Control Hub — Rev0.4 placement
 
 > **WIP — MANUFACTURING PROHIBITED.** Where every part of Rev0.4 sits on the
-> 100 × 72 mm board (D24), and why. Issue #6 P3. No routing exists yet (P4); placement
-> problems that routing finds are fixed here, in this file.
+> 100 × 72 mm board (D24), and why, with its silkscreen labels. Issue #6 P3 and P5;
+> placement problems that routing (P4) finds are fixed here, in this file.
 
 `design/ecad/scripts/make_pcb.py` builds `source/usb-power-hub.kicad_pcb` from this file and
 the captured schematic, and `design/ecad/scripts/check_pcb.py` checks the board against this
@@ -333,6 +333,66 @@ checks them against each other.
 | U13 | U23 | 26.5 | 37.6 | 90 | AFE_{x} | range comparators between the M/L amplifiers and Q17/Q18 |
 <!-- channel:end -->
 
+## Silkscreen
+
+The labels CLAUDE.md §6 asks of the board (P5): the product name and revision, a port label
+beside each USB-C module, and the net name at every test pad. `make_pcb.py` writes each row as
+a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks them.
+
+- `x`, `y` are the text's centre in the board frame; `Rot` is 0 (left to right) or 90 (bottom
+  to top). `Width` and `Height` are KiCad's glyph size and `Stroke` the line width, in mm.
+  JLCPCB's legend limits are a 1.0 mm text height, a 0.15 mm line and a line-to-height ratio
+  of 1:6 (pcb-capabilities, Legend, read 2026-11-06), so a stroke is at least
+  max(0.15, height / 6): 0.17 mm at 1.0 mm, 0.2 mm at 1.2 mm. A 0.8 mm width keeps the
+  1.0 mm height and is used where a long name has no room at 1.0.
+- A label without a leader sits beside its test pad: within 1.5 mm of the pad, and its centre
+  is nearer that pad than any other test pad's. Where no such spot is free, `Leader` gives a
+  0.15 mm silk line as board points, from the label to 0.3 mm off its pad's edge. TP8's leader
+  runs under TP7 because J4's outline and F1 close every straight path; GATE_H_x's labels sit
+  above OUT_H_x's pads, so both of those pads have leaders.
+- The port labels sit just outside their module, so they stay visible after the module is
+  soldered and are not under the case's port openings, which are at the board edge.
+- Reference designators stay hidden (300 at 1.0 mm do not fit); the assembly drawing carries
+  them. Pin 1 and polarity are the footprints' own marks (check_libraries.py keeps them on
+  every polar part).
+
+<!-- silk:begin -->
+| Label | Text | x | y | Rot | Width | Height | Stroke | Leader |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| title | USB Power-Control Hub | 66 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
+| revision | Rev0.4 | 71 | 8.25 | 0 | 1.2 | 1.2 | 0.2 | - |
+| J1 | HOST | 75.5 | 56.08 | 0 | 1 | 1 | 0.17 | - |
+| J2 | OUT A | 17.5 | 15.87 | 0 | 1 | 1 | 0.17 | - |
+| J3 | OUT B | 51.3 | 15.87 | 0 | 1 | 1 | 0.17 | - |
+| J4 | 5V IN | 23.85 | 56.08 | 0 | 0.8 | 1 | 0.17 | - |
+| TP1 | V5L | 67.2 | 50.2 | 0 | 1 | 1 | 0.17 | - |
+| TP2 | V5A | 87.4 | 43.25 | 0 | 1 | 1 | 0.17 | - |
+| TP3 | V12F | 89.25 | 12.5 | 0 | 1 | 1 | 0.17 | - |
+| TP4 | V_INJ | 38.35 | 6.55 | 0 | 1 | 1 | 0.17 | - |
+| TP5 | V3V3 | 57.35 | 59.15 | 0 | 1 | 1 | 0.17 | - |
+| TP6 | VDDA | 85 | 41.75 | 0 | 1 | 1 | 0.17 | - |
+| TP7 | GND | 5.55 | 56.75 | 0 | 1 | 1 | 0.17 | - |
+| TP8 | VBUS_IN | 3.6 | 55.2 | 0 | 1 | 1 | 0.17 | 6.7,54.7 10.3,54.7 10.3,55.0 |
+| TP9 | V_J4 | 23.8 | 50.1 | 0 | 1 | 1 | 0.17 | - |
+| TP10 | DVDD | 49.7 | 63.55 | 90 | 1 | 1 | 0.17 | - |
+| TP11 | RUN | 45.55 | 66.5 | 0 | 1 | 1 | 0.17 | - |
+| TP12 | CLKOUT | 49.7 | 68.4 | 90 | 1 | 1 | 0.17 | - |
+| TP13 | VDD33_HUB | 97.25 | 30.85 | 90 | 1 | 1 | 0.17 | - |
+| TP14 | VBUS_J1 | 80.8 | 50.7 | 0 | 1 | 1 | 0.17 | - |
+| TP101 | OUT_H_A | 10.2 | 29.85 | 90 | 0.8 | 1 | 0.17 | 9.569,32.373 7.546,33.761 |
+| TP102 | GATE_H_A | 6.7 | 36.65 | 0 | 0.8 | 1 | 0.17 | 3.986,36.016 3.819,34.841 |
+| TP103 | HOLD_M_A | 29.3 | 49.4 | 0 | 1 | 1 | 0.17 | - |
+| TP104 | HOLD_L_A | 21.2 | 30.9 | 90 | 1 | 1 | 0.17 | - |
+| TP105 | VSUP_A | 1.15 | 36.35 | 90 | 0.8 | 1 | 0.17 | - |
+| TP106 | VBUS_A | 33.45 | 32.9 | 90 | 1 | 1 | 0.17 | - |
+| TP201 | OUT_H_B | 44 | 29.8 | 90 | 1 | 1 | 0.17 | 43.369,32.909 41.344,33.755 |
+| TP202 | GATE_H_B | 40.7 | 36.65 | 0 | 0.8 | 1 | 0.17 | 37.929,36.016 37.674,34.831 |
+| TP203 | HOLD_M_B | 61.95 | 49.4 | 0 | 1 | 1 | 0.17 | - |
+| TP204 | HOLD_L_B | 55 | 30.9 | 90 | 1 | 1 | 0.17 | - |
+| TP205 | VSUP_B | 33.35 | 37.55 | 0 | 0.8 | 1 | 0.17 | - |
+| TP206 | VBUS_B | 67.25 | 32.95 | 90 | 1 | 1 | 0.17 | - |
+<!-- silk:end -->
+
 ## Deviations from the study
 
 | Study | Here | Why |
@@ -348,8 +408,6 @@ checks them against each other.
 ## Not settled here
 
 - Routing (P4) can move any part; this file then changes, not the board.
-- The silkscreen labels of CLAUDE.md §6 (product name, revision, Pin 1, port labels, test-pad
-  names) come with routing.
 - The heights under the modules are planning values; V-MECH-01 measures the built board.
 - U1's west side is the densest spot. Its QSPI pins 51–56 reach U8 to the south-west, the
   decouplers of pins 43–45 and 48–50 stand in one column at x 36.75, and the USB pair leaves

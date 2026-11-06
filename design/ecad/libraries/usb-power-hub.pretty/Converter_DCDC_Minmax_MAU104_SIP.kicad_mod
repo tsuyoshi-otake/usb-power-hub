@@ -29,7 +29,7 @@
 		(start -2.21 -1.41)
 		(end 17.51 4.91)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(fill no)
@@ -39,7 +39,7 @@
 		(start -2.5 -1.7)
 		(end -2.5 0.8)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")

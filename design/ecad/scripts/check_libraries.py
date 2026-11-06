@@ -17,9 +17,13 @@ say) and never the generator's `params`, and it measures footprints as KiCad loa
     Datasheet, MPN, LCSC or Akizuki code, Class, in_bom and the designator letters are the
     register's.
  3. Footprints: exactly one file per footprint the register names (a schematic-only symbol,
-    footprint `none`, names none and must have an empty Footprint). A stock one is a
-    byte-for-byte copy of KiCad's once KiCad's CRLF is read as LF; every one loads in pcbnew; its numbered pads are its
-    symbol's pins; its courtyard contains every pad (and, if generated, its F.Fab outline).
+    footprint `none`, names none and must have an empty Footprint). A stock one is KiCad's
+    file once KiCad's CRLF is read as LF, line for line, except its F.SilkS shapes: each is
+    KiCad's shape with its stroke widened, or, for a register `silk_drop` footprint, none is
+    left (allowed only on parts whose pins are all non-polar terminals). Every one loads in
+    pcbnew; every F.SilkS stroke is >= 0.15 mm wide and >= 0.15 mm from each of its own mask
+    openings (JLCPCB's legend limits, measured with pcbnew's shapes); its numbered pads are
+    its symbol's pins; its courtyard contains every pad (and, if generated, its F.Fab outline).
     Then a land check per `land.kind`:
     - qfn_land: each pad's inner and outer edge, width and centre are the datasheet land's.
     - qfn, dual, sot23, sot223, chip: coverage. Each pad contains the nominal terminal
@@ -54,6 +58,8 @@ What it CANNOT see:
 - the generic R and C lands. Their per-value datasheets are bound at P2.
 - 3D models; part heights (the strip under a USB-C module is 2D here).
 - whether a pin's electrical type suits ERC (P2's ERC sees that).
+- silkscreen against another footprint's pads (check_pcb.py measures that on the board), and
+  whether a mark is readable beyond JLCPCB's two limits.
 - the JLCPCB CPL rotation frame (CLAUDE.md 4.2; P5) and the package's pin-1 marking where the
   datasheet prints no pin numbers (AO3401A, AO3400A; see their register notes).
 """
@@ -77,6 +83,10 @@ KFP = KICAD / "share" / "kicad" / "footprints"
 CLI = KICAD / "bin" / "kicad-cli.exe"
 TOL = 0.002          # mm: the files carry 4 decimals; pcbnew rounds to 1 nm
 MIN_SENSE_OVERLAP = 0.3   # mm of a sense pad across its electrode's width
+SILK_MIN = 0.15      # mm: JLCPCB legend minimum line width (pcb-capabilities, Legend, 2026-11-06)
+SILK_GAP = 0.15      # mm: JLCPCB minimum pad-to-silkscreen distance (same page)
+SILK_SHAPES = ("fp_line", "fp_arc", "fp_circle", "fp_rect", "fp_poly")
+NON_POLAR = {"terminal", "test pad"}   # datasheet pin names a silk_drop part may have
 
 
 def _load(name):
@@ -597,6 +607,61 @@ def check_symbols(rep, parts, sym_path, pretty):
     return pins_of
 
 
+def silk_split(tree):
+    """(the footprint's nodes except its F.SilkS shapes, those shapes)."""
+    rest, silk = [], []
+    for node in tree:
+        if isinstance(node, list) and node and node[0] in SILK_SHAPES and ["layer", "F.SilkS"] in node:
+            silk.append(node)
+        else:
+            rest.append(node)
+    return rest, silk
+
+
+def stroke_width(node):
+    return next(w[1] for s in node if isinstance(s, list) and s[0] == "stroke"
+                for w in s[1:] if isinstance(w, list) and w[0] == "width")
+
+
+def check_stock_copy(rep, who, path, src, dropped):
+    """A stock footprint is KiCad's file, CRLF read as LF, except its F.SilkS shapes: each is
+    KiCad's with a wider stroke, or, for a silk_drop footprint, none is left."""
+    mine, kicad = path.read_text(encoding="utf-8"), src.read_bytes().decode("utf-8").replace("\r\n", "\n")
+    m_rest, m_silk = silk_split(sx.loads(mine))
+    k_rest, k_silk = silk_split(sx.loads(kicad))
+    rep.check(m_rest == k_rest, who, f"differs from KiCad's {src.stem} outside its silkscreen")
+    if dropped:
+        rep.check(not m_silk and k_silk, who, f"silk_drop: {len(m_silk)} F.SilkS shapes left "
+                  f"(KiCad's has {len(k_silk)})")
+        return
+    same_shape = len(m_silk) == len(k_silk) and all(
+        [n for n in a if not (isinstance(n, list) and n[0] == "stroke")]
+        == [n for n in b if not (isinstance(n, list) and n[0] == "stroke")]
+        and stroke_width(a) >= stroke_width(b) for a, b in zip(m_silk, k_silk))
+    rep.check(same_shape, who, f"its F.SilkS shapes are not KiCad's {src.stem} shapes (only the stroke "
+              "may be wider)")
+    # outside the silk shapes, the text is KiCad's line for line
+    strip = lambda t: [ln for ln in t.split("\n") if "(width " not in ln]
+    rep.check(strip(mine) == strip(kicad), who, f"text differs from KiCad's {src.stem} beyond stroke widths")
+
+
+def check_silk(rep, who, fp, dropped):
+    """JLCPCB's legend limits, measured as pcbnew loads the footprint: every F.SilkS shape at
+    least SILK_MIN wide and at least SILK_GAP from each of the footprint's own mask openings."""
+    silk = [g for g in fp.GraphicalItems() if g.GetLayer() == pcbnew.F_SilkS and g.GetClass() != "PCB_TEXT"]
+    if dropped:
+        rep.check(not silk, who, "silk_drop footprint still has silkscreen")
+        return
+    for g in silk:
+        w = pcbnew.ToMM(g.GetWidth())
+        rep.check(w >= SILK_MIN - 1e-6, who, f"F.SilkS {g.GetShapeStr()} stroke {w:.3f} mm < {SILK_MIN}")
+        shape = g.GetEffectiveShape(pcbnew.F_SilkS)
+        for p in fp.Pads():
+            if p.IsOnLayer(pcbnew.F_Mask):
+                rep.check(not shape.Collide(p.GetEffectiveShape(pcbnew.F_Mask), pcbnew.FromMM(SILK_GAP) - 1),
+                          who, f"F.SilkS {g.GetShapeStr()} within {SILK_GAP} mm of pad {p.GetNumber()!r}")
+
+
 LAND = {"qfn_land": lambda rep, who, pads, land, fp: land_qfn(rep, who, pads, land, True),
         "qfn": lambda rep, who, pads, land, fp: land_qfn(rep, who, pads, land, False),
         "dual": lambda rep, who, pads, land, fp: land_dual(rep, who, pads, land),
@@ -616,6 +681,8 @@ def check_footprints(rep, parts, pretty, pins_of):
         names, stock = footprint_names(part)
         for i, name in enumerate(names):
             wanted.setdefault(name, []).append((part, stock[i] if stock else None))
+        stale = sorted(set(part.get("footprint", {}).get("silk_drop", [])) - set(names))
+        rep.check(not stale, part["id"], f"silk_drop names footprints the part does not use: {stale}")
     rep.check(files == set(wanted), "footprints", f"library has {sorted(files - set(wanted))} extra and "
               f"{sorted(set(wanted) - files)} missing")
     for name, users in sorted(wanted.items()):
@@ -624,14 +691,19 @@ def check_footprints(rep, parts, pretty, pins_of):
             continue
         for part, stock in users:
             who = f"{part['id']} / {name}"
+            dropped = name in part["footprint"].get("silk_drop", [])
             if stock:
                 lib, base = stock.split(":")
                 src = KFP / f"{lib}.pretty" / f"{base}.kicad_mod"
-                rep.check(path.read_bytes() == src.read_bytes().replace(b"\r\n", b"\n"), who,
-                          f"not a byte copy of KiCad's {stock} (its CRLF read as LF)")
+                check_stock_copy(rep, who, path, src, dropped)
+            if dropped:
+                rep.check(all(str(v[0] if isinstance(v, list) else v) in NON_POLAR
+                              for v in part["pins"].values()), who,
+                          "silk_drop on a part whose pins are not all non-polar terminals")
             fp = pcbnew.FootprintLoad(str(pretty), name)
             if not rep.check(fp is not None, who, "pcbnew cannot load it"):
                 continue
+            check_silk(rep, who, fp, dropped)
             rep.check(fp.GetFPID().GetLibItemName() == name, who,
                       f"internal name {fp.GetFPID().GetLibItemName()!r} is not the file name")
             tree = sx.loads(path.read_text(encoding="utf-8"))
@@ -711,17 +783,16 @@ def check_drc(rep, srcdir, pretty, fp_names):
             f'(fp_lib_table (version 7) (lib (name "{NICK}")(type "KiCad")(uri "{pretty.resolve().as_posix()}")'
             '(options "")(descr "")))\n', encoding="utf-8", newline="\n")
         # Only the rules and the stackup are wanted: since P3 the project board also carries
-        # the placed parts (make_pcb.py), whose unrouted nets are not this check's business.
-        # They are cut from the copy's text; removing them through pcbnew breaks its later
-        # FootprintLoad calls (KiCad 9.0.8: "'SwigPyObject' object has no attribute").
+        # the placed parts (make_pcb.py), whose unrouted nets are not this check's business,
+        # and since P5 its silkscreen labels. They and the outline are cut from the copy's
+        # text; removing any item through pcbnew breaks its later FootprintLoad calls
+        # (KiCad 9.0.8: "'SwigPyObject' object has no attribute").
         tree = sx.loads((t / "sandbox.kicad_pcb").read_text(encoding="utf-8"))
-        tree[:] = [n for n in tree if not (isinstance(n, list) and n
-                                           and n[0] in ("footprint", "segment", "arc", "via", "zone"))]
+        tree[:] = [n for n in tree if not (isinstance(n, list) and n and
+                                           (n[0] in ("footprint", "segment", "arc", "via", "zone") or
+                                            str(n[0]).startswith("gr_")))]
         (t / "sandbox.kicad_pcb").write_text(sx.dumps(tree), encoding="utf-8", newline="\n")
         board = pcbnew.LoadBoard(str(t / "sandbox.kicad_pcb"))
-        for d in list(board.GetDrawings()):
-            if d.GetLayer() == pcbnew.Edge_Cuts:
-                board.Remove(d)
         x, y, row_h, width = 10.0, 10.0, 0.0, 250.0
         multi = set()                          # nets of pad numbers used twice in a footprint
         for k, name in enumerate(fp_names):

@@ -51,7 +51,7 @@ Read in this order:
 | `requirements/verification.md` | How each requirement is proven (V-* IDs: method, pass criterion, limits). |
 | `design/circuit/CIRCUIT_DESIGN_Rev0.4.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.3 are in Git history. |
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
-| `design/ecad/` | The KiCad 9 project (D32): `source/` holds the project, the source of truth until the EasyEDA import; `scripts/` holds its generators and checks; `libraries/` holds the project's symbols and footprints and the parts register they are checked against (its README). So far: stackup, outline, rules, net classes, the libraries, the schematic, written from `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md` (the capture list: every part, pin and net) and checked against it, and the placement, written from `design/ecad/PLACEMENT_Rev0.4.md` (where every part sits, and why). `design/ecad/README.md` gives the order to run the generators in. |
+| `design/ecad/` | The KiCad 9 project (D32): `source/` holds the project, the source of truth until the EasyEDA import; `scripts/` holds its generators and checks; `libraries/` holds the project's symbols and footprints and the parts register they are checked against (its README). So far: stackup, outline, rules, net classes, the libraries, the schematic, written from `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md` (the capture list: every part, pin and net) and checked against it, the placement and silkscreen, written from `design/ecad/PLACEMENT_Rev0.4.md` (where every part and label sits, and why), and the routing, from `design/ecad/ROUTING_Rev0.4.md`; `make_outputs.py` writes the candidate manufacturing set from the board. `design/ecad/README.md` gives the order to run the generators in. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
 | `design/experiments/stackup-impedance/` | The stackup study behind D27: JLCPCB's 4-layer stackups, the 90 Ω USB pair width on each, and a model checked against JLCPCB's single-ended calculator. A non-authoritative study, not design data. |
 | `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03 and re-run 2026-11-04 for D29, D30, D31 and D33: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
@@ -95,8 +95,11 @@ complete, then imported into EasyEDA (decision D32, issue #6). The module header
 chosen (D33) and every part has a symbol and a footprint, the RP2040's and the CH335F's
 lands drawn from their datasheets (G20, G21). The schematic is captured (issue #6 P2,
 D34) and includes J1's soft start (D35, issue #7). The parts are placed (P3) and routed
-(P4, under D36's L3/L4 rule): DRC reports 0 violations and 0 unconnected items. The next step
-is the manufacturing outputs (P5): Gerber, drill, BOM and CPL. The front-end checks are made on
+(P4, under D36's L3/L4 rule): DRC reports 0 violations and 0 unconnected items. The silkscreen
+labels are placed, and a candidate manufacturing set (P5: Gerber, drill, JLCPCB BOM and CPL,
+schematic PDF, renders, a `WIP` manifest) is generated into `manufacturing/working/rev0.4/`,
+which Git does not track and nobody may order from. The next step is the EasyEDA import
+(P6). The front-end checks are made on
 the first assembled board, not on a bench beforehand (decision D28). Firmware does not
 exist.
 
@@ -111,9 +114,12 @@ The KiCad project, its libraries, its schematic and its board are generated, not
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_schematic.py         # writes the schematic, runs ERC and check_schematic.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_schematic.py   # its negative tests
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/autoroute.py --java <java.exe> --jar <freerouting-2.5.0.jar>  # only when its input changed
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_pcb.py               # places and routes, runs check_pcb.py and check_routing.py
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_pcb.py               # places, routes and labels; runs check_pcb.py, check_routing.py, check_silk.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_pcb.py         # its negative tests
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_routing.py
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_silk.py
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py           # writes manufacturing/working/rev0.4, runs check_outputs.py
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_outputs.py     # its negative tests
 ```
 
 `make_project.py` writes a bare board, so `make_pcb.py` runs after it. `autoroute.py` needs

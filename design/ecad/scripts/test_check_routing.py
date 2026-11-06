@@ -211,18 +211,28 @@ class CheckTest(unittest.TestCase):
 
     def test_b_cu_under_analog_in2_track(self):
         def edit(tree):
-            # the first In2 track inside AFE_A (x 0.5-33.6, y 19-49.5) of a net other than V3V3,
-            # copied onto B.Cu as a V3V3 track (a net over its own B.Cu track is exempt)
+            # the longest In2 track inside AFE_A (x 0.5-33.6, y 19-49.5) of a net other than
+            # V3V3, its middle 60 % copied onto B.Cu as a V3V3 track (a net over its own B.Cu
+            # track is exempt). The longest, not the first: the file's segment order follows
+            # the UUIDs. The middle, not the whole: a copy ending on the In2 track's via would
+            # join that via's net when the board loads, and be exempt.
             other = net_code(tree, "V3V3")
+            best = None
             for s in sx.find(tree, "segment"):
                 if sx.first(s, "layer")[1] != "In2.Cu" or sx.first(s, "net")[1] == other:
                     continue
                 (x0, y0), (x1, y1) = ((e[1] - ORIGIN[0], ORIGIN[1] - e[2]) for e in ends(s))
                 if all(1.0 < x < 33.0 and 20.0 < y < 49.0 for x, y in ((x0, y0), (x1, y1))):
-                    c = [x for x in s if not (isinstance(x, list) and x and x[0] in ("layer", "uuid", "net"))]
-                    tree.append(c + [["layer", "B.Cu"], ["net", other], ["uuid", str(uuid.uuid4())]])
-                    return
-            raise AssertionError("no In2 track inside AFE_A")
+                    length = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
+                    if best is None or length > best[0]:
+                        best = (length, s)
+            if best is None:
+                raise AssertionError("no In2 track inside AFE_A")
+            s = best[1]
+            (_, ax, ay), (_, bx, by) = ends(s)
+            at = [[k, ax + f * (bx - ax), ay + f * (by - ay)] for k, f in (("start", 0.2), ("end", 0.8))]
+            width = sx.first(s, "width")
+            tree.append(["segment", *at, width, ["layer", "B.Cu"], ["net", other], ["uuid", str(uuid.uuid4())]])
         self.assertFailsWith(run_check(board=edit), "FAIL analog: In2 ")
 
     def test_crossing_in_analog_allowed(self):

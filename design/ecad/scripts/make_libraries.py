@@ -14,7 +14,11 @@ Input: design/ecad/libraries/library.json, the parts register (one entry per sym
 - design/ecad/libraries/usb-power-hub.pretty/: one file per footprint. A stock footprint is
   KiCad's file with its CRLF line endings written as LF: KiCad's Windows install ships CRLF,
   and the repository stores LF (.gitattributes `eol=lf`), so a checkout must hold the same
-  bytes as this output. Eight are generated from the register's `params`:
+  bytes as this output. Its silkscreen is then made manufacturable (P5): JLCPCB's legend
+  needs strokes of at least 0.15 mm, and KiCad draws 0.12 mm, so each F.SilkS stroke is
+  widened to 0.15 mm; a footprint in the register's `silk_drop` (0402 R and C, the test
+  pad: non-polar, and their silk cannot keep 0.15 mm from their pads) loses its silkscreen.
+  Nothing else in the file changes. Eight are generated from the register's `params`:
   the two QFN lands (G20, G21), three Kelvin shunt lands (CLAUDE.md 5.4), the MF-R300
   radial, the MAU104 SIP and the USB-C module.
 - design/ecad/source/fp-lib-table and sym-lib-table: the project's library tables.
@@ -41,6 +45,8 @@ NICK = "usb-power-hub"
 KICAD = pathlib.Path(sys.executable).resolve().parents[1]      # .../KiCad/9.0
 KSYM = KICAD / "share" / "kicad" / "symbols"
 KFP = KICAD / "share" / "kicad" / "footprints"
+SILK_W = 0.15       # mm: JLCPCB legend minimum line width (pcb-capabilities, Legend, 2026-11-06)
+SILK_SHAPES = ("fp_line", "fp_arc", "fp_circle", "fp_rect", "fp_poly")
 
 
 def _load(name):
@@ -315,12 +321,12 @@ def gen_qfn(name, p, part):
     first = r((n - 1) / 2 * pitch + pw / 2 + 0.26)
     for sxn, syn in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
         corner = (r(sxn * silk), r(syn * silk))
-        fp.append(line(corner, (r(sxn * first), r(syn * silk)), "F.SilkS", 0.12))
-        fp.append(line(corner, (r(sxn * silk), r(syn * first)), "F.SilkS", 0.12))
+        fp.append(line(corner, (r(sxn * first), r(syn * silk)), "F.SilkS", SILK_W))
+        fp.append(line(corner, (r(sxn * silk), r(syn * first)), "F.SilkS", SILK_W))
     y1 = r(-(n - 1) / 2 * pitch)
     tip = r(outer + 0.27)
-    fp.append(poly([(-tip, y1), (r(-tip - 0.33), r(y1 + 0.24)), (r(-tip - 0.33), r(y1 - 0.24))],
-                   "F.SilkS", 0.12))
+    fp.append(poly([(-tip, y1), (r(-tip - 0.25), r(y1 + 0.18)), (r(-tip - 0.25), r(y1 - 0.18))],
+                   "F.SilkS", SILK_W))
     fp.append(rect((-court, -court), (court, court), "F.CrtYd", 0.05))
     ch = min(1.0, half_b / 4)
     fp.append(poly([(r(-half_b + ch), -half_b), (half_b, -half_b), (half_b, half_b), (-half_b, half_b),
@@ -367,7 +373,7 @@ def gen_kelvin_chip(name, p, part):
                 "resistor shunt Kelvin 4-terminal", ["smd"], (0, r(-cy - 0.7)), (0, r(cy + 0.7)))
     silk_x = r(x0 - 0.26)
     for y in (r(-bw - 0.11), r(bw + 0.11)):
-        fp.append(line((-silk_x, y), (silk_x, y), "F.SilkS", 0.12))
+        fp.append(line((-silk_x, y), (silk_x, y), "F.SilkS", SILK_W))
     fp.append(rect((-cx, -cy), (cx, cy), "F.CrtYd", 0.05))
     fp.append(rect((-bl, -bw), (bl, bw), "F.Fab", 0.1))
     fp.append(fab_ref((0, 0)))
@@ -406,8 +412,8 @@ def gen_chip_kelvin_tie(name, p, part):
                 f"sense pad at each end (2, 3) joined by copper (net tie); register: {part['id']}",
                 "resistor shunt Kelvin net tie 0805", ["smd"], (0, r(cy_top - 0.7)), (0, r(cy_bot + 0.7)),
                 extra=tie_props())
-    fp.append(line((-0.227064, -0.735), (0.227064, -0.735), "F.SilkS", 0.12))
-    fp.append(line((-0.227064, 0.735), (0.227064, 0.735), "F.SilkS", 0.12))
+    fp.append(line((-0.227064, -0.735), (0.227064, -0.735), "F.SilkS", SILK_W))
+    fp.append(line((-0.227064, 0.735), (0.227064, 0.735), "F.SilkS", SILK_W))
     fp.append(rect((-cx, cy_top), (cx, cy_bot), "F.CrtYd", 0.05))
     fp.append(rect((-1.0, -0.625), (1.0, 0.625), "F.Fab", 0.1))
     fp.append(fab_ref((0, 0)))
@@ -431,9 +437,9 @@ def gen_axial_kelvin(name, p, part):
                 "resistor axial shunt Kelvin net tie", ["through_hole"], (r(pitch / 2), r(cy_top - 0.7)),
                 (r(pitch / 2), r(cy_bot + 0.7)), extra=tie_props())
     sb = r(bd / 2 + 0.11)
-    fp.append(rect((r(x0 - 0.11), -sb), (r(x1 + 0.11), sb), "F.SilkS", 0.12))
-    fp.append(line((r(pad / 2 + 0.3), 0), (r(x0 - 0.11), 0), "F.SilkS", 0.12))
-    fp.append(line((r(x1 + 0.11), 0), (r(pitch - pad / 2 - 0.3), 0), "F.SilkS", 0.12))
+    fp.append(rect((r(x0 - 0.11), -sb), (r(x1 + 0.11), sb), "F.SilkS", SILK_W))
+    fp.append(line((r(pad / 2 + 0.3), 0), (r(x0 - 0.11), 0), "F.SilkS", SILK_W))
+    fp.append(line((r(x1 + 0.11), 0), (r(pitch - pad / 2 - 0.3), 0), "F.SilkS", SILK_W))
     fp.append(rect((r(-pad / 2 - 0.25), cy_top), (r(pitch + pad / 2 + 0.25), cy_bot), "F.CrtYd", 0.05))
     fp.append(rect((x0, r(-bd / 2)), (x1, r(bd / 2)), "F.Fab", 0.1))
     fp.append(line((0, 0), (x0, 0), "F.Fab", 0.1))
@@ -454,7 +460,7 @@ def gen_radial(name, p, part):
     fp = header(name, f"{part['mpn']} {part['manufacturer']} PTC, radial, style 2 straight leads, "
                 f"pitch {pitch} mm, body {bw} x {bt} mm max", "PTC polyfuse radial", ["through_hole"],
                 (r(pitch / 2), r(-yb - 1.3)), (r(pitch / 2), r(yb + 1.3)))
-    fp.append(rect((r(x0 - 0.11), r(-yb - 0.11)), (r(x1 + 0.11), r(yb + 0.11)), "F.SilkS", 0.12))
+    fp.append(rect((r(x0 - 0.11), r(-yb - 0.11)), (r(x1 + 0.11), r(yb + 0.11)), "F.SilkS", SILK_W))
     fp.append(rect((r(x0 - 0.5), r(-yb - 0.5)), (r(x1 + 0.5), r(yb + 0.5)), "F.CrtYd", 0.05))
     fp.append(rect((x0, -yb), (x1, yb), "F.Fab", 0.1))
     fp.append(fab_ref((r(pitch / 2), 0)))
@@ -468,8 +474,8 @@ def gen_sip(name, p, part):
     fp = header(name, f"{part['mpn']} {part['manufacturer']} 1 W DC-DC, SIP-7 single output (pins 1, 2, "
                 f"4, 6 fitted), body {r(x1 - x0)} x {r(y1 - y0)} mm", "DCDC SIP Minmax", ["through_hole"],
                 (r((x0 + x1) / 2), r(y0 - 1.3)), (r((x0 + x1) / 2), r(y1 + 1.3)))
-    fp.append(rect((r(x0 - 0.11), r(y0 - 0.11)), (r(x1 + 0.11), r(y1 + 0.11)), "F.SilkS", 0.12))
-    fp.append(line((r(x0 - 0.4), r(y0 - 0.4)), (r(x0 - 0.4), 0.8), "F.SilkS", 0.12))
+    fp.append(rect((r(x0 - 0.11), r(y0 - 0.11)), (r(x1 + 0.11), r(y1 + 0.11)), "F.SilkS", SILK_W))
+    fp.append(line((r(x0 - 0.4), r(y0 - 0.4)), (r(x0 - 0.4), 0.8), "F.SilkS", SILK_W))
     fp.append(rect((r(x0 - 0.25), r(y0 - 0.25)), (r(x1 + 0.25), r(y1 + 0.25)), "F.CrtYd", 0.05))
     fp.append(rect((x0, y0), (x1, y1), "F.Fab", 0.1))
     fp.append(fab_ref((r((x0 + x1) / 2), r((y0 + y1) / 2 + 1.0))))
@@ -516,10 +522,10 @@ def gen_usbc_module(name, p, part):
     # receptacle overhangs it), so the side lines stop `edge` short of it: silk there would be
     # clipped by the board edge (DRC silk_edge_clearance; min_copper_edge_clearance 0.3 mm).
     s, edge = 0.11, 0.5
-    fp.append(line((r(mx0 - s), r(my0 + edge)), (r(mx0 - s), r(my1 + s)), "F.SilkS", 0.12))
-    fp.append(line((r(mx0 - s), r(my1 + s)), (r(mx1 + s), r(my1 + s)), "F.SilkS", 0.12))
-    fp.append(line((r(mx1 + s), r(my1 + s)), (r(mx1 + s), r(my0 + edge)), "F.SilkS", 0.12))
-    fp.append(poly([(-1.3, 0), (-1.8, -0.3), (-1.8, 0.3)], "F.SilkS", 0.12))
+    fp.append(line((r(mx0 - s), r(my0 + edge)), (r(mx0 - s), r(my1 + s)), "F.SilkS", SILK_W))
+    fp.append(line((r(mx0 - s), r(my1 + s)), (r(mx1 + s), r(my1 + s)), "F.SilkS", SILK_W))
+    fp.append(line((r(mx1 + s), r(my1 + s)), (r(mx1 + s), r(my0 + edge)), "F.SilkS", SILK_W))
+    fp.append(poly([(-1.3, 0), (-1.8, -0.3), (-1.8, 0.3)], "F.SilkS", SILK_W))
     for (x, y, rw, rh) in court:
         a, b = tr(x, y), tr(x + rw, y + rh)
         fp.append(rect(a, b, "F.CrtYd", 0.05))
@@ -559,12 +565,45 @@ def write_footprints(parts, pretty):
             (pretty / f"{fp['name']}.kicad_mod").write_text(sx.dumps(node) + "\n", encoding="utf-8",
                                                             newline="\n")
             continue
+        drop = set(fp.get("silk_drop", []))
         for lib_name in (fp["stock"] if isinstance(fp["stock"], list) else [fp["stock"]]):
             lib, name = lib_name.split(":")
             dst = pretty / f"{name}.kicad_mod"
             if not dst.exists():
-                dst.write_bytes((KFP / f"{lib}.pretty" / f"{name}.kicad_mod").read_bytes()
-                                .replace(b"\r\n", b"\n"))
+                text = (KFP / f"{lib}.pretty" / f"{name}.kicad_mod").read_bytes().decode("utf-8")
+                dst.write_bytes(adapt_stock(text.replace("\r\n", "\n"), name in drop).encode("utf-8"))
+            drop.discard(name)
+        if drop:
+            raise SystemExit(f"{part['id']}: silk_drop names {sorted(drop)}, which it does not use")
+
+
+def adapt_stock(text, drop):
+    """KiCad's stock footprint text with JLCPCB's legend limits (library.json `about`): each
+    F.SilkS shape's stroke widened to SILK_W, or every F.SilkS shape left out when `drop`.
+    Text-level, so the rest of the file stays KiCad's bytes; check_libraries.py compares it
+    with KiCad's file and measures the limits itself."""
+    lines, out, i, seen = text.split("\n"), [], 0, 0
+    while i < len(lines):
+        m = re.fullmatch(r"\t\((\w+)", lines[i])
+        if m and m.group(1) in SILK_SHAPES:
+            j = lines.index("\t)", i)
+            block = lines[i:j + 1]
+            if '\t\t(layer "F.SilkS")' in block:
+                seen += 1
+                if drop:
+                    i = j + 1
+                    continue
+                block = [re.sub(r"^(\t\t\t\(width )([0-9.]+)\)$",
+                                lambda w: w.group(1) + (f"{SILK_W:g}" if float(w.group(2)) < SILK_W
+                                                        else w.group(2)) + ")", ln) for ln in block]
+            out += block
+            i = j + 1
+            continue
+        out.append(lines[i])
+        i += 1
+    if drop and not seen:
+        raise SystemExit("silk_drop on a footprint without silkscreen")
+    return "\n".join(out)
 
 
 def write_tables(src):

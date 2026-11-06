@@ -1,4 +1,4 @@
-# Project libraries (Rev0.4, issue #6 P1)
+# Project libraries (Rev0.4, issue #6 P1, P5)
 
 The KiCad symbol and footprint library for every part in Rev0.4 §6.2. State: **WIP**. No
 land here has been soldered or seen in the JLCPCB placement preview.
@@ -7,7 +7,7 @@ land here has been soldered or seen in the JLCPCB placement preview.
 |---|---|---|
 | `library.json` | The parts register: one entry per symbol, with its pins and land facts and the datasheet page each was read from | hand (the evidence) |
 | `usb-power-hub.kicad_sym` | 32 symbols, flattened (no `extends`): one per part, and PWR_FLAG, because the project has no global symbol table (P2) | `make_libraries.py` |
-| `usb-power-hub.pretty/` | 28 footprints: 20 copies of KiCad 9.0.8 stock (its CRLF written as LF), 8 generated | `make_libraries.py` |
+| `usb-power-hub.pretty/` | 28 footprints: 20 copies of KiCad 9.0.8 stock (its CRLF written as LF, its silkscreen adapted, below), 8 generated | `make_libraries.py` |
 | `../source/fp-lib-table`, `../source/sym-lib-table` | the project's library tables (`${KIPRJMOD}/../libraries/...`) | `make_libraries.py` |
 
 Do not edit the `.kicad_sym` or `.pretty` by hand. Change `library.json` or the generator,
@@ -20,7 +20,7 @@ From the repository root, with KiCad's own Python:
 ```sh
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_libraries.py        # write + check
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/check_libraries.py       # check only
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_libraries.py  # 19 tests (a clean copy, 18 corruptions), about 45 s
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_libraries.py  # 26 tests (a clean copy, 25 corruptions), about 60 s
 ```
 
 `check_libraries.py` exits 0 only if every check passes. Its docstring lists what it checks
@@ -29,7 +29,12 @@ and what it cannot see. In short:
 - each symbol's pins against the datasheet pin names;
 - each footprint's pads against its symbol's pins;
 - each land against the datasheet's numbers in `land`;
-- stock copies byte for byte against KiCad's, its CRLF read as LF;
+- stock copies against KiCad's, its CRLF read as LF: byte for byte outside the F.SilkS
+  shapes, and each F.SilkS shape KiCad's with its stroke widened, or none for a `silk_drop`
+  footprint;
+- every F.SilkS stroke ≥ 0.15 mm and ≥ 0.15 mm from the footprint's own mask openings
+  (JLCPCB's legend limits, `library.json` `about`); `silk_drop` only on non-polar parts and
+  only on footprints the part uses;
 - no CR byte in any file here: the repository stores LF (`.gitattributes`), so the checked
   bytes are the ones a checkout holds;
 - Kelvin net ties against their force / sense pairs;

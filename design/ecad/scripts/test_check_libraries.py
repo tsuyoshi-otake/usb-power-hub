@@ -72,6 +72,11 @@ def edit_fp(lib, name, fn):
     p.write_text(after + "\n", encoding="utf-8", newline="\n")
 
 
+def silk(tree):
+    return [n for n in tree if isinstance(n, list) and n and
+            n[0] in ("fp_line", "fp_arc", "fp_circle", "fp_rect", "fp_poly") and sx.first(n, "layer")[1] == "F.SilkS"]
+
+
 def pad(tree, num):
     return next(n for n in sx.find(tree, "pad") if n[1] == num)
 
@@ -155,7 +160,8 @@ class CheckLibrariesFails(unittest.TestCase):
     def test_stock_copy_altered(self):
         def c(lib, src):
             edit_fp(lib, TC2030, lambda t: t.remove(pad(t, "6")))
-        self.assertFailsWith(run_check(c), "not a byte copy", "are not the symbol's pins")
+        self.assertFailsWith(run_check(c), f"differs from KiCad's {TC2030} outside its silkscreen",
+                             "are not the symbol's pins")
 
     def test_stock_copy_with_kicad_crlf(self):
         # KiCad's Windows install ships CRLF; the repository stores LF (.gitattributes), so a
@@ -165,8 +171,60 @@ class CheckLibrariesFails(unittest.TestCase):
             data = p.read_bytes()
             assert b"\r" not in data, "the copy already has CR bytes"
             p.write_bytes(data.replace(b"\n", b"\r\n"))
-        self.assertFailsWith(run_check(c), "FAIL line endings: SOT-23.kicad_mod has CR bytes",
-                             "not a byte copy of KiCad's Package_TO_SOT_SMD:SOT-23")
+        self.assertFailsWith(run_check(c), "FAIL line endings: SOT-23.kicad_mod has CR bytes")
+
+    # ---- silkscreen (P5) ------------------------------------------------------------------------
+    def test_silk_stroke_thin(self):
+        def c(lib, src):
+            def f(t):
+                sx.first(sx.first(silk(t)[0], "stroke"), "width")[1] = 0.12
+            edit_fp(lib, CH335F, f)
+        self.assertFailsWith(run_check(c), f"FAIL CH335F / {CH335F}: F.SilkS", "stroke 0.120 mm < 0.15")
+
+    def test_silk_on_pad(self):
+        def c(lib, src):
+            def f(t):
+                at = sx.first(pad(t, "1"), "at")
+                x, y = float(at[1]), float(at[2])
+                line = next(n for n in silk(t) if n[0] == "fp_line")
+                sx.first(line, "start")[1:3] = [round(x - 0.3, 3), y]
+                sx.first(line, "end")[1:3] = [round(x + 0.3, 3), y]
+            edit_fp(lib, CH335F, f)
+        self.assertFailsWith(run_check(c), f"FAIL CH335F / {CH335F}: F.SilkS", "within 0.15 mm of pad '1'")
+
+    def test_stock_silk_reshaped(self):
+        def c(lib, src):
+            def f(t):
+                sx.first(silk(t)[0], "start")[1] = 0.5
+            edit_fp(lib, "SOT-23", f)
+        self.assertFailsWith(run_check(c), "its F.SilkS shapes are not KiCad's SOT-23 shapes")
+
+    def test_stock_silk_narrower_than_kicad(self):
+        def c(lib, src):
+            def f(t):
+                sx.first(sx.first(silk(t)[0], "stroke"), "width")[1] = 0.1
+            edit_fp(lib, "SOT-23", f)
+        self.assertFailsWith(run_check(c), "its F.SilkS shapes are not KiCad's SOT-23 shapes",
+                             "stroke 0.100 mm < 0.15")
+
+    def test_silk_drop_on_polar_part(self):
+        def c(lib, src):
+            edit_register(lib, lambda parts: parts["2N7002"]["footprint"].__setitem__("silk_drop", ["SOT-23"]))
+        self.assertFailsWith(run_check(c), "FAIL 2N7002 / SOT-23: silk_drop on a part whose pins are not all",
+                             "FAIL 2N7002 / SOT-23: silk_drop footprint still has silkscreen")
+
+    def test_silk_drop_stale(self):
+        def c(lib, src):
+            edit_register(lib, lambda parts: parts["R"]["footprint"]["silk_drop"].append("R_1206_3216Metric"))
+        self.assertFailsWith(run_check(c),
+                             "FAIL R: silk_drop names footprints the part does not use: ['R_1206_3216Metric']")
+
+    def test_silk_drop_entry_removed(self):
+        """C_0402's silkscreen is left out of the file; without its silk_drop entry that is a
+        stock copy whose silk shapes are missing."""
+        def c(lib, src):
+            edit_register(lib, lambda parts: parts["C"]["footprint"].__setitem__("silk_drop", []))
+        self.assertFailsWith(run_check(c), "FAIL C / C_0402_1005Metric: its F.SilkS shapes are not KiCad's")
 
     def test_footprint_missing(self):
         def c(lib, src):
