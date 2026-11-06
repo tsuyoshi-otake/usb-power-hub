@@ -1003,3 +1003,17 @@ Section 13 (board) only once verified.
   - The open issues of CLAUDE.md §11 stand; the set is not orderable.
 - **Learning.** rules.md: "KiCad 9 silkscreen and manufacturing outputs".
 - **Commit.** `7fca00e`.
+
+## 2026-11-06 — #6 P6: EasyEDA import route researched, paused
+
+- **Symptom.** P6 needs EasyEDA, which is not installed, and the user's account.
+- **Findings** (EasyEDA Pro docs, read 2026-11-06):
+  - The KiCad import supports "KiCad versions below 10.0" from KiCad's project archive. It
+    rebuilds the copper pours, so the pours will differ.
+  - The desktop half-offline and full-offline modes need no login, but both need a free
+    activation file that is downloaded after registering.
+- **Decision.** Not taken: the user stopped before choosing among web editor in their Chrome,
+  desktop half-offline, or importing it themselves. The options are in issue #6, comment of
+  2026-11-06.
+- **Cleanup.** The other session's `freerouting.log` (105 MB) was deleted, with the user's OK.
+- **Learning.** None verified yet; a pour comparison after import is planned.
