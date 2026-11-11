@@ -9,15 +9,22 @@ orderable (CLAUDE.md 2, manufacturing/working/), and not a release. Every file i
 <Product>_<Board>_<Revision>_<Artifact> (CLAUDE.md 2):
 - _Gerber.zip: the Gerbers of the 4 copper layers, paste, silkscreen, mask and Edge.Cuts with
   Protel extensions, soldermask subtracted from the silkscreen, plus the Excellon drill
-  files (PTH and NPTH apart, mm, decimal, alternate oval mode, absolute origin) and their
-  Gerber X2 drill maps: JLCPCB's KiCad settings (help pages read 2026-11-06). Vias are
-  tented by the board's own setting.
+  files (PTH and NPTH apart, mm, decimal, alternate oval mode) and their Gerber X2 drill
+  maps: JLCPCB's KiCad settings (help pages read 2026-11-06), except the origin: the
+  Gerbers and the drills use the board's auxiliary origin, its lower-left corner, as the CPL
+  does. With the sheet's absolute origin JLCPCB's placement preview drew every part 50 mm
+  left of and 122 mm above the board (quote of 2026-11-11, issue #6). Vias are tented by the
+  board's own setting.
 - _BOM_JLCPCB.csv: Comment, Designator, Footprint, JLCPCB Part #: one row per LCSC part of
   every footprint with an LCSC field that is not excluded from the BOM, the machine-placed
-  parts (D13).
+  parts (D13). A part on two footprints is one row, with the first designator's Comment and
+  Footprint: JLCPCB's part mapping does not select two rows of one LCSC number.
 - _CPL_JLCPCB.csv: Designator, Mid X, Mid Y, Layer, Rotation for the same parts: the
   footprint origin in the board frame (lower-left corner, y up, mm), Top, KiCad's
-  orientation (counter-clockwise, degrees).
+  orientation plus the part's JLCPCB model rotation (counter-clockwise, degrees), which
+  design/ecad/jlcpcb_model_rotation.json holds: JLCPCB's models are not drawn at KiCad's
+  zero (the placement preview of 2026-11-11 showed the CH335F, the SOIC-8s, the SOT-23s and
+  the SOT-223 90 or 180 degrees off, issue #6).
 - _HandSolder.csv: the parts with an Akizuki field, which the user solders (D13, V-MFG-01);
   they are in neither the BOM nor the CPL.
 - _Schematic.pdf, _Assembly_Top.pdf (F.Fab and the outline with the title block: the
@@ -33,8 +40,11 @@ SHA-256 instead of a Git commit, and check_outputs.py fails a set older than its
 Then it runs check_outputs.py in a new process, unless --no-check.
 Exit status: 0 = written and checked; 1 = a check failed or an export failed.
 
-What it CANNOT see: whether JLCPCB reads the files as meant. The upload's DFM, part mapping
-and placement preview (CLAUDE.md 8, JLCPCB gate) are not run: no login or order (issue #6).
+What it CANNOT see: whether JLCPCB reads the files as meant. The upload of 2026-11-11 (DFM,
+part mapping, placement preview, quote; issue #6) is recorded in
+manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the Gerber zip, BOM and
+CPL it saw. This script does not read that file: a change to a source, to this script or to
+jlcpcb_model_rotation.json that changes one of those three hashes makes that review stale.
 """
 import csv
 import hashlib
@@ -53,6 +63,7 @@ import pcbnew
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 SRC = ROOT / "design" / "ecad" / "source"
+ROTATIONS = ROOT / "design" / "ecad" / "jlcpcb_model_rotation.json"
 OUT = ROOT / "manufacturing" / "working" / "rev0.4"
 NICK = "usb-power-hub"
 PREFIX = "UsbPowerHub_Main_Rev0.4"
@@ -118,20 +129,36 @@ def parts(board):
 
 
 def bom(machine):
+    """One row per LCSC part. Comment and Footprint come from the row's first designator (natural
+    order): JLCPCB's part mapping leaves two rows with one LCSC number unselected ("Multiple
+    lines in the BOM have been matched to the same part", quote of 2026-11-11, issue #6), so the
+    510 ohm 0805 of R14 and of the Kelvin shunts RS12/RS22 (C17734) share one row. The CPL names
+    no footprint, so the placement does not depend on the row's footprint name."""
     groups = {}
     for fp in machine:
-        key = (fp.GetValue(), fp.GetFPID().GetLibItemName().wx_str(), field(fp, "LCSC"))
-        groups.setdefault(key, []).append(fp.GetReference())
-    rows = [[v, ",".join(refs), name, lcsc] for (v, name, lcsc), refs in groups.items()]
+        groups.setdefault(field(fp, "LCSC"), []).append(fp)
+    rows = []
+    for lcsc, fps in groups.items():
+        first = fps[0]                       # `machine` is in natural designator order
+        rows.append([first.GetValue(), ",".join(f.GetReference() for f in fps),
+                     first.GetFPID().GetLibItemName().wx_str(), lcsc])
     return csv_bytes(BOM_HEAD, sorted(rows, key=lambda r: natural(r[1].split(",")[0])))
 
 
+def model_rotation():
+    """{LCSC: degrees} from design/ecad/jlcpcb_model_rotation.json (see its _doc)."""
+    table = json.loads(ROTATIONS.read_text(encoding="utf-8"))["parts"]
+    return {lcsc: float(v["add"]) for lcsc, v in table.items()}
+
+
 def cpl(machine):
+    """Rotation = the footprint's KiCad orientation plus its part's JLCPCB model rotation."""
+    add = model_rotation()
     rows = []
     for fp in machine:
         x = pcbnew.ToMM(fp.GetPosition().x) - ORIGIN[0]
         y = ORIGIN[1] - pcbnew.ToMM(fp.GetPosition().y)
-        rot = fp.GetOrientationDegrees() % 360
+        rot = (fp.GetOrientationDegrees() + add.get(field(fp, "LCSC"), 0.0)) % 360
         rows.append([fp.GetReference(), f"{x:.4f}", f"{y:.4f}", "Top", f"{rot:g}"])
     return csv_bytes(CPL_HEAD, rows)
 
@@ -145,8 +172,9 @@ def hand_list(hand):
 # ---- exports -----------------------------------------------------------------------------------
 def gerber_zip(pcb, tmp):
     g = tmp / "gerber"
-    status, log = cli("pcb", "export", "gerbers", "-l", LAYERS, "--subtract-soldermask", "-o", g, pcb)
-    status2, log2 = cli("pcb", "export", "drill", "--format", "excellon", "--drill-origin", "absolute",
+    status, log = cli("pcb", "export", "gerbers", "-l", LAYERS, "--subtract-soldermask", "--use-drill-file-origin",
+                        "-o", g, pcb)
+    status2, log2 = cli("pcb", "export", "drill", "--format", "excellon", "--drill-origin", "plot",
                         "--excellon-units", "mm", "--excellon-zeros-format", "decimal",
                         "--excellon-oval-format", "alternate", "--excellon-separate-th",
                         "--generate-map", "--map-format", "gerberx2", "-o", f"{g}/", pcb)
@@ -233,7 +261,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "| Impedance control | not ordered for the prototype (D27) |",
         f"| Finish | leaded HASL (D30; board setting `{finish}`) |",
         "| Mask, silkscreen colour | not decided; no decision records them |",
-        "| Vias | tented front and back (board setting) |",
+        "| Vias | tented front and back (board setting); JLCPCB's form offers Plugged, not Tented, for the 0.25 mm via class and quotes it at $0.00 (2026-11-11) |",
         "| Assembly side | Top only (REQ-MFG-01) |",
         f"| Machine-placed parts | {len(machine)} footprints, {len(lcsc)} LCSC parts; Extended: {', '.join(extended) or 'none'} (D29, D31) |",
         f"| Hand-soldered parts | {len(hand)} (`{PREFIX}_HandSolder.csv`), in neither BOM nor CPL |",
@@ -241,7 +269,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         f"| ERC | {count(erc, 'violations')} violations |",
         f"| DRC | {count(drc, 'violations')} violations, {count(drc, 'unconnected_items')} unconnected items, "
         f"{count(drc, 'schematic_parity')} schematic-parity items |",
-        "| JLCPCB DFM, part mapping, placement preview | not run: no upload (issue #6) |",
+        "| JLCPCB DFM, part mapping, placement preview | run once, 2026-11-11 (issue #6): `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`; it holds only while this set's Gerber, BOM and CPL SHA-256 equal the ones it records |",
         "| Firmware | none |",
         "| JLCPCB order number | none |",
         "| Approver, approval time | none: WIP |",
@@ -258,12 +286,14 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "",
         "## Residual risks",
         "",
-        "- The CPL's origin is the board's lower-left corner and its angles are KiCad's; JLCPCB's",
-        "  page states neither the origin nor its own model angles, which differ from a CPL angle",
-        "  (easy-stick 14.18). The placement preview is the evidence for every part's position,",
-        "  pin 1 and polarity (CLAUDE.md 4.2).",
-        "- JLCPCB's DFM check, part mapping and placement preview have not seen this set; they",
-        "  are the JLCPCB gate (CLAUDE.md 8), and an upload is the user's decision.",
+        "- The CPL's origin is the board's lower-left corner and its angles are KiCad's plus the",
+        "  JLCPCB model rotation of design/ecad/jlcpcb_model_rotation.json (easy-stick 14.18). The",
+        "  placement preview of 2026-11-11 was read for every oriented part class after both were",
+        "  corrected; JLCPCB checks the final placement again in its DFM Analysis 4-6 hours after",
+        "  an order. The review is manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md.",
+        "- JLCDFM's Danger items (0.25 mm via annular ring, THT-to-SMD distance, mask opening",
+        "  exposing a trace, silkscreen over a plugged via) are judged in that review; JLCPCB's own",
+        "  DFM at order time can differ.",
         "- No footprint is proven on a board or in the JLCPCB preview; no order-time stock check",
         "  has been done (CLAUDE.md 0).",
         "- The open issues of CLAUDE.md 11 stand; the set is not orderable until each is closed.",

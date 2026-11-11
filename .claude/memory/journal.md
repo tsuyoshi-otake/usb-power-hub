@@ -1096,3 +1096,58 @@ Section 13 (board) only once verified.
 - **Verification.** check_schematic.py: 3992 checks, 0 failed, after the edit.
 - **Learning.** Estimates for a rejected alternative go in the issue and the journal, not in
   the design document. The rule already stands in rules.md.
+
+## 2026-11-12 - #6 P6: the pre-order gate (JLCPCB DFM, part mapping, placement preview, quote), nothing ordered
+
+The user asked 「発注できる寸前まで頼むよ」 and signed in to JLCPCB and JLCDFM themselves. The task: run the
+JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubric:
+`.claude/goal-loop/pre-order/rubric.md` (not tracked). Evidence is outside the repository
+(`~/tmp/usb-power-hub/pre-order/`).
+
+### Three defects the gate found
+
+- **Symptom 1.** JLCPCB's part matching left BOM rows unselected. **Root cause.** P5 wrote one row per
+  (LCSC, Footprint); C17734 (510 Ω) has two footprints, and rows that share a code are not
+  auto-selected. **Fix.** One row per LCSC (40 rows), checked by `check_outputs.py`. **Verification.**
+  Part mapping 40 of 40, 0 substituted, after re-uploading. The merged row still needs a hand tick
+  after each *Process BOM & CPL*.
+- **Symptom 2.** In the placement viewer every part sat off the board. **Root cause.** The Gerber and
+  drill files carried KiCad's page origin; JLCPCB reads the CPL against the Gerber's origin. **Fix.**
+  Auxiliary origin at the board's lower-left in `make_outputs.py`; `check_outputs.py` requires Edge.Cuts
+  at (0, 0)-(W, H). **Verification.** The viewer; and 51,444 Gerber/drill coordinates of the old and
+  new zip differ by one constant, within 1 µm, nothing else (`gerber-translation-check.txt`). JLCDFM
+  had analysed the old zip, so its geometry results carry over by that comparison, not by a rerun.
+- **Symptom 3.** With the KiCad angle in the CPL, the model's pin 1 sat 90 or 180 degrees from the
+  board's pad 1 for 11 part classes. **Root cause.** The CPL angle is applied to JLCPCB's own model
+  (easy-stick 14.18); this is the lesson `CLAUDE.md` §4.2 already names, now measured here.
+  **Fix.** `design/ecad/jlcpcb_model_rotation.json`, per LCSC, read by the generator and the checker (a
+  dead entry fails). **Verification.** The viewer, class by class, after the corrected CPL was
+  uploaded (`JLCPCB_REVIEW.md` section 5). A first +180 on the LEDs was **wrong** (the anode went to
+  pad 1) and was removed after the viewer showed it; only the viewer decided it.
+
+### What the quote showed
+
+- **$81.85 without shipping** against the estimate's $53.77 (without its $7.23 shipping), a gap of
+  $28.08. The 0.25 mm via class alone adds $34.16 (a 4-Wire Kelvin Test and a minimum-via fee, added
+  by the form itself, which also offers Plugged instead of Tented); the estimate did not know. The
+  other lines net to -$6.08: component prices (-$6.85), small fees, and "Confirm Parts Placement"
+  left off (-$0.45). Shipping for the PCBA parcel (556.50 g) was not read: it is chosen in the cart.
+- **DFM.** JLCDFM's Danger items are the 0.25 mm vias at exactly its 0.1 mm annular-ring boundary,
+  through-hole-to-SMD distance (hand-soldered modules), 107 silkscreen/via pairs (vias plugged) and same-net
+  via-to-pad spacing (145 pairs, none on different nets). Not explained: mask opening exposing a trace
+  (4 Danger, 13 Warning), negative mask expansion (18), silkscreen to pad (2), fiducial (3), trace
+  spacing (25). They are in the manifest's open gates.
+
+### State at the end
+
+- `manufacturing/releases/rev0.4/r01/`: the ten candidate files, `JLCPCB_REVIEW.md`, `SOURCING_CHECK.md`
+  (PASS, 2026-11-12), `EASYEDA_IMPORT.md`, a `WIP` manifest and `SHA256SUMS.txt`. Not approved; no order
+  number. CLAUDE.md §0 and §12 are updated; the open gates have owners (manifest, "Open gates").
+- **EasyEDA import (D32): blocked.** EasyEDA Pro is signed out, and easyeda.com shows a terms modal. Both
+  are the user's to answer. The archive for the import is prepared (SHA-256 `ae06a4ac...e727`).
+- **Left in the user's JLCPCB account:** two auto-saved quote drafts (Projects > Quotes). The cart's one item
+  is the user's older easy-stick quote, untouched.
+- **Learning.** The first real upload found three defects that no local check could see, and a cost that
+  an estimate had not priced. A checker proves only what it looks at: `check_outputs.py` now also checks
+  the origin, the one-row-per-LCSC rule and the rotation table, each with a negative test.
+- **Commit.** The one that adds this entry and `manufacturing/releases/rev0.4/r01/`; base `d054edf`. Not pushed.

@@ -1,0 +1,16 @@
+{
+  "_doc": "Degrees, counter-clockwise, that make_outputs.py adds to a footprint's KiCad orientation to get the CPL's Rotation, per LCSC part. JLCPCB places each part with its own model, drawn at an orientation of its own that a CPL angle is measured from (easy-stick 14.18); the table is what the JLCPCB placement preview showed on 2026-11-11 (issue #6): with the KiCad angle alone the model's pin 1 / polarity mark sat 90 or 180 degrees from the board's pad 1. A part not listed has none (its model matched, or it is symmetrical: R, C, FB1, D5/D6; the LEDs D10-D13 matched: the viewer's + mark, the anode, sat on the board's pad 2 at the KiCad angle, and a +180 first tried for them put it on pad 1). The table is keyed by LCSC number, not by package: the model belongs to the part. check_outputs.py reads this file too; it fails an entry no BOM line uses. Each entry is confirmed only by the preview after the corrected CPL was uploaded (JLCPCB_REVIEW.md in the release candidate).",
+  "parts": {
+    "C5137013": {"add": 270, "part": "CH335F, QFN-28 (U6)", "seen": "model pin 1 on the bottom row's left end; the board's pin 1 is the top of the left column"},
+    "C97521": {"add": 270, "part": "W25Q128JVSIQ, SOIC-8 5.3 mm (U8)", "seen": "model leads on top and bottom, pin 1 bottom-left; the board's pads are in left and right columns, pin 1 top-left"},
+    "C7433": {"add": 270, "part": "OP07CDR, SOIC-8 (U10-U12, U20-U22)", "seen": "model leads on left and right, pin 1 bottom-right; the board's pads are in top and bottom rows, pin 1 bottom-left"},
+    "C7955": {"add": 270, "part": "LM393DR2G, SOIC-8 (U13, U23, U30)", "seen": "as C7433"},
+    "C15127": {"add": 180, "part": "AO3401A, SOT-23", "seen": "model pin 1 diagonally opposite the board's pin 1"},
+    "C8545": {"add": 180, "part": "2N7002, SOT-23", "seen": "model's two leads on the side where the board has one pad"},
+    "C20917": {"add": 180, "part": "AO3400A, SOT-23", "seen": "SOT-23 model, as C8545"},
+    "C8543": {"add": 180, "part": "S9012, SOT-23", "seen": "SOT-23 model, as C8545"},
+    "C32677": {"add": 180, "part": "PSM712-LF-T7, SOT-23", "seen": "SOT-23 model, as C8545"},
+    "C3113": {"add": 180, "part": "CJ431, SOT-23", "seen": "SOT-23 model, as C8545"},
+    "C6186": {"add": 180, "part": "AMS1117-3.3, SOT-223", "seen": "model pin 1 at the right-hand end, the board's at the left (three-lead side)"}
+  }
+}

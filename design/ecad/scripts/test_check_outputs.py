@@ -29,6 +29,7 @@ CHECK = HERE / "check_outputs.py"
 ROOT = HERE.parents[2]
 OUT = ROOT / "manufacturing" / "working" / "rev0.4"
 SRC = ROOT / "design" / "ecad" / "source"
+ROTATIONS = ROOT / "design" / "ecad" / "jlcpcb_model_rotation.json"
 PREFIX = "UsbPowerHub_Main_Rev0.4"
 ZIP = f"{PREFIX}_Gerber.zip"
 BOM = f"{PREFIX}_BOM_JLCPCB.csv"
@@ -89,11 +90,14 @@ def run_check(corrupt=None, sums=True):
         out, src = t / "rev0.4", t / "source"
         shutil.copytree(OUT, out)
         shutil.copytree(SRC, src)
+        table = t / ROTATIONS.name              # a corruption reaches it as src.parent / ROTATIONS.name
+        shutil.copy(ROTATIONS, table)
         if corrupt:
             corrupt(out, src)
         if sums:
             rehash(out)
-        r = subprocess.run([sys.executable, "-I", "-B", str(CHECK), "--out", str(out), "--src", str(src)],
+        r = subprocess.run([sys.executable, "-I", "-B", str(CHECK), "--out", str(out), "--src", str(src),
+                            "--rotations", str(table)],
                            capture_output=True, text=True, encoding="utf-8", timeout=600)
         return r.returncode, r.stdout + r.stderr
 
@@ -142,7 +146,7 @@ class CheckOutputsTest(unittest.TestCase):
 
     def test_outline_moved(self):
         self.assertFails(lambda o, s: edit_zip(o, f"{PREFIX}_Edge_Cuts.gm1",
-                                               lambda t: re.sub(r"X150000000Y", "X151000000Y", t)),
+                                               lambda t: re.sub(r"X100000000Y", "X101000000Y", t)),
                          f"FAIL {PREFIX}_Edge_Cuts.gm1: outline spans")
 
     def test_drill_hit_missing(self):
@@ -157,6 +161,12 @@ class CheckOutputsTest(unittest.TestCase):
     def test_bom_designator_dropped(self):
         self.assertFails(lambda o, s: edit(o / BOM, b'"C1,C3,', b'"C3,'),
                          "FAIL BOM: designators: extra [], missing ['C1']")
+
+    def test_lcsc_part_in_two_rows(self):
+        """C45783 split over two BOM rows: the designators are all there, but JLCPCB selects neither row."""
+        self.assertFails(lambda o, s: edit(o / BOM, b'"C1,C3,C7,C8"',
+                                           b'"C1","C_0805_2012Metric","C45783"\n"22u","C3,C7,C8"'),
+                         "FAIL BOM: an LCSC part in two rows")
 
     def test_hand_part_in_bom(self):
         def corrupt(o, s):
@@ -181,7 +191,18 @@ class CheckOutputsTest(unittest.TestCase):
 
     def test_cpl_rotation(self):
         self.assertFails(lambda o, s: edit(o / CPL, b'"55.8000","Top","180"', b'"55.8000","Top","90"'),
-                         "FAIL CPL C1: rotation 90.0, footprint 180")
+                         "FAIL CPL C1: rotation 90.0, expected 180 (footprint 180 + JLCPCB model 0)")
+
+    def test_cpl_model_rotation_missing(self):
+        """U6 (CH335F, C5137013) is placed at its KiCad angle 0 plus the model's 270."""
+        self.assertFails(lambda o, s: edit(o / CPL, b'"U6","94.0000","27.0000","Top","270"',
+                                           b'"U6","94.0000","27.0000","Top","0"'),
+                         "FAIL CPL U6: rotation 0.0, expected 270 (footprint 0 + JLCPCB model 270)")
+
+    def test_model_rotation_table_dead_entry(self):
+        self.assertFails(lambda o, s: edit(s.parent / ROTATIONS.name, b'"C6186": {"add": 180,',
+                                           b'"C9999999": {"add": 180,'),
+                         "FAIL model rotation table: entries no BOM line uses: ['C9999999']")
 
     def test_cpl_bottom(self):
         self.assertFails(lambda o, s: edit(o / CPL, b'"55.8000","Top"', b'"55.8000","Bottom"'),

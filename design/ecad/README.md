@@ -31,7 +31,7 @@ written and checked.
 | 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
 | 4 | `autoroute.py` | what `make_pcb.py --dsn` writes from the step-5 inputs | `routing/usb-power-hub.ses`, `routing/autoroute.json` | `make_pcb.py`, which refuses a session made from other input | — |
 | 5 | `make_pcb.py` | the schematic's exported netlist, `PLACEMENT_Rev0.4.md`, `ROUTING_Rev0.4.md`, the session, the footprints | `.kicad_pcb` | `make_project.py --check`, `check_pcb.py`, `check_routing.py` (each with DRC), `check_silk.py` | `test_check_pcb.py`, `test_check_routing.py`, `test_check_silk.py` |
-| 6 | `make_outputs.py` | the project in `source/` | `manufacturing/working/rev0.4/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
+| 6 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_rotation.json` | `manufacturing/working/rev0.4/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
 
 ```sh
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py
@@ -60,6 +60,15 @@ than checked out: the same sources give the same bytes, because creation dates a
 1980-01-01 and paths made relative. Its manifest records the SHA-256 of every source file
 instead of a Git commit, and `check_outputs.py` fails a set older than its sources. A
 release is copied to `manufacturing/releases/<rev>/<rNN>/` and tracked there (CLAUDE.md §2).
+
+The CPL's angles are KiCad's plus a per-LCSC rotation, `jlcpcb_model_rotation.json`, because
+JLCPCB applies a CPL angle to its own model of the part (easy-stick 14.18); `make_outputs.py`
+reads it and `check_outputs.py` fails an entry no BOM line uses. Gerber and drill files are
+written with the auxiliary origin at the board's lower-left corner, the CPL's origin. A new
+entry or a new part class is confirmed only in JLCPCB's placement preview, after the corrected
+CPL is uploaded; the first review is `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, and
+its candidate release is the first one under `manufacturing/releases/` (state `WIP`, not
+approved).
 
 The negative tests corrupt copies of the files in a temporary directory and expect the
 checker to name each fault; they never write to `source/`, `libraries/` or `manufacturing/`.

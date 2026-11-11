@@ -86,6 +86,27 @@ price), the PSM712 ($3.11), the AO3401A (14 per board, $3.08), the CH335F ($2.23
 22 µF capacitors ($2.21), the RP2040 ($2.18) and the OP07 ($1.34). The 0402 resistors cost
 cents in total.
 
+### The real quote, 2026-11-12 (issue #6)
+
+JLCPCB's quote for the actual files (5 boards, 2 assembled, Economic PCBA, leaded HASL) was
+**$81.85 without shipping**, against $53.77 for the same lines above (the estimate's $61.01
+less $7.23 shipping). The $28.08 difference:
+
+| Cause | USD |
+|---|---:|
+| The 0.25 mm via class adds "4-Wire Kelvin Test" $17.02 and "Min via hole size/diameter" $17.14; the estimate did not know | +34.16 |
+| Components at the quote's prices, 40 items: $20.47 against $27.32 | -6.85 |
+| "Nitrogen reflow soldering", not in the estimate | +0.86 |
+| SMT assembly $2.39 against $2.15 | +0.24 |
+| Setup, stencil, Extended fee: +$0.06, +$0.02, +$0.04 | +0.12 |
+| "Confirm Parts Placement" left off (the estimate budgeted it) | -0.45 |
+
+At 160 yen/USD the JLCPCB part is 13,096 yen without shipping; the total of this study, 17,456 yen,
+becomes about 21,950 yen if shipping stays at the estimate's $7.23. The shipping of the PCBA parcel
+(556.50 g on the quote page, against the 0.24 kg PCB-only parcel priced here) was not read: it is
+chosen in the cart. The line-by-line record is in
+`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, section 6.
+
 ## Akizuki (2 units, prices tax included)
 
 | Part | Code | Each | Qty | Yen |

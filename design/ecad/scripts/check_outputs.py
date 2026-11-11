@@ -16,17 +16,21 @@ script's own parsers, the board with pcbnew; nothing of make_outputs.py is impor
     SHA-256 of the file in --src now (a stale set fails), and every .kicad_sch of --src is
     listed; revision, stackup and finish as the board's.
  3. Gerber zip: one file per layer, with JLCPCB's Protel extension, millimetres, its X2
-    file function, the date fixed; Edge.Cuts spans the board's outline (100 x 72 mm at the
-    sheet's (50, 50)-(150, 122), y negated as Gerber's y points up); B.Paste has no object and B.SilkS no dark one (Top only).
+    file function, the date fixed; Edge.Cuts spans the board's outline (100 x 72 mm at
+    (0, 0)-(100, 72): the auxiliary origin is the board's lower-left corner, as the CPL's,
+    and y points up); B.Paste has no object and B.SilkS no dark one (Top only).
  4. Drill: PTH and NPTH Excellon in mm, each with its map; every hole of the board, counted
     by diameter, plated or not as the board has it (pads and vias).
- 5. BOM: JLCPCB's header; one row per LCSC part, Comment the footprints' Value and Footprint
-    their footprint (an LCSC part on two footprints takes two rows); the designators are exactly the footprints with an LCSC field that are
+ 5. BOM: JLCPCB's header; exactly one row per LCSC part (JLCPCB's part mapping selects neither
+    of two rows with one LCSC number), Comment and Footprint the row's first designator's Value
+    and footprint; the designators are exactly the footprints with an LCSC field that are
     not BOM-excluded; every part's Class is Basic, or Extended for C2040 (D29) or C5137013
     (D31) only (D22).
  6. CPL: JLCPCB's header; the BOM's designators; Mid X/Y the footprint's origin in the
     board frame (0.0001 mm), inside the outline and within MID_TOL (0.05 mm) of the centre of
-    its F.Fab body (a Kelvin land's sense pads make its pads' centre another point); Layer Top; Rotation the footprint's orientation.
+    its F.Fab body (a Kelvin land's sense pads make its pads' centre another point); Layer Top;
+    Rotation the footprint's orientation plus the part's entry in design/ecad/jlcpcb_model_rotation.json
+    (--rotations); every entry of that table is used by a BOM line and adds 90, 180 or 270.
  7. Hand list: exactly the footprints with an Akizuki field, none of them in the BOM or CPL.
  8. Documents: the schematic PDF has one page per sheet instance; the assembly PDF one page;
     each preview a PNG at least PREVIEW_MIN_W wide with the board's aspect (3 %); ERC and DRC reports with 0 violations, 0 unconnected
@@ -38,8 +42,9 @@ Exit status: 0 = every check passed; 1 = at least one failed. Each failure print
 
 What it CANNOT see:
 - whether JLCPCB reads the files as meant: its DFM, part mapping and placement preview are
-  the evidence (CLAUDE.md 8, JLCPCB gate), and the CPL's origin and angles stay unverified
-  until that preview (easy-stick 14.18).
+  the evidence (CLAUDE.md 8, JLCPCB gate). The upload of 2026-11-11 is recorded in
+  manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the three files it
+  saw; this checker does not read it, so it cannot tell a review that has gone stale.
 - Gerber geometry beyond the outline's extent and object counts: the copper is the board's
   because kicad-cli plotted it, and DRC (check_pcb.py) checks the board itself.
 - the content of the PDFs and renders beyond their page count and image size.
@@ -241,7 +246,7 @@ def check_gerber(rep, data, board):
             rep.check(dark > 0, name, "empty")
         if suffix.startswith("Edge_Cuts"):
             e = extent(text)
-            want_e = (ORIGIN[0], -ORIGIN[1], ORIGIN[0] + W, -(ORIGIN[1] - H))   # Gerber y points up
+            want_e = (0.0, 0.0, W, H)   # the auxiliary origin is the board's lower-left corner; y points up
             rep.check(e is not None and all(abs(a - b) <= 0.001 for a, b in zip(e, want_e)), name,
                       f"outline spans {e}, want {want_e}")
     holes = board_holes(board)
@@ -267,7 +272,7 @@ def fab_centre(fp):
     return frame(pcbnew.VECTOR2I((x0 + x1) // 2, (y0 + y1) // 2))
 
 
-def check_lists(rep, files, fps):
+def check_lists(rep, files, fps, rotations):
     bom = read_csv(rep, "BOM", files.get(f"{PREFIX}_BOM_JLCPCB.csv", b""), BOM_HEAD)
     cpl = read_csv(rep, "CPL", files.get(f"{PREFIX}_CPL_JLCPCB.csv", b""), CPL_HEAD)
     hand = read_csv(rep, "hand list", files.get(f"{PREFIX}_HandSolder.csv", b""), HAND_HEAD)
@@ -277,22 +282,28 @@ def check_lists(rep, files, fps):
     for row in bom:
         refs = row["Designator"].split(",")
         seen += refs
-        lines.append((row["JLCPCB Part #"], row["Footprint"]))
-        for ref in refs:
+        lines.append(row["JLCPCB Part #"])
+        for n, ref in enumerate(refs):
             fp = fps.get(ref)
             if not rep.check(fp is not None, "BOM", f"{ref} is not on the board"):
                 continue
             rep.check(field(fp, "LCSC") == row["JLCPCB Part #"], f"BOM {ref}",
                       f"JLCPCB Part # {row['JLCPCB Part #']}, footprint LCSC {field(fp, 'LCSC')}")
-            rep.check(fp.GetValue() == row["Comment"], f"BOM {ref}", f"Comment {row['Comment']!r}, Value {fp.GetValue()!r}")
-            name = fp.GetFPID().GetLibItemName().wx_str()
-            rep.check(name == row["Footprint"], f"BOM {ref}", f"Footprint {row['Footprint']}, board {name}")
+            if n == 0:                       # Comment and Footprint describe the row's first designator
+                rep.check(fp.GetValue() == row["Comment"], f"BOM {ref}", f"Comment {row['Comment']!r}, Value {fp.GetValue()!r}")
+                name = fp.GetFPID().GetLibItemName().wx_str()
+                rep.check(name == row["Footprint"], f"BOM {ref}", f"Footprint {row['Footprint']}, board {name}")
             cls = field(fp, "Class")
             lcsc = field(fp, "LCSC")
             ok = cls == "Basic" or (lcsc in EXTENDED and cls == f"Extended ({EXTENDED[lcsc]})")
             rep.check(ok, f"BOM {ref}", f"class {cls!r} for {lcsc}: Basic only, except C2040 (D29) and C5137013 (D31)")
     rep.check(len(seen) == len(set(seen)), "BOM", "a designator in two rows")
-    rep.check(len(lines) == len(set(lines)), "BOM", "an LCSC part with one footprint in two rows")
+    rep.check(len(lines) == len(set(lines)), "BOM",
+              "an LCSC part in two rows: JLCPCB's part mapping selects neither (quote of 2026-11-11)")
+    dead = sorted(set(rotations) - set(lines))
+    rep.check(not dead, "model rotation table", f"entries no BOM line uses: {dead}")
+    rep.check(all(v["add"] in (90, 180, 270) for v in rotations.values()), "model rotation table",
+              "an entry whose add is not 90, 180 or 270 (a part with none is left out)")
     rep.check(set(seen) == machine, "BOM", f"designators: extra {sorted(set(seen) - machine)}, "
               f"missing {sorted(machine - set(seen))}")
     cpl_refs = [r["Designator"] for r in cpl]
@@ -318,8 +329,11 @@ def check_lists(rep, files, fps):
             rep.check(abs(body[0] - fx) <= MID_TOL and abs(body[1] - fy) <= MID_TOL, f"CPL {ref}",
                       f"origin ({fx:.3f}, {fy:.3f}) is not its body's centre ({body[0]:.3f}, {body[1]:.3f})")
         rep.check(row["Layer"] == "Top", f"CPL {ref}", f"layer {row['Layer']}")
-        rep.check(abs(rot - fp.GetOrientationDegrees() % 360) < 1e-6, f"CPL {ref}",
-                  f"rotation {rot}, footprint {fp.GetOrientationDegrees() % 360:g}")
+        orient = fp.GetOrientationDegrees() % 360
+        add = float(rotations.get(field(fp, "LCSC"), {"add": 0})["add"])
+        want = (orient + add) % 360
+        rep.check(abs(rot - want) < 1e-6, f"CPL {ref}",
+                  f"rotation {rot}, expected {want:g} (footprint {orient:g} + JLCPCB model {add:g})")
     hrefs = [r["Designator"] for r in hand]
     rep.check(len(hrefs) == len(set(hrefs)) and set(hrefs) == handset, "hand list",
               f"extra {sorted(set(hrefs) - handset)}, missing {sorted(handset - set(hrefs))}")
@@ -401,6 +415,7 @@ def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=pathlib.Path, default=ROOT / "manufacturing" / "working" / "rev0.4")
     ap.add_argument("--src", type=pathlib.Path, default=ROOT / "design" / "ecad" / "source")
+    ap.add_argument("--rotations", type=pathlib.Path, default=ROOT / "design" / "ecad" / "jlcpcb_model_rotation.json")
     a = ap.parse_args(argv[1:])
     rep = Report()
     pcb = a.src / f"{NICK}.kicad_pcb"
@@ -412,7 +427,7 @@ def main(argv):
     check_manifest(rep, files.get("RELEASE_MANIFEST.md", b"").decode("utf-8", "replace"), a.src, board,
                    pcb.read_text(encoding="utf-8"))
     z = check_gerber(rep, files.get(f"{PREFIX}_Gerber.zip", b""), board)
-    check_lists(rep, files, fps)
+    check_lists(rep, files, fps, json.loads(a.rotations.read_text(encoding="utf-8"))["parts"])
     check_documents(rep, files, a.src)
     check_private(rep, files, z)
     if prl.exists() and not prl_before:

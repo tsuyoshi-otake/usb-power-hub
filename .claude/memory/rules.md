@@ -397,15 +397,24 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **The stackup's copper finish is not reachable from Python** (`m_FinishType` raised
   AttributeError, 9.0.8). Read `(copper_finish "HAL SnPb")` from the board text.
 - **In a Gerber, y points up, so the sheet's y is negated.** The 100 × 72 mm outline at the
-  sheet's (50, 50)–(150, 122) spans y −122..−50 in the Edge.Cuts file (#6 P5).
+  sheet's (50, 50)–(150, 122) spans y −122..−50 in the Edge.Cuts file (#6 P5). That is why the
+  set must be written with the auxiliary origin at the board's lower-left corner (#6 P6):
+  JLCPCB reads the CPL against the Gerber's own origin, and with the page origin every part sat
+  50 mm / 122 mm off the copper in the placement viewer. After the change the Edge.Cuts spans
+  (0, 0)–(100, 72) (`check_outputs.py`), and every Gerber and drill coordinate differs from the old
+  set by one constant (checked line by line, 51,444 coordinates, within 1 µm).
 - **`kicad-cli pcb render` writes a little under the size asked** (1568 × 1120 for
   1600 × 1152). Check a render's width floor and aspect, not its exact size.
 - **Fix creation dates to make an output set deterministic.** kicad-cli stamps Gerbers,
   drill files, PDFs and JSON reports with the run time; replacing each with a same-length
   1980-01-01 stamp and writing zip members with fixed times gave two runs identical
   SHA256SUMS (#6 P5).
-- **One LCSC part can sit on two footprints.** C17734 (510 Ω) is both R_0805 and the Kelvin
-  0805 shunt land, so a JLCPCB BOM row is unique per (LCSC, Footprint), not per LCSC (#6 P5).
+- **One LCSC part can sit on two footprints, but the BOM has one row per LCSC.** C17734 (510 Ω)
+  is both R_0805 and the Kelvin 0805 shunt land. P5 wrote one row per (LCSC, Footprint); JLCPCB's
+  part matching then left the rows that share a code unselected (#6 P6, 2026-11-11). Now the BOM
+  has one row per LCSC (40 rows) and the Footprint column shows the first footprint; the part
+  mapping reads 40 of 40. The merged C17734 row still had to be ticked by hand after each
+  *Process BOM & CPL*.
 - **`manufacturing/working/` is ignored by Git** (`.gitignore`: disposable candidates). A
   candidate set is regenerated, never committed; its manifest records the sources' SHA-256
   instead of a commit, and check_outputs.py fails a stale set.
@@ -413,6 +422,29 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   re-saved.** SaveBoard orders segments by UUID; P5's re-save made test_check_routing pick a
   0.7 mm stub ending on a via, whose B.Cu copy joined the via's net and was exempt (#6 P5).
   Pick by a property (the longest) and keep a copied track off the original's endpoints.
+
+## JLCPCB quote, placement preview and the account (#6 P6, 2026-11-11/12)
+
+- **A CPL angle is applied to JLCPCB's own model of the part** (easy-stick 14.18), so the KiCad
+  angle alone was wrong for 11 classes: U6, U8, the OP07 and LM393 SOICs by +270; the SOT-23 family,
+  the PSM712 and the SOT-223 by +180. The table is `design/ecad/jlcpcb_model_rotation.json`, keyed
+  by LCSC number (the model belongs to the part, not the footprint). In the viewer the magenta or
+  purple dot is the model's pin 1 and the LED's "+" is the anode. Confirm each class only after
+  the corrected CPL is uploaded: a first +180 on the LEDs put the anode on pad 1 and was removed.
+- **The 0.25 mm via class costs $34.16.** The form adds "4-Wire Kelvin Test" ($17.02) and
+  "Min via hole size/diameter" ($17.14) by itself, and offers Plugged, not Tented, at $0.00
+  (2026-11-12, 4 layers, 100 × 72 mm). An estimate that ignores the via class is $28 short.
+- **JLCDFM lists only the first 50 results of an item** and says via results of the annular-ring
+  check may be ignored. Judge an item by measuring the board (via-to-pad pairs by net, silkscreen
+  against holes), not by the 50 rows. Keep a note of what stays unexplained.
+- **Uploading to JLCPCB creates auto-saved drafts** under My Account > Projects > **Quotes**; the
+  pcbFileNo in the URL is account data and does not go into the repository. Tell the user the
+  drafts exist and how to delete them ("..." > Delete). BOM upload, JLCDFM and EasyEDA Pro's
+  Import KiCad all need the user's own sign-in; EasyEDA also shows a terms modal on easyeda.com,
+  which only the user answers.
+- **Browser evidence:** `computer screenshot` keeps nothing unless `save_to_disk` is true; a
+  large `zoom` region can time out (take a plain scaled screenshot instead). Screenshots can show
+  account details, so they live outside the repository.
 
 ## Delegated verifiers
 
