@@ -1043,9 +1043,33 @@ lockstep with a stretched sample phase.
 the thinnest stock of any part (41 at Akizuki). The RP2040 itself, its flash, crystal and
 passives are JLCPCB parts at a fraction of that, and one Extended feeder fee
 (`design/experiments/cost-estimate/`). The RP2350A was reviewed for issue #3 as well and
-rejected: its on-chip core regulator needs a shielded 3.3 µH inductor, which no Basic part
-provides (the recommended one, C42411119, is Extended with 1 in stock), and no Basic or
-Akizuki regulator makes an external 1.1 V instead. It would need at least two Extended parts.
+rejected on 2026-11-04: its on-chip core regulator needs a shielded 3.3 µH inductor, which no
+Basic part provides (the recommended one, C42411119, was Extended with 1 in stock), and no
+Basic or Akizuki regulator made an external 1.1 V instead. It would have needed at least two
+Extended parts.
+
+**Re-reviewed on 2026-11-11, and D29 kept (the user's choice).** The user asked whether
+Akizuki's new g129527, a Torex XC6221B111NR-G (1.1 V LDO, SSOT-24, ¥50), changed this
+(「設計を見直してほしい。… これとか良くない」), and chose 「RP2040 のまま (推奨)」. Both 2026-11-04
+reasons had changed: that LDO exists, and C42411119 had 738 in stock. Neither makes a move
+to an RP2350 pay for itself here:
+
+- Nothing in `requirements/product.md` needs an RP2350.
+- The LDO's data (Torex JTR03028-016a) puts V<sub>OUT</sub> at 1.080–1.120 V (±20 mV at
+  10 mA), with load regulation up to 40 mV. Its worst case, 1.040 V, is 10 mV under the
+  RP2350's 1.05 V DVDD minimum. The typical case, 1.090 V, is inside it. Only a built board
+  would settle the worst case.
+- The RP2350's core would draw about 35–40 mA from J1 through an LDO, against at most
+  16.6 mA for the RP2040. That uses an assumed 80–90 % efficiency for the on-chip switcher
+  behind hello_usb's 14.7 mA at 3.3 V, so it is an estimate. It would reopen D26's
+  bMaxPower 200 mA.
+- The saving is 2.09 USD per board at JLCPCB's 1–9 tier (2026-11-11): the RP2040 and U8,
+  1.0854 + 2.2574 USD, against the RP2354A alone, 1.2554 USD, whose 2 MB flash sits in the
+  package. The LDO (¥50) and its 4.7 µF output capacitor come out of that, and the SSOT-24
+  part would be hand-soldered. The routed board (P4) and its checks would be redone.
+
+The re-review is recorded in `.claude/memory/journal.md` (2026-11-11). It changes no
+decision, so it has no D number.
 
 **D31 replaced the hub module with the bare chip.** The module (AE-QFN28-DIP(CH335F),
 Akizuki g129556, ¥420) was 38.5 × 10.2 mm of hand-soldered DIP30 on headers, with no

@@ -1063,3 +1063,22 @@ Section 13 (board) only once verified.
 - **Learning.** rules.md: "Decision records" (a catalogue or stock reason expires) and
   "Akizuki" (read a tolerance from the datasheet's order code).
 - **Commit.** This journal entry and the rules.md entries.
+
+## 2026-11-11 - #3 revisited: decision, RP2040 kept (D29 stands)
+
+- **Decision.** The user chose 「RP2040 のまま (推奨)」 from three options: keep the RP2040;
+  RP2354A with the XC6221 LDO (hand-soldered); RP2354A with the on-chip regulator and
+  C42411119 as a third Extended part.
+- **Fix.** Rev0.4 §9 no longer says the RP2350A cannot be powered from Akizuki or Basic parts.
+  It dates the 2026-11-04 rejection and adds the re-review: nothing in product.md needs an
+  RP2350; the LDO's worst case, 1.040 V, is 10 mV under DVDD's 1.05 V minimum; the core would
+  draw about 35–40 mA from J1 (an estimate) and reopen D26; the saving is 2.09 USD per board
+  before the LDO. No D number, because no decision changed.
+- **Correction.** The option text shown to the user said "about 4 USD for 2 boards". That is
+  2 × 2.09 USD before the LDO (¥50) and its capacitor; the net saving is lower. §9 states the
+  gross figure and says what comes out of it.
+- **Verification.** `check_schematic.py` after the edit: 3992 checks, 0 failed. Only §9's
+  prose changed; `git status` showed that one file.
+- **Residual risk.** None for the board: it is unchanged. Reopen if V-HOST-01 shows J1 short of
+  current, or if the RP2040's supply (Extended C2040, 84,031 in stock) changes.
+- **Commit.** This entry and the §9 edit; `949d944` and this commit are not pushed.
