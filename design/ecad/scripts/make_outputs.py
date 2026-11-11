@@ -75,7 +75,7 @@ FIXED_ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 BOM_HEAD = ["Comment", "Designator", "Footprint", "JLCPCB Part #"]
 CPL_HEAD = ["Designator", "Mid X", "Mid Y", "Layer", "Rotation"]
 HAND_HEAD = ["Designator", "Qty", "Manufacturer", "MPN", "Akizuki", "Class", "Footprint"]
-SOURCES = [f"design/ecad/source/{NICK}.kicad_pcb", f"design/ecad/source/{NICK}.kicad_pro"]
+SOURCES = [f"design/ecad/source/{NICK}.{ext}" for ext in ("kicad_pcb", "kicad_pro", "kicad_dru")]
 DATES = [
     (re.compile(rb"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d\d:\d\d"), b"1980-01-01T00:00:00+00:00"),
     (re.compile(rb"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d{4}"), b"1980-01-01T00:00:00+0000"),
@@ -261,7 +261,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "| Impedance control | not ordered for the prototype (D27) |",
         f"| Finish | leaded HASL (D30; board setting `{finish}`) |",
         "| Mask, silkscreen colour | not decided; no decision records them |",
-        "| Vias | tented front and back (board setting); JLCPCB's form offers Plugged, not Tented, for the 0.25 mm via class and quotes it at $0.00 (2026-11-11) |",
+        "| Vias | 0.45 mm copper, 0.30 mm drill: JLCPCB's standard class \"0.3mm/(0.4/0.45mm)\" (issue #8); tented front and back (board setting); JLCPCB's form offers Plugged, not Tented, at $0.00 for this board (2026-11-12) |",
         "| Assembly side | Top only (REQ-MFG-01) |",
         f"| Machine-placed parts | {len(machine)} footprints, {len(lcsc)} LCSC parts; Extended: {', '.join(extended) or 'none'} (D29, D31) |",
         f"| Hand-soldered parts | {len(hand)} (`{PREFIX}_HandSolder.csv`), in neither BOM nor CPL |",
@@ -291,9 +291,10 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "  placement preview of 2026-11-11 was read for every oriented part class after both were",
         "  corrected; JLCPCB checks the final placement again in its DFM Analysis 4-6 hours after",
         "  an order. The review is manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md.",
-        "- JLCDFM's Danger items (0.25 mm via annular ring, THT-to-SMD distance, mask opening",
-        "  exposing a trace, silkscreen over a plugged via) are judged in that review; JLCPCB's own",
-        "  DFM at order time can differ.",
+        "- JLCDFM's Danger items of r01 (via annular ring, THT-to-SMD distance, mask opening",
+        "  exposing a trace, silkscreen over a plugged via) are judged in that review. It ran on the",
+        "  0.25 mm via drill; the 0.30 mm drill (issue #8) leaves a 0.075 mm via ring, which JLCDFM",
+        "  has not seen. JLCPCB's own DFM at order time can differ.",
         "- No footprint is proven on a board or in the JLCPCB preview; no order-time stock check",
         "  has been done (CLAUDE.md 0).",
         "- The open issues of CLAUDE.md 11 stand; the set is not orderable until each is closed.",

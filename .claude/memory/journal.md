@@ -1152,3 +1152,43 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   an estimate had not priced. A checker proves only what it looks at: `check_outputs.py` now also checks
   the origin, the one-row-per-LCSC rule and the rotation table, each with a negative test.
 - **Commit.** The one that adds this entry and `manufacturing/releases/rev0.4/r01/`; base `d054edf`. Not pushed.
+
+## 2026-11-12 - #8 step 1: vias drilled at 0.30 mm, release candidate r02, the $34.16 via-class fee removed
+
+- **Symptom.** r01's quote was $81.85 without shipping; $34.16 of it was the 0.25 mm via class, which
+  makes JLCPCB's form add "4-Wire Kelvin Test" ($17.02) and "Min via hole size/diameter" ($17.14).
+  The user asked to lower the manufacturing cost (「製造コストを下げて」, then 「試して」).
+- **Root cause.** The design rules set the via at 0.45/0.25 mm. JLCPCB's standard class is
+  "0.3mm/(0.4/0.45mm)"; a 0.25 mm hole moves the order into the dearer class.
+- **Fix.** `make_project.py`: via drill 0.30 for both net classes and the board minimum, and a new
+  `usb-power-hub.kicad_dru` with JLCPCB's hole figures (via hole to copper 0.20, via to via 0.20,
+  PTH hole to copper 0.28, PTH ring 0.15, pad hole to pad hole 0.45; pcb-capabilities read 2026-11-12).
+  The board minimums for hole clearance and hole-to-hole stay 0.25, because KiCad's DSN export sizes
+  NPTH keepouts with min_hole_clearance (a first try at 0.20 changed the router input). `route.py`'s
+  GND fanout keeps 0.20 mm to another via's hole and 0.25 mm to a pad's hole, from `make_pcb.py`.
+- **Verification.**
+  - Router input equal to the old one except the via's name (`450:250` → `450:300`); the 17-minute
+    Freerouting run returned the old session with that name replaced (56 passes).
+  - Board against `df5df08`: 2206 tracks, 356 via positions and pads, 300 footprints identical;
+    holes now ≥ 0.30 mm (334 × 0.45/0.30, 22 × 0.60/0.30).
+  - Gerbers against r01: every member identical except the PTH drill and map and the two poured layers
+    (B.Cu, In2), whose difference is slivers under 6 µm wide (a 3 µm erosion leaves nothing). Refilling
+    the old board reproduced its own fill, so the slivers come from the drill. BOM, CPL, ERC, DRC,
+    schematic and assembly PDF byte-identical.
+  - Checks: make_project, check_pcb (12694), check_routing with DRC (3945), check_silk (2522),
+    check_outputs (2853), all PASS. Tests: test_make_project 16, test_check_routing 19 (new: 0.25 mm via
+    drill, PTH ring below 0.15, via holes 0.15 apart, each FAILs DRC by name), test_check_pcb 24,
+    test_check_silk 27, test_check_outputs 26, all OK.
+  - JLCPCB: r02's Gerber uploaded to the quote form (03:38 JST): the form selected 0.3mm/(0.4/0.45mm),
+    PCB $8.00, no Kelvin or minimum-via line, FR4 TG135 not forced to Tg155; with the stackup named, still
+    $8.00. With r01's PCBA lines (identical BOM/CPL) the total is $47.69, and 16,482 yen for 2 units with
+    the Akizuki parts and OCS Express (was 21,950 yen).
+- **Changed the rubric once, openly.** C2 asked for byte-identical Gerbers; the zone-fill slivers made
+  that the wrong test, so C2 now asks for item identity plus the 3 µm erosion (rubric text says why).
+- **Decision recorded, reversible by the user.** r02 stays Rev0.4: no Rev0.4 board exists, and a new
+  revision would change the silkscreen legend and so the copper identity. r02 supersedes r01.
+- **Open.** JLCDFM has not run on r02 (the via ring is now 0.075 mm; needs the user's sign-in). One more
+  auto-saved quote draft is in the user's JLCPCB account.
+- **Learning.** In KiCad, a board minimum feeds the router export, so per-type figures belong in custom
+  rules; and a drill change moves the zone fill by microns, so copper identity is proven item by item.
+- **Commit.** The one that adds this entry and `manufacturing/releases/rev0.4/r02/`; base `df5df08`. Not pushed.

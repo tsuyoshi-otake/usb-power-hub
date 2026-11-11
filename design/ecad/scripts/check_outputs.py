@@ -155,7 +155,7 @@ def check_manifest(rep, text, src, board, pcb_text):
               f"finish: board {m and m.group(1)!r}, want leaded HASL (D30)")
     listed = dict(re.findall(r"^\| `(design/ecad/source/[^`]+)` \| `([0-9a-f]{64})` \|$", text, re.M))
     want = {f"design/ecad/source/{p.name}" for p in src.glob("*.kicad_sch")} | \
-           {f"design/ecad/source/{NICK}.kicad_pcb", f"design/ecad/source/{NICK}.kicad_pro"}
+           {f"design/ecad/source/{NICK}.{ext}" for ext in ("kicad_pcb", "kicad_pro", "kicad_dru")}
     rep.check(set(listed) == want, who, f"sources listed {sorted(listed)}, want {sorted(want)}")
     for rel, digest in listed.items():
         p = src / pathlib.PurePosixPath(rel).name

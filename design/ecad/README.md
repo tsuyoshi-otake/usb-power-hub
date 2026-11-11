@@ -11,7 +11,7 @@ not to edit.
 
 | Path | Holds |
 |---|---|
-| `source/` | The KiCad project: `usb-power-hub.kicad_pro` (rules, net classes), the root sheet and six sub-sheets, `usb-power-hub.kicad_pcb` (stackup, outline, placed footprints). |
+| `source/` | The KiCad project: `usb-power-hub.kicad_pro` (rules, net classes), `usb-power-hub.kicad_dru` (JLCPCB's hole figures for vias and PTH pads as custom DRC rules, issue #8), the root sheet and six sub-sheets, `usb-power-hub.kicad_pcb` (stackup, outline, placed footprints). |
 | `libraries/` | The project symbols and footprints and `library.json`, the datasheet facts they are checked against (its README). |
 | `PLACEMENT_Rev0.4.md` | Where every part sits on the board, and why (P3), and its silkscreen labels: text, position, size, stroke and leader (P5). |
 | `ROUTING_Rev0.4.md` | The plane, the hand-drawn tracks (USB pairs, Kelvin taps, power trunks), the zones, the router's classes, keepouts, layer preferences and costs, the patch drawn after the router, and why (P4). |
@@ -26,7 +26,7 @@ written and checked.
 
 | Step | Script | Reads | Writes | Checked by | Negative tests |
 |---|---|---|---|---|---|
-| 1 | `make_project.py` | `design/experiments/stackup-impedance/stackups.json` | `.kicad_pro`, a bare `.kicad_pcb` | `make_project.py --check` | `test_make_project.py` |
+| 1 | `make_project.py` | `design/experiments/stackup-impedance/stackups.json` | `.kicad_pro`, `.kicad_dru`, a bare `.kicad_pcb` | `make_project.py --check` | `test_make_project.py` |
 | 2 | `make_libraries.py` | `libraries/library.json` | `libraries/usb-power-hub.kicad_sym`, `usb-power-hub.pretty/` | `check_libraries.py` | `test_check_libraries.py` |
 | 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
 | 4 | `autoroute.py` | what `make_pcb.py --dsn` writes from the step-5 inputs | `routing/usb-power-hub.ses`, `routing/autoroute.json` | `make_pcb.py`, which refuses a session made from other input | — |
@@ -68,7 +68,8 @@ written with the auxiliary origin at the board's lower-left corner, the CPL's or
 entry or a new part class is confirmed only in JLCPCB's placement preview, after the corrected
 CPL is uploaded; the first review is `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, and
 its candidate release is the first one under `manufacturing/releases/` (state `WIP`, not
-approved).
+approved). `r02` beside it is the same copper with every via drilled at 0.30 mm, JLCPCB's
+standard via class (issue #8); its `JLCPCB_REVIEW.md` records only what changed.
 
 The negative tests corrupt copies of the files in a temporary directory and expect the
 checker to name each fault; they never write to `source/`, `libraries/` or `manufacturing/`.

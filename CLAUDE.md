@@ -59,7 +59,10 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > the blocked EasyEDA import (`EASYEDA_IMPORT.md`, D32). The gate found three defects, now
 > fixed in the generator: BOM rows sharing an LCSC code, the Gerber origin against the CPL's,
 > and the JLCPCB model rotation (`design/ecad/jlcpcb_model_rotation.json`). It also showed
-> that the 0.25 mm via class adds $34.16 (a user decision). `design/ecad/README.md` gives the order to run the generators in. The project
+> that the 0.25 mm via class adds $34.16. Release candidate r02 (issue #8, 2026-11-12, `WIP`) drills
+> every via at 0.30 mm, JLCPCB's standard class, with the copper, BOM and CPL of r01. JLCPCB's form
+> prices its Gerber without those fees: $47.69 without shipping. r02 supersedes r01, and JLCDFM has
+> not run on it. `design/ecad/README.md` gives the order to run the generators in. The project
 > library exists (P1): a symbol and a footprint for every Rev0.4 part in
 > `design/ecad/libraries/`, each land measured by `check_libraries.py` against the
 > datasheet numbers recorded in `library.json`. Candidate parts have been looked up in the JLCPCB
@@ -360,7 +363,7 @@ current, impedance, creepage, or thermal calculation:
 | Trace spacing | ≥ 0.15 mm |
 | USB 2.0 differential | 90 Ω ±10 %: W 0.31 / S 0.15 mm on L1 over L2 of JLC04161H-7628 (D27; model 90.4 Ω, provisional until JLCPCB's differential calc is rerun) |
 | VBUS trunk | sized for target current + margin; see OI-4 |
-| Via diameter / drill | 0.45 / 0.25 mm (0.60 / 0.30 mm where space allows) |
+| Via diameter / drill | 0.45 / 0.30 mm (0.60 / 0.30 mm where space allows): JLCPCB's standard via class "0.3mm/(0.4/0.45mm)". A 0.25 mm drill puts the order in the "0.25mm/(0.35/0.4mm)" class, which adds a 4-Wire Kelvin Test and a minimum-via fee ($34.16 on r01's quote, issue #8) |
 | Copper to routed edge | ≥ 0.30 mm |
 | Silkscreen text height | ≥ 1.0 mm Latin (see Section 6) |
 | Silkscreen stroke | ≥ 0.15 mm |
@@ -709,9 +712,11 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 ## 12. Pre-Order Checklist
 
 Status on 2026-11-12 (issue #6, the pre-order work): `[x]` = done, with the evidence named;
-`[ ]` = not done, with the owner. The candidate release is `manufacturing/releases/rev0.4/r01/`
-(state `WIP`; nothing ordered, nothing paid). The `[x]` items hold for that set only: any regenerated
-file needs them again.
+`[ ]` = not done, with the owner. The candidate release is `manufacturing/releases/rev0.4/r02/`
+(state `WIP`; nothing ordered, nothing paid), which supersedes r01 (issue #8: the vias drilled at
+0.30 mm, the copper, BOM and CPL unchanged). Evidence named for r01 holds for r02 where its manifest
+says the files are byte-identical (F_Cu, F_Mask, BOM, CPL, ERC, DRC). The `[x]` items hold for that set
+only: any regenerated file needs them again.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
       `WIP`; the user approves.*
@@ -750,15 +755,16 @@ file needs them again.
       the JLCPCB placement preview. *`r01/JLCPCB_REVIEW.md` section 5, every machine-placed class. The
       USB-C connectors are hand-soldered modules and are not in the preview.*
 - [ ] Enclosure fit verified against a real USB-C cable, not a drawing. *Not done (user).*
-- [x] Gerber, BOM, CPL, source, manifest, and checksums share one revision. *`r01`:
-      `sha256sum -c SHA256SUMS.txt`; the Gerber, BOM and CPL equal a fresh `make_outputs.py`.*
+- [x] Gerber, BOM, CPL, source, manifest, and checksums share one revision. *`r02`:
+      `sha256sum -c SHA256SUMS.txt`; its ten files equal a fresh `make_outputs.py`.*
 - [ ] JLCPCB DFM, part mapping, and placement preview accepted. *Reviewed, not accepted: part mapping is
       40 of 40; the DFM has items nobody explained (mask opening exposing a trace, negative mask
-      expansion, fiducial); the user accepts.*
+      expansion, fiducial); JLCDFM has not run on r02's 0.30 mm drill; the user accepts.*
 - [ ] Prototype or first-article evidence attached. *Nothing is built.*
-- [ ] Final landed cost, shipping, and lead time reviewed. *Half: $81.85 without shipping, PCB 3 days and
-      assembly 3-4 days; shipping for the 0.24 kg PCB-only parcel is $7.23 (OCS Express) to $17.67 (DHL, the
-      default); the assembled parcel is priced only in the cart (user).*
+- [ ] Final landed cost, shipping, and lead time reviewed. *Half: $47.69 without shipping for r02 (r01:
+      $81.85; `r02/JLCPCB_REVIEW.md`), PCB 3 days and assembly 3-4 days; shipping for the 0.24 kg PCB-only
+      parcel is $7.23 (OCS Express) to $17.67 (DHL, the default); the assembled parcel is priced only in the
+      cart (user).*
 - [ ] **User approval obtained before order submission or payment.**
 
 ---

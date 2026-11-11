@@ -6,7 +6,7 @@ design/ecad/source:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_make_project.py
 
-Each test copies the two source files into a temporary directory, corrupts one aspect
+Each test copies the three source files into a temporary directory, corrupts one aspect
 and runs `make_project.py --check DIR` in a new process, because pcbnew caches a loaded
 project within a process. The unchanged copy must pass; every corruption must fail and be
 named in the output. The source files themselves are never modified.
@@ -23,15 +23,19 @@ HERE = pathlib.Path(__file__).resolve().parent
 SCRIPT = HERE / "make_project.py"
 SOURCE = HERE.parents[0] / "source"
 NAME = "usb-power-hub"
-EXTS = (".kicad_pcb", ".kicad_pro")
+EXTS = (".kicad_pcb", ".kicad_pro", ".kicad_dru")
 
 
-def run_check(edit_pcb=None, edit_pro=None):
-    """Copy, corrupt, check. Returns (exit status, output)."""
+def run_check(edit_pcb=None, edit_pro=None, edit_dru=None):
+    """Copy, corrupt, check. Returns (exit status, output).
+
+    edit_dru(path): corrupt or delete the copied custom-rule file."""
     with tempfile.TemporaryDirectory() as tmp:
         d = pathlib.Path(tmp)
         for ext in EXTS:
             shutil.copyfile(SOURCE / f"{NAME}{ext}", d / f"{NAME}{ext}")
+        if edit_dru:
+            edit_dru(d / f"{NAME}.kicad_dru")
         if edit_pcb:
             p = d / f"{NAME}.kicad_pcb"
             text = p.read_text(encoding="utf-8")
@@ -69,6 +73,31 @@ class CheckTest(unittest.TestCase):
         def edit(pro):
             pro["board"]["design_settings"]["rules"]["min_clearance"] = 0.10
         self.assertFailsWith(run_check(edit_pro=edit), "m_MinClearance", "rule min_clearance")
+
+    def test_via_drill_back_to_025(self):
+        def edit(pro):
+            pro["board"]["design_settings"]["rules"]["min_through_hole_diameter"] = 0.25
+            classes(pro)["Default"]["via_drill"] = 0.25
+        self.assertFailsWith(run_check(edit_pro=edit), "m_MinThroughDrill", "Default.via_drill")
+
+    def test_hole_clearance_rule(self):
+        def edit(pro):
+            pro["board"]["design_settings"]["rules"]["min_hole_clearance"] = 0.20
+        self.assertFailsWith(run_check(edit_pro=edit), "m_HoleClearance", "rule min_hole_clearance")
+
+    def test_hole_to_hole_rule(self):
+        def edit(pro):
+            pro["board"]["design_settings"]["rules"]["min_hole_to_hole"] = 0.15
+        self.assertFailsWith(run_check(edit_pro=edit), "m_HoleToHoleMin")
+
+    def test_pth_rules_missing(self):
+        self.assertFailsWith(run_check(edit_dru=lambda p: p.unlink()), "is not the rule set HOLE_RULES")
+
+    def test_pth_rule_loosened(self):
+        def edit(p):
+            p.write_text(p.read_text(encoding="utf-8").replace("(min 0.28mm)", "(min 0.20mm)"),
+                         encoding="utf-8", newline="\n")
+        self.assertFailsWith(run_check(edit_dru=edit), "is not the rule set HOLE_RULES")
 
     def test_edge_clearance_rule(self):
         def edit(pro):

@@ -154,36 +154,36 @@ left open in a trial: drawn here, they are fixed before it starts.
 | USB_A_P | F.Cu | 0.20 | U6.9 93.2,24.2 92.77,23.77 92.6,23.77 | U6 lead-in |
 | USB_A_N | F.Cu | 0.31 | 92.6,24.23 90.805,24.23 90.17,23.595 90.17,18.495 89.805,18.13 23.8,18.13 23.6,18.33 | coupled, then to the crossing via |
 | USB_A_P | F.Cu | 0.31 | 92.6,23.77 90.995,23.77 90.63,23.405 90.63,18.305 89.995,17.67 23.8,17.67 | coupled |
-| USB_A_N | via | 0.45/0.25 | 23.6,18.33 | the crossing |
+| USB_A_N | via | 0.45/0.30 | 23.6,18.33 | the crossing |
 | USB_A_N | B.Cu | 0.31 | 23.6,18.33 22.58,17.31 J2.2 | under P to J2 D− |
 | USB_A_P | F.Cu | 0.31 | 23.8,17.67 22.76,17.67 20.04,14.95 J2.3 | to J2 D+, diagonal to match N (skew) |
 | USB_B_N | F.Cu | 0.20 | U6.13 94.8,24.2 95.23,23.77 95.4,23.77 | U6 lead-in |
 | USB_B_P | F.Cu | 0.20 | U6.14 95.2,24.45 95.4,24.23 | U6 lead-in |
 | USB_B_N | F.Cu | 0.31 | 95.4,23.77 96.405,23.77 96.77,23.405 96.77,16.545 96.405,16.18 57.8,16.18 57.6,16.38 | coupled, then to the crossing via |
 | USB_B_P | F.Cu | 0.31 | 95.4,24.23 96.595,24.23 97.23,23.595 97.23,16.355 96.595,15.72 57.8,15.72 | coupled |
-| USB_B_N | via | 0.45/0.25 | 57.6,16.38 | the crossing |
+| USB_B_N | via | 0.45/0.30 | 57.6,16.38 | the crossing |
 | USB_B_N | B.Cu | 0.31 | 57.6,16.38 56.38,15.16 J3.2 | under P to J3 D− |
 | USB_B_P | F.Cu | 0.31 | 57.8,15.72 56.46,15.72 J3.3 | to J3 D+, diagonal to match N (skew) |
 | XI_HUB | F.Cu | 0.20 | U6.11 94,20.95 Y2.1 | the crystal, between Y2's pads |
 | XO_HUB | F.Cu | 0.20 | U6.12 94.4,23.6 94.8,23.2 Y2.3 | the crystal |
 | VDD33_HUB | F.Cu | 0.20 | U6.19 U6.18 96.55,27.0 96.8,26.75 | U6's pins 18 and 19, out past the unused pins 15-17 (the router left them open) |
-| VDD33_HUB | via | 0.45/0.25 | 96.8,26.75 | 0.64 mm from the UP pair's conductor |
+| VDD33_HUB | via | 0.45/0.30 | 96.8,26.75 | 0.64 mm from the UP pair's conductor |
 | VDD33_HUB | In2.Cu | 0.20 | 96.8,26.75 95.9,26.75 95.9,30.3 | under U6's east row, clear of the UP pair's keepout |
-| VDD33_HUB | via | 0.45/0.25 | 95.9,30.3 | |
+| VDD33_HUB | via | 0.45/0.30 | 95.9,30.3 | |
 | VDD33_HUB | F.Cu | 0.20 | 95.9,30.3 TP13.1 | to the rest of VDD33_HUB at its test point |
 | XOUT | F.Cu | 0.20 | U1.21 44.25,58.2 | U1's escape inward, between its pad row and its ePad (the router left it open) |
-| XOUT | via | 0.45/0.25 | 44.25,58.2 | 0.225 mm from the ePad |
+| XOUT | via | 0.45/0.30 | 44.25,58.2 | 0.225 mm from the ePad |
 | SWCLK | F.Cu | 0.20 | U1.24 44.7,59.35 | U1's escape inward |
-| SWCLK | via | 0.45/0.25 | 44.7,59.35 | |
+| SWCLK | via | 0.45/0.30 | 44.7,59.35 | |
 | SWDIO | F.Cu | 0.20 | U1.25 45.0,59.8 44.25,60.25 | U1's escape inward, staggered from SWCLK's via |
-| SWDIO | via | 0.45/0.25 | 44.25,60.25 | |
+| SWDIO | via | 0.45/0.30 | 44.25,60.25 | |
 | USB_MCU_N | F.Cu | 0.20 | U1.46 39.65,59.8 | U1's escape inward |
-| USB_MCU_N | via | 0.45/0.25 | 39.65,59.8 | |
+| USB_MCU_N | via | 0.45/0.30 | 39.65,59.8 | |
 | QSPI_SCLK | F.Cu | 0.20 | U1.52 37.924,57.4 | U1's escape west, between its pads and C17 (the router left it open) |
-| QSPI_SCLK | via | 0.45/0.25 | 37.924,57.4 | 0.19 mm from C17's pad |
+| QSPI_SCLK | via | 0.45/0.30 | 37.924,57.4 | 0.19 mm from C17's pad |
 | V3V3 | F.Cu | 0.20 | U1.22 46.35,58.6 46.35,59.1 C14.1 | pin 22 to its decoupler, clear of Y1's pad (the router left it open) |
 | DVDD | F.Cu | 0.20 | U1.23 45.1,59.0 44.75,58.75 | U1's escape inward: pin 22's decoupler track blocks the east side |
-| DVDD | via | 0.45/0.25 | 44.75,58.75 | |
+| DVDD | via | 0.45/0.30 | 44.75,58.75 | |
 | RUN | F.Cu | 0.20 | U1.26 46.158,60.2 46.37,60.412 46.37,62.69 R26.2 | pin 26 to its pull-up (the router left it open) |
 | V5L | F.Cu | 0.20 | U6.26 C27.1 | U6's 5 V pin to its decoupler (the router left it open in every trial) |
 | VBUS_J4 | B.Cu | 1.50 | J4.1 F1.1 | J4 to the fuse; both through-hole |
@@ -216,9 +216,9 @@ left open in a trial: drawn here, they are fixed before it starts.
 | GL_A | F.Cu | 0.20 | Q20.3 22.04,36.472 22.04,35.03 R118.1 | the gate network of the LOW range, as the router drew it for channel A (it left channel B open) |
 | GL_A | F.Cu | 0.20 | 22.04,35.03 C111.1 23.195,35.125 U13.1 | |
 | GL_A | F.Cu | 0.20 | R118.1 22.01,26.467 22.621,25.856 | |
-| GL_A | via | 0.45/0.25 | 22.621,25.856 | |
+| GL_A | via | 0.45/0.30 | 22.621,25.856 | |
 | GL_A | In2.Cu | 0.20 | 22.621,25.856 26.037,25.856 | 2.9 mm from the LAD1 trunk on L4 |
-| GL_A | via | 0.45/0.25 | 26.037,25.856 | |
+| GL_A | via | 0.45/0.30 | 26.037,25.856 | |
 | GL_A | F.Cu | 0.20 | 26.037,25.856 26.037,24.82 26.623,24.235 27.155,24.235 R114.1 | |
 | GL_A | F.Cu | 0.20 | R114.1 27.275,23.085 Q18.1 | |
 | VSUP_A | F.Cu | 0.60 | Q11.3 2.25,38.1 TP105.1 | |
@@ -257,9 +257,14 @@ left open in a trial: drawn here, they are fixed before it starts.
 
 ## GND fanout
 
-Every GND surface pad (SMD, or a connector pad without paste: J5's pad 5) gets a 0.45/0.25 via to L2 on the nearest free spot (16 directions, outward
+Every GND surface pad (SMD, or a connector pad without paste: J5's pad 5) gets the board's via,
+the Default class's 0.45/0.30 (`make_project.py`), to L2 on the nearest free spot (16 directions, outward
 from its part first, 0.1 mm rings) and a 0.20 mm stub to it; the search keeps 0.15 mm from other
-copper, 0.5 mm from the HS pairs, 0.25 mm between holes and 0.3 mm from the edge. Each exposed
+copper, 0.5 mm from the HS pairs, 0.20 mm from another via's hole (JLCPCB's via figure, the
+custom rule `VIA_HOLE_TO_HOLE`), the board's 0.25 mm hole-to-hole minimum from a pad's hole, and
+0.3 mm from the edge. Until issue #8 the via was 0.45/0.25 with 0.25 mm between all holes: the same
+0.50 mm between two via centres. The router input of issue #8 equals the one before it except for
+the via's name (`450:250` → `450:300`), so every fanout via landed where it was. Each exposed
 pad gets five vias, at its centre and at the offset on the four axes, inside the cross of its
 paste windows; the residual risk is solder wicking into them (V-MFG-03 inspects U1 and U6).
 
@@ -289,7 +294,12 @@ Freerouting 2.5.0 (the jar and the JRE are named, with their SHA-256, in
 `routing/autoroute.json`) routes what the tables above leave, from the board after the plane,
 the hand-drawn tracks and the GND fanout. `autoroute.py` exports that board's DSN, adds the
 classes and keepouts below, runs the router with its optimizer off (it made the result worse in
-every trial), and writes `routing/usb-power-hub.ses`. The router's own via is 0.45/0.25.
+every trial), and writes `routing/usb-power-hub.ses`. The router's own via is the board's, 0.45/0.30.
+The router models a via by its copper circle alone; the drill appears only in the padstack's name.
+KiCad's DSN export sizes the router's keepout around each NPTH hole with the board's
+`min_hole_clearance`, so that minimum stays 0.25 mm, and the 0.20 mm figures for vias are custom
+rules in `usb-power-hub.kicad_dru` (`make_project.py`, issue #8): a change to the board minimum
+changes the router input.
 With neck-down switched off the router still narrows a wire where it enters a 0.4 mm-pitch pin
 (0.10–0.12 mm seen on this board); `--router.neck_width_um=150` holds such a neck at the
 board's 0.15 mm minimum, so DRC's track-width rule holds. The full argument list is in
@@ -352,15 +362,15 @@ new session, rewrite the table.
 |---|---|---:|---|---|
 | EVTG_L_A | F.Cu | 0.20 | Q25.1 19.8,38.7 19.7,38.6 19.7,36.3 R118.2 | unrouted by the router |
 | ADC_CC2 | F.Cu | 0.20 | R6.2 27.2,60.8 | unrouted by the router: J4's CC2 to U17 CH4, a DC level, so its 81 mm and 2 vias cost nothing |
-| ADC_CC2 | via | 0.45/0.25 | 27.2,60.8 | |
+| ADC_CC2 | via | 0.45/0.30 | 27.2,60.8 | |
 | ADC_CC2 | B.Cu | 0.20 | 27.2,60.8 28.8,60.8 39.2,71.2 47.4,71.2 60.4,58.2 60.4,46.6 | |
-| ADC_CC2 | via | 0.45/0.25 | 60.4,46.6 | |
+| ADC_CC2 | via | 0.45/0.30 | 60.4,46.6 | |
 | ADC_CC2 | In2.Cu | 0.20 | 60.4,46.6 66.2,40.8 70,40.8 71,39.8 70.7,39.5 77.1,33.1 78.66,33.1 U17.5 | |
 | ADC_DIN_3V | remove | - | 72.4855,46.9005 57.8169,48.4490 | its L3 corner at (70.94, 48.45) ran along L4 LED_ON_B |
 | ADC_DIN_3V | In2.Cu | 0.20 | 74.0340,45.3520 71.3,48.086 71.3,48.4 71.2,48.5 44.8,48.5 44.6968,48.4490 | |
 | INP_L_B | remove | - | 58.6559,27.7707 59.3775,28.2257 59.8178,28.3993 59.9914,28.5728 60.4868,28.5728 62.1086,27.4464 | its L4 stub at y 28.23 ran 0.15 mm under L3 GATE_L_B; its via moves off that track |
 | INP_L_B | B.Cu | 0.20 | 58.2009,27.3158 58.2,28.6 59.2,29.6 60.1,28.7 | |
-| INP_L_B | via | 0.45/0.25 | 60.1,28.7 | |
+| INP_L_B | via | 0.45/0.30 | 60.1,28.7 | |
 | INP_L_B | F.Cu | 0.20 | 60.1,28.7 60.7,28.1 61.6,28.1 63.2,26.5 63.2350,26.3199 | |
 | HOLD_L_B | remove | - | 53.1096,40.6495 52.6689,44.4294 | its L4 diagonal ran along L3 TH_REF's jog at (53.05, 40.03) |
 | HOLD_L_B | B.Cu | 0.20 | 53.5504,40.2088 53.5504,43.2185 52.6689,44.1 52.6689,47.7685 | |

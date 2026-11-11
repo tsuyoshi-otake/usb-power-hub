@@ -266,7 +266,7 @@ def router_input(board, routing, regions, tmp):
     def pad_frame(token, net):
         return route.to_frame(route.pad_position(board, token, net))
     keepouts = route.keepout_polygons(routing, regions, pad_frame)
-    return route.post_dsn(raw.read_text(encoding="utf-8"), routing, keepouts)
+    return route.post_dsn(raw.read_text(encoding="utf-8"), routing, keepouts, route.board_via(board))
 
 
 def session():
@@ -298,7 +298,8 @@ def build(pcb, comps, pins, place, routing, regions, silk, tmp, dsn_out=None):
     route.plane(board, routing["zones"], proj.SIZE_MM)
     n_t, n_v = route.apply_rows(board, routing["rows"])
     hs = {n for p in routing["pairs"] for n in p["nets"]}
-    n_f, unfanned = route.gnd_fanout(board, routing["epads"], hs)
+    n_f, unfanned = route.gnd_fanout(board, routing["epads"], hs,
+                                     (proj.VIA_HOLE_TO_HOLE, proj.RULES["min_hole_to_hole"]))
     print(f"routing document: {n_t} track segments, {n_v} vias; GND fanout: {n_f} vias,"
           f" {len(unfanned)} pad(s) left to the router{': ' + ' '.join(unfanned) if unfanned else ''}")
     dsn = router_input(board, routing, regions, tmp)
@@ -330,7 +331,7 @@ def main(argv):
         dsn_out = pathlib.Path(argv[2]).resolve()
     elif argv[1:] not in ([], ["--no-check"]):
         raise SystemExit("usage: make_pcb.py [--no-check | --dsn <out.dsn>]")
-    pcb, pro, prl = proj.paths(SRC)
+    pcb, pro, prl, _ = proj.paths(SRC)
     pro_before = pro.read_bytes()
     place = read_placement(DOC)
     routing, regions = read_routing(DOC, ROUTING)

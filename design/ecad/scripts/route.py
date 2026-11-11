@@ -282,9 +282,11 @@ def fill(board):
 
 
 # ---- GND fanout ----------------------------------------------------------------------------
-FAN_VIA = (0.45, 0.25)
+# The fanout's via is the board's Default class via (board_via). The hole-to-hole spacing it keeps
+# is make_project.py's, which make_pcb.py passes in: VIA_HOLE_TO_HOLE (JLCPCB's via figure, a
+# custom rule) to another via, the board's min_hole_to_hole to a pad's hole.
 FAN_STUB = 0.20
-FAN_CLR, FAN_HOLE_CLR = 0.15, 0.25
+FAN_CLR = 0.15
 FAN_HS_CLR = 0.50                  # the HS pairs keep 0.5 mm of coplanar clearance
 FAN_GRID = 2.0
 FAN_STEPS = 14                     # candidate rings 0.1 mm apart
@@ -329,12 +331,19 @@ class _Copper:
                         yield self.items[k]
 
 
-def _clear(cu, net, shape, box, layers, hs, hole=None):
+def board_via(board):
+    """(diameter, drill) in mm: the Default class's via, from the project make_project.py writes."""
+    nc = board.GetDesignSettings().m_NetSettings.GetDefaultNetclass()
+    return pcbnew.ToMM(nc.GetViaDiameter()), pcbnew.ToMM(nc.GetViaDrill())
+
+
+def _clear(cu, net, shape, box, layers, hs, hole=None, hole_clr=None):
+    """hole_clr: (to a via's hole, to a pad's hole) in mm, for a via at `hole`."""
     for inet, item, ibox, ihole in cu.near(box):
         if ibox[0] > box[2] or ibox[2] < box[0] or ibox[1] > box[3] or ibox[3] < box[1]:
             continue
         if hole and ihole and math.hypot(ihole[0] - hole[0], ihole[1] - hole[1]) < \
-                ihole[2] + hole[2] + FAN_HOLE_CLR + 0.01:
+                ihole[2] + hole[2] + hole_clr[item.GetClass() != "PCB_VIA"] + 0.01:
             return False
         if inet == net:
             continue
@@ -345,11 +354,13 @@ def _clear(cu, net, shape, box, layers, hs, hole=None):
     return True
 
 
-def gnd_fanout(board, epads, hs_nets):
+def gnd_fanout(board, epads, hs_nets, hole_clr):
     """GND vias: each exposed pad of `epads` gets a centre via and four at the offset; every
-    other GND surface pad (SMD, or a connector pad without paste such as J5's) gets a 0.45/0.25
-    via on the nearest free spot of 16 directions, outward
-    first, and a 0.2 mm stub to it. Returns (vias, pads left without one)."""
+    other GND surface pad (SMD, or a connector pad without paste such as J5's) gets the board's
+    via (board_via) on the nearest free spot of 16 directions, outward
+    first, and a 0.2 mm stub to it. hole_clr = (to a via's hole, to a pad's hole) in mm, the
+    hole-to-hole spacing it keeps. Returns (vias, pads left without one)."""
+    fan_via = board_via(board)
     gnd = board.FindNet("GND")
     cu = _Copper(board)
     x0, y0, x1, y1 = (pcbnew.ToMM(v) for v in (board.GetBoardEdgesBoundingBox().GetLeft(),
@@ -367,12 +378,12 @@ def gnd_fanout(board, epads, hs_nets):
                     raise SystemExit(f"epad {key} is on {p.GetNetname()}, not GND")
                 c, off = p.GetPosition(), mm(epads[key])
                 for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
-                    v = add_via(board, gnd, pcbnew.VECTOR2I(c.x + dx * off, c.y + dy * off), *FAN_VIA)
-                    cu.add(v, (pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y), FAN_VIA[1] / 2))
+                    v = add_via(board, gnd, pcbnew.VECTOR2I(c.x + dx * off, c.y + dy * off), *fan_via)
+                    cu.add(v, (pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y), fan_via[1] / 2))
                     n += 1
             elif p.GetNetname() == "GND" and p.GetAttribute() in (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN):
                 pads.append((key, p))
-    r = FAN_VIA[0] / 2
+    r = fan_via[0] / 2
     for key, p in pads:
         cx, cy = pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y)
         fp = p.GetParentFootprint()
@@ -395,14 +406,14 @@ def gnd_fanout(board, epads, hs_nets):
                 continue
             circ = pcbnew.SHAPE_CIRCLE(pcbnew.VECTOR2I(mm(x), mm(y)), mm(r))
             box = (x - r - 1, y - r - 1, x + r + 1, y + r + 1)
-            if not _clear(cu, "GND", circ, box, all_layers, hs_nets, (x, y, FAN_VIA[1] / 2)):
+            if not _clear(cu, "GND", circ, box, all_layers, hs_nets, (x, y, fan_via[1] / 2), hole_clr):
                 continue
             seg = pcbnew.SHAPE_SEGMENT(pcbnew.VECTOR2I(mm(cx), mm(cy)), pcbnew.VECTOR2I(mm(x), mm(y)), mm(FAN_STUB))
             sbox = (min(cx, x) - 1, min(cy, y) - 1, max(cx, x) + 1, max(cy, y) + 1)
             if not _clear(cu, "GND", seg, sbox, [pcbnew.F_Cu], hs_nets):
                 continue
-            v = add_via(board, gnd, pcbnew.VECTOR2I(mm(x), mm(y)), *FAN_VIA)
-            cu.add(v, (x, y, FAN_VIA[1] / 2))
+            v = add_via(board, gnd, pcbnew.VECTOR2I(mm(x), mm(y)), *fan_via)
+            cu.add(v, (x, y, fan_via[1] / 2))
             t = add_track(board, gnd, pcbnew.VECTOR2I(mm(cx), mm(cy)), pcbnew.VECTOR2I(mm(x), mm(y)),
                           FAN_STUB, pcbnew.F_Cu)
             cu.add(t, None)
@@ -526,9 +537,12 @@ def _class_names(text, i):
         i = j
 
 
-def post_dsn(text, routing, keepouts):
+def post_dsn(text, routing, keepouts, via):
     """KiCad's DSN -> the router's input: the document's classes (their nets moved out of
-    KiCad's classes), their via padstacks, and the keepouts."""
+    KiCad's classes), their via padstacks, and the keepouts. `via` is the board's (diameter,
+    drill) in mm (board_via), the via KiCad names in the structure's via line."""
+    via_name = f"Via[0-3]_{round(via[0] * 1000)}:{round(via[1] * 1000)}_um"
+    structure_via = re.compile(r'^    \(via "' + re.escape(via_name) + r'"[^)\n]*\)$', re.M)
     moved = {n for c in routing["classes"] for n in c["nets"]}
     out, pos = [], 0
     for m in re.finditer(r"\(class (\S+) ", text):
@@ -560,9 +574,9 @@ def post_dsn(text, routing, keepouts):
     i = text.index("  (wiring")
     j = text.rindex("  )\n", 0, i)
     text = text[:j] + "".join(blocks) + text[j:]
-    m = re.search(r'^    \(via "Via\[0-3\]_450:250_um"[^)\n]*\)$', text, re.M)
+    m = structure_via.search(text)
     if m is None:
-        raise SystemExit("DSN: no structure via line naming the 0.45/0.25 via")
+        raise SystemExit(f"DSN: no structure via line naming the board's via {via_name}")
     line = m.group(0)[:-1] + "".join(f' "{v}"' for v in vias) + ")"
     # the router's costs and layer preferences (router_costs, router_layers), read after the layer
     # scopes; fanout, routing and vias stay on, the optimizer off, as autoroute.py's arguments say
@@ -574,8 +588,8 @@ def post_dsn(text, routing, keepouts):
         raise SystemExit("DSN: no single structure boundary to put the autoroute settings before")
     text = text.replace("    (boundary", "    (autoroute_settings\n      (fanout on)\n      (autoroute on)\n"
                         "      (postroute off)\n      (vias on)\n" + rules + "    )\n    (boundary", 1)
-    m = re.search(r'^    \(via "Via\[0-3\]_450:250_um"[^)\n]*\)$', text, re.M)
-    ko = "".join(f'    ({kind} "" (polygon {layer} 0  {"  ".join(_um(x, y) for x, y in poly + [poly[0]])}))\n'
+    m = structure_via.search(text)
+    ko ="".join(f'    ({kind} "" (polygon {layer} 0  {"  ".join(_um(x, y) for x, y in poly + [poly[0]])}))\n'
                  for layer, kind, poly in keepouts)
     return text[:m.start()] + ko + line + text[m.end():]
 

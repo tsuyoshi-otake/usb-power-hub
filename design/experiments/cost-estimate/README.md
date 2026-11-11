@@ -108,6 +108,23 @@ $20.81); the assembled order weighs 556.50 g on the quote page and is priced onl
 line-by-line record is in
 `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, section 6.
 
+### The via class removed, 2026-11-12 (issue #8)
+
+Release candidate r02 drills every via at 0.30 mm, JLCPCB's standard class "0.3mm/(0.4/0.45mm)",
+with the copper unchanged. JLCPCB's form, given r02's Gerber, selected that class itself and priced
+the PCB at $8.00 with neither the Kelvin test nor the minimum-via fee
+(`manufacturing/releases/rev0.4/r02/JLCPCB_REVIEW.md`). The PCBA lines were not quoted again: the
+BOM and CPL are byte-identical to r01's, so r01's lines are carried over.
+
+| | USD | Yen at 160 |
+|---|---:|---:|
+| JLCPCB without shipping: $81.85 − $34.16 | 47.69 | 7,630 |
+| with OCS Express ($7.23, the PCB-only parcel) | 54.92 | 8,787 |
+| with the Akizuki parts (7,695 yen) | — | **16,482** |
+
+That is 5,466 yen less than the 21,950 yen above, about 8,240 yen per assembled unit. The assembled
+parcel's shipping is still priced only in the cart.
+
 ## Akizuki (2 units, prices tax included)
 
 | Part | Code | Each | Qty | Yen |

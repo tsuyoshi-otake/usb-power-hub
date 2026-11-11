@@ -1,0 +1,17 @@
+(version 1)
+# Written by design/ecad/scripts/make_project.py; JLCPCB pcb-capabilities, read 2026-11-12 (issue #8).
+(rule "JLCPCB via hole to copper 0.20"
+  (constraint hole_clearance (min 0.20mm))
+  (condition "A.Type == 'Via'"))
+(rule "JLCPCB via hole to via hole 0.20"
+  (constraint hole_to_hole (min 0.20mm))
+  (condition "A.Type == 'Via' && B.Type == 'Via'"))
+(rule "JLCPCB PTH to copper 0.28"
+  (constraint hole_clearance (min 0.28mm))
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && B.Type != 'Via'"))
+(rule "JLCPCB PTH annular ring 0.15"
+  (constraint annular_width (min 0.15mm))
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'"))
+(rule "JLCPCB pad hole to pad hole 0.45"
+  (constraint hole_to_hole (min 0.45mm))
+  (condition "A.Type == 'Pad' && B.Type == 'Pad'"))

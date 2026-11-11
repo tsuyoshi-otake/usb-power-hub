@@ -100,9 +100,26 @@ def add_segment(tree, name, a, b, width, layer):
                  ["layer", layer], ["net", net_code(tree, name)], ["uuid", str(uuid.uuid4())]])
 
 
-def add_via(tree, name, at_sheet):
-    tree.append(["via", ["at", *at_sheet], ["size", 0.45], ["drill", 0.25], ["layers", "F.Cu", "B.Cu"],
+def add_via(tree, name, at_sheet, drill=0.30):
+    tree.append(["via", ["at", *at_sheet], ["size", 0.45], ["drill", drill], ["layers", "F.Cu", "B.Cu"],
                  ["net", net_code(tree, name)], ["uuid", str(uuid.uuid4())]])
+
+
+def vias_of(tree, name):
+    code = net_code(tree, name)
+    return [v for v in sx.find(tree, "via") if sx.first(v, "net")[1] == code]
+
+
+def tht_pads(tree):
+    """(footprint reference, pad node) of every plated through-hole pad with a round drill."""
+    out = []
+    for f in sx.find(tree, "footprint"):
+        ref = next((p[2] for p in sx.find(f, "property") if len(p) > 2 and p[1] == "Reference"), None)
+        for p in sx.find(f, "pad"):
+            drill = sx.first(p, "drill")
+            if p[2] == "thru_hole" and drill is not None and len(drill) == 2:
+                out.append((ref, p))
+    return out
 
 
 def remove(tree, items):
@@ -194,6 +211,29 @@ class CheckTest(unittest.TestCase):
             remove(tree, bumps)
             add_segment(tree, "USB_UP_P", (97.57, 31.0), (97.57, 47.82), 0.31, "F.Cu")
         self.assertFailsWith(run_check(board=edit), "FAIL pair UP: P 66.5", "skew 3.1")
+
+    # ---- JLCPCB's hole figures (make_project.py RULES and PTH_RULES, issue #8) -----------------
+
+    def test_via_drill_025(self):
+        def edit(tree):
+            sx.first(vias_of(tree, "GND")[0], "drill")[1] = 0.25
+        self.assertFailsWith(run_check(board=edit), "FAIL DRC", "drill_out_of_range")
+
+    def test_pth_ring_below_015(self):
+        def edit(tree):
+            # the first round PTH pad: copper 0.20 mm wider than its drill, a 0.10 mm ring, which
+            # the board's via minimum (0.075) allows and the PTH rule (0.15) does not
+            _, pad = tht_pads(tree)[0]
+            d = sx.first(pad, "drill")[1]
+            sx.first(pad, "size")[1:3] = [round(d + 0.2, 3), round(d + 0.2, 3)]
+        self.assertFailsWith(run_check(board=edit), "FAIL DRC", "annular_width")
+
+    def test_via_holes_015_apart(self):
+        def edit(tree):
+            # a second GND via 0.45 mm from a GND via: 0.15 mm between the 0.30 mm holes
+            at = sx.first(vias_of(tree, "GND")[0], "at")
+            add_via(tree, "GND", (round(at[1] + 0.45, 6), at[2]))
+        self.assertFailsWith(run_check(board=edit), "FAIL DRC", "hole_to_hole")
 
     def test_copper_near_pair(self):
         # 0.415 mm from USB_A_P's edge, on F.Cu, away from any other copper of the corridor

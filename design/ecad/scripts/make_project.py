@@ -4,7 +4,9 @@ Run with KiCad's own Python, which carries the pcbnew module, from the repositor
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py
 
-It writes two files:
+It writes three files:
+- usb-power-hub.kicad_dru: JLCPCB's hole figures for vias and PTH pads (HOLE_RULES), as
+  custom DRC rules, which override the board minimums of the .kicad_pro (issue #8);
 - usb-power-hub.kicad_pcb: 4 copper layers; the JLC04161H-7628 stackup (D27), read from
   design/experiments/stackup-impedance/stackups.json, which holds JLCPCB's published table;
   leaded HASL (D30); 1.6 mm nominal thickness; the 100 x 72 mm outline (D24), lower-left
@@ -29,6 +31,8 @@ Exit status: 0 = written and checked; 1 = a check failed.
 What it CANNOT see (CLAUDE.md 8):
 - whether the constraints are JLCPCB's current capabilities (CLAUDE.md 9: recheck at every
   release);
+- what the custom rules do on a board: that is DRC's, and test_check_routing.py shows each
+  rule failing a corrupted board;
 - the VBUS trunk width, which needs a current and temperature-rise calculation before
   routing (issue #6, P4);
 - which nets are USB pairs: USB_HS is assigned by the name pattern USB_*, and
@@ -63,25 +67,60 @@ COMMENTS = ("WIP - MANUFACTURING PROHIBITED",
             "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
 UUID_NS = uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/tsuyoshi-otake/usb-power-hub")
 
-# CLAUDE.md 5.3 starting values (mm). They are starting rules, not a capability limit.
+# CLAUDE.md 5.3 starting values (mm). They are starting rules, not a capability limit. The hole
+# figures are JLCPCB's (pcb-capabilities, read 2026-11-12, issue #8): the via drill is 0.30 mm,
+# because a 0.25 mm via hole puts the order in the "0.25mm/(0.35/0.4mm)" class, which adds
+# "4-Wire Kelvin Test", "Min via hole size/diameter" and FR4 Tg155 ($37.65 on the quote form,
+# 2026-11-12). The via copper stays 0.45 mm: 0.15 mm larger than the hole, JLCPCB's preferred margin.
 RULES = {
     "min_clearance": 0.15,               # trace spacing >= 0.15
     "min_track_width": 0.15,             # signal 0.15-0.20
-    "min_via_diameter": 0.45,            # via 0.45 / 0.25 (0.60 / 0.30 where space allows)
-    "min_through_hole_diameter": 0.25,
-    "min_via_annular_width": 0.10,       # (0.45 - 0.25) / 2
+    "min_via_diameter": 0.45,            # via 0.45 / 0.30 (0.60 / 0.30 where space allows)
+    "min_through_hole_diameter": 0.30,   # the standard via class "0.3mm/(0.4/0.45mm)"
+    "min_via_annular_width": 0.075,      # (0.45 - 0.30) / 2
+    # Every other hole. KiCad's DSN export also sizes the router's keepout around each NPTH hole
+    # with min_hole_clearance, so lowering it changes the router input (issue #8).
+    "min_hole_clearance": 0.25,          # JLCPCB: NPTH to track 0.2; vias and PTH: HOLE_RULES
+    "min_hole_to_hole": 0.25,            # vias and pad holes: HOLE_RULES
     "min_copper_edge_clearance": 0.30,   # copper to routed edge >= 0.30
     "min_text_height": 1.0,              # Latin silkscreen >= 1.0 mm (CLAUDE.md 6)
     "min_text_thickness": 0.15,          # stroke >= 0.15 mm
 }
+# JLCPCB's hole figures for vias and for plated through-hole (PTH) pads, as custom rules
+# (.kicad_dru); a custom rule overrides the board minimum above (tried 2026-11-12: a via rule of
+# 0.20 under a board minimum of 0.25 removed all 199 via hole_clearance violations).
+# KiCad applies a pair rule to both items' holes, in either order, so a rule cannot give a via's
+# hole 0.20 mm and a PTH pad's hole 0.28 mm in the same via-pad pair: the via rule governs that
+# pair. The PTH side still holds: a PTH ring >= 0.15 mm plus the 0.15 mm copper clearance keeps
+# every other net's copper >= 0.30 mm from a PTH hole.
+VIA_HOLE_CLEARANCE = 0.20                # JLCPCB "Via hole to Track"
+VIA_HOLE_TO_HOLE = 0.20                  # JLCPCB "Via Hole-to-Hole Spacing"; route.py's fanout too
+HOLE_RULES = f"""(version 1)
+# Written by design/ecad/scripts/make_project.py; JLCPCB pcb-capabilities, read 2026-11-12 (issue #8).
+(rule "JLCPCB via hole to copper {VIA_HOLE_CLEARANCE:.2f}"
+  (constraint hole_clearance (min {VIA_HOLE_CLEARANCE:.2f}mm))
+  (condition "A.Type == 'Via'"))
+(rule "JLCPCB via hole to via hole {VIA_HOLE_TO_HOLE:.2f}"
+  (constraint hole_to_hole (min {VIA_HOLE_TO_HOLE:.2f}mm))
+  (condition "A.Type == 'Via' && B.Type == 'Via'"))
+(rule "JLCPCB PTH to copper 0.28"
+  (constraint hole_clearance (min 0.28mm))
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && B.Type != 'Via'"))
+(rule "JLCPCB PTH annular ring 0.15"
+  (constraint annular_width (min 0.15mm))
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'"))
+(rule "JLCPCB pad hole to pad hole 0.45"
+  (constraint hole_to_hole (min 0.45mm))
+  (condition "A.Type == 'Pad' && B.Type == 'Pad'"))
+"""
 TRACK_WIDTHS = [0.15, 0.20, 0.31]
-VIAS = [(0.45, 0.25), (0.60, 0.30)]
+VIAS = [(0.45, 0.30), (0.60, 0.30)]
 USB_PAIR = (0.31, 0.15)                  # D27: W / S on L1 over L2, provisional
 CLASSES = {
     "Default": {"track_width": 0.20, "clearance": 0.15, "via_diameter": 0.45,
-                "via_drill": 0.25},
+                "via_drill": 0.30},
     "USB_HS": {"track_width": USB_PAIR[0], "clearance": 0.15, "via_diameter": 0.45,
-               "via_drill": 0.25, "diff_pair_width": USB_PAIR[0],
+               "via_drill": 0.30, "diff_pair_width": USB_PAIR[0],
                "diff_pair_gap": USB_PAIR[1]},
 }
 NETCLASS_PATTERNS = [("USB_HS", "USB_*")]    # the netlist document names every D+/D- net USB_*
@@ -205,6 +244,7 @@ API_RULES = {  # pcbnew design-settings attribute -> RULES key, read back in a f
     "m_MinClearance": "min_clearance", "m_TrackMinWidth": "min_track_width",
     "m_ViasMinSize": "min_via_diameter", "m_MinThroughDrill": "min_through_hole_diameter",
     "m_ViasMinAnnularWidth": "min_via_annular_width",
+    "m_HoleClearance": "min_hole_clearance", "m_HoleToHoleMin": "min_hole_to_hole",
     "m_CopperEdgeClearance": "min_copper_edge_clearance",
 }
 API_CLASS = {"track_width": "GetTrackWidth", "clearance": "GetClearance",
@@ -212,10 +252,12 @@ API_CLASS = {"track_width": "GetTrackWidth", "clearance": "GetClearance",
              "diff_pair_width": "GetDiffPairWidth", "diff_pair_gap": "GetDiffPairGap"}
 
 
-def check(pcb_path, pro_path):
+def check(pcb_path, pro_path, dru_path):
     """Run in a fresh process: pcbnew caches a loaded project, so only a new process
     shows what KiCad reads from the files."""
     fails = []
+    if not dru_path.exists() or dru_path.read_text(encoding="utf-8") != HOLE_RULES:
+        fails.append(f"{dru_path.name} is not the rule set HOLE_RULES")
     board = pcbnew.LoadBoard(str(pcb_path))
     ds = board.GetDesignSettings()
     for attr, key in API_RULES.items():
@@ -273,12 +315,13 @@ def check(pcb_path, pro_path):
 
 
 def paths(out=OUT):
-    return out / f"{NAME}.kicad_pcb", out / f"{NAME}.kicad_pro", out / f"{NAME}.kicad_prl"
+    return (out / f"{NAME}.kicad_pcb", out / f"{NAME}.kicad_pro", out / f"{NAME}.kicad_prl",
+            out / f"{NAME}.kicad_dru")
 
 
 def run_check(out):
-    pcb, pro, prl = paths(out)
-    fails = check(pcb, pro)
+    pcb, pro, prl, dru = paths(out)
+    fails = check(pcb, pro, dru)
     if prl.exists():
         prl.unlink()                         # LoadBoard may recreate the local-state file
     print("checks: " + ("PASS" if not fails else "FAIL"))
@@ -296,10 +339,11 @@ def main():
     if sys.argv[1:]:
         raise SystemExit("usage: make_project.py [--check [DIR]]")
     OUT.mkdir(parents=True, exist_ok=True)
-    pcb, pro, prl = paths()
+    pcb, pro, prl, dru = paths()
     for p in (pcb, pro):
         if p.exists():
             p.unlink()                       # regenerated from scratch every run
+    dru.write_text(HOLE_RULES, encoding="utf-8", newline="\n")
     make_board(pcb)
     insert_stackup(pcb)
     # round trip: pcbnew reads the stackup text back and writes it normalized
@@ -310,7 +354,7 @@ def main():
     edit_project(pro)                        # last, so no SaveBoard overwrites it
     if prl.exists():
         prl.unlink()
-    print(f"wrote {pcb.name}, {pro.name} in {OUT.relative_to(ROOT).as_posix()};"
+    print(f"wrote {pcb.name}, {pro.name}, {dru.name} in {OUT.relative_to(ROOT).as_posix()};"
           f" {n} board uuid(s) fixed; the board is bare: run make_pcb.py to place the parts")
     th = sum(t for _, _, t, _, _ in stackup())
     print(f"stackup {STACKUP_ID}: copper + dielectric {th:.4f} mm; finish {FINISH};"

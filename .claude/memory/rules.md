@@ -377,6 +377,24 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **Check what a note parser will read as a designator.** check_pcb.py read "at P3" in a
   placement note as part P3, and failed (#6 P4).
 
+## KiCad 9 hole rules (#8, 2026-11-12)
+
+- **A custom rule in `<project>.kicad_dru` overrides the board minimum, in both directions.** A via
+  `hole_clearance` rule of 0.20 under a board `min_hole_clearance` of 0.25 gave 0 violations; without
+  the rule, 199. Use the board minimum as the default and the DRU for per-type figures.
+- **A pair rule matches the two items in either order and constrains both holes.** A rule with
+  `A.Type == 'Pad' && Through-hole` also flagged the via's hole against PTH copper. Exclude the other
+  type explicitly (`B.Type != 'Via'`) and give that pair its own rule.
+- **KiCad's DSN export sizes the router's NPTH keepouts with `min_hole_clearance`.** Changing it from
+  0.25 to 0.20 shrank two keepouts (2700→2600, 1490.6→1390.6 µm) and changed the router input. Keep the
+  board minimum fixed when the router input must stay the same.
+- **Changing only a via's drill changes the zone fill.** The poured layers (B.Cu, In2) differed by
+  slivers under 6 µm wide, although the hole's knockout lies inside the copper's. Refilling the old
+  board alone reproduced its own fill exactly. Prove "copper unchanged" by tracks, via positions and
+  pads, footprints, plus a 3 µm erosion of the fill difference, not by Gerber bytes.
+- **Freerouting with the same input repeats its session.** The 17-minute run on input that differed
+  only in the via's padstack name gave the old session with that name replaced (56 passes both times).
+
 ## KiCad 9 silkscreen and manufacturing outputs
 
 - **JLCPCB's legend needs line ≥ 0.15 mm, height ≥ 1.0 mm and a line-to-height ratio of
@@ -434,6 +452,8 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **The 0.25 mm via class costs $34.16.** The form adds "4-Wire Kelvin Test" ($17.02) and
   "Min via hole size/diameter" ($17.14) by itself, and offers Plugged, not Tented, at $0.00
   (2026-11-12, 4 layers, 100 × 72 mm). An estimate that ignores the via class is $28 short.
+  Drill every via at ≥ 0.30 mm with a ≥ 0.45 mm pad: the form then selects "0.3mm/(0.4/0.45mm)"
+  and prices the PCB at $8.00 with neither line, and no longer forces Tg155 (r02, issue #8).
 - **JLCDFM lists only the first 50 results of an item** and says via results of the annular-ring
   check may be ignored. Judge an item by measuring the board (via-to-pad pairs by net, silkscreen
   against holes), not by the 50 rows. Keep a note of what stays unexplained.
