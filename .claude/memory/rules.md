@@ -379,9 +379,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 
 ## KiCad 9 hole rules (#8, 2026-11-12)
 
-- **A custom rule in `<project>.kicad_dru` overrides the board minimum, in both directions.** A via
+- **A looser custom rule in `<project>.kicad_dru` overrides the stricter board minimum.** A via
   `hole_clearance` rule of 0.20 under a board `min_hole_clearance` of 0.25 gave 0 violations; without
-  the rule, 199. Use the board minimum as the default and the DRU for per-type figures.
+  the rule, 199. A stricter custom rule is enforced too: a 0.10 mm PTH ring fails the DRU's 0.15 mm
+  `annular_width` rule (`test_pth_ring_below_015`). Use the board minimum as the default and the DRU
+  for per-type figures.
 - **A pair rule matches the two items in either order and constrains both holes.** A rule with
   `A.Type == 'Pad' && Through-hole` also flagged the via's hole against PTH copper. Exclude the other
   type explicitly (`B.Type != 'Via'`) and give that pair its own rule.
@@ -452,8 +454,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **The 0.25 mm via class costs $34.16.** The form adds "4-Wire Kelvin Test" ($17.02) and
   "Min via hole size/diameter" ($17.14) by itself, and offers Plugged, not Tented, at $0.00
   (2026-11-12, 4 layers, 100 × 72 mm). An estimate that ignores the via class is $28 short.
-  Drill every via at ≥ 0.30 mm with a ≥ 0.45 mm pad: the form then selects "0.3mm/(0.4/0.45mm)"
-  and prices the PCB at $8.00 with neither line, and no longer forces Tg155 (r02, issue #8).
+  Drill every via at ≥ 0.30 mm with a ≥ 0.45 mm pad, and the board fits "0.3mm/(0.4/0.45mm)", the
+  form's default: $8.00 with neither line, FR4 TG135 (r02, issue #8). The form does not show that it
+  reads the via size from the Gerber (a fresh form shows the same default); choose the class from the
+  board's smallest hole.
 - **JLCDFM lists only the first 50 results of an item** and says via results of the annular-ring
   check may be ignored. Judge an item by measuring the board (via-to-pad pairs by net, silkscreen
   against holes), not by the 50 rows. Keep a note of what stays unexplained.

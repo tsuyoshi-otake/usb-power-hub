@@ -18,7 +18,7 @@
 | Copper | outer 0.035 mm (1 oz), inner 0.0152 mm (0.5 oz) |
 | Impedance control | not ordered for the prototype (D27) |
 | Finish | leaded HASL (D30) |
-| Via class | **0.30 mm hole / 0.45 mm pad (334 vias) and 0.30 / 0.60 mm (22): JLCPCB's standard class "0.3mm/(0.4/0.45mm)"**. The form selected it from this Gerber and offers Plugged covering at $0.00 (Tented greyed out) |
+| Via class | **0.30 mm hole / 0.45 mm pad (334 vias) and 0.30 / 0.60 mm (22): JLCPCB's standard class "0.3mm/(0.4/0.45mm)"**, the quote form's default, which r02's smallest hole (0.30 mm) allows. r01 needed the 0.25 mm class, selected by hand on its quote to match its 0.25 mm vias. The form offers Plugged covering at $0.00 (Tented greyed out) |
 | Solder mask, silkscreen colour | not decided; the quote used JLCPCB's form defaults, green and white |
 | Assembly side | Top only (REQ-MFG-01); Economic PCBA |
 | Quantities | 5 boards, 2 assembled (the quote and the cost estimate) |
@@ -97,11 +97,19 @@ r01's open gates stand (`../r01/RELEASE_MANIFEST.md`), with these changes:
 |---|---|---|
 | 0.25 mm via class adds $34.16 | **closed by r02**: the Gerber is priced in the standard class | — |
 | JLCDFM on r02's Gerber | **not run**. The via ring is now 0.075 mm, inside JLCPCB's own figure for this class (via pad 0.1 mm, 0.15 mm preferred, larger than the hole) but below the 0.1 mm at which JLCDFM flagged r01's vias | user signs in to JLCDFM, then Claude |
-| Material type | the form shows FR4 TG135 selected with the r02 Gerber; r01's via class forced Tg155 | confirm in the cart |
+| Material type | the form shows FR4 TG135 selected with the r02 Gerber; with the 0.25 mm class the form's notice said FR4 Tg155 would be selected automatically (r01's review, section 2, unresolved) | confirm in the cart |
 | User approval before any order or payment | not given | user |
 
 ## Residual risks
 
+What else moved with the drill (CLAUDE.md 3: a change recorded as cost-saving is not neutral by default):
+
+- **The via ring is 0.075 mm, was 0.10 mm.** JLCPCB's hole-position tolerance is ±0.075 mm, so at the
+  tolerance's limit a hole can touch its pad's edge. JLCPCB lists exactly this pad and hole as its standard
+  class and its preferred margin (pad 0.15 mm larger than the hole); it is still a thinner ring than r01's.
+- **The ten ePad vias under U1 and U6 (five each) are now 0.30 mm.** The solder wicking that
+  `design/ecad/ROUTING_Rev0.4.md` names as their residual risk (V-MFG-03 inspects it) grows with the hole.
+  The form's Plugged covering, offered at $0.00, is what limits it.
 - JLCDFM has not seen the 0.30 mm drill; JLCPCB's own DFM at order time can differ.
 - The PCBA lines of the $47.69 are r01's quote for the identical BOM and CPL, not a new quote; prices and
   stock move, and are checked again before payment.

@@ -111,8 +111,9 @@ line-by-line record is in
 ### The via class removed, 2026-11-12 (issue #8)
 
 Release candidate r02 drills every via at 0.30 mm, JLCPCB's standard class "0.3mm/(0.4/0.45mm)",
-with the copper unchanged. JLCPCB's form, given r02's Gerber, selected that class itself and priced
-the PCB at $8.00 with neither the Kelvin test nor the minimum-via fee
+with the copper unchanged. That class is the quote form's default; r01's 0.25 mm vias needed the
+dearer class, which adds the Kelvin test and the minimum-via fee. With r02's Gerber and the 0.3 mm
+class the form priced the PCB at $8.00 with neither line
 (`manufacturing/releases/rev0.4/r02/JLCPCB_REVIEW.md`). The PCBA lines were not quoted again: the
 BOM and CPL are byte-identical to r01's, so r01's lines are carried over.
 

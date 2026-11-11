@@ -1192,3 +1192,18 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Learning.** In KiCad, a board minimum feeds the router export, so per-type figures belong in custom
   rules; and a drill change moves the zone fill by microns, so copper identity is proven item by item.
 - **Commit.** The one that adds this entry and `manufacturing/releases/rev0.4/r02/`; base `df5df08`. Not pushed.
+
+### Correction, same day (#8, after review of f640334)
+
+- **Withdrawn claim.** f640334 (commit message, r02 manifest and review, cost README, rules.md, the entry
+  above, the issue comment) said JLCPCB's form *selected* the 0.3 mm class from r02's Gerber. Not shown:
+  the r01 quote's 0.25 mm class was clicked by hand ("Selects min via hole 0.25mm" in the session record),
+  and a fresh form shows the 0.3 mm class by default. What is shown: 0.3 mm is the class r02's smallest
+  hole (0.30 mm) allows, and with it the PCB is $8.00 with no Kelvin or minimum-via line and TG135.
+  "Forced Tg155" was also too strong: r01's form showed TG135 under a notice saying Tg155 is auto-selected.
+- **Added residual risks** (CLAUDE.md §3): the via ring went from 0.10 to 0.075 mm against JLCPCB's
+  ±0.075 mm hole-position tolerance, and the ten ePad vias under U1 and U6 are larger, so the wicking
+  risk V-MFG-03 inspects grows (Plugged covering limits it).
+- **Learning.** A form's state after an upload is evidence of detection only if it differs from the
+  form's default; compare with a fresh form before writing "selected by itself".
+- **Commit.** The follow-up commit that adds this note.

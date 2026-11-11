@@ -61,8 +61,8 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > and the JLCPCB model rotation (`design/ecad/jlcpcb_model_rotation.json`). It also showed
 > that the 0.25 mm via class adds $34.16. Release candidate r02 (issue #8, 2026-11-12, `WIP`) drills
 > every via at 0.30 mm, JLCPCB's standard class, with the copper, BOM and CPL of r01. JLCPCB's form
-> prices its Gerber without those fees: $47.69 without shipping. r02 supersedes r01, and JLCDFM has
-> not run on it. `design/ecad/README.md` gives the order to run the generators in. The project
+> prices its PCB at $8.00 without those fees; with r01's PCBA lines carried over for the identical
+> BOM and CPL, $47.69 without shipping. r02 supersedes r01, and JLCDFM has not run on it. `design/ecad/README.md` gives the order to run the generators in. The project
 > library exists (P1): a symbol and a footprint for every Rev0.4 part in
 > `design/ecad/libraries/`, each land measured by `check_libraries.py` against the
 > datasheet numbers recorded in `library.json`. Candidate parts have been looked up in the JLCPCB

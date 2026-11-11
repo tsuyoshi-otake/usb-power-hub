@@ -23,19 +23,20 @@ Evidence is kept outside the repository, in `~/tmp/usb-power-hub/cost-down/jlcpc
 was named), and, for the comparison by hand on a fresh form, `screenshot-1794419899783-167.jpg` (0.25 mm class,
 $45.65) and `screenshot-1794419963795-169.jpg` (0.3 mm class, $8.00).
 
-## 1. What the form took from r02's Gerber
+## 1. The form with r02's Gerber
 
 | Option | JLCPCB form | r01's form | Verdict |
 |---|---|---|---|
 | Detected board | "4 layer board of 72x100mm" | the same | match |
-| Min via hole size/diameter | **0.3mm/(0.4/0.45mm)** | 0.25mm/(0.35/0.4mm) | the standard class; r02's smallest hole is 0.30 mm |
+| Min via hole size/diameter | **0.3mm/(0.4/0.45mm)**, the form's default, left as it was | 0.25mm/(0.35/0.4mm), selected by hand to match r01's 0.25 mm vias | the standard class; r02's smallest hole is 0.30 mm, so this is the class to order |
 | Via covering | Plugged, $0.00 (Tented greyed out) | the same | unchanged |
-| Material type | FR4 TG135 | the via-class notice forced FR4 Tg155 | no longer forced |
+| Material type | FR4 TG135 | FR4 TG135 shown, but the 0.25 mm class's notice said FR4 Tg155 is selected automatically (unresolved) | TG135, no notice to resolve |
 | Stackup | "Specify Stackup: Yes", JLC04161H-7628, set by hand as in r01; the price stayed $8.00 | the same | match (D27) |
 | Surface finish, copper, thickness | HASL (with lead); 1 oz / 0.5 oz; 1.6 mm | the same | match |
 
-r01's journal records that the form added the 0.25 mm class and its fees by itself from r01's Gerber. With
-r02's Gerber the form shows the 0.3 mm class, and its charges carry neither line.
+The form does not show that it read the via size from the Gerber: a fresh form with no Gerber also shows the
+0.3 mm class at $8.00 (`screenshot-1794419963795-169.jpg`). What is shown is that the class r02 needs carries
+neither fee: with the 0.25 mm class, which r01's vias needed, the form adds both lines by itself.
 
 ## 2. Price
 
