@@ -75,6 +75,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   - purchasable stock: the one `<div class="block-goods-detail-available_purchase">`.
   The bulk-purchase blocks lower on the page belong to related products: a regex over any
   "available_purchase" field returned their stock.
+- **Read a regulator's tolerance from the datasheet's order-code table, not from the product
+  page's 主な仕様.** g129527 (XC6221B111NR-G) lists 出力電圧精度 ±1 %; Torex's sheet gives
+  ±1 % only for V<sub>OUT</sub> ≥ 2.00 V, and ±20 mV (1.080–1.120 V) for the 1.10 V part.
+  Verified 2026-11-11.
 - **The shipping rule is on `/catalog/pages/buy.aspx`, server-rendered.**
 - Verified 2026-11-03 on 43 product pages by the main session, and again by two verifiers'
   fresh downloads.
@@ -133,6 +137,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   ("two crystals, a consequence of D11") was withdrawn after an independent
   verifier showed D11 forces only a 24 MHz hub clock; it is now P13 and OI-2 is
   open again.
+- **A rejection that rests on a catalogue or stock fact expires: re-run the lookup when the
+  question returns.** Verified 2026-11-11 (#3): the RP2350A was rejected on 2026-11-04
+  because Akizuki had no 1.1 V regulator and JLCPCB held 1 of its inductor (C42411119).
+  Seven days later Akizuki listed XC6221B111NR-G (g129527) and the inductor stood at 738.
+  Record such a reason with its date and the query that produced it.
 
 ## Shell and Python on this box
 

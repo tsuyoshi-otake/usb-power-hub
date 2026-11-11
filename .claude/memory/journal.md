@@ -1017,3 +1017,49 @@ Section 13 (board) only once verified.
   2026-11-06.
 - **Cleanup.** The other session's `freerouting.log` (105 MB) was deleted, with the user's OK.
 - **Learning.** None verified yet; a pour comparison after import is planned.
+
+## 2026-11-11 - #3 revisited: Akizuki now lists a 1.1 V LDO (XC6221B111NR-G)
+
+- **Request.** The user: 「設計を見直してほしい。https://akizukidenshi.com/catalog/g/g129527/
+  これとか良くない」.
+- **Symptom.** Issue #3 and Rev0.4 §9 rejected the RP2350A on 2026-11-04 because "no Basic or
+  Akizuki regulator makes an external 1.1 V". Akizuki listed one on 2026-11-11.
+- **Findings** (all read 2026-11-11).
+  - Akizuki g129527: Torex XC6221B111NR-G, 1.1 V LDO, SSOT-24 (4 pins, 1.3 mm pitch), ¥50,
+    通販購入可能数 102, page release 2026-11-11.
+  - Torex datasheet JTR03028-016a (Akizuki `/goodsaffix/xc6221-j.pdf`):
+    - type B = no CE pull-down, C<sub>L</sub> discharge; accuracy code 1 at 1.10 V is
+      1.0800–1.1200 V (±20 mV at I<sub>OUT</sub> 10 mA, 25 °C), not the ±1 % of Akizuki's
+      table, which the datasheet gives only for V<sub>OUT</sub> ≥ 2.00 V;
+    - load regulation 10 mV typical, 40 mV maximum (0.1–100 mA); I<sub>OUTMAX</sub> 200 mA;
+      V<sub>IN</sub> 1.6–6.0 V; ±100 ppm/°C typical;
+    - C<sub>L</sub> ≥ 4.7 µF for settings 0.80–1.15 V, C<sub>IN</sub> ≥ 1.0 µF;
+    - SSOT-24 pins: 1 CE, 2 V<sub>SS</sub>, 3 V<sub>OUT</sub>, 4 V<sub>IN</sub>; 150 mW alone,
+      500 mW on a 40 × 40 mm board. The outline drawing is not in this PDF.
+  - RP2350 datasheet (build d126e9e, the 2026-11-04 copy): DVDD 1.05–1.16 V; an external
+    1.1 V supply is allowed with VREG_FB to ground and VREG_VIN / VREG_AVDD still powered
+    (p.451, Figure 21); the supplies may come up in any order (§6.1.8). RP2354A = the same
+    die and pinout with a 2 MB W25Q16JV in the package.
+  - Worst case by the limits: 1.080 − 0.040 = 1.040 V, 10 mV under the 1.05 V minimum; typical
+    1.090 V. The datasheet gives no figure between 10 mA and the load, so the 40 mV is the
+    only bound.
+  - Core current through an LDO: hello_usb takes 14.7 mA at 3.3 V (48.5 mW) through the
+    on-chip switcher; at an assumed 80–90 % efficiency that is 35.3–39.7 mA of DVDD, against
+    ≤ 16.6 mA for the RP2040. The efficiency is an assumption, not a datasheet figure.
+  - JLCPCB pool: C2040 RP2040 84,031, $1.0854; C42411118 RP2350A 6,171, $1.293; C41378174
+    RP2354A 9,184, $1.2554 (9,584 in a query minutes earlier); C97521 W25Q128JVSIQ $2.2574;
+    C42411119 (the RP2350 inductor) **738**, $0.3363, minimum 5 — it was 1 on 2026-11-04;
+    XC6221B111NR-G and -MR-G: no exact match; C485147 TLV74311PDBVR 11,002. All Extended
+    except C97521.
+- **Root cause of the stale rejection.** Both reasons recorded on 2026-11-04 were catalogue
+  and stock facts, and both changed within 7 days.
+- **Fix.** None yet: the design is unchanged. The choice (keep the RP2040; RP2354A with this
+  LDO, hand-soldered; RP2354A with the on-chip regulator and C42411119 as a third Extended
+  part) is the user's, since D29 is a user decision. Rev0.4 §9's sentence stays as written
+  until that choice.
+- **Verification.** Product page fetched; datasheet pages 1–11 read as text; RP2350 statements
+  re-read in the 2026-11-04 extraction; stock and prices from `tools/jlc_stock.py` and the same
+  API's `componentPrices`.
+- **Learning.** rules.md: "Decision records" (a catalogue or stock reason expires) and
+  "Akizuki" (read a tolerance from the datasheet's order code).
+- **Commit.** This journal entry and the rules.md entries.
