@@ -135,11 +135,18 @@ Quote on 2026-11-12 00:23 (USD, the account's currency). Screenshots: `final-179
 - **Cause of the jump:** the 0.25 mm via class adds the 4-Wire Kelvin Test and a minimum-via-size fee
   automatically ($34.16 together). The estimate did not know. Without them the quote is $47.69,
   $6.08 below the estimate, mostly from the component prices at the quote.
-- Shipping is chosen in the cart, which was not opened. The quote page shows the parcel weight,
-  556.50 g (the estimate's $7.23 was a 0.24 kg PCB-only parcel), so the shipping figure is **not known**.
-- At the planning rate of 160 yen/USD: JLCPCB 13,096 yen without shipping; with the estimate's $7.23
-  shipping 14,253 yen; with Akizuki 7,695 yen about 21,950 yen, against 17,456 yen estimated.
-- Lead time shown: PCB 3 days, assembly 3-4 days, plus shipping.
+- **Shipping to Japan**, read on the PCB form on 2026-11-12 (`shipping-1794411393890-164.jpg`,
+  `shipping-panel-1794411384681-162.jpg`): OCS Express $7.23 (4-6 business days), UPS Worldwide Express
+  Saver $9.69 (3-5), DHL Express $17.67 (1-3; the form's default, left unchanged), FedEx Express $20.81
+  (2-4), S.F. Express Economy $16.35 (5-9), OCS NEP $4.51 (4-6; at most 0.6 kg and 10 x 10 cm). These are
+  prices for the form's 0.24 kg PCB-only parcel. The quote page weighs the assembled order at 556.50 g and
+  the cart prices that parcel, so the real shipping may be higher. Nothing was selected.
+- Total with the estimate's carrier (OCS Express): $89.08, 14,253 yen at the planning rate of 160 yen/USD;
+  with the default DHL Express: $99.52. With the Akizuki parts (7,695 yen) the estimate's total of 17,456 yen
+  becomes about 21,950 yen (OCS Express).
+- Lead time shown: PCB 3 days, assembly 3-4 days, plus the carrier's 4-6 business days (OCS Express). The
+  PCB form, reopened with "Change PCB", showed the build time "3-4 days" selected ("3 days" is offered for
+  PCBA only); both cost $0.00.
 
 ## 7. What was not done, and what is left in the user's accounts
 
@@ -156,6 +163,7 @@ Quote on 2026-11-12 00:23 (USD, the account's currency). Screenshots: `final-179
    (hole 0.30 mm, pad 0.45 mm or more). The second is a layout change and a new revision, not a setting.
 2. **Confirm Parts Placement:** the estimate budgeted $0.45; the quote has it off. CLAUDE.md 4.2 wants
    placement checked; JLCPCB's post-order DFM does it anyway.
-3. **Shipping method and price:** read in the cart.
+3. **Shipping method:** the form's default is DHL Express, $17.67; the estimate assumed OCS Express, $7.23,
+   which takes 4-6 days. The cart prices the real parcel; choose there.
 4. **Material and solder paste:** confirm "FR4 TG135 or Tg155" and "High temp." paste with leaded HASL in
    the cart before paying.

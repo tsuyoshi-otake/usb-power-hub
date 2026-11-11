@@ -1131,7 +1131,8 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   $28.08. The 0.25 mm via class alone adds $34.16 (a 4-Wire Kelvin Test and a minimum-via fee, added
   by the form itself, which also offers Plugged instead of Tented); the estimate did not know. The
   other lines net to -$6.08: component prices (-$6.85), small fees, and "Confirm Parts Placement"
-  left off (-$0.45). Shipping for the PCBA parcel (556.50 g) was not read: it is chosen in the cart.
+  left off (-$0.45). Shipping read on the PCB form for the 0.24 kg PCB-only parcel: OCS Express $7.23, UPS $9.69, DHL $17.67
+  (default), FedEx $20.81; the assembled parcel (556.50 g) is priced only in the cart.
 - **DFM.** JLCDFM's Danger items are the 0.25 mm vias at exactly its 0.1 mm annular-ring boundary,
   through-hole-to-SMD distance (hand-soldered modules), 107 silkscreen/via pairs (vias plugged) and same-net
   via-to-pad spacing (145 pairs, none on different nets). Not explained: mask opening exposing a trace

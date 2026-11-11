@@ -102,9 +102,10 @@ less $7.23 shipping). The $28.08 difference:
 | "Confirm Parts Placement" left off (the estimate budgeted it) | -0.45 |
 
 At 160 yen/USD the JLCPCB part is 13,096 yen without shipping; the total of this study, 17,456 yen,
-becomes about 21,950 yen if shipping stays at the estimate's $7.23. The shipping of the PCBA parcel
-(556.50 g on the quote page, against the 0.24 kg PCB-only parcel priced here) was not read: it is
-chosen in the cart. The line-by-line record is in
+becomes about 21,950 yen if shipping stays at the estimate's $7.23. The form still prices the 0.24 kg
+PCB-only parcel at $7.23 for OCS Express on 2026-11-12 (UPS $9.69, DHL $17.67 as the default, FedEx
+$20.81); the assembled order weighs 556.50 g on the quote page and is priced only in the cart. The
+line-by-line record is in
 `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, section 6.
 
 ## Akizuki (2 units, prices tax included)

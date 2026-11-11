@@ -27,7 +27,7 @@
 | ERC | 0 violations (`UsbPowerHub_Main_Rev0.4_ERC.json`) |
 | DRC | 0 violations, 0 unconnected items, 0 schematic-parity items (`UsbPowerHub_Main_Rev0.4_DRC.json`) |
 | JLCPCB DFM, part mapping, placement preview | reviewed 2026-11-11/12: `JLCPCB_REVIEW.md` (JLCDFM: every Danger and Warning item listed one by one with a judgement, the unexplained ones marked; part mapping 40 of 40, 0 substituted; placement read per class). Holds only while the Gerber, BOM and CPL SHA-256 in `SHA256SUMS.txt` are the ones recorded there |
-| Quote | $81.85 without shipping (5 boards, 2 assembled), lead time PCB 3 days + assembly 3-4 days; `JLCPCB_REVIEW.md` section 6 |
+| Quote | $81.85 without shipping (5 boards, 2 assembled), lead time PCB 3 days + assembly 3-4 days; shipping to Japan $4.51-$20.81 by carrier for the form's 0.24 kg PCB-only parcel (OCS Express $7.23, DHL Express $17.67 the default), not yet priced for the assembled parcel; `JLCPCB_REVIEW.md` section 6 |
 | Sourcing | `SOURCING_CHECK.md`, PASS on 2026-11-12; repeated before payment |
 | Firmware | none |
 | JLCPCB order number | **none: nothing was ordered or paid** |
@@ -83,7 +83,7 @@ it is tracked in `design/ecad/source/` and identified by the hashes below; copy 
 | Differential impedance computed against JLC04161H-7628 | **not done**: D27's W 0.31 / S 0.15 mm is a model value; JLCPCB's differential calculator returned no result on 2026-11-03 and was not rerun | Claude |
 | DFM items not explained: mask opening exposing a trace (4 Danger, 13 Warning), negative mask expansion (18), silkscreen to pad (2), fiducial (3), trace spacing (25) | see `JLCPCB_REVIEW.md` section 4; JLCPCB's own DFM after an order may differ | Claude, then JLCPCB's post-order DFM |
 | 0.25 mm via class adds $34.16 (Kelvin test + minimum via fee) | decision pending (accept, or move to a 0.30 mm class: a new revision) | user |
-| Confirm Parts Placement ($0.45) off; shipping method and price; material TG135 or Tg155; solder paste "High temp." with leaded HASL | to confirm in the cart before paying | user |
+| Confirm Parts Placement ($0.45) off; shipping method (default DHL $17.67; the estimate assumed OCS $7.23) and the price of the assembled parcel; material TG135 or Tg155; solder paste "High temp." with leaded HASL | to confirm in the cart before paying | user |
 | EasyEDA import (D32) | blocked at the user's sign-in and terms prompt (`EASYEDA_IMPORT.md`) | user signs in, then Claude |
 | Prototype or first-article evidence | nothing built or measured | bring-up |
 | Stock check at order time, and again before payment | done 2026-11-12 only | Claude, immediately before payment |
@@ -99,6 +99,6 @@ it is tracked in `design/ecad/source/` and identified by the hashes below; copy 
 - No footprint is proven on a board; nothing has been built or measured.
 - The open issues of CLAUDE.md 11 stand (OI-1, OI-5, OI-6, OI-8, OI-26); the set is not orderable until each
   is closed with evidence.
-- The shipping cost of the PCBA parcel is unknown, so the landed cost is not known (the quote is $81.85 without it).
+- The shipping of the assembled parcel (556.50 g) is priced only in the cart; the PCB-only figures ($7.23 OCS Express to $20.81 FedEx) are a floor, so the landed cost is known only as $89.08 or more with OCS Express ($81.85 without shipping).
 - X-ray inspection of the two leadless parts (RP2040 LQFN-56, CH335F QFN-28) may be charged per board; it is
   not in the quote.

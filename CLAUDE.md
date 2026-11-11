@@ -757,7 +757,8 @@ file needs them again.
       expansion, fiducial); the user accepts.*
 - [ ] Prototype or first-article evidence attached. *Nothing is built.*
 - [ ] Final landed cost, shipping, and lead time reviewed. *Half: $81.85 without shipping, PCB 3 days and
-      assembly 3-4 days; shipping is chosen in the cart and is unknown (user).*
+      assembly 3-4 days; shipping for the 0.24 kg PCB-only parcel is $7.23 (OCS Express) to $17.67 (DHL, the
+      default); the assembled parcel is priced only in the cart (user).*
 - [ ] **User approval obtained before order submission or payment.**
 
 ---
