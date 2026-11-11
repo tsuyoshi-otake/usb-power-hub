@@ -1082,3 +1082,17 @@ Section 13 (board) only once verified.
 - **Residual risk.** None for the board: it is unchanged. Reopen if V-HOST-01 shows J1 short of
   current, or if the RP2040's supply (Extended C2040, 84,031 in stock) changes.
 - **Commit.** This entry and the §9 edit; `949d944` and this commit are not pushed.
+
+### Follow-up (same day): §9 trimmed after an advisor review
+
+- **Symptom.** §9's re-review carried 1.040 V, 35–40 mA and 2.09 USD, which no committed
+  script reproduces (rules.md, "Design documents": every derived number in a design document
+  comes from one script). The claim "nothing in product.md needs an RP2350" had been made from
+  CLAUDE.md's summary, not from product.md.
+- **Fix.** §9 keeps dated catalogue facts, the user's words in full, and pointers to the issue
+  #3 comment and this journal; the arithmetic stays in those two records. product.md was read:
+  no requirement exceeds the RP2040's capability. A move would rewrite REQ-HOST-02 (serial
+  from U8's unique ID), REQ-MEAS-03, REQ-BOOT-02 and REQ-MFG-05.
+- **Verification.** check_schematic.py: 3992 checks, 0 failed, after the edit.
+- **Learning.** Estimates for a rejected alternative go in the issue and the journal, not in
+  the design document. The rule already stands in rules.md.

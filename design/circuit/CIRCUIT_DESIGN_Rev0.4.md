@@ -1048,28 +1048,23 @@ Basic part provides (the recommended one, C42411119, was Extended with 1 in stoc
 Basic or Akizuki regulator made an external 1.1 V instead. It would have needed at least two
 Extended parts.
 
-**Re-reviewed on 2026-11-11, and D29 kept (the user's choice).** The user asked whether
-Akizuki's new g129527, a Torex XC6221B111NR-G (1.1 V LDO, SSOT-24, ¥50), changed this
-(「設計を見直してほしい。… これとか良くない」), and chose 「RP2040 のまま (推奨)」. Both 2026-11-04
-reasons had changed: that LDO exists, and C42411119 had 738 in stock. Neither makes a move
-to an RP2350 pay for itself here:
+**Re-reviewed on 2026-11-11, and D29 kept (the user's choice).** The user wrote
+「設計を見直してほしい。https://akizukidenshi.com/catalog/g/g129527/ これとか良くない」, and chose 「RP2040 のまま
+(推奨)」 from three options (keep the RP2040; RP2354A with that LDO; RP2354A with the on-chip
+regulator).
 
-- Nothing in `requirements/product.md` needs an RP2350.
-- The LDO's data (Torex JTR03028-016a) puts V<sub>OUT</sub> at 1.080–1.120 V (±20 mV at
-  10 mA), with load regulation up to 40 mV. Its worst case, 1.040 V, is 10 mV under the
-  RP2350's 1.05 V DVDD minimum. The typical case, 1.090 V, is inside it. Only a built board
-  would settle the worst case.
-- The RP2350's core would draw about 35–40 mA from J1 through an LDO, against at most
-  16.6 mA for the RP2040. That uses an assumed 80–90 % efficiency for the on-chip switcher
-  behind hello_usb's 14.7 mA at 3.3 V, so it is an estimate. It would reopen D26's
-  bMaxPower 200 mA.
-- The saving is 2.09 USD per board at JLCPCB's 1–9 tier (2026-11-11): the RP2040 and U8,
-  1.0854 + 2.2574 USD, against the RP2354A alone, 1.2554 USD, whose 2 MB flash sits in the
-  package. The LDO (¥50) and its 4.7 µF output capacitor come out of that, and the SSOT-24
-  part would be hand-soldered. The routed board (P4) and its checks would be redone.
+- Both 2026-11-04 reasons had changed by then: Akizuki g129527 is a Torex XC6221B111NR-G, a
+  1.1 V LDO in SSOT-24 (¥50, 通販購入可能数 102, released 2026-11-11), and JLCPCB held 738 of
+  C42411119 (Extended). The LDO has no exact match in JLCPCB's assembly pool (searched
+  2026-11-11).
+- No requirement in `requirements/product.md` exceeds what the RP2040 provides (read
+  2026-11-11). A move would rewrite REQ-HOST-02, REQ-MEAS-03, REQ-BOOT-02 and REQ-MFG-05,
+  reopen D26's bMaxPower, and redo the routed board (P4).
+- The LDO and current figures behind the choice are estimates and datasheet limits that
+  `CIRCUIT_DESIGN_Rev0.4_calc.py` does not reproduce, so they are not repeated here. They
+  are in the issue #3 comment of 2026-11-11 and in `.claude/memory/journal.md`.
 
-The re-review is recorded in `.claude/memory/journal.md` (2026-11-11). It changes no
-decision, so it has no D number.
+No decision changes, so this has no D number.
 
 **D31 replaced the hub module with the bare chip.** The module (AE-QFN28-DIP(CH335F),
 Akizuki g129556, ¥420) was 38.5 × 10.2 mm of hand-soldered DIP30 on headers, with no
