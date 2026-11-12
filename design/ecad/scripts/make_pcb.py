@@ -1,4 +1,4 @@
-"""Place, route and label the Rev0.4 board from its documents (issue #6 P3-P5; CLAUDE.md 5, 6).
+"""Place, route and label the Rev0.5 board from its documents (issue #6 P3-P5; CLAUDE.md 5, 6).
 
 Run with KiCad's own Python from the repository root, after make_schematic.py:
 
@@ -9,9 +9,9 @@ Inputs:
 - the schematic in design/ecad/source; its netlist is exported with kicad-cli, so the board
   carries exactly what the schematic carries;
 - design/ecad/libraries/usb-power-hub.pretty, the project footprints;
-- design/ecad/PLACEMENT_Rev0.4.md, the position and rotation of every part, and the
+- design/ecad/PLACEMENT_Rev0.5.md, the position and rotation of every part, and the
   silkscreen labels (its silk table);
-- design/ecad/ROUTING_Rev0.4.md, the plane, the hand-drawn tracks, the GND fanout, the zones,
+- design/ecad/ROUTING_Rev0.5.md, the plane, the hand-drawn tracks, the GND fanout, the zones,
   and the classes and keepouts of the router;
 - design/ecad/routing/usb-power-hub.ses, the router's session, with routing/autoroute.json, the
   SHA-256 of the router input it was made from (autoroute.py writes both).
@@ -64,8 +64,8 @@ ROOT = HERE.parents[2]
 ECAD = ROOT / "design" / "ecad"
 SRC = ECAD / "source"
 LIB = ECAD / "libraries" / "usb-power-hub.pretty"
-DOC = ECAD / "PLACEMENT_Rev0.4.md"
-ROUTING = ECAD / "ROUTING_Rev0.4.md"
+DOC = ECAD / "PLACEMENT_Rev0.5.md"
+ROUTING = ECAD / "ROUTING_Rev0.5.md"
 NAME = "usb-power-hub"
 SESSION = ECAD / "routing" / f"{NAME}.ses"
 RECORD = ECAD / "routing" / "autoroute.json"

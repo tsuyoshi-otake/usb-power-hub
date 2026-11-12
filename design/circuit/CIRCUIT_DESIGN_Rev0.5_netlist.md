@@ -1,8 +1,8 @@
 # USB Power-Control Hub — Rev0.4 netlist
 
 > **WIP — MANUFACTURING PROHIBITED.** This is the capture list of
-> [`CIRCUIT_DESIGN_Rev0.4.md`](CIRCUIT_DESIGN_Rev0.4.md): every part, every pin and every net
-> of Rev0.4 §3–§6.6 with the capture values of D34. The circuit document stays the design;
+> [`CIRCUIT_DESIGN_Rev0.5.md`](CIRCUIT_DESIGN_Rev0.5.md): every part, every pin and every net
+> of Rev0.5 §3–§6.6 with the capture values of D34. The circuit document stays the design;
 > this file is its transcription in a form a script can read. Issue #6 P2.
 
 `design/ecad/scripts/make_schematic.py` generates the KiCad schematic from the tables below,
@@ -29,10 +29,10 @@ circuit document together.
 - Pins that share one position in the symbol (U1's IOVDD and DVDD, the crystals' two G pins)
   are listed one by one, all on the same net.
 - Passive numbers: the common block uses R1…, C1…, TP1…; channel A uses R101…, C101…,
-  TP101…, and channel B the same + 100. Other channel-B designators follow Rev0.4 §6.2: U and
+  TP101…, and channel B the same + 100. Other channel-B designators follow Rev0.5 §6.2: U and
   RS + 10, Q + 20; D10/D11 → D12/D13, J2 → J3, SW1 → SW2.
 
-## GPIO map (U1, 24 of 30; Rev0.4 §6.4)
+## GPIO map (U1, 24 of 30; Rev0.5 §6.4)
 
 | GPIO | Pin | Net | GPIO | Pin | Net |
 |---|---:|---|---|---:|---|
@@ -147,7 +147,7 @@ widest thickness code).
 | TP6 | TestPoint | VDDA | none | 1=VDDA | P11 |
 | TP7 | TestPoint | GND | none | 1=GND | P11 |
 | TP8 | TestPoint | VBUS_IN | none | 1=VBUS_IN | P11 |
-| TP9 | TestPoint | V_J4 | none | 1=V_J4 | Rev0.4 §12 item 5 (V-MEAS-06) |
+| TP9 | TestPoint | V_J4 | none | 1=V_J4 | Rev0.5 §12 item 5 (V-MEAS-06) |
 | TP14 | TestPoint | VBUS_J1 | none | 1=VBUS_J1 | D35 (V-PWR-03) |
 | FID1 | Fiducial | Fiducial | none | — | ≥ 3 global fiducials |
 | FID2 | Fiducial | Fiducial | none | — | |
@@ -158,7 +158,7 @@ widest thickness code).
 | H4 | MountingHole | MountingHole | none | — | |
 <!-- netlist:end -->
 
-### Sheet `mcu` — U1 RP2040, U8 flash, Y1, SWD (Rev0.4 §6.5)
+### Sheet `mcu` — U1 RP2040, U8 flash, Y1, SWD (Rev0.5 §6.5)
 
 <!-- netlist:begin sheet=mcu -->
 | Ref | Symbol | Value | Order | Pins | Note |
@@ -196,7 +196,7 @@ widest thickness code).
 | TP12 | TestPoint | CLKOUT | none | 1=CLKOUT | D29, GPOUT0 (V-MEAS-06) |
 <!-- netlist:end -->
 
-### Sheet `hub` — U6 CH335F, Y2 (Rev0.4 §6.6)
+### Sheet `hub` — U6 CH335F, Y2 (Rev0.5 §6.6)
 
 <!-- netlist:begin sheet=hub -->
 | Ref | Symbol | Value | Order | Pins | Note |
@@ -209,7 +209,7 @@ widest thickness code).
 | TP13 | TestPoint | VDD33_HUB | none | 1=VDD33_HUB | D31 |
 <!-- netlist:end -->
 
-### Sheet `adc` — U7, U17, the SPI level shifters, U30 (Rev0.4 §3.3, §6.4)
+### Sheet `adc` — U7, U17, the SPI level shifters, U30 (Rev0.5 §3.3, §6.4)
 
 <!-- netlist:begin sheet=adc -->
 | Ref | Symbol | Value | Order | Pins | Note |
@@ -236,7 +236,7 @@ widest thickness code).
 
 ## Channel block (port A and port B)
 
-### Sheets `channel_a` and `channel_b` (Rev0.4 §3.1, §3.2, §3.4)
+### Sheets `channel_a` and `channel_b` (Rev0.5 §3.1, §3.2, §3.4)
 
 <!-- netlist:begin sheet=channel_a,channel_b -->
 | Ref A | Ref B | Symbol | Value | Order | Pins | Note |
@@ -326,10 +326,10 @@ widest thickness code).
 | R141 | R241 | R | 510 | C17734 | 1=LED_FLT_{x} 2=LEDA_FLT_{x} | red LED resistor (D34) |
 | D11 | D13 | NCD0805R1 | NCD0805R1 | C84256 | 1=GND 2=LEDA_FLT_{x} | port fault |
 | SW1 | SW2 | TS-1187A-B-A-B | TS-1187A-B-A-B | C318884 | 1=BTN_{x} 2=GND | port button |
-| TP101 | TP201 | TestPoint | OUT_H | none | 1=OUT_H_{x} | Rev0.4 §12 item 5 (V-MEAS-00) |
-| TP102 | TP202 | TestPoint | GATE_H | none | 1=GATE_H_{x} | Rev0.4 §12 item 5 (V-MEAS-00) |
-| TP103 | TP203 | TestPoint | HOLD_M | none | 1=HOLD_M_{x} | Rev0.4 §12 item 5 (V-MEAS-06) |
-| TP104 | TP204 | TestPoint | HOLD_L | none | 1=HOLD_L_{x} | Rev0.4 §12 item 5 (V-MEAS-06) |
+| TP101 | TP201 | TestPoint | OUT_H | none | 1=OUT_H_{x} | Rev0.5 §12 item 5 (V-MEAS-00) |
+| TP102 | TP202 | TestPoint | GATE_H | none | 1=GATE_H_{x} | Rev0.5 §12 item 5 (V-MEAS-00) |
+| TP103 | TP203 | TestPoint | HOLD_M | none | 1=HOLD_M_{x} | Rev0.5 §12 item 5 (V-MEAS-06) |
+| TP104 | TP204 | TestPoint | HOLD_L | none | 1=HOLD_L_{x} | Rev0.5 §12 item 5 (V-MEAS-06) |
 | TP105 | TP205 | TestPoint | VSUP | none | 1=VSUP_{x} | P11 |
 | TP106 | TP206 | TestPoint | VBUS | none | 1=VBUS_{x} | P11 |
 <!-- netlist:end -->
@@ -352,7 +352,7 @@ appear in the netlist.
 
 ## What this list cannot see
 
-- Whether a value is right: the circuit document and `CIRCUIT_DESIGN_Rev0.4_calc.py` decide
+- Whether a value is right: the circuit document and `CIRCUIT_DESIGN_Rev0.5_calc.py` decide
   that. The checker only proves that the schematic carries what this list says.
 - Placement notes ("at U1 pin 1") are layout instructions for P3; no netlist shows them.
 - Pin functions: the checker compares pin numbers and nets, so a symbol with a wrong pin map

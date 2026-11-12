@@ -113,7 +113,7 @@ W_SEARCH_HI_MM = 2.0                       # wider bracket, only to label "needs
 GRID_W_MM = (0.10, 0.12, 0.15, 0.18, 0.20, 0.25, 0.30, 0.35, 0.40, 0.50, 0.60)
 
 # Recommended USB High-Speed pair on L1 over L2: the D27 starting geometry in
-# design/circuit/CIRCUIT_DESIGN_Rev0.4.md section 10 and CLAUDE.md 5.3. Change it
+# design/circuit/CIRCUIT_DESIGN_Rev0.5.md section 10 and CLAUDE.md 5.3. Change it
 # there and here together. TRACK_TOL is JLCPCB's track-width tolerance
 # (capabilities page), applied with S held fixed.
 REC_STACKUP_ID = "JLC04161H-7628"

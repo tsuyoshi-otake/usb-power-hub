@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Reproduce the calculated numbers quoted in CIRCUIT_DESIGN_Rev0.4.md.
+"""Reproduce the calculated numbers quoted in CIRCUIT_DESIGN_Rev0.5.md.
 
 Usage:
-    python design/circuit/CIRCUIT_DESIGN_Rev0.4_calc.py
+    python design/circuit/CIRCUIT_DESIGN_Rev0.5_calc.py
 
 Every section header names the document section that quotes its output. The
 inputs below are the Rev0.4 component values and datasheet or catalogue

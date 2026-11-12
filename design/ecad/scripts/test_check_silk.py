@@ -24,7 +24,7 @@ import unittest
 HERE = pathlib.Path(__file__).resolve().parent
 CHECK = HERE / "check_silk.py"
 ECAD = HERE.parent
-DOC = ECAD / "PLACEMENT_Rev0.4.md"
+DOC = ECAD / "PLACEMENT_Rev0.5.md"
 ORIGIN = (50.0, 122.0)
 COLS = ("Label", "Text", "x", "y", "Rot", "Width", "Height", "Stroke", "Leader")
 
@@ -235,8 +235,8 @@ class CheckSilkTest(unittest.TestCase):
                              "FAIL silk J2: port label 2.")
 
     def test_title_mismatch(self):
-        self.assertFailsWith(run_check(board=retext("Rev0.4", "Rev0.5"), doc=set_row("revision", Text="Rev0.5")),
-                             "FAIL silk revision: want the title block's 'Rev0.4'")
+        self.assertFailsWith(run_check(board=retext("Rev0.5", "Rev0.6"), doc=set_row("revision", Text="Rev0.6")),
+                             "FAIL silk revision: want the title block's 'Rev0.5'")
 
     # ---- 4 association ------------------------------------------------------------------------
     def test_label_far_without_leader(self):

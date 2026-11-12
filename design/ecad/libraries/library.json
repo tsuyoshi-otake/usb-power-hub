@@ -4,7 +4,7 @@
   "kicad": "9.0.8",
   "reviewed": "Claude, issue #6 P1, 2026-11-04",
   "about": [
-    "The parts register of Rev0.4 (design/circuit/CIRCUIT_DESIGN_Rev0.4.md 6.2). One entry per symbol.",
+    "The parts register of Rev0.5 (design/circuit/CIRCUIT_DESIGN_Rev0.5.md 6.2). One entry per symbol.",
     "'land' holds what the datasheet says, in the datasheet's own terms; make_libraries.py --check measures the footprint file against it.",
     "'footprint.params' holds design choices for a generated footprint; nothing checks them except the land check and the DRC run.",
     "'pins' maps each symbol pin number to the datasheet's pin name. A [datasheet, symbol] pair means the stock symbol spells the same pin differently; the check then compares the symbol's spelling exactly.",
@@ -41,7 +41,7 @@
         "45": "VREG_VOUT", "46": "USB_DM", "47": "USB_DP", "48": "USB_VDD", "49": "IOVDD", "50": "DVDD",
         "51": "QSPI_SD3", "52": "QSPI_SCLK", "53": "QSPI_SD0", "54": "QSPI_SD2", "55": "QSPI_SD1",
         "56": ["QSPI_SS_N", "~{QSPI_SS}"], "57": "GND"},
-      "notes": ["Figure 3 gives the ePad no number; it is numbered 57 as in KiCad's symbol and Rev0.4 6.5.",
+      "notes": ["Figure 3 gives the ePad no number; it is numbered 57 as in KiCad's symbol and Rev0.5 6.5.",
                 "G20: the land is generated from Figure 167's numbers, not copied from a stock QFN-56 footprint."]
     },
     {
@@ -486,7 +486,7 @@
     {
       "id": "TC2030-NL",
       "value": "TC2030-NL (DNL)",
-      "refs": "SWD (no designator in Rev0.4)",
+      "refs": "SWD (no designator in Rev0.5)",
       "mpn": null,
       "manufacturer": "Tag-Connect (footprint only)",
       "order": {"vendor": "none", "code": "", "class": "Footprint only, not populated"},
@@ -566,7 +566,7 @@
       "mpn": null, "manufacturer": null,
       "order": {"vendor": "none", "code": "", "class": "Schematic only"},
       "symbol": {"base": "power:PWR_FLAG"},
-      "footprint": {"none": "ERC marker on V5L, V12F, VDDA and V5A, nets whose supply arrives through a passive part (CIRCUIT_DESIGN_Rev0.4_netlist.md); not a part, no footprint"},
+      "footprint": {"none": "ERC marker on V5L, V12F, VDDA and V5A, nets whose supply arrives through a passive part (CIRCUIT_DESIGN_Rev0.5_netlist.md); not a part, no footprint"},
       "datasheet": {"title": "KiCad 9.0.8 power.kicad_sym", "revision": "-", "url": "", "pins": "1 power output", "land": "-"},
       "land": {"kind": "none"},
       "pins": {"1": ["power flag", "~"]}

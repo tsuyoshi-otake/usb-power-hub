@@ -24,13 +24,13 @@ re-run's.
 - A block placement at **100 × 72 mm** passes every check below.
 - D24 (2026-11-03) adopts 100 × 72 mm. The user's condition was 「100x100未満ならいいんだっけ」:
   stay inside JLCPCB's 100 × 100 mm price tier. The size inside it came from this study
-  (CIRCUIT_DESIGN_Rev0.4.md §10).
+  (CIRCUIT_DESIGN_Rev0.5.md §10).
 
 This directory is a trial, not design data (CLAUDE.md §2: `design/experiments/` is
 non-authoritative). The block positions are a proposal. Nothing here is a footprint, an
 outline drawing or a layout.
 
-The placement that issue #6 P3 made from this proposal is `design/ecad/PLACEMENT_Rev0.4.md`;
+The placement that issue #6 P3 made from this proposal is `design/ecad/PLACEMENT_Rev0.5.md`;
 its *Deviations from the study* lists where the real footprints did not fit these blocks.
 
 ## Files

@@ -6,7 +6,7 @@ been executed — no board exists.
 
 Every requirement in `requirements/product.md` is covered by at least one entry here, and
 every entry cites the requirements it proves. Design-review gates G1 – G21 live in
-`design/circuit/CIRCUIT_DESIGN_Rev0.4.md` Section 8; entries here reference them rather than
+`design/circuit/CIRCUIT_DESIGN_Rev0.5.md` Section 8; entries here reference them rather than
 restate them. CLAUDE.md Section 8 ("Functional" gate) requires these to pass before release.
 
 **Stages:** *Design review* (against schematic/layout, before order) · *Bring-up* (first

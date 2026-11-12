@@ -1,10 +1,10 @@
-"""Route the Rev0.4 board from the routing document (issue #6 P4; CLAUDE.md 5.1, 5.3, 5.4).
+"""Route the Rev0.5 board from the routing document (issue #6 P4; CLAUDE.md 5.1, 5.3, 5.4).
 
 A library, not a script. make_pcb.py owns the board file and calls it after placing the parts;
 autoroute.py calls it to build Freerouting's input. Both parse the documents with
 make_pcb.doc_tables and hand this module the tables.
 
-The routed board is built in this order (design/ecad/ROUTING_Rev0.4.md):
+The routed board is built in this order (design/ecad/ROUTING_Rev0.5.md):
 1. `plane()`: In1.Cu becomes a plane layer holding the document's In1 zone (GND).
 2. `apply_rows()`: the hand-drawn tracks and vias of the `route` table and, for both channels,
    the `channel_route` table; channel B is channel A moved by dx, with the placement's
@@ -97,7 +97,7 @@ def _tune(p):
 def read(tables, refs, dx):
     """The routing document's tables -> {zones, pairs, rows, classes, keepouts, epads}.
 
-    tables: make_pcb.doc_tables of ROUTING_Rev0.4.md; refs: the placement's Ref A -> Ref B
+    tables: make_pcb.doc_tables of ROUTING_Rev0.5.md; refs: the placement's Ref A -> Ref B
     (plus the modules); dx: the placement's channel offset.
     """
     need = ("zones", "pairs", "route", "channel_route", "epad", "classes", "keepouts", "router_layers",

@@ -23,7 +23,7 @@ here, never in KiCad: the next run of `make_pcb.py` rebuilds the board.
 - In the channel table, channel B is channel A moved by `dx` in x: the same y, the same
   rotation. `{x}` in a region name is `A` or `B`.
 - Three parts of each channel sheet are in the common table: R139/C114/C115 and R239/C214/C215,
-  the over-current threshold filters at U30's inputs (Rev0.4 §3.4). U30 is shared, so the two
+  the over-current threshold filters at U30's inputs (Rev0.5 §3.4). U30 is shared, so the two
   sets sit beside it and cannot be 33.8 mm apart.
 - A note's `at X pin N` (also `pins N/M`, `pad N`) means the part has a pad on that pin's net
   within 3.0 mm of it, centre to centre; `at X`, `next to X` and `after X` mean the two
@@ -360,7 +360,7 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | Label | Text | x | y | Rot | Width | Height | Stroke | Leader |
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | title | USB Power-Control Hub | 66 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
-| revision | Rev0.4 | 71 | 8.25 | 0 | 1.2 | 1.2 | 0.2 | - |
+| revision | Rev0.5 | 71 | 8.25 | 0 | 1.2 | 1.2 | 0.2 | - |
 | J1 | HOST | 75.5 | 56.08 | 0 | 1 | 1 | 0.17 | - |
 | J2 | OUT A | 17.5 | 15.87 | 0 | 1 | 1 | 0.17 | - |
 | J3 | OUT B | 51.3 | 15.87 | 0 | 1 | 1 | 0.17 | - |

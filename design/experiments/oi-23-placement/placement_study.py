@@ -3,7 +3,7 @@
 Usage (standard library only):
     python -I design/experiments/oi-23-placement/placement_study.py [--svg OUT.svg]
 
-It answers two questions for CIRCUIT_DESIGN_Rev0.4.md:
+It answers two questions for the Rev0.4 circuit (CIRCUIT_DESIGN_Rev0.4.md, renamed Rev0.5 in #8):
 1. Necessary area. Could ANY layout of 85 x 35 mm (D10, before D24) hold the part set? It sums every
    courtyard, subtracts every square millimetre that could hold SMD parts under a raised
    module, and compares the result with the board area. It prints the bound for a sweep of

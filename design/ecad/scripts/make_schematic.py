@@ -1,11 +1,11 @@
-"""Write the Rev0.4 schematic (issue #6 P2) from the netlist document.
+"""Write the Rev0.5 schematic (issue #6 P2) from the netlist document.
 
 Run with KiCad's own Python from the repository root:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_schematic.py
 
 Input:
-- design/circuit/CIRCUIT_DESIGN_Rev0.4_netlist.md: every part, pin and net, in the tables
+- design/circuit/CIRCUIT_DESIGN_Rev0.5_netlist.md: every part, pin and net, in the tables
   between its `<!-- ...:begin -->` / `<!-- ...:end -->` markers;
 - design/ecad/libraries/usb-power-hub.kicad_sym: the project symbols, embedded unchanged,
   PWR_FLAG (the ERC driver marker, schematic-only) included.
@@ -25,7 +25,7 @@ a re-run writes the same bytes.
 Then it runs check_schematic.py, which compares the netlist KiCad exports from these files
 with the document. Exit status: 0 = written and checked; 1 = a check failed.
 
-What it CANNOT see: whether the document's circuit is right (CIRCUIT_DESIGN_Rev0.4.md and
+What it CANNOT see: whether the document's circuit is right (CIRCUIT_DESIGN_Rev0.5.md and
 its _calc.py decide that), and the readability of the drawing. A sheet made of labels shows
 connectivity, not signal flow.
 """
@@ -39,7 +39,7 @@ import uuid
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-DOC = ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.4_netlist.md"
+DOC = ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.5_netlist.md"
 LIB = ROOT / "design" / "ecad" / "libraries" / "usb-power-hub.kicad_sym"
 OUT = ROOT / "design" / "ecad" / "source"
 NICK = "usb-power-hub"

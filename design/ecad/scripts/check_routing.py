@@ -1,11 +1,11 @@
-"""Check the routed Rev0.4 board against its routing document (issue #6 P4; CLAUDE.md 5, 8).
+"""Check the routed Rev0.5 board against its routing document (issue #6 P4; CLAUDE.md 5, 8).
 
 Run with KiCad's own Python from the repository root, after make_pcb.py:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/check_routing.py
         [--src DIR] [--doc ROUTING.md] [--placement PLACEMENT.md] [--reports DIR]
 
-What it checks, each against design/ecad/ROUTING_Rev0.4.md:
+What it checks, each against design/ecad/ROUTING_Rev0.5.md:
 1. DRC with schematic parity: no violation of any severity, no unconnected item, no parity
    issue (Section 8, Routing gate: zero unrouted nets).
 2. In1.Cu is a plane layer holding only the GND zone, with no track or arc on it.
