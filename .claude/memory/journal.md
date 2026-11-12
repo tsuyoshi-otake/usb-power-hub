@@ -1224,3 +1224,22 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Not verified.** Serial I/O with a real board (no firmware), mouse handling in the running window, high
   DPI; "Save all as CSV" blocks the UI thread.
 - **Commit.** `4aa7e29`. Not pushed.
+
+## 2026-11-12 - #8 step 2 / #10: Rev0.5 planned and handed off to a new session
+
+- **Decision.** The user chose 「USB-C直付けのみ (推奨)」: C2765186 receptacles, machine-placed, replace the
+  four Akizuki modules, as Rev0.5; the #10 data-line taps (1 kΩ to GPIO26–29) go into the same revision.
+  Then the user asked to update the issue and hand off (「Issue更新して別セッションに引き継ごうか」), after
+  repeated `server_error` stream stalls in this long session.
+- **Handoff.** The plan, the land read from the maker's drawing, placements, taps, work order and risks are in
+  #8 (issuecomment-6811380017); #8's body marks step 2 decided; #10 points to it. Nothing in the repository
+  changed for Rev0.5.
+- **Correction before it reached a file.** The working notes put both D+ pads of C2765186 in the middle.
+  Enlarging the drawing's label row showed B7, A6, A7, B6 at −0.75, −0.25, +0.25, +0.75: D−, D+, D−, D+,
+  the usual 16-pin order. The handoff carries the corrected table.
+- **Found while writing it.** The NPTH pegs sit 0.165 mm (computed from the drawing) from the VBUS and GND
+  pads, below the board's 0.25 mm `min_hole_clearance`: a scoped rule backed by JLCPCB's NPTH figure, not a
+  global change.
+- **Learning.** Read a connector's pin order from the drawing's own labels, enlarged, before writing it down;
+  a remembered order is not evidence.
+- **Commit.** The one that adds this entry. Not pushed.
