@@ -1207,3 +1207,20 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Learning.** A form's state after an upload is evidence of detection only if it differs from the
   form's default; compare with a fresh form before writing "selected by itself".
 - **Commit.** The follow-up commit that adds this note.
+
+## 2026-11-12 - #9: host profiler, a native Win32 Rust app (demo-verified only)
+
+- **Request.** The user: 「PPK2のようなソフトウェアはRustでフレームワーク使わないネイティブアプリで頼むよ。
+  デザインと機能はPPK2ライクでお願い値」. Built by a delegated agent from a brief that fixed the stream
+  frame bit layout; reviewed and committed by the main session.
+- **Constraint kept.** No code, name or artwork of the reference profiler: its licence allows use only with
+  its maker's ICs. The app speaks only product.md 4.1/4.2.
+- **Single owner.** The frame bit layout and the `CAL?` format were chosen with the app; product.md 4.1/4.2
+  now records them (fields, flags, n ≤ 2800, CRC parameters and check value 0x29B1, sample time), so
+  firmware follows the document, not the Rust source.
+- **Review.** Re-ran `cargo test --release` (38 passed), `cargo build --release` and
+  `cargo clippy --all-targets` (11 + 4 style warnings fixed, now 0), and a `--demo --screenshot` run
+  (exit 0, both traces, lost data hatched). No profiler, cargo or rustc process left.
+- **Not verified.** Serial I/O with a real board (no firmware), mouse handling in the running window, high
+  DPI; "Save all as CSV" blocks the UI thread.
+- **Commit.** `4aa7e29`. Not pushed.
