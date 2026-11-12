@@ -31,6 +31,7 @@ PRETTY = HERE.parents[0] / "libraries" / "usb-power-hub.pretty"
 CLI = pathlib.Path(sys.executable).resolve().parents[1] / "bin" / "kicad-cli.exe"
 RECEPTACLE = "USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
 PEG_RULE = re.compile(r'\(rule "JLCPCB NPTH to copper[^"]*"\n.*?memberOfFootprint\([^)]*\)"\)\)\n', re.S)
+BOARD_ITEMS = re.compile(r"\n\t\((?:footprint|segment|via|zone)\b.*?\n\t\)", re.S)   # a top-level item ends at "\n\t)"
 NAME = "usb-power-hub"
 EXTS = (".kicad_pcb", ".kicad_pro", ".kicad_dru")
 
@@ -171,9 +172,14 @@ def peg_drc(track_gap, keep_rule=True):
             dru, n = PEG_RULE.subn("", dru)
             assert n == 1, "the peg rule is not in the rules file"
         (d / "t.kicad_dru").write_text(dru, encoding="utf-8", newline="\n")
+        # The parts, tracks, vias and zones go in the text: removing an item through pcbnew breaks
+        # every later FootprintLoad call of the process (check_libraries.py, the same trap).
+        text = (d / "t.kicad_pcb").read_text(encoding="utf-8")
+        text, n = BOARD_ITEMS.subn("", text)
+        assert n > 0, "the board holds no parts to strip"
+        (d / "t.kicad_pcb").write_text(text, encoding="utf-8", newline="\n")
         board = pcbnew.LoadBoard(str(d / "t.kicad_pcb"))
-        for fp in list(board.GetFootprints()):
-            board.Remove(fp)
+        assert not list(board.GetFootprints()), "the scratch board still holds parts"
         fp = pcbnew.FootprintLoad(str(PRETTY), RECEPTACLE)
         assert fp is not None, "run make_libraries.py first"
         fp.SetFPID(pcbnew.LIB_ID(NAME, RECEPTACLE))

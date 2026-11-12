@@ -5,8 +5,8 @@ Usage:
     python design/circuit/CIRCUIT_DESIGN_Rev0.5_calc.py
 
 Every section header names the document section that quotes its output. The
-inputs below are the Rev0.4 component values and datasheet or catalogue
-figures recorded in requirements/parts.md. Change a value here and in the
+inputs below are the Rev0.4 component values (Rev0.5's D37 and D38 change none of
+them) and datasheet or catalogue figures recorded in requirements/parts.md. Change a value here and in the
 document together; the document is the design, this script is its arithmetic.
 
 What this script CANNOT see (CLAUDE.md Section 8 - a checker only proves what
@@ -28,7 +28,7 @@ it looks at):
 """
 import math
 
-# ---- inputs (Rev0.4 values) -------------------------------------------------
+# ---- inputs (Rev0.4 values, unchanged by Rev0.5) -------------------------------------------------
 VDDA = 3.3                    # MCP3208 V_REF = VDDA (its V_DD is V5A, 5 V)
 LSB = VDDA / 4096             # 12-bit
 RS = {"LOW": 510.0, "MID": 10.0, "HIGH": 0.1}    # shunts R_L, R_M, R_H
@@ -37,7 +37,7 @@ ROUT = {"LOW": 1500.0, "MID": 1500.0, "HIGH": 2400.0}
 CN = {"LOW": 330e-12, "MID": 330e-12, "HIGH": 220e-12}
 RDS = 0.060                   # AO3401A R_DS(on) max at -4.5 V
 RSW = 2 * RDS                 # back-to-back port switch
-RWIRE = 0.040                 # traces, headers and receptacle, estimate
+RWIRE = 0.040                 # traces and the receptacles' contacts, estimate (headers gone, D37)
 RF1 = 0.080                   # F1 MF-R300 R1max (1 h after reflow or trip); Rmin 0.020
 IHOLD_F1 = {23: 3.00, 40: 2.49, 50: 2.31}   # F1 hold current vs ambient (Bourns derating)
 VTH = 2.80                    # LM393 up-range / OC threshold at the amp output
@@ -536,4 +536,4 @@ for vs in (VJ1[0], 4.75):
           f" at J1 {I_J1_MAX*1e3:.0f} mA the drop is <= {I_J1_MAX*r25*1e3:.0f} / {I_J1_MAX*r25*1.23*1e3:.0f} mV,"
           f" {I_J1_MAX**2*r25*1.23*1e3:.1f} mW")
 drop_hi = I_J1_MAX * rds_j(VJ1[0]) * 1.23
-print(f"V5L >= {V5L_MIN} V (U6 V5 and MAU104 minimum) now needs J1 >= {V5L_MIN + drop_hi:.3f} V at the module pin")
+print(f"V5L >= {V5L_MIN} V (U6 V5 and MAU104 minimum) now needs J1 >= {V5L_MIN + drop_hi:.3f} V at the receptacle")

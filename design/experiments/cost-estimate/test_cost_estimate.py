@@ -48,7 +48,7 @@ class Bom(unittest.TestCase):
         self.assertTrue(any(e.startswith("0402") for e in ce.check_bom(totals)))
 
     def test_codes_are_the_41_in_parts_md(self):
-        bom = list(ce.EXACT) + list(ce.EST_0402)
+        bom = ce.snapshot_codes()                  # the 40 of Rev0.4 (D34) and Rev0.5's receptacle
         md = parts_md_codes()
         self.assertEqual(len(md), 41)
         self.assertEqual(sorted(bom), sorted(md))
@@ -59,7 +59,20 @@ class Bom(unittest.TestCase):
         codes = list(ce.EXACT) + list(ce.EST_0402)
         self.assertEqual(ce.class_errors(snap, codes), [])
         self.assertEqual(ce.extended_codes(snap, codes), ["C2040", "C5137013"])
-        self.assertEqual(ce.APPROVED_EXTENDED, {"C2040": "D29", "C5137013": "D31"})
+        self.assertEqual(ce.APPROVED_EXTENDED,
+                         {"C2040": "D29", "C5137013": "D31", "C2765186": "D37"})
+        self.assertEqual(ce.class_errors(snap, [ce.RECEPTACLE, ce.TAP]), [])
+        self.assertEqual(ce.extended_codes(snap, [ce.RECEPTACLE, ce.TAP]), [ce.RECEPTACLE])
+
+    def test_the_receptacle_needs_its_decision_and_its_price(self):
+        snap = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
+        saved = ce.APPROVED_EXTENDED.pop(ce.RECEPTACLE)
+        try:
+            errs = ce.class_errors(snap, [ce.RECEPTACLE])
+        finally:
+            ce.APPROVED_EXTENDED[ce.RECEPTACLE] = saved
+        self.assertTrue(any(e.startswith("C2765186: expand") for e in errs), errs)
+        self.assertTrue(any(e.startswith("C2765186: not in") for e in ce.class_errors({}, [ce.RECEPTACLE])))
 
     def test_an_exception_needs_its_decision(self):
         snap = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
@@ -78,6 +91,40 @@ class Bom(unittest.TestCase):
         self.assertTrue(any(e.startswith("C7433") for e in errs), errs)
         del bad["C9002"]
         self.assertTrue(any(e.startswith("C9002: not in") for e in ce.class_errors(bad, ["C9002"])))
+
+
+class Rev05(unittest.TestCase):
+    """The delta of D37 and D38 on release candidate r02's quote."""
+
+    def setUp(self):
+        self.parts = json.loads(ce.SNAPSHOT.read_text(encoding="utf-8"))["parts"]
+        self.pins = ce.header_pins_per_board(STUDY)
+
+    def test_delta_follows_the_hand_calculation(self):
+        d = ce.rev05_delta(self.parts, 2, self.pins)
+        self.assertEqual(d["receptacle_qty"], 4 * 2 + 3)       # 8 needed + 3 attrition (lossNumber)
+        self.assertEqual(d["joints"], 2 * (4 * 16 + 4 * 2))
+        added = 11 * 0.0728 + 8 * 0.0013 + 144 * 0.0016 + 3.07
+        self.assertAlmostEqual(d["added_usd"], added, places=6)
+        self.assertEqual((d["akizuki_old"], d["akizuki_new"]), (7695, 4790))
+        self.assertAlmostEqual(d["base_yen"], 54.92 * 160 + 7695, places=6)
+        self.assertAlmostEqual(d["net_yen"], added * 160 - 2905, places=6)
+        self.assertEqual(round(d["total_yen"]), 14235)
+
+    def test_the_akizuki_saving_is_the_modules_and_the_headers(self):
+        old, _ = ce.akizuki_cost(2, self.pins)
+        no_modules, _ = ce.akizuki_cost(2, self.pins, without=(ce.MODULE_CODE,))
+        none, rows = ce.akizuki_cost(2, 0, without=(ce.MODULE_CODE,))
+        self.assertEqual(old - no_modules, 8 * 350)             # a delta that kept the headers
+        self.assertEqual(no_modules - none, 3 * 35)             # would differ by these 105 yen
+        self.assertFalse([r for r in rows if r[1] in (ce.MODULE_CODE, "g100167")])
+        self.assertEqual(rows[-1][2], ce.AKIZUKI_SHIPPING_YEN)  # 4,240 yen is below the free-shipping line
+
+    def test_a_dearer_receptacle_tier_moves_the_total(self):
+        base = ce.rev05_delta(self.parts, 2, self.pins)["total_yen"]
+        dearer = json.loads(json.dumps(self.parts))
+        dearer[ce.RECEPTACLE]["componentPrices"][0]["productPrice"] += 0.10
+        self.assertGreater(ce.rev05_delta(dearer, 2, self.pins)["total_yen"], base + 100)
 
 
 class Arithmetic(unittest.TestCase):

@@ -45,9 +45,10 @@ written and checked.
 Step 4 needs Freerouting 2.5.0 and a Java runtime, which are not in the repository; the
 script refuses any jar or runtime other than the pinned ones (their SHA-256 is in the
 script). It is needed only when its input changes: `make_pcb.py` stops and asks for it when
-the session no longer matches the board it would route. The committed session took 17 min
-(56 passes, single-threaded) on this machine, and 23 min with other router runs beside it. A new session also needs a new patch
-table (`ROUTING_Rev0.5.md`, *After the router*).
+the session no longer matches the board it would route. The committed session took about
+26 min (40 passes, single-threaded: the router stops after 10 passes without a better score,
+and its best pass was the 30th) on this machine. A new session also needs a new patch table
+(`ROUTING_Rev0.5.md`, *After the router*).
 
 `make_project.py` writes a bare board, so `make_pcb.py` runs after it; until then
 `check_pcb.py` fails, because the board holds no footprints. A re-run of any generator writes
@@ -68,8 +69,12 @@ written with the auxiliary origin at the board's lower-left corner, the CPL's or
 entry or a new part class is confirmed only in JLCPCB's placement preview, after the corrected
 CPL is uploaded; the first review is `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, and
 its candidate release is the first one under `manufacturing/releases/` (state `WIP`, not
-approved). `r02` beside it is the same copper with every via drilled at 0.30 mm, JLCPCB's
-standard via class (issue #8); its `JLCPCB_REVIEW.md` records only what changed.
+approved). Rev0.4's `r02` beside it is the same copper with every via drilled at 0.30 mm,
+JLCPCB's standard via class (issue #8); its `JLCPCB_REVIEW.md` records only what changed.
+Rev0.5's candidate release is `manufacturing/releases/rev0.5/r01/` (state `WIP`, not approved).
+The gate has not run on it: the receptacle C2765186 (D37) is a part class the preview has not
+shown, and `jlcpcb_model_rotation.json` has no entry for it, so its model's orientation is
+unconfirmed until then.
 
 The negative tests corrupt copies of the files in a temporary directory and expect the
 checker to name each fault; they never write to `source/`, `libraries/` or `manufacturing/`.
@@ -90,6 +95,9 @@ checker to name each fault; they never write to `source/`, `libraries/` or `manu
 Each checker's docstring ends with a "What it CANNOT see" list (CLAUDE.md §8). In short: the
 checkers compare the KiCad files with the documents, not the documents with the physics.
 Whether the circuit is right is the circuit document's and its `_calc.py`'s; whether the
-routing is good beyond the rules `check_routing.py` lists is a review's; heights, the plug overmold and the enclosure are V-MECH-01's; whether JLCPCB reads the set as
+routing is good beyond the rules `check_routing.py` lists is a review's (its rule 9 reads the 2-D
+copper fill of L2, as voids and exposed-pad webs, and not the return currents: a void shorter
+than 3.0 mm still lengthens a return path, and the router, which knows no antipad, sees none of
+it); heights, the plug overmold and the enclosure are V-MECH-01's; whether JLCPCB reads the set as
 meant (DFM, part mapping, the CPL's origins and angles in its placement preview) is the JLCPCB
 gate's (CLAUDE.md §8, easy-stick 14.18).

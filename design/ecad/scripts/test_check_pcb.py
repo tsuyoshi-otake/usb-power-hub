@@ -15,6 +15,7 @@ export, about 3 s.
 
 Not covered here: the J2-J3 pitch rule (moving J3 means moving all of channel B) and the
 board-outline rule (make_project.py --check and test_make_project.py own the outline).
+The board in design/ecad/source must be the placed one: make_pcb.py writes it.
 """
 import importlib.util
 import pathlib
@@ -124,15 +125,15 @@ class CheckTest(unittest.TestCase):
 
     # ---- position and identity ----------------------------------------------------------------
     def test_board_part_moved(self):
-        self.assertFailsWith(run_check(board=lambda t: move(t, "C12", 39.75, 53.4)),
-                             "FAIL C12: at (39.7500, 53.4000), document (39.25, 53.4)")
+        self.assertFailsWith(run_check(board=lambda t: move(t, "C12", 39.75, 52.6)),
+                             "FAIL C12: at (39.7500, 52.6000), document (39.25, 52.6)")
 
     def test_document_position_changed(self):
         self.assertFailsWith(run_check(doc=row("C12", y=53.0)),
-                             "FAIL C12: at (39.2500, 53.4000), document (39.25, 53.0)")
+                             "FAIL C12: at (39.2500, 52.6000), document (39.25, 53.0)")
 
     def test_board_rotation_changed(self):
-        self.assertFailsWith(run_check(board=lambda t: move(t, "C12", 39.25, 53.4, 90)),
+        self.assertFailsWith(run_check(board=lambda t: move(t, "C12", 39.25, 52.6, 90)),
                              "FAIL C12: rotation 90, document 180")
 
     def test_channel_b_moved_on_board(self):
@@ -187,26 +188,51 @@ class CheckTest(unittest.TestCase):
             sx.first(line, "layer")[1] = "B.SilkS"
         self.assertFailsWith(run_check(board=edit), "FAIL C1: items on ['B.Silkscreen']")
 
-    # ---- regions, keepouts, modules, mechanics ------------------------------------------------
-    def test_part_under_module_not_on_list(self):
-        doc = row("TP7", x=15.0, y=62.1, region="UNDER_PWR")
-        self.assertFailsWith(run_check(board=lambda t: move(t, "TP7", 15.0, 62.1), doc=doc),
-                             "FAIL TP7: under J4, but TestPoint_Pad_D1.0mm is not on the under list")
-
+    # ---- regions, keepouts, receptacles, mechanics --------------------------------------------
     def test_part_in_keepout(self):
         doc = row("TP4", x=40.0, y=17.0)
         self.assertFailsWith(run_check(board=lambda t: move(t, "TP4", 40.0, 17.0), doc=doc),
                              "FAIL TP4: courtyard enters keepout USB_CORRIDOR",
-                             "FAIL TP4: courtyard (38.952, 15.954, 41.045, 18.046) leaves region REF")
+                             "FAIL TP4: courtyard (39.002, 16.004, 40.995, 17.996) leaves region REF")
+
+    def test_part_in_lane_keepout(self):
+        """The lane keepouts lie inside a port block; a part's courtyard may not enter one.
+        USB_LANE_A is widened to x 20.1, over C116 (courtyard from x 19.7)."""
+        edit = sub_once(r"^\| USB_LANE_A \| 16\.1 \| 8\.5 \| 1\.8 \|", "| USB_LANE_A | 16.1 | 8.5 | 4 |")
+        self.assertFailsWith(run_check(doc=edit), "FAIL C116: courtyard enters keepout USB_LANE_A")
+
+    def test_keepout_straddles_a_region(self):
+        edit = sub_once(r"^\| USB_UP_LANE \| 75\.6 \| 56\.5 \|", "| USB_UP_LANE | 75.6 | 55 |")
+        self.assertFailsWith(run_check(doc=edit), "FAIL USB_UP_LANE: keepout lies partly in region(s)")
 
     def test_analog_part_near_mau104(self):
         self.assertFailsWith(run_check(doc=row("C5", region="ADC")), "from the MAU104 U5",
                              "leaves region ADC")
 
-    def test_module_off_back_edge(self):
-        doc = row("J4", y=57.9)
-        self.assertFailsWith(run_check(board=lambda t: move(t, "J4", 9.88, 57.9, 0), doc=doc),
-                             "FAIL J4: module outline (7.5, 56.0, 27.5, 71.0) does not stand on the back edge")
+    def test_receptacle_off_its_overhang(self):
+        """J4 moved 1.4 mm south: its front face stands 0.34 mm past the back edge, not 1.06."""
+        doc = row("J4", y=67.985)
+        self.assertFailsWith(run_check(board=lambda t: move(t, "J4", 17.5, 67.985, 180), doc=doc),
+                             "FAIL J4: front face at y = 71.660, opening +1 along y; want the opening "
+                             "toward the back edge (+1) and the face at y = 73.06")
+
+    def test_receptacle_past_the_edge(self):
+        """J2 and J3 moved 1.0 mm south: the courtyard passes the front edge by 2.3 mm, more
+        than the 1.31 mm a receptacle may (the overhang plus the library's courtyard margin)."""
+        edit = sub_once(r"^\| J2 \| J3 \| 17\.5 \| 2\.615 \|", "| J2 | J3 | 17.5 | 1.615 |")
+
+        def board(tree):
+            move(tree, "J2", 17.5, 1.615)
+            move(tree, "J3", 51.3, 1.615)
+        self.assertFailsWith(run_check(board=board, doc=edit),
+                             "passes the edge it stands on by more than 1.31 mm",
+                             "FAIL J2: front face at y = -2.060, opening -1 along y")
+
+    def test_receptacle_turned_around(self):
+        """J4 at rotation 0 opens toward the board's interior, not the back edge."""
+        edit = sub_once(r"^\| J4 \| 17\.5 \| 69\.385 \| 180 \|", "| J4 | 17.5 | 69.385 | 0 |")
+        self.assertFailsWith(run_check(board=lambda t: move(t, "J4", 17.5, 69.385, 0), doc=edit),
+                             "FAIL J4: front face at y = 65.710, opening -1 along y")
 
     def test_hole_out_of_corner(self):
         doc = row("H2", x=50.0)
@@ -214,8 +240,8 @@ class CheckTest(unittest.TestCase):
                              "FAIL H2: hole at (50.00, 3.50) is in no corner", "FAIL holes")
 
     def test_courtyards_overlap(self):
-        doc = row("C13", x=39.25, y=53.6)
-        self.assertFailsWith(run_check(board=lambda t: move(t, "C13", 39.25, 53.6), doc=doc),
+        doc = row("C13", x=39.25, y=52.8)
+        self.assertFailsWith(run_check(board=lambda t: move(t, "C13", 39.25, 52.8), doc=doc),
                              "courtyards_overlap")
 
     # ---- the documents ------------------------------------------------------------------------
@@ -223,9 +249,17 @@ class CheckTest(unittest.TestCase):
         edit = sub_once(r"^\| MCU \| block \| 28\.0 \|", "| MCU | block | 27.0 |")
         self.assertFailsWith(run_check(doc=edit), "FAIL MCU/PWR4: regions overlap")
 
-    def test_under_height_too_tall(self):
-        edit = sub_once(r"^\| C_0805_2012Metric \| 1\.45 \|", "| C_0805_2012Metric | 1.65 |")
-        self.assertFailsWith(run_check(doc=edit), "FAIL C_0805_2012Metric: under-list height 1.65")
+    def test_region_kind_of_the_module_design(self):
+        """Rev0.4's `module` and `under` kinds are gone with the modules."""
+        edit = sub_once(r"^\| PORT_A \| block \|", "| PORT_A | module |")
+        self.assertFailsWith(run_check(doc=edit), "FAIL PORT_A: kind 'module' is not one of ['block', 'mark']")
+
+    def test_document_note_names_a_receptacle_pad(self):
+        """"at J2 pad B4" is a pad of a receptacle, named with a letter. Read as "at J2" it
+        would pass on the courtyards alone, so a wrong pad name must fail on its own."""
+        edit = sub_once(r"port capacitor, at J2 pad B4", "port capacitor, at J2 pad A5")
+        self.assertFailsWith(run_check(doc=edit), "FAIL C116 (document): note 'port capacitor, at J2 pad A5'",
+                             "FAIL C216 (document): note 'port capacitor, at J2 pad A5'")
 
     def test_capture_pin_note_broken(self):
         edit = sub_once(r"\| at U1 pin 1 \(IOVDD\) \|", "| at U1 pin 30 (IOVDD) |")

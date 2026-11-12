@@ -81,24 +81,11 @@ def channel_b(row, refs, dx):
     return dict(row, net=row["net"][:-2] + "_B", points=pts)
 
 
-def _tune(p):
-    """The pairs table's Tune cell: "-", or "<P|N> x,y x,y <height>": that conductor carries
-    tuning bumps up to <height> mm away from its partner, along the centreline between the
-    two points."""
-    if p["Tune"] == "-":
-        return None
-    c = p["Tune"].split()
-    if len(c) != 4 or c[0] not in ("P", "N"):
-        raise SystemExit(f"pair {p['Pair']}: Tune {p['Tune']!r}, want '<P|N> x,y x,y <height>'")
-    span = [tuple(_num(v, p["Pair"]) for v in t.split(",")) for t in c[1:3]]
-    return dict(net=p[c[0]], span=span, height=_num(c[3], p["Pair"]))
-
-
 def read(tables, refs, dx):
     """The routing document's tables -> {zones, pairs, rows, classes, keepouts, epads}.
 
     tables: make_pcb.doc_tables of ROUTING_Rev0.5.md; refs: the placement's Ref A -> Ref B
-    (plus the modules); dx: the placement's channel offset.
+    (J2 -> J3 among them); dx: the placement's channel offset.
     """
     need = ("zones", "pairs", "route", "channel_route", "epad", "classes", "keepouts", "router_layers",
             "router_costs")
@@ -117,7 +104,7 @@ def read(tables, refs, dx):
     pairs = []
     for p in tables["pairs"][1]:
         pts = [tuple(_num(v, p["Pair"]) for v in t.split(",")) for t in p["Centreline"].split()]
-        pairs.append(dict(name=p["Pair"], nets=(p["P"], p["N"]), centreline=pts, tune=_tune(p)))
+        pairs.append(dict(name=p["Pair"], nets=(p["P"], p["N"]), centreline=pts))
     classes = []
     for c in tables["classes"][1]:
         via = tuple(_num(v, c["Class"]) for v in c["Via"].split("/")) if c["Via"] != "-" else None
@@ -130,6 +117,10 @@ def read(tables, refs, dx):
     analog = tables["keepouts"][0].get("analog", "").split(",")
     if analog == [""]:
         raise SystemExit("ROUTING: the keepouts table names no analog blocks (analog=...)")
+    if "plane_via" not in tables["keepouts"][0]:
+        raise SystemExit("ROUTING: the keepouts table does not say how much larger a via is on In1.Cu"
+                         " for the router (plane_via=<mm>)")
+    plane_via = _num(tables["keepouts"][0]["plane_via"], "plane_via")
     keepouts = []
     for k in tables["keepouts"][1]:
         keepouts.append(dict(name=k["Keepout"], layers=k["Layers"].split(","), kind=k["Kind"],
@@ -146,7 +137,8 @@ def read(tables, refs, dx):
             raise SystemExit(f"router_costs: {x['Setting']} {x['Value']}")
         router_costs.append((x["Setting"], int(x["Value"])))
     return dict(zones=zones, pairs=pairs, rows=rows, classes=classes, keepouts=keepouts, epads=epads,
-                analog=analog, router_layers=router_layers, router_costs=router_costs, patch=patch)
+                analog=analog, plane_via=plane_via, router_layers=router_layers, router_costs=router_costs,
+                patch=patch)
 
 
 # ---- board items ---------------------------------------------------------------------------
@@ -462,46 +454,115 @@ def _clip(polys, boxes):
     return out
 
 
-def keepout_polygons(routing, regions, pad_frame):
+def _row_points(row, pad_frame):
+    return [pad_frame(t, row["net"]) if PAD_RE.match(t) else tuple(map(float, t.split(",")))
+            for t in row["points"]]
+
+
+def _buffer_mm(k, base="w/2"):
+    """The mm of a keepout's `w/2+<mm>` buffer, the distance beyond the half-width of each track,
+    or of its `pad+<mm>` buffer, the distance beyond a drilled pad's copper and hole."""
+    m = re.fullmatch(re.escape(base) + r"\+([\d.]+)", k["buffer"])
+    if not m:
+        raise SystemExit(f"keepout {k['name']}: buffer {k['buffer']!r}, want {base}+<mm>")
+    return float(m.group(1))
+
+
+def drilled_boxes(board):
+    """(x0, y0, x1, y1), board frame, of every drilled pad that is not on GND: its copper and its
+    hole. On the plane each of them stands in a void; a GND pad stands in the copper."""
+    out = []
+    for fp in board.GetFootprints():
+        for p in fp.Pads():
+            if p.GetDrillSize().x <= 0 or p.GetNetname() == "GND":
+                continue
+            bb = p.GetBoundingBox()
+            c, d = p.GetPosition(), p.GetDrillSize()
+            xs = [bb.GetLeft(), bb.GetRight(), c.x - d.x // 2, c.x + d.x // 2]
+            ys = [bb.GetTop(), bb.GetBottom(), c.y - d.y // 2, c.y + d.y // 2]
+            (xa, ya), (xb, yb) = to_frame(pcbnew.VECTOR2I(min(xs), min(ys))), to_frame(pcbnew.VECTOR2I(max(xs), max(ys)))
+            out.append((min(xa, xb), min(ya, yb), max(xa, xb), max(ya, yb)))
+    return sorted(out)
+
+
+def _within(k, routing, regions):
+    """The (x, y, w, h) boxes of the placement regions after `in` in the keepout's Around cell
+    (`analog`: the keepouts table's analog blocks), or None when the cell has no `in`."""
+    tail = k["around"][1:]
+    if not tail:
+        return None
+    names = routing["analog"] if tail[1:] == ["analog"] else tail[1:]
+    if tail[0] != "in" or not names:
+        raise SystemExit(f"keepout {k['name']}: want '{k['around'][0]}' or '{k['around'][0]} in REGION ...'")
+    for name in names:
+        if name not in regions:
+            raise SystemExit(f"keepout {k['name']}: no placement region {name}")
+    return [regions[n] for n in names]
+
+
+def keepout_polygons(routing, regions, pad_frame, drilled=()):
     """[(layer, kind, polygon)] in the board frame, from the document's keepout rules.
 
     regions: {name: (x, y, w, h)} of the placement; pad_frame(token, net) -> (x, y) for pad
-    points of B.Cu rows."""
+    points of the B.Cu rows and of the pairs' leads; drilled: drilled_boxes of the board."""
     out = []
     for k in routing["keepouts"]:
         polys = []
-        if k["around"] == ["pair-tracks"]:
-            # around the drawn 0.31 mm conductors of the pairs (not the 0.20 mm lead-ins at
-            # U6), so the tuning bumps and the ends at the modules are covered
-            m = re.fullmatch(r"w/2\+([\d.]+)", k["buffer"])
-            if not m:
-                raise SystemExit(f"keepout {k['name']}: buffer {k['buffer']!r}, want w/2+<mm>")
+        head = k["around"][0]
+        if head == "drilled-pads":
+            # around every drilled pad that is not on GND, `pad+<mm>` beyond its copper and hole
+            buf = _buffer_mm(k, "pad")
+            if len(k["around"]) != 1 or not drilled:
+                raise SystemExit(f"keepout {k['name']}: want 'drilled-pads' alone, and a board with drilled pads")
+            polys = [[(x0 - buf, y0 - buf), (x1 + buf, y0 - buf), (x1 + buf, y1 + buf), (x0 - buf, y1 + buf)]
+                     for x0, y0, x1, y1 in drilled]
+        elif head == "box":
+            # "box X0,Y0,X1,Y1": that rectangle of the board frame, as it is written.
+            # "box X0,Y0,X1,Y1 open X,Y ...": the rectangle less a square window of side `buffer`
+            # centred on each X,Y, as rectangles (a DSN keepout has no hole)
+            try:
+                x0, y0, x1, y1 = (float(v) for v in k["around"][1].split(","))
+                opened = len(k["around"]) > 2
+                if opened and (k["around"][2] != "open" or len(k["around"]) < 4):
+                    raise ValueError
+                at = [tuple(float(v) for v in a.split(",")) for a in k["around"][3:]]
+                side = float(k["buffer"]) if opened else 0.0
+                if not (x0 < x1 and y0 < y1) or any(len(a) != 2 for a in at) or (k["buffer"] != "-") != opened:
+                    raise ValueError
+            except (IndexError, ValueError):
+                raise SystemExit(f"keepout {k['name']}: want 'box X0,Y0,X1,Y1' with X0 < X1, Y0 < Y1 and buffer "
+                                 "'-', or 'box X0,Y0,X1,Y1 open X,Y ...' with the windows' side as buffer") from None
+            wins = [(x - side / 2, y - side / 2, x + side / 2, y + side / 2) for x, y in at]
+            ys = sorted({y0, y1} | {y for w in wins for y in (w[1], w[3]) if y0 < y < y1})
+            for ya, yb in zip(ys, ys[1:]):
+                x = x0
+                for w in sorted(w for w in wins if w[1] < yb and w[3] > ya):
+                    if w[0] > x:
+                        polys.append([(x, ya), (w[0], ya), (w[0], yb), (x, yb)])
+                    x = max(x, w[2])
+                if x < x1:
+                    polys.append([(x, ya), (x1, ya), (x1, yb), (x, yb)])
+        elif head in ("pair-tracks", "pair-leads"):
+            # "pair-tracks": around the drawn 0.31 mm conductors of the pairs. "pair-leads": around
+            # the 0.20 mm lead-ins at U6 and at the receptacles, the hops and the branches. Both
+            # take "in REGION ...". The document keeps wires off the conductors only, so CC1 and CC2
+            # can leave their pads beside a lane; a via is kept off the leads too
+            buf = _buffer_mm(k)
+            within = _within(k, routing, regions)
             nets = {n for p in routing["pairs"] for n in p["nets"]}
             for r in routing["rows"]:
-                if r["net"] in nets and r["layer"] != "via" and r["width"] > 0.2:
-                    pts = [pad_frame(t, r["net"]) if PAD_RE.match(t) else tuple(map(float, t.split(",")))
-                           for t in r["points"]]
-                    polys += _rects(pts, r["width"] / 2 + float(m.group(1)))
-        elif k["around"][0] == "B.Cu-rows":
+                if r["net"] in nets and r["layer"] != "via" and (r["width"] > 0.2) == (head == "pair-tracks"):
+                    rects = _rects(_row_points(r, pad_frame), r["width"] / 2 + buf)
+                    polys += rects if within is None else _clip(rects, within)
+        elif head == "B.Cu-rows":
             # "B.Cu-rows" or "B.Cu-rows in REGION ..." ("in analog": the analog blocks): around
             # the document's B.Cu tracks, clipped to the named placement regions when given
-            m = re.fullmatch(r"w/2\+([\d.]+)", k["buffer"])
-            if not m:
-                raise SystemExit(f"keepout {k['name']}: buffer {k['buffer']!r}, want w/2+<mm>")
-            within = k["around"][2:] if k["around"][1:2] == ["in"] else None
-            if within == ["analog"]:
-                within = routing["analog"]
-            if len(k["around"]) > 1 and not within:
-                raise SystemExit(f"keepout {k['name']}: want 'B.Cu-rows' or 'B.Cu-rows in REGION ...'")
-            for name in within or ():
-                if name not in regions:
-                    raise SystemExit(f"keepout {k['name']}: no placement region {name}")
+            buf = _buffer_mm(k)
+            within = _within(k, routing, regions)
             for r in routing["rows"]:
                 if r["layer"] == "B.Cu":
-                    pts = [pad_frame(t, r["net"]) if PAD_RE.match(t) else tuple(map(float, t.split(",")))
-                           for t in r["points"]]
-                    rects = _rects(pts, r["width"] / 2 + float(m.group(1)))
-                    polys += rects if within is None else _clip(rects, [regions[n] for n in within])
+                    rects = _rects(_row_points(r, pad_frame), r["width"] / 2 + buf)
+                    polys += rects if within is None else _clip(rects, within)
         else:
             for name in k["around"]:
                 if name not in regions:
@@ -574,6 +635,22 @@ def post_dsn(text, routing, keepouts, via):
     i = text.index("  (wiring")
     j = text.rindex("  )\n", 0, i)
     text = text[:j] + "".join(blocks) + text[j:]
+    # on the plane a via of another net stands in its antipad: every via padstack is plane_via
+    # larger on In1.Cu, so the router keeps plane copper between two antipads. A GND via has no
+    # antipad: the vias already on GND keep a copy of the padstack as KiCad wrote it
+    grow = round(routing["plane_via"] * 1000)
+    stack = re.compile(r'    \(padstack "(Via\[0-3\]_\d+:\d+_um)"\n(?:      \(shape \(circle \S+ \d+\)\)\n)+'
+                       r'      \(attach off\)\n    \)\n')
+    text = stack.sub(lambda m: m.group(0) + m.group(0).replace(m.group(1), m.group(1) + "_gnd", 1), text)
+    text, gnd = re.subn(r'^(    \(via "Via\[0-3\]_\d+:\d+_um)("  \S+ \S+ \(net GND\))', r"\1_gnd\2", text, flags=re.M)
+    if gnd == 0:
+        raise SystemExit("DSN: no via on GND in the wiring")
+
+    def on_plane(m):
+        return re.sub(r"\(circle In1\.Cu (\d+)\)", lambda s: f"(circle In1.Cu {int(s.group(1)) + grow})", m.group(0))
+    text, n = re.subn(r'    \(padstack "Via\[0-3\]_\d+:\d+_um"\n(?:      \(shape \(circle \S+ \d+\)\)\n)+', on_plane, text)
+    if n == 0 or text.count("(circle In1.Cu") < n:
+        raise SystemExit("DSN: no via padstack with a circle on In1.Cu to enlarge")
     m = structure_via.search(text)
     if m is None:
         raise SystemExit(f"DSN: no structure via line naming the board's via {via_name}")

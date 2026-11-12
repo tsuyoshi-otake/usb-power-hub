@@ -1,4 +1,4 @@
-# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29, D30, D31 and D33) — non-authoritative
+# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29, D30, D31 and D33; Rev0.5 delta 2026-11-12) — non-authoritative
 
 **Question.** What does a first prototype cost? The order is JLCPCB fabricating **5 bare
 PCBs** and assembling **2** of them, plus the Akizuki parts the user solders by hand onto
@@ -18,6 +18,11 @@ per-board counts in `cost_estimate.py` no longer match the schematic, and the 1 
 gone (41 → 40 machine-placed types; Standard PCBA's feeder loading falls by one type,
 1.53). D35 adds one AO3401A, one 33 kΩ, one 100 nF and two 1 µF per board, no new type.
 The figures below are the D33 re-run's.
+
+**Rev0.5 (D37, D38; issues #8 and #10, 2026-11-12)** replaces the four Akizuki USB-C modules
+with machine-placed receptacles and adds four 1 kΩ data-line taps per board. The model above
+still prices Rev0.4 and is not the base: `cost_estimate.py` prints the delta against release
+candidate r02's real quote instead (section "Rev0.5 against r02", below).
 
 **Answer** (at 160 yen/USD; Japanese import tax, M2 inserts and the enclosure print are not
 included):
@@ -58,9 +63,9 @@ the board is WIP and has no layout.
 
 | File | What it is |
 |---|---|
-| `cost_estimate.py` | The estimate: `python -I -B design/experiments/cost-estimate/cost_estimate.py`. `--fetch` refreshes the price snapshot through `tools/jlc_stock.py`. Exits 1 if the BOM disagrees with the OI-23 placement study, or a part is not Basic and not an approved exception (`APPROVED_EXTENDED`: C2040, D29; C5137013, D31). |
-| `test_cost_estimate.py` | 14 tests. Six corrupt the BOM, the study, the code list, a part's class or the list of approved exceptions and expect the check to fail (CLAUDE.md §8). One checks that the header strips follow the study's pin count (44 per board, D33) and that a changed count reaches it. |
-| `jlc_prices.json` | JLCPCB assembly-parts API snapshot, 2026-11-04: class, stock, price tiers, attrition (`lossNumber`) and minimum quantity (`leastPatchNumber`) for the 41 machine-placed codes. |
+| `cost_estimate.py` | The estimate: `python -I -B design/experiments/cost-estimate/cost_estimate.py`. `--fetch` refreshes the price snapshot through `tools/jlc_stock.py`. Exits 1 if the BOM disagrees with the OI-23 placement study, or a part is not Basic and not an approved exception (`APPROVED_EXTENDED`: C2040, D29; C5137013, D31; C2765186, D37). |
+| `test_cost_estimate.py` | 18 tests. Six corrupt the BOM, the study, the code list, a part's class or the list of approved exceptions and expect the check to fail (CLAUDE.md §8). One checks that the header strips follow the study's pin count (44 per board, D33) and that a changed count reaches it. Three check the Rev0.5 delta against a hand calculation, against the Akizuki saving (modules and headers) and against a dearer receptacle price tier. |
+| `jlc_prices.json` | JLCPCB assembly-parts API snapshot, 2026-11-04 (C2765186: 2026-11-12): class, stock, price tiers, attrition (`lossNumber`) and minimum quantity (`leastPatchNumber`) for 41 codes, the 40 machine-placed types of Rev0.4 (D34) and Rev0.5's receptacle. |
 
 ## JLCPCB, Economic PCBA (2 assembled of 5)
 
@@ -125,6 +130,31 @@ BOM and CPL are byte-identical to r01's, so r01's lines are carried over.
 
 That is 5,466 yen less than the 21,950 yen above, about 8,240 yen per assembled unit. The assembled
 parcel's shipping is still priced only in the cart.
+
+### Rev0.5 against r02, 2026-11-12 (issues #8 and #10, D37 and D38)
+
+The user's cost request, 「安価に製造できないとね、製造コストを下げて」, led to the lever
+「USB-C直付けのみ (推奨)」: J1–J4 become the SHOU HAN receptacle C2765186, an Extended part
+machine-placed at $0.0728 each (1–199 pieces, snapshot of 2026-11-12), and issue #10 adds four 1 kΩ
+taps per board (R35–R38, C11702, a Basic line the board already has). `cost_estimate.py` prices the
+change on r02's quote, because its own total above is dearer than the quote and is not the base:
+
+| | USD | Yen at 160 |
+|---|---:|---:|
+| 11 receptacles: 8 needed + 3 attrition (`lossNumber`) | 0.80 | |
+| 8 tap resistors, added to the existing C11702 line | 0.01 | |
+| 144 SMT joints: 2 boards × (4 receptacles × 16 + 4 taps × 2) × $0.0016 | 0.23 | |
+| A third Extended feeder fee | 3.07 | |
+| **JLCPCB order gains** | **4.11** | 658 |
+| The 8 modules (g113080, 350 yen each) and the 3 header strips (g100167, 35 yen each) leave the Akizuki order; its 550 yen shipping stays | | −2,905 |
+| **Net** | | **−2,247** |
+
+r02's 16,482 yen (above) becomes **14,235 yen for 2 units, 7,118 yen per unit**. The Akizuki order falls
+from 7,695 to 4,790 yen, still under the 11,000 yen free-shipping line. What this cannot see: the real
+price of the new BOM and CPL, which only the JLCPCB form gives (CLAUDE.md §9); impedance control, which
+D37 reopens and does not decide (CIRCUIT_DESIGN_Rev0.5.md §9: $33.08 and an auto-selected $1.05 on
+2026-11-03, 5,461 yen at 160 yen/USD); and the receptacle's joints, whose yield the first board shows
+(V-MFG-03, OI-33).
 
 ## Akizuki (2 units, prices tax included)
 

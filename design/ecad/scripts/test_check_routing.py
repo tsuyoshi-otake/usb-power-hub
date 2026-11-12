@@ -12,9 +12,14 @@ check_routing.py on them in a new process. The unchanged copy must pass. Every c
 must fail, and the failure must be named in the output. The repository's files are never
 modified. Each run includes DRC, about 10 s.
 
+The two tests of the plane (rule 9) add vias and fill the zones of the corrupted copy again,
+because the checker reads the stored fill.
+
 Not covered here:
 - The In1 zone's net and layer type (make_pcb.py builds them from the zones table).
 - The In1 fill rule under the pairs: removing fill also breaks DRC's zone connectivity first.
+- Rule 9 on U6's exposed pad, and on the north, east and south of U1's: one side of one pad
+  stands for the eight, which one function measures.
 """
 import importlib.util
 import pathlib
@@ -37,10 +42,21 @@ sx = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(sx)
 
 
-def run_check(board=None, **edit_text):
+def refill_zones(path):
+    """Fill every zone of a board file again, as make_pcb.py does after the routing: the checker
+    reads the stored fill, so a corruption that must show in the plane is refilled first."""
+    import pcbnew
+    board = pcbnew.LoadBoard(str(path))
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    if not pcbnew.SaveBoard(str(path), board):
+        raise AssertionError("pcbnew could not save the refilled board")
+
+
+def run_check(board=None, refill=False, **edit_text):
     """Copy, corrupt, check. Returns (exit status, output).
 
-    board(tree): edit the board's parsed S-expression in place.
+    board(tree): edit the board's parsed S-expression in place; refill: fill the zones of the
+    corrupted board again.
     doc / placement = edit(text): return the corrupted text.
     """
     with tempfile.TemporaryDirectory(prefix="routetest-") as tmp:
@@ -65,6 +81,8 @@ def run_check(board=None, **edit_text):
             board(tree)
             assert sx.dumps(tree) != before, "the board corruption changed nothing"
             p.write_text(sx.dumps(tree) + "\n", encoding="utf-8", newline="\n")
+            if refill:
+                refill_zones(p)
         r = subprocess.run([sys.executable, "-I", "-B", str(CHECK), "--src", str(src), *args],
                            capture_output=True, text=True, encoding="utf-8", timeout=900)
         return r.returncode, r.stdout + r.stderr
@@ -120,6 +138,15 @@ def tht_pads(tree):
             if p[2] == "thru_hole" and drill is not None and len(drill) == 2:
                 out.append((ref, p))
     return out
+
+
+def footprint_at(tree, ref):
+    """The position of a part, board frame."""
+    for f in sx.find(tree, "footprint"):
+        if any(len(p) > 2 and p[1] == "Reference" and p[2] == ref for p in sx.find(f, "property")):
+            at = sx.first(f, "at")
+            return at[1] - ORIGIN[0], ORIGIN[1] - at[2]
+    raise AssertionError(f"no part {ref}")
 
 
 def remove(tree, items):
@@ -188,29 +215,15 @@ class CheckTest(unittest.TestCase):
                 e[2] = round(e[2] + 0.05, 6)
         self.assertFailsWith(run_check(board=edit), "FAIL pair A: USB_A_P 0.280 mm from the centreline")
 
-    def test_tuning_bump_too_tall(self):
-        def edit(tree):
-            x = sheet(97.1, 0)[0]
-            for s in segments(tree, "USB_UP_P", "F.Cu"):
-                for e in ends(s):
-                    if abs(e[1] - x) < 1e-6:
-                        e[1] = round(x - 0.2, 6)
-        self.assertFailsWith(run_check(board=edit), "FAIL pair UP: USB_UP_P 0.900 mm from the centreline")
+    def test_pair_via(self):
+        # a via on a pair's net anywhere: the pairs have none (D37)
+        self.assertFailsWith(run_check(board=lambda t: add_via(t, "USB_B_N", sheet(60.0, 40.0))),
+                             "FAIL pair B: 1 via(s) on USB_B_N USB_B_P")
 
-    def test_tune_height_lowered_in_document(self):
-        doc = sub_once(r"\| P 97\.8,31\.0 97\.8,47\.82 0\.47 \|", "| P 97.8,31.0 97.8,47.82 0.30 |")
-        self.assertFailsWith(run_check(doc=doc), "FAIL pair UP: USB_UP_P", "want 0.23 to 0.53")
-
-    def test_tuning_bumps_removed(self):
+    def test_pair_track_on_back_layer(self):
         def edit(tree):
-            xa, ya = sheet(97.0, 47.82)
-            xb, yb = sheet(97.6, 31.0)
-            bumps = [s for s in segments(tree, "USB_UP_P", "F.Cu")
-                     if all(xa - 1e-6 <= e[1] <= xb + 1e-6 and ya - 1e-6 <= e[2] <= yb + 1e-6 for e in ends(s))]
-            assert len(bumps) >= 30, len(bumps)
-            remove(tree, bumps)
-            add_segment(tree, "USB_UP_P", (97.57, 31.0), (97.57, 47.82), 0.31, "F.Cu")
-        self.assertFailsWith(run_check(board=edit), "FAIL pair UP: P 66.5", "skew 3.1")
+            sx.first(segments(tree, "USB_A_N", "F.Cu")[0], "layer")[1] = "B.Cu"
+        self.assertFailsWith(run_check(board=edit), "FAIL pair A: USB_A_N track on B.Cu")
 
     # ---- JLCPCB's hole figures (make_project.py RULES and PTH_RULES, issue #8) -----------------
 
@@ -329,6 +342,61 @@ class CheckTest(unittest.TestCase):
         self.assertEqual(status, 1, out)
         self.assertIn("FAIL DRC", out)
         self.assertNotIn("FAIL port A", out)
+
+    @staticmethod
+    def remove_joiner(tree, net="VBUS_A"):
+        """The 0.25 mm F.Cu joiner under the receptacle between its two VBUS pads (D37)."""
+        joiner = [s for s in segments(tree, net, "F.Cu") if sx.first(s, "width")[1] == 0.25]
+        assert len(joiner) == 3, joiner
+        remove(tree, joiner)
+
+    def test_joined_receptacle_pads_are_one_node(self):
+        """With the joiner gone pad A4 is unconnected (DRC says so), but the port path to the
+        pair `J2.A4+J2.B4` is still found through pad B4: the contacts are one node."""
+        status, out = run_check(board=self.remove_joiner)
+        self.assertEqual(status, 1, out)
+        self.assertIn("FAIL DRC unconnected", out)
+        self.assertNotIn("FAIL port A", out)
+
+    def test_single_receptacle_pad_has_no_path_without_the_joiner(self):
+        doc = sub_once(r"^\| A \| VBUS_A \| Q17\.3 \| J2\.A4\+J2\.B4 \|$", "| A | VBUS_A | Q17.3 | J2.A4 |")
+        self.assertFailsWith(run_check(board=self.remove_joiner, doc=doc),
+                             "FAIL port A: VBUS_A Q17.3 -> J2.A4: no copper path")
+
+    # ---- the plane (rule 9) -------------------------------------------------------------------
+
+    def test_plane_slot(self):
+        """Four vias of one signal net 0.9 mm apart: their 0.85 mm antipads join into one void
+        2.7 + 0.85 = 3.55 mm long, over the 3.0 mm limit."""
+        at = (60.0, 40.0)
+
+        def edit(tree):
+            for k in range(4):
+                add_via(tree, "V3V3", sheet(at[0] + 0.9 * k, at[1]))
+        status, out = run_check(board=edit, refill=True)
+        self.assertEqual(status, 1, out)
+        slots = re.findall(r"FAIL L2 slot: void ([\d.]+) mm long, x ([\d.]+)\.\.([\d.]+), y ([\d.]+)\.\.([\d.]+),", out)
+        self.assertEqual(len(slots), 1, out)
+        length, x0, x1, y0, y1 = map(float, slots[0])
+        self.assertGreaterEqual(length, 3.5, out)
+        self.assertTrue(x0 <= at[0] and at[0] + 2.7 <= x1 and y0 <= at[1] <= y1, out)
+
+    def test_plane_perforated_at_epad(self):
+        """Five vias 1.10 mm apart down the west of U1's exposed pad, between it and the pad
+        row: each antipad is its own 0.85 mm void, so there is no slot, but only the 0.25 mm
+        webs between them join the pad's area to the plane on that side: about 1 mm of the
+        pad's 3.20 mm, under the 1.60 mm rule 9 wants. The west is chosen because it carries
+        none of the document's escapes of U1's pins (the north and east do); the unchanged copy
+        passes with at least 1.60 mm there, so a web below it comes from these five vias."""
+        def edit(tree):
+            cx, cy = footprint_at(tree, "U1")
+            for k in range(-2, 3):
+                add_via(tree, "V3V3", sheet(cx - 1.6 - 0.7, cy + 1.10 * k))
+        status, out = run_check(board=edit, refill=True)
+        self.assertEqual(status, 1, out)
+        m = re.search(r"FAIL L2 web U1\.57 W: ([\d.]+) mm of plane copper", out)
+        self.assertIsNotNone(m, out)
+        self.assertLess(float(m.group(1)), 1.6, out)
 
     def test_port_path_limit_lowered(self):
         doc = sub_once(r"<!-- port_path:begin limit=40 -->", "<!-- port_path:begin limit=1 -->")

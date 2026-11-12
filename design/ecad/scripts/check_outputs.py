@@ -20,12 +20,14 @@ script's own parsers, the board with pcbnew; nothing of make_outputs.py is impor
     (0, 0)-(100, 72): the auxiliary origin is the board's lower-left corner, as the CPL's,
     and y points up); B.Paste has no object and B.SilkS no dark one (Top only).
  4. Drill: PTH and NPTH Excellon in mm, each with its map; every hole of the board, counted
-    by diameter, plated or not as the board has it (pads and vias).
+    by diameter, plated or not as the board has it (pads and vias); every oblong drill of
+    the board (the receptacles' plated shell slots, D37) is a routed slot (G85) of the drill
+    file with the same centre, length, width and axis, and the file has no other slot.
  5. BOM: JLCPCB's header; exactly one row per LCSC part (JLCPCB's part mapping selects neither
     of two rows with one LCSC number), Comment and Footprint the row's first designator's Value
     and footprint; the designators are exactly the footprints with an LCSC field that are
-    not BOM-excluded; every part's Class is Basic, or Extended for C2040 (D29) or C5137013
-    (D31) only (D22).
+    not BOM-excluded; every part's Class is Basic, or Extended for C2040 (D29), C5137013
+    (D31) or C2765186 (D37) only (D22).
  6. CPL: JLCPCB's header; the BOM's designators; Mid X/Y the footprint's origin in the
     board frame (0.0001 mm), inside the outline and within MID_TOL (0.05 mm) of the centre of
     its F.Fab body (a Kelvin land's sense pads make its pads' centre another point); Layer Top;
@@ -42,9 +44,12 @@ Exit status: 0 = every check passed; 1 = at least one failed. Each failure print
 
 What it CANNOT see:
 - whether JLCPCB reads the files as meant: its DFM, part mapping and placement preview are
-  the evidence (CLAUDE.md 8, JLCPCB gate). The upload of 2026-11-11 is recorded in
-  manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the three files it
-  saw; this checker does not read it, so it cannot tell a review that has gone stale.
+  the evidence (CLAUDE.md 8, JLCPCB gate). The uploads of Rev0.4 (2026-11-11 and -12) are
+  recorded in manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the three
+  files they saw; Rev0.5's set has not been uploaded. This checker does not read those files,
+  so it cannot tell a review that has gone stale.
+- whether JLCPCB's model of the receptacle C2765186 sits on its footprint at the CPL angle:
+  that part has no row in jlcpcb_model_rotation.json until the placement preview shows it.
 - Gerber geometry beyond the outline's extent and object counts: the copper is the board's
   because kicad-cli plotted it, and DRC (check_pcb.py) checks the board itself.
 - the content of the PDFs and renders beyond their page count and image size.
@@ -54,6 +59,7 @@ import csv
 import hashlib
 import io
 import json
+import math
 import pathlib
 import re
 import struct
@@ -70,7 +76,7 @@ ORIGIN = (50.0, 122.0)
 BOARD = (100.0, 72.0)
 MID_TOL = 0.05
 POS_TOL = 0.0001
-EXTENDED = {"C2040": "D29", "C5137013": "D31"}
+EXTENDED = {"C2040": "D29", "C5137013": "D31", "C2765186": "D37"}
 PREVIEW_MIN_W = 1200                      # kicad-cli renders a little under the size asked
 ASPECT = 100.0 / 72.0
 ARTIFACTS = ("Gerber.zip", "BOM_JLCPCB.csv", "CPL_JLCPCB.csv", "HandSolder.csv", "Schematic.pdf",
@@ -201,8 +207,29 @@ def board_holes(board):
     return holes
 
 
+def board_slots(board):
+    """{"PTH": [...], "NPTH": [...]}: (x, y, length, width, axis) of the board's oblong drills
+    (the receptacles' shell slots, D37) in the board frame, sorted; axis is "x" or "y". A pad
+    turned by anything but a quarter turn gets axis "?": the drill file's axes are x or y."""
+    out = {"PTH": [], "NPTH": []}
+    for fp in board.GetFootprints():
+        for p in fp.Pads():
+            if p.GetDrillShape() != pcbnew.PAD_DRILL_SHAPE_OBLONG:
+                continue
+            sx, sy = pcbnew.ToMM(p.GetDrillSizeX()), pcbnew.ToMM(p.GetDrillSizeY())
+            turns = p.GetOrientationDegrees() / 90
+            axis = "?" if abs(turns - round(turns)) > 1e-3 else ("x" if (sx > sy) == (round(turns) % 2 == 0) else "y")
+            x, y = frame(p.GetPosition())
+            kind = "NPTH" if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH else "PTH"
+            out[kind].append((round(x, 3), round(y, 3), round(max(sx, sy), 3), round(min(sx, sy), 3), axis))
+    return {k: sorted(v) for k, v in out.items()}
+
+
 def excellon(text):
-    tools, hits, tool = {}, {}, None
+    """(metric, {diameter: holes}, slots): the holes by tool diameter, slots among them; slots are
+    the routed ones (G85, KiCad's alternate oval mode) as (x, y, length, width, axis) of the
+    slot's centre, its overall length and the tool's diameter, sorted."""
+    tools, hits, slots, tool = {}, {}, [], None
     metric = "METRIC" in text.splitlines()[:30] or any(ln.startswith("METRIC") for ln in text.splitlines()[:30])
     for ln in text.splitlines():
         m = re.fullmatch(r"T(\d+)C([\d.]+)", ln)
@@ -216,7 +243,18 @@ def excellon(text):
         if tool and re.match(r"X-?[\d.]+Y-?[\d.]+", ln):
             d = tools.get(tool)
             hits[d] = hits.get(d, 0) + 1
-    return metric, hits
+            s = re.fullmatch(r"X(-?[\d.]+)Y(-?[\d.]+)G85X(-?[\d.]+)Y(-?[\d.]+)", ln)
+            if s:
+                x1, y1, x2, y2 = map(float, s.groups())
+                slots.append((round((x1 + x2) / 2, 3), round((y1 + y2) / 2, 3),
+                              round(math.hypot(x2 - x1, y2 - y1) + d, 3), d, "x" if abs(x2 - x1) > abs(y2 - y1) else "y"))
+    return metric, hits, sorted(slots)
+
+
+def same_slots(got, want, tol=0.0015):
+    """The slots of the drill file equal the board's, to the file's 1 micron rounding, axes too."""
+    return len(got) == len(want) and all(g[4] == w[4] and all(abs(a - b) <= tol for a, b in zip(g[:4], w[:4]))
+                                         for g, w in zip(got, want))
 
 
 def check_gerber(rep, data, board):
@@ -249,14 +287,16 @@ def check_gerber(rep, data, board):
             want_e = (0.0, 0.0, W, H)   # the auxiliary origin is the board's lower-left corner; y points up
             rep.check(e is not None and all(abs(a - b) <= 0.001 for a, b in zip(e, want_e)), name,
                       f"outline spans {e}, want {want_e}")
-    holes = board_holes(board)
+    holes, slots = board_holes(board), board_slots(board)
     for kind in ("PTH", "NPTH"):
         name = f"{PREFIX}_{kind}.drl"
         if name not in names:
             continue
-        metric, hits = excellon(z.read(name).decode("ascii", "replace"))
+        metric, hits, got = excellon(z.read(name).decode("ascii", "replace"))
         rep.check(metric, name, "not METRIC")
         rep.check(hits == holes[kind], name, f"holes by diameter {sorted(hits.items())}, board {sorted(holes[kind].items())}")
+        rep.check(same_slots(got, slots[kind]), name,
+                  f"slots (x, y, length, width, axis) {got}, board {slots[kind]}")
     return z
 
 

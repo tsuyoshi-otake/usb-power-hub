@@ -1,13 +1,17 @@
-# USB Power-Control Hub — Circuit Design Rev0.4
+# USB Power-Control Hub — Circuit Design Rev0.5
 
 **State: WIP — MANUFACTURING PROHIBITED**
-Date opened: 2026-08-16 (Rev0.1). Revised: 2026-11-03 (Rev0.2, Rev0.3 and Rev0.4, all the same day).
+Date opened: 2026-08-16 (Rev0.1). Revised: 2026-11-03 (Rev0.2, Rev0.3 and Rev0.4, all the same day)
+and 2026-11-12 (Rev0.5).
 Amended 2026-11-04 (D28: the pre-layout bench is replaced by desk checks, §12; D29: the
 PGA2040 module is replaced by a bare RP2040 that JLCPCB places, §6.5; D30: leaded HASL
 instead of ENIG, §10; D31: the CH335F module is replaced by the bare chip, which JLCPCB
 places, §6.6; D32: capture and layout in KiCad until complete, then an EasyEDA import, §10;
 D33: the module pin headers, §11; D34: the values set at capture, issue #6 P2, §3.2, §3.4,
 §6.4, §10; D35: J1's soft start, OI-32, issue #7, §3.1, §7.1).
+Amended 2026-11-12 (Rev0.5, issues #8 and #10; D37: J1–J4 become machine-placed USB-C
+receptacles, C2765186, the third Extended part, §1 fact 20, §3.3, §6.2, §7.4, §9, §10; D38: four
+RP2040 GPIO tap the D+ and D− of J2 and J3 for a Low-Speed and Full-Speed capture, §3.3, §6.4).
 
 This document *is* the schematic at this stage. KiCad capture transcribes what is settled
 here; it is not where the design happens (CLAUDE.md Section 2). Nothing in this file has been
@@ -73,6 +77,27 @@ Offered the bare chip against the Akizuki module, the user selected 「IC 単体
 its crystal and capacitors (§6.6). It is the second Extended part, the user's second
 exception to D22; D22 otherwise stands.
 
+**D37 and D38 (2026-11-12): Rev0.5.** The user asked for a cheaper board (issue #8):
+
+> 安価に製造できないとね、製造コストを下げて
+
+After the via drill (release candidate r02) Claude listed the next levers with their figures,
+and the user chose one alone, 「USB-C直付けのみ (推奨)」: the four Akizuki USB-C modules
+(AE-USB2.0-TYPE-C on PH-1x40SG headers) give way to machine-placed receptacles, C2765186
+(SHOU HAN TYPE-C 16PIN 2MD(073)). It is the third Extended part, the user's third exception to
+D22 (D37). The other levers, among them one ADC instead of two (−1,000 yen), were not chosen.
+The estimate on r02's quote (`design/experiments/cost-estimate/`) is 14,235 yen for 2 units, 2,247
+yen less than r02's 16,482 yen. The part changes footprints, layout and mechanics, so it is a new
+PCB revision, Rev0.5 (CLAUDE.md §2).
+
+The same day the user asked about the data lines (issue #10):
+
+> 可能ならデータ線部分もロジックアナライズできるとUSB接続機器を開発するのに便利なんだけど、出来る?
+
+Four spare RP2040 GPIO now tap the D+ and D− of J2 and J3 through 1 kΩ resistors, so that the
+PIO can capture Low-Speed and Full-Speed traffic (D38). It needs the layout D37 redraws, so it
+goes into the same revision.
+
 Most of the Rev0.2 design needed Extended parts: RP2040, CH224Q, USB2514B, ADS131M02, INA190,
 the TMUX mux, the 4-terminal shunt, and the TPD4E05 ESD array. Rev0.3 therefore redesigns the
 board from the parts that D13 allows. Where no allowed part can do a job, the function is
@@ -80,9 +105,10 @@ reduced, and Section 7.4 and `requirements/product.md` §9 say what was lost.
 
 Decisions made under the delegation are recorded in Section 10 as **"Claude (delegated)"**.
 They are decisions, because the user handed them over, but the user can revert any one of
-them; each row names what reverting it would reopen. Rev0.4 has no Preferred Extended part.
-Every machine-placed part is JLCPCB Basic (D22, Section 9) except two Extended parts, each an
-exception the user made: the RP2040 (C2040, D29) and the CH335F (C5137013, D31).
+them; each row names what reverting it would reopen. Rev0.4 and Rev0.5 have no Preferred
+Extended part. Every machine-placed part is JLCPCB Basic (D22, Section 9) except three Extended
+parts, each an exception the user made: the RP2040 (C2040, D29), the CH335F (C5137013, D31) and
+the USB-C receptacle (C2765186, D37).
 
 ---
 
@@ -100,7 +126,7 @@ exception the user made: the RP2040 (C2040, D29) and the CH335F (C5137013, D31).
 | 8 | All designators/values in `mockup/` are placeholders | CLAUDE.md §0 | Settled |
 | 9 | ~~Board outline 85 × 35 mm~~, 4 layers | User decision, 2026-11-03 (D10) | 4 layers settled; **outline superseded by fact 17** (D24) |
 | 10 | ~~USB hub is USB2514B~~ | User decision, 2026-11-03 (D11) | **Superseded** by D13 → D15: every USB2514B variant is Extended |
-| 11 | Part parameters quoted here | Manufacturer datasheets fetched 2026-11-03 and 2026-11-04 (the D28 desk checks, D29 and D31), cited per part in `requirements/parts.md` | High for the parameters cited; nothing else about those parts is confirmed |
+| 11 | Part parameters quoted here | Manufacturer datasheets fetched 2026-11-03 and 2026-11-04 (the D28 desk checks, D29 and D31) and 2026-11-12 (D37), cited per part in `requirements/parts.md` | High for the parameters cited; nothing else about those parts is confirmed |
 | 12 | Sourcing rule: JLCPCB **Basic** parts in assembly stock for machine-placed parts; **Akizuki** parts in stock for large hand-soldered parts; no Extended-only PCBA | User decision, 2026-11-03 (D13) | Settled |
 | 13 | JLCPCB Basic holds 351 parts: 182 resistors, 88 MLCCs, 81 others. None of the 81 is a microcontroller, a USB hub, a USB-C receptacle, a USB D± ESD array, a current-sense amplifier, a multi-channel ADC or a fuse | JLCPCB assembly-parts list, 2026-11-03 (`requirements/parts.md`) | High as of that date |
 | 14 | Akizuki stock, part numbers and specifications | akizukidenshi.com product pages, 2026-11-03 | High as of that date; stock changes daily |
@@ -109,6 +135,7 @@ exception the user made: the RP2040 (C2040, D29) and the CH335F (C5137013, D31).
 | 17 | Board outline 100 × 72 mm, 4 layers | D24, 2026-11-03: the user's condition 「100x100未満ならいいんだっけ」 (stay within 100 × 100 mm), size chosen by Claude from the OI-23 study | Settled; block placement checked, routing not |
 | 18 | JLCPCB stackup JLC04161H-7628 (1 oz outer, 7628 prepreg 0.2104 mm, Dk 4.4); the only named 4-layer stackup on the quote page without the special-stackup note. JLCPCB's calculator gives 14.85 mil for 50 Ω single-ended on L1 without mask; its differential calculation returned no result | `jlcpcb.com/impedance` (curl) and the quote page and impedance calculator (browser), 2026-11-03; D27 | High for the stackup data and the single-ended datum. The 90 Ω pair width is a model value, provisional until JLCPCB's differential calculator is rerun |
 | 19 | CH335F (C5137013, QFN28 4 × 4 × 0.75 mm, 0.4 mm pitch, 2.7 mm ePad = GND): USB 2.0 High-Speed hub (MTT), 4 downstream ports; V5 4.5–5.25 V through an internal LDO to VDD33 (3.2–3.5 V, 20 mA available outside); 85 mA typical with HS upstream and 4 HS ports; 12 MHz crystal with on-chip load capacitors; on-chip 1.5 kΩ upstream pull-up, downstream pull-downs and power-on reset; 6 kV HBM on the USB pins. Until D31 it came on the Akizuki AE-QFN28-DIP module (its record is at Git commit `3e11f68`) | WCH CH334/CH335 datasheet V2.5 (Akizuki's copy), read 2026-11-04; pin table, §4.1–§4.2, §5.6 package drawing | High for the parameters cited (D31 desk check). A built board confirms them (V-MFG-03, V-HOST-01) |
+| 20 | USB-C receptacle C2765186 (SHOU HAN TYPE-C 16PIN 2MD(073), JLCPCB Extended, SMD with plated shell slots): body 8.94 × 7.35 × 3.16 mm; 12 pads at 0.5 mm pitch (A1/B1 GND and A4/B4 VBUS 0.60 mm wide, each pad two contacts; eight signal pads 0.30 mm), four plated shell slots (the shield) and two unplated ø0.65 mm pegs; 5 V, 3 A; −25 to +85 °C; insertion 0.5–2.0 kgf, removal 0.8–2.0 kgf, 10,000 cycles; contact resistance 40 mΩ per pin at most (shield 50 mΩ); reflow 260 °C for 10 s. The pad row reads B7, A6, A7, B6, so D−, D+, D−, D+ alternate. The maker's recommended land is drawn for a **0.80 mm** board. Until D37 J1–J4 were the Akizuki AE-USB2.0-TYPE-C modules (the Rev0.4 text with them is at Git commit `5a697aa`) | The maker's drawing and specification (SHOU HAN customer copy, REV. A) as LCSC lists them for C2765186, read 2026-11-12; JLCPCB assembly pool, 1,070,668 in stock on 2026-11-12 (`requirements/parts.md`) | High for the pad positions and the ratings cited (`design/ecad/libraries/library.json`, measured by `check_libraries.py`). Not settled: the 0.80 mm board against this one's 1.6 mm, and the part's orientation in JLCPCB's placement preview (V-MFG-03) |
 
 Everything else below is derived by calculation in this document, or is explicitly marked OPEN.
 The arithmetic is reproduced by `CIRCUIT_DESIGN_Rev0.5_calc.py` beside this file
@@ -136,6 +163,14 @@ A row that names only one design is the same in Rev0.3 and Rev0.4.
 Rev0.2's other content still applies unless a section below replaces it: Kelvin sensing, the
 default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
 
+**Rev0.5 against Rev0.4** (issues #8 and #10):
+
+| Rev0.4 had | Rev0.5 has | Why |
+|---|---|---|
+| J1–J4: four Akizuki AE-USB2.0-TYPE-C modules on PH-1x40SG headers, hand-soldered, ¥350 each | **Four machine-placed receptacles, C2765186** (Extended, the third exception to D22; D37) | The user's cost request. On r02's quote the 2-unit estimate falls from 16,482 yen to 14,235 yen: the modules and headers leave the Akizuki order (−2,905 yen), the receptacles, their joints and a third Extended feeder join JLCPCB's (+658 yen) (`design/experiments/cost-estimate/`) |
+| Each D± path crossed a module, its 2.54 mm headers and an unknown module layout (OI-26) | Each path ends at the receptacle's pads on this board, with a hop and a branch that join its alternating D± pads | The module and its headers are gone; OI-26 narrows to the on-board layout (§3.3) |
+| J2's and J3's D± ran only between U6 and the connector | A 1 kΩ tap from each of those four lines to RP2040 GPIO26–29, at U6 (D38) | A Low-Speed and Full-Speed capture for developing USB devices (issue #10) |
+
 ---
 
 ## 3. Topology
@@ -143,7 +178,7 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
 ### 3.1 Power path
 
 ```
- J4 (Akizuki USB-C module, power only)
+ J4 (USB-C receptacle C2765186, power only)
    CC1,CC2 ── Rd 5.1 kΩ ×2 to GND ── 1 kΩ ── U17 CH3, CH4    (read J4's advertisement)
    CC1,CC2 ── D4 PSM712 (ESD)
    VBUS ── F1 MF-R300 ── D6 SMBJ6.5CA ── 22 µF ── VBUS_IN ──┬── divider 33k/15k ── U7 CH4  (V_J4)
@@ -156,7 +191,7 @@ default-ON ladder (D9), the CDC-ACM interface (D7), and the gates in Section 8.
         common source, gates tied)   └─ Q17 bypasses R_M+R_L ┘           ├── Q13 AO3400A + 1 kΩ to GND (discharge)
                                                  └─ Q18 bypasses R_L ┘   └── nothing else (no divider, no TVS)
 
- J1 (Akizuki USB-C module, host data + logic power)
+ J1 (USB-C receptacle C2765186, host data + logic power)
    CC1,CC2 ── Rd 5.1 kΩ ×2 to GND;  D1 PSM712 on CC1, CC2;  D+, D− unprotected (D22)
    VBUS_J1 ── D5 SMBJ6.5CA ── Q53 AO3401A soft start, source VBUS_J1, drain V5L (D35, below)
    Q53 soft start (D35) ── V5L (logic 5 V) ──┬── U6 CH335F V5 (its VDD33: §6.6)
@@ -193,8 +228,8 @@ source hold the gate at the source when VBUS_J1 steps up. `CIRCUIT_DESIGN_Rev0.5
   against about 25 W for a 10 ms single pulse (AO3401A Figure 10, read from the graph).
   Fully on, V<sub>GS</sub> = −V_J1, so R<sub>DS(on)</sub> ≤ 61.2 mΩ at 4.40 V and 25 °C,
   75.3 mΩ at 70 °C (Figure 4's 1.23): ≤ 17 / 21 mV and 5.8 mW at 277 mA. V5L's 4.5 V
-  design minimum (§3.2; U6's V5 range, §6.6) therefore needs J1 ≥ 4.52 V at the module
-  pin.
+  design minimum (§3.2; U6's V5 range, §6.6) therefore needs J1 ≥ 4.52 V at the
+  receptacle.
 - Not settled on paper: the MAU104's own start-up current, which Q53 passes once V5L is
   past the MAU104's start; its datasheet gives no figure. V-PWR-03 records J1's peak.
 - On unplug, V5L's charge returns to VBUS_J1 through Q53's body diode and its still-on
@@ -208,7 +243,7 @@ capacitor, the discharge FET, and the LOW amplifier's +IN through 10 kΩ. That i
 has no voltage divider and no TVS: either would add a leakage that the LOW range measures.
 
 **Port voltage at the DUT.** Each port's path has the switch (2 × 60 mΩ max), R_H (0.1 Ω),
-the MID-bypass FET (60 mΩ max) and about 40 mΩ of copper and module wiring, 0.32 Ω in total.
+the MID-bypass FET (60 mΩ max) and about 40 mΩ of copper and connector contacts, 0.32 Ω in total.
 F1 (0.08 Ω at R1max, D25) is shared by both ports, so its drop depends on the sum:
 
 | Load | Drop | Port, J4 = 5.00 V | Port, J4 = 4.75 V |
@@ -461,13 +496,35 @@ datasheet states no tolerance. The PGA2040 carried its own pair until D29.
 
 The host interface is not the ceiling: the ADC conversion time is (OI-14).
 
-**HS through the modules.** The CH335F hub is High-Speed upstream and downstream (MTT), so a
-DUT on J2/J3 can run at HS. Each HS path, however, passes through an Akizuki USB-C breakout
-module, its 2.54 mm headers and an unknown module layout: J1 upstream, J2 or J3 downstream.
-Since D31 the hub sits on the board itself, so a path crosses one module and header instead
-of two. HS eye margin is unverified, and the fallback is that DUTs enumerate at FS. This is OI-26, verified at bring-up (V-HOST-01). On the board
-itself the pairs start at W = 0.31 mm, S = 0.15 mm on L1 over L2 of JLC04161H-7628, without
-impedance control (D27).
+**HS through the receptacles.** The CH335F hub is High-Speed upstream and downstream (MTT), so a
+DUT on J2/J3 can run at HS. Until D37 each HS path also passed through an Akizuki USB-C breakout
+module, its 2.54 mm headers and an unknown module layout (J1 upstream, J2 or J3 downstream).
+Since D37 each pair ends at the receptacle's pads on this board. What stays in the path is the
+pair's own layout, the receptacle's pads, the hop and the branch that join its alternating D± pads
+(D−, D+, D−, D+, fact 20; `design/ecad/ROUTING_Rev0.5.md`, High-speed pairs), and, on J2 and J3, the
+stubs of the taps below. HS eye margin is unverified, and the fallback is that DUTs enumerate at
+FS. This is OI-26, verified at bring-up (V-HOST-01). On the board the pairs are W = 0.31 mm,
+S = 0.15 mm on L1 over L2 of JLC04161H-7628, without impedance control (D27).
+
+**Data-line taps (D38, issue #10).** The user asked for the data lines to be observable:
+
+> 可能ならデータ線部分もロジックアナライズできるとUSB接続機器を開発するのに便利なんだけど、出来る?
+
+The RP2040's PIO can sample D+ and D− passively at Low-Speed (1.5 Mbit/s) and Full-Speed
+(12 Mbit/s), the class of most microcontroller USB devices. High-Speed (480 Mbit/s) needs a ULPI
+PHY and an FPGA, and is not attempted. R35–R38, four 1 kΩ 0402 resistors (C11702, Basic, already
+on the board), take the DUT side of the hub to RP2040 pins: USB_A_P to GPIO26, USB_A_N to GPIO27
+(J2), USB_B_P to GPIO28 and USB_B_N to GPIO29 (J3), U1 pins 38–41, so that the D+ and D− of one
+port are consecutive pins, as a PIO `in` needs (§6.4). Each resistor stands on the pair next to
+U6, so a stub is one resistor pad. The 1 kΩ keeps the GPIO pad's load off the line and limits the
+current into the pin while the RP2040 is unpowered, or when a faulty DUT or cable puts VBUS on
+a data line (5.25 V through 1 kΩ into the pin's clamp diode, taking 0.6 V across it: 1.4 mA with
+the RP2040 powered from 3.3 V, 4.7 mA with it unpowered; the datasheet's injection-current rating
+is not read here, and 5.25 V on the pad itself exceeds its IOVDD + 0.5 V limit). The levels in
+normal operation, at most 3.6 V (USB 2.0), are inside that limit. The resistors can be removed, which takes the GPIO off
+the line and leaves only the copper to their pads. **Risk:** HS signal integrity on J2's and J3's
+paths, which the first board shows (V-HOST-01). The PIO capture, its trigger and RAM buffer, the
+packet decoding and the host application's lane (issue #9) are later work.
 
 ### 3.4 Port switching, Rp, over-current and discharge (per port)
 
@@ -670,9 +727,9 @@ this table and that list name the same parts.
 
 | Ref | Function | Part (source) | Class |
 |---|---|---|---|
-| J1 | USB-C host (data + logic power) | AE-USB2.0-TYPE-C (Akizuki g113080) | Hand |
-| J2, J3 | USB-C OUT A / OUT B | AE-USB2.0-TYPE-C (Akizuki g113080) | Hand |
-| J4 | USB-C PWR IN (power only) | AE-USB2.0-TYPE-C (Akizuki g113080) | Hand |
+| J1 | USB-C host (data + logic power) | TYPE-C 16PIN 2MD(073) (C2765186), SHOU HAN | **Extended** (D37) |
+| J2, J3 | USB-C OUT A / OUT B | TYPE-C 16PIN 2MD(073) (C2765186), SHOU HAN | **Extended** (D37) |
+| J4 | USB-C PWR IN (power only) | TYPE-C 16PIN 2MD(073) (C2765186), SHOU HAN | **Extended** (D37) |
 | U1 | MCU, support circuit in §6.5 | RP2040 (C2040), LQFN-56 7 × 7 mm | **Extended** (D29) |
 | U8 | QSPI flash, 16 MB; its 64-bit unique ID is the USB serial number | W25Q128JVSIQ (C97521), SOIC-8 208 mil | Basic |
 | U2 | 3.3 V LDO | AMS1117-3.3 (C6186) | Basic |
@@ -712,11 +769,11 @@ this table and that list name the same parts.
 | FB1 | VDDA ferrite | BLM18PG121SN1D (C14709) | Basic |
 | J5 | SWD, for debug only (programming uses the ROM USB bootloader) | Tag-Connect TC2030-NL footprint (no part, DNL), routed to U1's SWCLK (pin 24) / SWD (pin 25) | — |
 
-"Hand" means a large part bought from Akizuki and soldered by the user. The modules go on
-PH-1x40SG pin headers without sockets (D33), and their through-hole pins are soldered from
-the Bottom side. That changes
-CLAUDE.md §1's "Top-side assembly": JLCPCB places only Top SMD, and the user adds the
-through-hole and large parts afterwards (REQ-MFG-01).
+"Hand" means a large part bought from Akizuki and soldered by the user: the two DIP16 ADCs,
+the MAU104, R_H, R_M and F1. Their through-hole pins are soldered from the Bottom side. That
+changes CLAUDE.md §1's "Top-side assembly": JLCPCB places only Top SMD, and the user adds the
+through-hole and large parts afterwards (REQ-MFG-01). The USB-C receptacles are JLCPCB's since
+D37; they were hand-soldered modules on PH-1x40SG headers (D33) before.
 
 ### 6.3 Clock tree
 
@@ -761,11 +818,12 @@ decision as a third Extended part.
 | Per port × 2 | EN, OC event, HOLD_L, HOLD_M, EVT_L, EVT_M | 12 |
 | LEDs, buttons | 4 + 2 (SW1, SW2) | 6 |
 | Clock test pad (D29) | GPIO21 (GPOUT0; D34 chose it from GPIO21, 23, 24, 25), to a test pad for V-MEAS-06 | 1 |
-| **Total** | | **24 of 30** |
+| Data-line taps (D38) | USB_A_P, USB_A_N, USB_B_P, USB_B_N through R35–R38 to GPIO26–29 (pins 38–41, the RP2040's ADC0–3 pins) | 4 |
+| **Total** | | **28 of 30** |
 
 USB D±, QSPI, SWD and RUN have dedicated pins. SW3 goes to QSPI_SS through 1 kΩ (BOOTSEL,
-§6.5), not to a GPIO (REQ-BOOT-02). Six GPIO are spare, including the four that reach the
-RP2040's own ADC.
+§6.5), not to a GPIO (REQ-BOOT-02). Two GPIO are spare, GPIO24 and GPIO25; the four that reach
+the RP2040's own ADC carry the taps.
 
 **Assignment and LEDs (D34).** The GPIO map is in `CIRCUIT_DESIGN_Rev0.5_netlist.md`. The
 PIO drives SCLK, CS and DIN on GPIO12–14 and reads DOUT_A and DOUT_B on GPIO15–16, so each
@@ -912,7 +970,7 @@ with the module (D29).
   self-powered hub. It is not supported behind a bus-powered hub (`requirements/product.md`
   §9).
 - J1's current passes Q53, the soft start (D35, §3.1): ≤ 21 mV at 277 mA and 70 °C, so
-  V5L ≥ 4.5 V needs J1 ≥ 4.52 V at the module pin.
+  V5L ≥ 4.5 V needs J1 ≥ 4.52 V at the receptacle.
 
 ### 7.2 J4 (port) power and the port policy (D18; closes OI-16)
 
@@ -960,8 +1018,8 @@ starves the DUT and dissipates in a 0805.
 | Hardware-only range latch | D4 | Firmware hold within 100 µs | D17 |
 | ROM USB bootloader | RP2040 BOOTSEL | Regained: the RP2040 ROM bootloader (Rev0.3: a DFU bootloader in flash, written once over SWD) | REQ-BOOT-02 |
 | ESD on D+/D− of J1–J3 | TPD4E05U06 | **None**; only the CH335F's on-chip protection remains, 6 kV HBM on its USB pins (datasheet §4.1) (Rev0.3: SRV05-4) | product.md §9 |
-| Top-only assembly | All SMD by JLCPCB | Modules (the four USB-C modules and the MAU104), two DIP16 ADCs, R_H, R_M and F1 hand-soldered. The MCU is machine-placed again since D29 (it was a module under D23), and the hub since D31 (it was a module under D15) | REQ-MFG-01 |
-| Basic parts only | — | Two Extended parts, the RP2040 (D29) and the CH335F (D31): two Extended feeder fees per order | REQ-MFG-05 |
+| Top-only assembly | All SMD by JLCPCB | The MAU104, two DIP16 ADCs, R_H, R_M and F1 hand-soldered. The MCU is machine-placed again since D29 (it was a module under D23), the hub since D31 (it was a module under D15) and the USB-C connectors since D37 (they were four modules under D13) | REQ-MFG-01 |
+| Basic parts only | — | Three Extended parts, the RP2040 (D29), the CH335F (D31) and the USB-C receptacle (D37): three Extended feeder fees per order | REQ-MFG-05 |
 
 ---
 
@@ -980,7 +1038,7 @@ Checked by a human against the schematic; recorded in the release notes with a n
 | G7 | Leakage on VBUS_x | List every net connection on VBUS_A/B | Port C; the discharge path (1 kΩ to Q13's drain); LOW amp +IN via 10 kΩ, from R_L's sense pad; the FET_M and FET_L drains, which are ladder elements; the VBUS_x test pad (REQ-MFG-04); the connector — nothing else |
 | G8 | USB serial number | Inspect firmware descriptor path | From U8's 64-bit unique ID (instruction 4Bh); never a constant |
 | G9 | Hub crystal | Y2 against CH335F built-in capacitors | Y2 frequency inside ±500 ppm on a built board |
-| G10 | ESD coverage | Count protected lines | J1–J4 CC1, CC2 on PSM712; J1–J3 D+/D− unprotected by decision (D22) and listed as such in the release notes; J1/J4 VBUS on SMBJ6.5CA; SBU not connected (modules do not bring it out) |
+| G10 | ESD coverage | Count protected lines | J1–J4 CC1, CC2 on PSM712; J1–J3 D+/D− unprotected by decision (D22) and listed as such in the release notes; J1/J4 VBUS on SMBJ6.5CA; SBU not connected (A8 and B8 are left open, D37) |
 | G11 | Comparator loop | Trace comparator → gate | No MCU in the up-range path; MCU only holds and releases |
 | G12 | Shunt ratings | Datasheets | R_L ≥ 0.125 W for 47 mW stuck-LOW; R_M short-time overload ≥ 2.35 W for 10 ms (the MFU datasheet gives 6.25 W for 5 s, D28) |
 | G13 | Port-enable ownership | Trace EN_x | Driven only by an RP2040 GPIO; U6's PWREN1–4# not connected; OVCUR1–4# tied to VDD33_HUB, inactive (§6.6) |
@@ -988,10 +1046,12 @@ Checked by a human against the schematic; recorded in the release notes with a n
 | G15 | 5 V signals into the MCU | RP2040 pin table and every net on a GPIO | No GPIO net can exceed 3.3 V: EVT through Q24/Q25 (Q44/Q45), DOUT through 10 kΩ / 15 kΩ, OC_x from EN_G_x through 100 kΩ, SCLK/CS/DIN driven through Q50–Q52 |
 | G16 | Op-amp supply and pedestal | Trace V12F, V_INJ | V_INJ = 8 V from U4; six 1 MΩ to the six X nodes; no op-amp or comparator on V5L or V3V3 (the LM393s are on V12F, D34) |
 | G17 | Fast turn-off | Trace DIS_x → Q15 → Q16 | Q16 clamps gate to common source when EN_G_x is low; Q13's gate reaches DIS_x only through 100 kΩ (D34) |
-| G18 | Through-hole side | Inspect footprints | Every Akizuki module, DIP and axial part is through-hole, soldered from Bottom; no SMD on Bottom |
+| G18 | Through-hole side | Inspect footprints | Every Akizuki DIP, module, axial and radial part (the ADCs, the MAU104, R_M, F1) is through-hole, soldered from Bottom; no SMD on Bottom; the receptacles' shell slots are plated slots, reflowed from Top (D37) |
 | G19 | ADC supply and inputs | Trace U7/U17 | V<sub>DD</sub> = V5A, V<sub>REF</sub> = VDDA; every used input through 1 kΩ; CH5–CH7 to GND |
 | G20 | U1 support circuit (D29) | Trace every U1 pin against §6.5; compare U1's land with the RP2040 datasheet's Figure 167 and U8's with the Winbond package drawing | 100 nF at each of the 10 power pins and 1 µF at pins 44 and 45, each at its pin; 22 Ω + 5.1 Ω in each of D+ / D− next to U1; Y1 with 2 × 15 pF and 1 kΩ on XOUT, on short traces; 1 kΩ from QSPI_SS to SW3 next to U8; TESTEN to GND; RUN to V3V3 through 10 kΩ; a 3.20 mm ePad; test pads on DVDD, RUN and the GPOUT clock pin |
 | G21 | U6 support circuit (D31) | Trace every U6 pin against §6.6; compare U6's land with the CH334/335 datasheet's §5.6 drawing (QFN28_4X4X0.75-0.4) | 1 µF at V5, 100 nF + 10 µF at VDD33, each at its pin; VDD33_HUB not tied to V3V3, with a test pad; Y2 straight to XI/XO with no load capacitors; DMU/DPU to J1, DM1/DP1 to U1's resistors, DM2/DP2 to J2, DM3/DP3 to J3; port 4, RESET#/CDP, PWREN1–4#, PSELF, PGANG, SCL and SDA unconnected; OVCUR1–4# to VDD33_HUB; 0.4 mm pitch, 0.20 mm terminals and a 2.7 mm ePad to GND with vias |
+| G22 | USB-C receptacle land (D37) | Compare J1–J4's footprint with the maker's drawing (TYPE-C 16PIN 2MD(073), REV. A, RECOMMENDED PCB LAYOUT) and the placement preview | 12 pads at 0.5 mm pitch (0.60 and 0.30 mm wide), four plated slots and two unplated pegs where the drawing puts them, A1 and B1 0.035 mm shorter (the user's choice, D37); D± as B7 D−, A6 D+, A7 D−, B6 D+; the opening toward the board edge; the part's rotation correct in JLCPCB's placement preview |
+| G23 | Data-line taps (D38) | Trace R35–R38 and U1 pins 38–41 | Pad 1 of each on USB_A_P, USB_A_N, USB_B_P or USB_B_N at U6's pair, pad 2 on GPIO26–29 only (TAP_A_P, TAP_A_N, TAP_B_P, TAP_B_N); nothing else on a tap net; each D± net has the resistor pad as its only branch |
 
 ---
 
@@ -1007,16 +1067,17 @@ dated stock (JLCPCB assembly pool or Akizuki), datasheet facts and remaining che
 2. Large parts are hand-soldered by the user and MUST be **in stock at Akizuki**. The
    thinnest is the MAU104, at 178 pcs on 2026-11-03. (The PGA2040, at 41, left with D29.)
 3. No Extended part of any kind, Preferred Extended included (D22). Rev0.3's two Preferred
-   Extended parts, STM32F103C8T6 (C8734) and SRV05-4 (C7420376), are removed. **Two
-   exceptions, both the user's (2026-11-04):** the RP2040, C2040 (D29), with 5,845 in
-   JLCPCB's assembly pool, and the CH335F, C5137013 (D31), with 4,937, both read on
-   2026-11-04. Each costs one Extended feeder fee per order. D13's "never an Extended-only
-   PCBA" still holds: 38 of the 40 machine-placed types are Basic. A third exception needs
-   the user's decision.
+   Extended parts, STM32F103C8T6 (C8734) and SRV05-4 (C7420376), are removed. **Three
+   exceptions, all the user's:** the RP2040, C2040 (D29), with 5,845 in JLCPCB's assembly
+   pool, and the CH335F, C5137013 (D31), with 4,937, both read on 2026-11-04; and the USB-C
+   receptacle, C2765186 (D37), with 1,070,668, read on 2026-11-12. Each costs one Extended
+   feeder fee per order. D13's "never an Extended-only PCBA" still holds: 38 of the 41
+   machine-placed types are Basic. A fourth exception needs the user's decision.
 4. Special or hard-to-source parts are avoided where an allowed alternative exists. The
-   remaining single-source parts are the Akizuki modules and shunts. Since D29 the MCU, and
-   since D31 the hub, are JLCPCB parts; their supply risk is C2040's and C5137013's assembly
-   stock, which the order-time recheck covers (V-MFG-02).
+   remaining single-source parts are the Akizuki MAU104, ADCs and shunts. Since D29 the MCU,
+   since D31 the hub and since D37 the USB-C connectors are JLCPCB parts; their supply risk is
+   C2040's, C5137013's and C2765186's assembly stock, which the order-time recheck covers
+   (V-MFG-02).
 5. Part types are pooled: one part per value, and one voltage rating per value. On
    2026-11-03 this removed four machine-placed types (42 → 38): 510 Ω 0402 (U3 feed now uses
    the 0805 R_L part), 20 kΩ (the V_J4 divider is now 33 k / 15 k, the U4 values), 10 µF 10 V
@@ -1030,7 +1091,8 @@ dated stock (JLCPCB assembly pool or Akizuki), datasheet facts and remaining che
    (CH335F). Its V5 and VDD33 capacitors reuse 1 µF, 100 nF and 10 µF, and Y2 was already on
    the board. D34 (the capture) removes one (41 → 40): `requirements/parts.md` had listed the
    1 nF C1523 for hysteresis and soft start before their values were set, and no part uses
-   it; those networks use 15 pF, 220 pF and 10 nF, already on the board.
+   it; those networks use 15 pF, 220 pF and 10 nF, already on the board. D37 adds one (40 → 41):
+   C2765186. D38's four tap resistors reuse the 1 kΩ C11702.
 
 **Rev0.3's strictly-Basic fallback became the design** (D22, D23), with one change of
 module. Rev0.3 named the Akizuki g117542 kit or the Raspberry Pi Pico. Neither brings D+/D−
@@ -1077,6 +1139,23 @@ protection. The user accepted this cost in D22, and it is recorded as a limitati
 `requirements/product.md` §9). The CC lines keep PSM712 (Basic; 12 V standoff, but too much
 capacitance for D±).
 
+**D37 replaced the four USB-C modules with machine-placed receptacles.** The module
+(AE-USB2.0-TYPE-C, g113080, ¥350, 20 × 15 mm, on a PH-1x40SG header, 11 pins) gives way to the
+SHOU HAN receptacle C2765186 (JLCPCB Extended, $0.0728 at 1–199 pieces, 8.94 × 7.35 mm). The
+estimate on r02's quote (`design/experiments/cost-estimate/`, prices of 2026-11-12) is 14,235 yen
+for 2 units against 16,482 yen. The eight modules (2,800 yen) and three header strips (105 yen)
+leave the Akizuki order, whose 550 yen shipping stays. JLCPCB's order gains 658 yen: eleven
+receptacles (eight and three of attrition) $0.80, eight tap resistors $0.01, 144 joints $0.23 and a
+third Extended feeder fee $3.07. The user chose this lever alone, 「USB-C直付けのみ (推奨)」.
+Costs: the third Extended type; one D± hop and one branch per receptacle; a land drawn for a
+0.80 mm board that this 1.6 mm board uses (V-MFG-03); no module board between the receptacle and
+the PCB, so the insertion force (0.5–2.0 kgf) is carried by the four shell slots and the pad
+joints (V-MECH-01). **D27's condition is met:** it reopens impedance control "if a later revision
+routes D± without the modules and headers". D37 is that revision. This document does not decide
+it: the option cost $33.08 and an auto-selected $1.05 on 2026-11-03 (5,461 yen at 160 yen/USD,
+38 % of the 14,235 yen), and the hop, the branch and the taps' stubs are outside what it
+controls. The user decides at the JLCPCB step, with a fresh quote.
+
 ---
 
 ## 10. Decisions
@@ -1105,22 +1184,24 @@ appear here.
 | D18 | Port path = back-to-back AO3401A, EN-sourced Rp 33 kΩ (Default), hardware OC at 1.16 A with fast turn-off, discharge at reset, firmware budget rule against J4's advertisement | 2026-11-03 | Claude (delegated) | OI-16, OI-7 (in part) |
 | D19 | Clocks: Y2, a 12 MHz Basic crystal → CH335F. **Amended by D23:** Y1 (→ STM32) removed; the RP2040 module has its own crystal. **Amended by D29:** Y1 returns, C9002 → RP2040 XOSC (§6.3) | 2026-11-03 | Claude (delegated) | OI-2 |
 | D20 | Accuracy target ±(1 % + 3 LSB of the active range), ±10 °C of calibration, after gain and zero calibration | 2026-11-03 | Claude (delegated) | OI-21 |
-| D21 | Rev0.2 proposals adopted: P9 (≥ 18 mm port pitch; the 20 mm-wide modules side by side meet it), P10 (BOOT command + lid pinhole; **amended by D23:** the RP2040 ROM USB bootloader, where Rev0.3 had a flash DFU bootloader), P11 (TC2030-NL + test pads; SWD is now for debug only), P12 (heat-set M2 inserts, 4 corners) | 2026-11-03 | Claude (delegated) | OI-9 (design); OI-1, OI-5, OI-8 still need physical checks |
-| D22 | **Basic parts only:** no Preferred Extended part either. STM32F103C8T6 and SRV05-4 are removed, accepting the costs Claude stated beforehand: an Akizuki RP2040 module plus a DIP ADC, a lower sample rate, and no D± ESD on J1–J3. The user answered 「うん、okだよ」 and then selected 「外して Basic のみにする」. Two exceptions since, both the user's: D29 (the RP2040) and D31 (the CH335F) | 2026-11-03 | **User** | OI-30 |
+| D21 | Rev0.2 proposals adopted: P9 (≥ 18 mm port pitch; the 20 mm-wide modules side by side met it, and since D37 J2 and J3 stand 33.8 mm apart), P10 (BOOT command + lid pinhole; **amended by D23:** the RP2040 ROM USB bootloader, where Rev0.3 had a flash DFU bootloader), P11 (TC2030-NL + test pads; SWD is now for debug only), P12 (heat-set M2 inserts, 4 corners) | 2026-11-03 | Claude (delegated) | OI-9 (design); OI-1, OI-5, OI-8 still need physical checks |
+| D22 | **Basic parts only:** no Preferred Extended part either. STM32F103C8T6 and SRV05-4 are removed, accepting the costs Claude stated beforehand: an Akizuki RP2040 module plus a DIP ADC, a lower sample rate, and no D± ESD on J1–J3. The user answered 「うん、okだよ」 and then selected 「外して Basic のみにする」. Three exceptions since, all the user's: D29 (the RP2040), D31 (the CH335F) and D37 (the USB-C receptacle) | 2026-11-03 | **User** | OI-30 |
 | D23 | MCU = **PGA2040** (RP2040 module, Akizuki); ADC = **2 × MCP3208-CI/P** (Akizuki DIP16) at V<sub>DD</sub> 5 V, sharing CLK/CS/DIN, sample phase stretched by the PIO, 14.0 kSPS with both ports sampled at once; PSM712 on J1–J3 CC, D± unprotected; RP2040 ROM USB bootloader; hold pull-ups 10 kΩ; level shifters on EVT and the ADC bus. Supersedes D16; amends D17, D19, D21. **Amended by D29:** the MCU is a bare RP2040 (C2040), no longer the PGA2040; the ADC part of D23 stands. *Revert → no Basic-only MCU remains; reverting D22 instead restores Rev0.3* | 2026-11-03 | Claude (delegated) | — (opens OI-31) |
 | D24 | Board outline **100 × 72 mm**, 4 layers; amends D10's 85 × 35 mm. The OI-23 study (`design/experiments/oi-23-placement/`) shows that Rev0.4 needs at least 3,715 mm² (no routing space, every low part credited under a module; 3,780 mm² once D25 added F1), against 2,975 mm². The user's condition, 「100x100未満ならいいんだっけ」, is that the outline stays within JLCPCB's 100 × 100 mm base price tier. JLCPCB instant quote, 2026-11-03, 4 layers, 5 pcs, default options: $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; $30.80 at 130 × 72 mm (a $25 engineering fee appears). ENIG adds $16.90 at 85 × 35 and $17.40 at 100 × 72 mm. The size inside the tier is Claude's choice. *Revert → no 85 × 35 layout exists; a smaller outline needs a new study run*. *Amended by D33 (2026-11-04): with the space under the USB-C modules read off their drawings, the bound at K = 1.0 is 2,931 mm², and it exceeds 85 × 35 mm from K = 1.025* | 2026-11-03 | **User** (condition) + Claude (delegated, size) | OI-23 (area only; outlines still open) |
 | D25 | **J4 input fuse F1 = Bourns MF-R300** (Akizuki g112630), ahead of D6. 3.00 A hold (2.49 A at 40 °C) against the 2.33 A the OC trips allow; 6.00 A trip; 30 V, so a wrong supply up to 30 V that D6 crowbars trips F1. Cost: R1max 0.08 Ω adds up to 0.16 V of drop with both ports at 1 A, which cuts the HIGH mirror's gate headroom to 0.03 V in the J4 = 4.75 V corner (OI-27, V-MEAS-00; **D28:** 1.63 V against TI's single-supply row, §3.2). Fallbacks if the bench check (since D28, V-MEAS-00 at bring-up) fails: firmware flags HIGH readings while V_J4 (measured after F1) is below the measured limit, or revert D25. Rejected: relying on the source's own protection, because a hand-soldered board can short upstream of the port OC. *Revert → OI-29 reopens; no other Akizuki PTC has a datasheet with resistance figures at hand*. *Amended by D34: with the trip's tolerance, both ports just below their trips draw up to 2.46 A at 40 °C, 0.03 A under F1's 2.49 A (§7.2)* | 2026-11-03 | Claude (delegated) | OI-29 |
 | D26 | **J1 power declaration.** The CH335F stays self-powered (PSELF default, 100 mA), because J2 and J3 are powered from J4: as a bus-powered hub it would offer DUTs only 100 mA. The RP2040 function declares bMaxPower 200 mA, bus-powered, against its 126 mA typical, 172 mA with every OP07 at its maximum (since D34, 127 mA and 192 mA with every OP07 and LM393 at its maximum). The board is specified for upstream ports that supply 500 mA, not for bus-powered hubs. Rejected: (a) raising the hub's MaxPower through the CH335F EEPROM, since a self-powered hub may draw only one unit load from upstream, so a larger figure is itself non-compliant, and it adds a part; (b) feeding the MCU and analog from J4. That is compliant, but it removes the COM port whenever J4 is absent. It also takes ≈ 0.13 A out of J4's advertisement, so a Default-only J4 could run no port (REQ-PWR-04), and it cuts F1's 40 °C hold margin from 0.16 A to ≈ 0.03 A. *Revert → OI-25 reopens with (a) and (b)* | 2026-11-03 | Claude (delegated) | OI-25 |
-| D27 | **Stackup JLC04161H-7628**, named on the order ("Specify Stackup: Yes"): 1 oz outer, 7628 prepreg 0.2104 mm (Dk 4.4) between L1 and L2, 1.065 mm core, 1.5862 mm in total; the layer use stays CLAUDE.md §5.1's. On the quote page (browser, 2026-11-03) it was the only one of 18 named 4-layer stackups without the note "This is a special stackup, and it doesn't support economic PCB assembly", naming it left the PCB price at $25.40, and "No requirement" shows the same build. **USB 2.0 pair: W = 0.31 mm, S = 0.15 mm on L1 over L2**, 90.4 Ω in the bare Hammerstad–Jensen + Kirschning–Jansen model at the published Dk (99.7 / 82.8 Ω at W −/+20 %, S held). The model reproduces JLCPCB's own single-ended 50 Ω width to +2 %, but JLCPCB's differential calculator returned no result, so the geometry is **provisional**: rerun that calculator (or ask JLCPCB) for 90 Ω at S = 0.15 mm before routing, and use its width. Study: `design/experiments/stackup-impedance/`. **Impedance control is not ordered for the prototype.** It costs $33.08 plus an auto-selected $1.05 "Confirm Production file" ($59.53 instead of $25.40). It controls only the board segment, while D± also pass through Akizuki modules and 2.54 mm headers (OI-26), and FS is the documented fallback (REQ-HOST-07). Its effect on the Economic PCBA class is also unseen. Rejected: the other 17 named stackups (the special-stackup note); 7628C/F also reach no 90 Ω width within 0.60 mm. *Revert → the order says "No requirement", which shows the same build but names nothing. Reopen impedance control if V-HOST-01's HS test fails and the fault is traced to the board-level pair, or if a later revision routes D± without the modules and headers* | 2026-11-03 | Claude (delegated) | — (CLAUDE.md §5.1 stackup ID) |
+| D27 | **Stackup JLC04161H-7628**, named on the order ("Specify Stackup: Yes"): 1 oz outer, 7628 prepreg 0.2104 mm (Dk 4.4) between L1 and L2, 1.065 mm core, 1.5862 mm in total; the layer use stays CLAUDE.md §5.1's. On the quote page (browser, 2026-11-03) it was the only one of 18 named 4-layer stackups without the note "This is a special stackup, and it doesn't support economic PCB assembly", naming it left the PCB price at $25.40, and "No requirement" shows the same build. **USB 2.0 pair: W = 0.31 mm, S = 0.15 mm on L1 over L2**, 90.4 Ω in the bare Hammerstad–Jensen + Kirschning–Jansen model at the published Dk (99.7 / 82.8 Ω at W −/+20 %, S held). The model reproduces JLCPCB's own single-ended 50 Ω width to +2 %, but JLCPCB's differential calculator returned no result, so the geometry is **provisional**: rerun that calculator (or ask JLCPCB) for 90 Ω at S = 0.15 mm before routing, and use its width. Study: `design/experiments/stackup-impedance/`. **Impedance control is not ordered for the prototype.** It costs $33.08 plus an auto-selected $1.05 "Confirm Production file" ($59.53 instead of $25.40). It controls only the board segment, while D± also pass through Akizuki modules and 2.54 mm headers (OI-26), and FS is the documented fallback (REQ-HOST-07). Its effect on the Economic PCBA class is also unseen. Rejected: the other 17 named stackups (the special-stackup note); 7628C/F also reach no 90 Ω width within 0.60 mm. *Revert → the order says "No requirement", which shows the same build but names nothing. Reopen impedance control if V-HOST-01's HS test fails and the fault is traced to the board-level pair, or if a later revision routes D± without the modules and headers.* **Amended by D37:** that revision is Rev0.5, so the impedance-control question is open again (§9); it is not ordered in this document | 2026-11-03 | Claude (delegated) | — (CLAUDE.md §5.1 stackup ID) |
 | D28 | **No pre-layout bench: desk checks now, the first PCBA prototype confirms.** The bench kit of issue #1 is not bought. The user: 「試験キットは買わない、基板で確かめる。君が机上で確認すればいい」. The assumptions it was to check are desk-checked from datasheets (§3.2, §4, §7.1; `CIRCUIT_DESIGN_Rev0.5_calc.py`), and V-MEAS-00 and V-MEAS-06 move to bring-up. **Settled on paper:** the OP07 common mode and output low limit (TI's single-supply gain row; gate headroom 1.63–1.96 V, was 0.03–0.36 V); R_M's survival of the stuck-MID fault (6.25 W for 5 s rating); the PGA2040's supply input, 27 Ω pair and flash unique ID; U1 on V3V3; the reset hold. **Not settled on paper, accepted as bring-up risk:** the mirror loop's stability, R_M's < 0.1 % shift after the fault, the MCP3208's INL at V<sub>REF</sub> 3.3 V and its stretched sample. A failure there costs a board revision instead of a bench rebuild. Not covered by D28: the CH335F module's outline (OI-24), which needed the module itself before layout; D31 removed the module and closes OI-24. *Revert → the kit is in Git at commit 609bfb7 (`tests/fixtures/pre-layout-bench/`), and OI-27, OI-28, OI-31 reopen as bench checks.* (D29 removed the PGA2040, so its three items here are superseded by D29's own desk check: §3.3, §6.3, §7.1.) | 2026-11-04 | **User** | OI-27, OI-28, OI-31 |
 | D29 | **MCU = a bare RP2040 (C2040, Extended, LQFN-56), machine-placed by JLCPCB: an exception to D22 (the second is D31).** Replaces D23's PGA2040. The support circuit follows Raspberry Pi's minimal design (§6.5): U8 W25Q128JVSIQ (C97521); Y1 C9002 with 2 × 15 pF and 1 kΩ in XOUT (§6.3); 27 Ω per USB line as 22 Ω + 5.1 Ω (§3.3); 100 nF per power pin and 1 µF at VREG_VIN and VREG_VOUT; SW3 to QSPI_SS through 1 kΩ; RUN to V3V3 through 10 kΩ; TESTEN to GND. Machine-placed types 35 → 40; the hand-soldered PGA2040 (¥1,680, 41 in stock) goes. The user asked 「このPGAてさ生のRP2040より高くない?」, accepted a larger redesign with 「いいよ、大きな設計変更になってもいいよ」, and selected 「素の RP2040 (推奨)」. Costs: one Extended feeder fee per order; a 0.4 mm-pitch QFN with a non-standard ePad to draw (G20); a crystal other than Raspberry Pi's recommendation, checked on the first boards (V-MEAS-06). *Revert → D23's PGA2040 returns (Git commit `6774bc5`), and D31 is D22's only exception* | 2026-11-04 | **User** | — (amends D19, D23) |
 | D30 | **Surface finish: leaded HASL, not ENIG.** Asked about the JLCPCB cost, the user wrote 「ENIGいらないよ、」. Claude named the risk and offered leaded HASL, lead-free HASL or ENIG, and the user selected 「有鉛 HASL (推奨)」. The 5 PCBs cost $8.00 instead of $25.40 (quote of 2026-11-03). **Risk accepted:** HASL is not flat. U1 (RP2040, 0.4 mm-pitch LQFN-56 with an ePad, D29) is the part it affects; when D30 was made, the next finest pitch on the board was SOT-23's 0.95 mm. A bridged or open U1 joint costs a rework or a board. V-MFG-03 inspects U1 on the first boards. **Amended by D31:** U6 (CH335F, 0.4 mm-pitch QFN-28 with an ePad) is a second such part, and V-MFG-03 inspects it too. The board is not RoHS-compliant. Whether green mask, 1.6 mm and leaded HASL form an Economic PCBA combination is as unconfirmed as it was with ENIG. *Revert → ENIG, +$17.40 per 5 PCBs; CLAUDE.md §9's ENIG text is at commit `4a04218`* | 2026-11-04 | **User** | — (changes CLAUDE.md §9's ENIG assumption) |
 | D31 | **Hub = a bare CH335F (C5137013, Extended, QFN-28 4 × 4 mm), machine-placed by JLCPCB: a second exception to D22.** Replaces D15's Akizuki module, AE-QFN28-DIP(CH335F) (g129556). The support circuit follows the WCH datasheet (§6.6): 1 µF at V5; 100 nF + 10 µF at VDD33, on its own net VDD33_HUB; Y2 straight to XI/XO; OVCUR1–4# tied inactive; every other control pin unconnected. Machine-placed types 40 → 41, with no new passive type. Asked what to buy from Akizuki, the user asked 「ええ、CH335FはLCSCに在庫無いの?」 and 「こんなモジュール実装するのデカくない?」; offered the bare chip against the module, the user selected 「IC 単体にする (推奨)」. Gains: the 38.5 × 10.2 mm module and one header strip per board go (one per two units, once D33 counted the mechanical pins) (hand-soldered area 2,198 → 1,806 mm²); OI-24 closes, because the datasheet gives the package drawing and the pin table; each HS path crosses one module and header instead of two (OI-26). Costs: a second Extended feeder fee per order ($3.07); a second 0.4 mm-pitch QFN with an ePad on leaded HASL (D30, V-MFG-03) and a land to draw (G21); V5's operating range has no margin against V5L's (§6.6), as it had on the module. The 2-unit Economic total changes by −59 to −299 yen (−24 to −144 yen once D33 counted each USB-C module's four mechanical header pins). *Revert → D15's module returns (its record is at Git commit `3e11f68`), OI-24 reopens, and D29 is D22's only exception* | 2026-11-04 | **User** | OI-24 (amends D15, D30) |
 | D32 | **ECAD workflow: capture and lay out Rev0.4 in KiCad 9.0.8 on the design PC until the design is complete, then import it into EasyEDA.** The user: 「いったんローカルでKiCadで完成まで目指してそのご、EasyEDAにインポートしよう」. "Complete" means every CLAUDE.md §8 gate up to and including BOM/CPL is reached and recorded; the state stays `WIP` (later `REVIEW`). Until the import is settled, the KiCad project in `design/ecad/source/` is the source of truth, and the EasyEDA copy is checked against it (nets, footprints, outputs). The import needs the user's EasyEDA account; Claude does not log in. Nothing is uploaded or ordered without the user's approval. Tracking: issue #6. *Revert → capture directly in EasyEDA; the KiCad project is then a reference only* | 2026-11-04 | **User** | — (amends D2) |
-| D33 | **Module headers: PH-1x40SG (Useconn; Akizuki g100167, ¥35 per 1 × 40 strip, 8,000 in stock on 2026-11-04), soldered without sockets; the DIP16 ADCs are soldered without sockets too.** Closes OI-23's remainder. From the PH-1xXXSG drawing: insulator 2.50 mm tall and 2.50 mm wide, general tolerance ±0.2 mm, so ≥ 2.30 mm; pins sq 0.64 mm, 6.10 mm above and 3.00 mm below the insulator; ø1.02 mm holes; 3 A. Under a module it leaves ≥ 0.80 mm above a 1.5 mm part, against the 0.5 mm the placement study now requires. Each USB-C module takes 11 pins: its 1 × 7 row and two 1 × 2 mechanical pieces, which REQ-MECH-03 requires to be soldered; 44 per board. Reading the module drawing and the receptacle drawing (Hirose CX70M-24P1) for the header height led to three corrections. (1) The receptacle is mid-mounted and hangs below the module by 2.36 mm less the module board's unpublished thickness, so the study's layout no longer puts parts under it: one 19.0 × 3.4 mm strip per module (65 mm²) replaces 130 mm². (2) The area bound now credits each module's outline less its header insulators (230.2 mm²), the most favourable reading. At K = 1.0 it is 2,931 mm², 1.5 % under 85 × 35 mm, which it exceeds from K = 1.025 (§11). (3) The cost estimate's header count had left out the mechanical pins: two units need 3 strips, not 2. Sockets rejected: they add a contact pair to every USB D± path (OI-26) and to the port current path, raise each module by the socket's height, and cost 360 yen more for two units. Gain: the study's last open input is on paper. Cost: replacing a module means desoldering 11 pins. The 2-unit Economic total is 17,456 yen. *Revert → sockets FH2.54-40U1GF8.5-0.5 (Akizuki 110073, ¥120 per strip) under the modules; re-run the study and the cost estimate* | 2026-11-04 | Claude (delegated) | OI-23 (remainder) |
+| D33 | **Superseded by D37 for the USB-C modules and their headers; the DIP16 ADCs stay soldered without sockets.** *Was:* **Module headers: PH-1x40SG (Useconn; Akizuki g100167, ¥35 per 1 × 40 strip, 8,000 in stock on 2026-11-04), soldered without sockets; the DIP16 ADCs are soldered without sockets too.** Closes OI-23's remainder. From the PH-1xXXSG drawing: insulator 2.50 mm tall and 2.50 mm wide, general tolerance ±0.2 mm, so ≥ 2.30 mm; pins sq 0.64 mm, 6.10 mm above and 3.00 mm below the insulator; ø1.02 mm holes; 3 A. Under a module it leaves ≥ 0.80 mm above a 1.5 mm part, against the 0.5 mm the placement study now requires. Each USB-C module takes 11 pins: its 1 × 7 row and two 1 × 2 mechanical pieces, which REQ-MECH-03 requires to be soldered; 44 per board. Reading the module drawing and the receptacle drawing (Hirose CX70M-24P1) for the header height led to three corrections. (1) The receptacle is mid-mounted and hangs below the module by 2.36 mm less the module board's unpublished thickness, so the study's layout no longer puts parts under it: one 19.0 × 3.4 mm strip per module (65 mm²) replaces 130 mm². (2) The area bound now credits each module's outline less its header insulators (230.2 mm²), the most favourable reading. At K = 1.0 it is 2,931 mm², 1.5 % under 85 × 35 mm, which it exceeds from K = 1.025 (§11). (3) The cost estimate's header count had left out the mechanical pins: two units need 3 strips, not 2. Sockets rejected: they add a contact pair to every USB D± path (OI-26) and to the port current path, raise each module by the socket's height, and cost 360 yen more for two units. Gain: the study's last open input is on paper. Cost: replacing a module means desoldering 11 pins. The 2-unit Economic total is 17,456 yen. *Revert → sockets FH2.54-40U1GF8.5-0.5 (Akizuki 110073, ¥120 per strip) under the modules; re-run the study and the cost estimate* | 2026-11-04 | Claude (delegated) | OI-23 (remainder) |
 | D34 | **The values set at capture (issue #6 P2).** Capture needed the values Rev0.4 left to it, and their desk check changed three circuit details. The values are in `CIRCUIT_DESIGN_Rev0.5_netlist.md`, the numbers in `CIRCUIT_DESIGN_Rev0.5_calc.py`. (1) **The three LM393s move from V5L to V12F.** An overranged amplifier node reaches 5.04 V, and LM393/D note 1 sets an input's absolute maximum equal to the supply voltage: on V5L (≥ 4.50 V) that fails by 0.54 V, on V12F (≥ 10.53 V) 5.49 V are left. Cost: V12F's minimum falls from 10.62 to 10.53 V (the OP07 common mode stays ≥ 5.28 V below V+, the output top is 6.93 V); the MAU104 carries ≤ 41.0 mA of its 84 mA; J1's function current with every OP07 and LM393 at its maximum is 192 mA, against the 200 mA it declares (D26). (2) **Comparator inputs:** the amplifier on −, TH_REF on + through 15 kΩ each; TH_REF is VDDA × 5.61 k / 6.61 k = 2.8008 V (ratio ±0.30 %) with 1 µF; the hysteresis is a 15 pF / 220 pF kick on + (255–335 mV on the bypass comparators, 151–198 mV on OC, τ 3.5 µs). The OC trip is then 1.164 A nominal, 1.110–1.221 A at 25 °C and 1.100–1.241 A over 0–70 °C, which replaces D18's ±3 % (REQ-PORT-05), and F1's worst-case 40 °C margin is +0.03 A (§7.2). (3) **Port switch:** R_on 100 kΩ, C_M 2 × 10 nF from gate to VSUP_x: soft start 1.99–5.93 ms, inrush ≤ 26 mA. **Q13's gate moves behind 100 kΩ (DISG_x):** on DIS_x directly its 630 pF made DIS_x take 10.0 µs to reach 2.5 V, the whole turn-off budget; now 0.85 µs. Q16 gets 5.1 kΩ / 100 kΩ base drive (S9012 rank H): OC to open in 3.8 µs, against 10 µs. (4) LEDs through 510 Ω, the R_L part (the green's current is not guaranteed at its V<sub>F</sub> limit, a first-board check, §6.4); 1 µF at the MAU104's input and output; no capacitor at either CJ431 (§4.1); GPIO21 is the clock pad; every passive bound to a Basic part, and the 1 nF C1523 is dropped (machine-placed types 41 → 40). **Not settled on paper:** an unpowered LM393 input takes ≤ 0.19 mA if TH_REF rises before V12F (§3.2); an OFF bypass gate's leakage reaches −1.08 V at the datasheet limits, −80 mV typical (§3.2, V-MEAS-01). *Revert (1) → overrange exceeds the LM393 input rating; revert (3) → Q13's gate alone spends the 10 µs turn-off budget* | 2026-11-04 | Claude (delegated) | — (amends D18, D25, D26) |
 | D35 | **J1's soft start: Q53, an AO3401A (C15127, Basic, already on the board), between VBUS_J1 and V5L (issue #7).** The fix is the user's (「OKお願いします」, accepting the recommendation in OI-32); the values are Claude's. R34 33 kΩ gate → GND, C35 100 nF gate → drain (Miller), C36 + C37 2 × 1 µF gate → source; D5 and the new TP14 on VBUS_J1. Without it J1 delivers 294 µC at plug-in, 5.9 × a 10 µF load's 50 µC. With it (§3.1): plug-in step −0.317 V against the −0.5 V minimum threshold, hold-off 2.5–23.7 ms, ramp 3.2–6.7 ms, capacitive inrush 95 mA nominal and ≤ 152 mA bound, V5L up ≤ 30.4 ms after plug-in, and ≤ 21 mV of drop, so J1 needs ≥ 4.52 V at the board. Parts: one more of the AO3401A, 33 kΩ, 100 nF and 1 µF types (two of the last); no new type (40 machine-placed types). **Not settled on paper:** the MAU104's start-up current and U6's time to attach, both measured in V-PWR-03. *Rejected: a load-switch IC with its own slew control (none is Basic or at hand); a gate RC without the Miller capacitor, which does not set the ramp. Revert → J1 again delivers 294 µC unlimited* | 2026-11-04 | **User** (the fix); Claude (the values) | OI-32 |
 | D36 | **In the analog blocks, an L3 and an L4 signal track may cross at 45° or more, but may not run along each other (issue #6 P4).** This amends how CLAUDE.md 5.1 applies there. The rule asks an L3 signal under the analog blocks for GND on L4 directly below. Routing it literally, with L4 closed to signals under AFE_A, AFE_B, ADC, ADCSUP and REF, left 76–78 connections unrouted on 100 × 72 mm in every Freerouting trial. With L4 open there the same router left 9 by DRC's count, and its routing had 171 L3/L4 crossings and 29 parallel overlaps (27 mm in all). Offered the crossings-only rule against a larger outline (≈ 100 × 90 mm, P3 redone) or carrying on as before, the user chose 「交差のみ許可 (推奨)」. check_routing.py rule 6 holds every In2/B.Cu pair of tracks within 0.3 mm of each other in those blocks to an angle of 45° or more (`design/ecad/ROUTING_Rev0.5.md`, Layers). **Cost:** at a crossing, part of the L3 signal's return current flows on L2, the analog blocks' reference, for the width of the crossing. The signals are low-speed (SPI at 1 MHz and slower), so the effect was judged small on paper. It has not been measured; V-MEAS-01's accuracy check against a reference on the first board is where it would show. *Revert → L4 closes under the analog blocks again (the keepout ANALOG_L4), and the outline has to grow for the board to route* | 2026-11-06 | **User** | — (amends CLAUDE.md 5.1) |
+| D37 | **J1–J4 = the USB-C receptacle C2765186 (SHOU HAN TYPE-C 16PIN 2MD(073), Extended, SMD with plated shell slots), machine-placed by JLCPCB: a third exception to D22.** Replaces the four Akizuki AE-USB2.0-TYPE-C modules on PH-1x40SG headers (D13, D33). The user asked for a cheaper board (「安価に製造できないとね、製造コストを下げて」, issue #8); Claude listed the levers with their figures, and the user chose this one alone, 「USB-C直付けのみ (推奨)」. The nets are the modules' own: A1/B1 and the shell GND, A4/B4 VBUS, A5 CC1, B5 CC2, D± as the drawing orders them (B7, A6, A7, B6, alternating), A8/B8 not connected; J4's D± are not connected. Gains: 14,235 yen for 2 units against r02's 16,482 yen, an estimate (§9); the four 20 × 15 mm modules and their header strips leave the hand-soldering (eight modules and three strips for two units); each HS path crosses no module or header, so OI-26 narrows to the on-board layout (§3.3); J2 and J3 stand 33.8 mm apart. Costs: a third Extended type and feeder fee ($3.07 per order); one hop and one branch of D± per receptacle (`design/ecad/ROUTING_Rev0.5.md`); a land drawn for a 0.80 mm board, on 1.6 mm (V-MFG-03); the insertion force carried by the shell slots (V-MECH-01). **GND pads A1 and B1 are 0.035 mm shorter at their near end than the drawing**, because the drawing leaves 0.165 mm from each peg hole to them, under JLCPCB's 0.20 mm figure for an unplated hole to copper (pcb-capabilities, read 2026-11-12); the user chose 「GND パッドを 0.035 mm 短く (推奨)」. Rev0.5 is a new PCB revision, with its own release candidate. *Reopens, not decided here: D27's impedance control (§9). Revert → the modules and headers return (Git commit `5a697aa`), and D22's exceptions are two again* | 2026-11-12 | **User** | — (amends D13, D21, D22, D27, D33; CLAUDE.md §1) |
+| D38 | **Data-line taps: USB_A_P/N to GPIO26/27 and USB_B_P/N to GPIO28/29 through four 1 kΩ 0402 (C11702, R35–R38), at U6, for a Low-Speed and Full-Speed capture by the RP2040's PIO (issue #10).** The user: 「可能ならデータ線部分もロジックアナライズできるとUSB接続機器を開発するのに便利なんだけど、出来る?」. Hardware only here; the PIO capture, trigger, RAM buffer, packet decoding and the host application's lane are later work (issues #10, #9). Not High-Speed: that needs a ULPI PHY and an FPGA. D+ and D− of a port are on consecutive pins, as a PIO `in` needs; the 1 kΩ keeps the pad's load off the pair and limits the current into the pin; each resistor stands on the pair, so a stub is one resistor pad (§3.3). No new part type; GPIO spare 6 → 2 (§6.4). **Risk accepted:** HS signal integrity of J2's and J3's paths, checked on the first board (V-HOST-01); a D± shorted to VBUS by a faulty DUT or cable puts 1.4 mA (RP2040 powered) to 4.7 mA (unpowered) through the 1 kΩ into the pin's clamp (§3.3). The four resistors are removable. *Revert → remove R35–R38; GPIO26–29 are spare again* | 2026-11-12 | **User** (the request); Claude (the circuit) | — (amends §6.4; issue #10) |
 
 D12 was withdrawn on 2026-11-03 and is not reused.
 
@@ -1172,11 +1253,18 @@ receptacle hangs below it, so the layout keeps that zone empty. The receptacle o
 module's front edge by 1.06 mm, so it stands 1.06 mm outside the board outline: an enclosure
 question (V-MECH-01). The study does not route; capture and layout do (D32).
 
+**D37 (2026-11-12) removes the four USB-C modules and their headers from the board.** This
+section counts them (1,806 mm² of hand-soldered parts, 921 mm² of space under them) and is the
+record of Rev0.4. Rev0.5 places the 8.94 × 7.35 mm receptacles themselves
+(`design/ecad/PLACEMENT_Rev0.5.md`); the outline stays 100 × 72 mm (D24). The study
+(`design/experiments/oi-23-placement/`) is kept as that record and is not re-run for the
+receptacles. The D33 header choice and the under-module strips no longer apply.
+
 ---
 
 ## 12. What must happen before KiCad capture
 
-Status as of 2026-11-04 (D28, D29, D31, D33, D34, D35). OI-30 is closed by D22; OI-27, OI-28 and
+Status as of 2026-11-04 (D28, D29, D31, D33, D34, D35); item 6 is D37's, of 2026-11-12. OI-30 is closed by D22; OI-27, OI-28 and
 OI-31 by D28; OI-24 by D31; OI-23 by D33; OI-32, found at capture, by D35. Capture has started in KiCad (D32, issue #6); items 1
 and 2 are drawn there before layout.
 
@@ -1208,7 +1296,10 @@ and 2 are drawn there before layout.
    2026-11-04):** TP101–TP104 and TP201–TP204 on each port's OUT_H, GATE_H, HOLD_M and
    HOLD_L, TP9 on V_J4, and TP10–TP13 on DVDD, RUN, CLKOUT (GPIO21) and VDD33_HUB
    (`CIRCUIT_DESIGN_Rev0.5_netlist.md`).
-6. Recheck all stock immediately before upload and again before payment (CLAUDE.md §4.1).
+6. ~~Draw J1–J4's land from the maker's drawing (D37).~~ **Drawn (issue #8, 2026-11-12):**
+   `design/ecad/libraries/`, measured against the drawing by `check_libraries.py` (G22). Its
+   rotation in JLCPCB's placement preview is read when the JLCPCB step is run.
+7. Recheck all stock immediately before upload and again before payment (CLAUDE.md §4.1).
 
 ---
 
@@ -1233,6 +1324,7 @@ and 2 are drawn there before layout.
 | 0.4 | 2026-11-04 | Amended: D34 (Claude, delegated) records the values set at capture (issue #6 P2) and three circuit changes found by their desk check: the LM393s move to V12F, Q13's gate moves behind 100 kΩ, and the comparators take the amplifier on − and a 2.80 V TH_REF divider on +. The capture list `CIRCUIT_DESIGN_Rev0.5_netlist.md` is added; the OC trip tolerance becomes 1.110–1.221 A at 25 °C (REQ-PORT-05). §3.1, §3.2, §3.4, §4.1, §6.1, §6.2 (J5), §6.4, §7.1, §7.2, G7, G16, G17, §9, §12 and the D25 and D26 rows updated. Machine-placed types 41 → 40 (38 Basic + C2040 + C5137013). |
 | 0.4 | 2026-11-04 | Amended: D35 (the user's fix, Claude's values; issue #7) closes OI-32: Q53, an AO3401A soft start between VBUS_J1 and V5L, with R34, C35–C37 and TP14. §3.1, §6.1, §6.2, §7.1 and P11 updated. No new part type. |
 | 0.4 | 2026-11-06 | Amended: D36 (user; issue #6 P4) lets an L3 and an L4 signal cross at 45° or more in the analog blocks, never run along each other. No circuit change. |
+| 0.5 | 2026-11-12 | D37 (user; issue #8) replaces the four Akizuki USB-C modules and their headers with machine-placed receptacles, C2765186, the third Extended part; D38 (user's request, Claude's circuit; issue #10) adds four 1 kΩ taps from J2's and J3's D± to GPIO26–29. Header, §1 (fact 20), §2, §3.1, §3.3, §6.2, §6.4, §7.1, §7.4, §8 (G10, G18; G22 and G23 added), §9, §10 (D21, D22, D27, D33 amended), §11 and §12 updated. Machine-placed types 40 → 41 (38 Basic + C2040 + C5137013 + C2765186). The capture list, the library, the placement and the routing follow in `design/ecad/`. D27's impedance-control question is reopened (§9). Still no manufacturing output. |
 
 ---
 

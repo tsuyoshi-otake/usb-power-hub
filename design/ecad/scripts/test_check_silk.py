@@ -5,9 +5,8 @@ Run with KiCad's Python from the repository root, after make_pcb.py has written 
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_silk.py
 
-Each test copies design/ecad/source and design/ecad/libraries into a temporary directory,
-copies the placement document beside them, corrupts the copies and runs check_silk.py on
-them in a new process. A test that moves a label edits the board and the document's silk
+Each test copies design/ecad/source into a temporary directory, copies the placement
+document beside it, corrupts the copies and runs check_silk.py on them in a new process. A test that moves a label edits the board and the document's silk
 table alike, so that only the rule under test breaks. The unchanged copy must pass; every
 corruption must fail and be named in the output. The repository's files are never modified.
 Each run takes about 2 s.
@@ -39,7 +38,6 @@ def run_check(board=None, doc=None):
         t = pathlib.Path(tmp)
         src = t / "source"
         shutil.copytree(ECAD / "source", src)
-        shutil.copytree(ECAD / "libraries", t / "libraries")
         text = DOC.read_text(encoding="utf-8")
         if doc:
             new = doc(text)
@@ -54,7 +52,7 @@ def run_check(board=None, doc=None):
             assert sx.dumps(tree) != before, "the board corruption changed nothing"
             p.write_text(sx.dumps(tree) + "\n", encoding="utf-8", newline="\n")
         r = subprocess.run([sys.executable, "-I", "-B", str(CHECK), "--src", str(src),
-                            "--lib", str(t / "libraries"), "--doc", str(t / DOC.name)],
+                            "--doc", str(t / DOC.name)],
                            capture_output=True, text=True, encoding="utf-8", timeout=600)
         return r.returncode, r.stdout + r.stderr
 
@@ -231,8 +229,13 @@ class CheckSilkTest(unittest.TestCase):
                              "FAIL silk J2: port label 'OUT A' missing")
 
     def test_port_label_far(self):
-        self.assertFailsWith(run_check(board=move_text("OUT A", 17.5, 18.0), doc=set_row("J2", y="18.0")),
+        """OUT A moved 2.0 mm west: its ink ends about 2.4 mm from J2's courtyard."""
+        self.assertFailsWith(run_check(board=move_text("OUT A", 7.6, 3.0), doc=set_row("J2", x="7.6")),
                              "FAIL silk J2: port label 2.")
+
+    def test_port_label_on_the_receptacle(self):
+        self.assertFailsWith(run_check(board=move_text("OUT A", 17.5, 3.0), doc=set_row("J2", x="17.5")),
+                             "FAIL silk J2: port label 0.00 mm from J2's courtyard, want outside and <= 1.5 mm")
 
     def test_title_mismatch(self):
         self.assertFailsWith(run_check(board=retext("Rev0.5", "Rev0.6"), doc=set_row("revision", Text="Rev0.6")),
@@ -274,7 +277,7 @@ class CheckSilkTest(unittest.TestCase):
                              "FAIL silk TP105 label: ink", "is not 0.5 mm inside the board")
 
     def test_label_in_courtyard(self):
-        self.assertFailsWith(run_check(board=move_text("5V IN", 23.25, 56.08), doc=set_row("J4", x="23.25")),
+        self.assertFailsWith(run_check(board=move_text("5V IN", 18.8, 53.3), doc=set_row("J4", x="18.8", y="53.3")),
                              "FAIL silk J4 label: enters D6's courtyard")
 
     def test_label_touches_label(self):

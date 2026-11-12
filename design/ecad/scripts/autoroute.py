@@ -90,7 +90,10 @@ def main(argv):
         sys.stdout.flush()
         with log.open("w", encoding="utf-8") as f:
             try:
-                rc = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, timeout=a.timeout).returncode
+                # Freerouting creates an empty "en/" folder in its working directory: the
+                # temporary one, so that none is left in the repository (issue #8)
+                rc = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, timeout=a.timeout,
+                                    cwd=tmp).returncode
             except subprocess.TimeoutExpired:
                 raise SystemExit(f"the router ran past {a.timeout} s and was stopped; no session")
         text = log.read_text(encoding="utf-8", errors="replace")

@@ -69,7 +69,6 @@ ROUTING = ECAD / "ROUTING_Rev0.5.md"
 NAME = "usb-power-hub"
 SESSION = ECAD / "routing" / f"{NAME}.ses"
 RECORD = ECAD / "routing" / "autoroute.json"
-MODULE_PAIRS = {"J2": "J3"}                 # channel B's module; the channel table holds the rest
 CLI = pathlib.Path(sys.executable).resolve().parents[1] / "bin" / "kicad-cli.exe"
 SKIP_FIELDS = {"Footprint"}                 # the footprint itself carries it
 ROTATIONS = {0, 90, 180, 270}
@@ -152,7 +151,6 @@ def read_routing(place_doc, routing_doc):
     ptables = doc_tables(place_doc.read_text(encoding="utf-8"))
     args, rows = ptables["channel"]
     refs = {r["Ref A"]: r["Ref B"] for r in rows}
-    refs.update(MODULE_PAIRS)
     routing = route.read(doc_tables(routing_doc.read_text(encoding="utf-8")), refs, float(args["dx"]))
     regions = {r["Region"]: tuple(float(r[k]) for k in ("x", "y", "w", "h")) for r in ptables["regions"][1]}
     return routing, regions
@@ -265,7 +263,7 @@ def router_input(board, routing, regions, tmp):
 
     def pad_frame(token, net):
         return route.to_frame(route.pad_position(board, token, net))
-    keepouts = route.keepout_polygons(routing, regions, pad_frame)
+    keepouts = route.keepout_polygons(routing, regions, pad_frame, route.drilled_boxes(board))
     return route.post_dsn(raw.read_text(encoding="utf-8"), routing, keepouts, route.board_via(board))
 
 

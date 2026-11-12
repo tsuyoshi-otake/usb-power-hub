@@ -13,6 +13,9 @@ snapshot from the JLCPCB assembly-parts API first, through tools/jlc_stock.py, w
 the API client and its rate limiting. Exit status: 0 = computed; 1 = a BOM code is missing
 from the snapshot, or is not Basic without being an approved exception (APPROVED_EXTENDED);
 2 = the fetch failed.
+
+The model prices Rev0.4 (the D33 re-run, with D34's C1523 removal). Rev0.5 (D37, D38) is priced
+as a delta on release candidate r02's quote: see rev05_delta().
 """
 from __future__ import annotations
 
@@ -89,14 +92,14 @@ EST_0402 = {
     "C25756": ("15 kohm", 4), "C25779": ("33 kohm", 6), "C25905": ("5.1 kohm", 4),
     "C25741": ("100 kohm", 6), "C26083": ("1 Mohm", 10), "C11702": ("1 kohm", 20),
     "C25077": ("10 ohm", 2), "C1530": ("220 pF", 2), "C307331": ("100 nF", 20),
-    "C52923": ("1 uF", 7), "C1523": ("1 nF", 4), "C15195": ("10 nF", 2),
+    "C52923": ("1 uF", 7), "C15195": ("10 nF", 2),
     "C1548": ("15 pF C0G (Y1 load)", 2), "C25092": ("22 ohm (USB 27 ohm, part 1)", 2),
 }
 PINS = {"0402": 2, "0603": 2, "0805": 2, "SOT-23": 3, "SOIC-8": 8, "SOT-223": 4, "SMB": 2,
         "3225": 4, "TACT": 4, "QFN-56": 57, "QFN-28": 29,
         "SOIC-8-208": 8}                         # each QFN: its pins + the ePad
 # The sourcing rule is Basic only (D13, D22). The user's exceptions, each with its decision:
-APPROVED_EXTENDED = {"C2040": "D29", "C5137013": "D31"}
+APPROVED_EXTENDED = {"C2040": "D29", "C5137013": "D31", "C2765186": "D37"}
 NOT_MACHINE = {"TSL-KELVIN", "AXIAL-10", "TC2030", "FID"}   # hand parts and bare lands
 
 # ---- Akizuki, per board unless noted (requirements/parts.md, 2026-11-03, tax incl.) -----
@@ -226,16 +229,59 @@ def header_pins_per_board(study) -> int:
     return study.HDR_PINS_USBC * sum(1 for k in study.HAND_PARTS.values() if k == "USBC")
 
 
-def akizuki_cost(n_units: int, header_pins: int) -> tuple[int, list[tuple]]:
-    """Akizuki order for n_units; header_pins per board, cut from shared 40-pin strips."""
-    rows = [(p, c, y, k * n_units) for p, c, y, k in AKIZUKI]
+def akizuki_cost(n_units: int, header_pins: int,
+                 without: tuple[str, ...] = ()) -> tuple[int, list[tuple]]:
+    """Akizuki order for n_units, less the codes in `without`; header_pins per board, cut from
+    shared 40-pin strips."""
+    rows = [(p, c, y, k * n_units) for p, c, y, k in AKIZUKI if c not in without]
     rows += [(p, c, y, 1) for p, c, y in AKIZUKI_ONCE]
     strips = math.ceil(header_pins * n_units / HEADER_STRIP_PINS)
-    rows.append((f"{HEADER[0]}, {header_pins * n_units} pins", HEADER[1], HEADER[2], strips))
+    if strips:
+        rows.append((f"{HEADER[0]}, {header_pins * n_units} pins", HEADER[1], HEADER[2], strips))
     sub = sum(y * q for _, _, y, q in rows)
     ship = 0 if sub >= AKIZUKI_FREE_SHIPPING_YEN else AKIZUKI_SHIPPING_YEN
     rows.append(("shipping (free from 11,000 yen)", "-", ship, 1))
     return sub + ship, rows
+
+
+# ---- Rev0.5 against r02 (D37, D38; issues #8, #10) --------------------------------------
+# The four USB-C modules per board (Akizuki AE-USB2.0-TYPE-C) become machine-placed
+# receptacles, C2765186 (Extended): 12 pads and 4 shell slots, 16 joints each. Four 1 kohm taps
+# (C11702, 2 joints each) join the board. The base is release candidate r02, whose quote the
+# JLCPCB form gave on 2026-11-12 (manufacturing/releases/rev0.4/r02/JLCPCB_REVIEW.md); the
+# model's own total above is dearer than that quote and is not the base.
+RECEPTACLE = "C2765186"
+RECEPTACLES_PER_BOARD, RECEPTACLE_JOINTS = 4, 16
+TAP = "C11702"
+TAPS_PER_BOARD, TAP_JOINTS = 4, 2
+MODULE_CODE = "g113080"                 # AE-USB2.0-TYPE-C: leaves the Akizuki order
+R02_JLCPCB_USD = 54.92                  # PCB + PCBA + parts + OCS Express, r02 (4 = 47.69 + 7.23)
+
+
+def rev05_delta(parts: dict, boards: int, header_pins: int) -> dict[str, float]:
+    """Rev0.5 against r02: what JLCPCB's order gains (USD) and Akizuki's loses (yen)."""
+    rec = parts[RECEPTACLE]
+    qty = order_qty(RECEPTACLES_PER_BOARD, boards, rec)
+    receptacles = qty * tier_price(rec["componentPrices"], qty)
+    # the tap resistors join an existing C11702 line, so only their own pieces are added
+    taps = TAPS_PER_BOARD * boards * tier_price(parts[TAP]["componentPrices"], 1)
+    n_joints = boards * (RECEPTACLES_PER_BOARD * RECEPTACLE_JOINTS + TAPS_PER_BOARD * TAP_JOINTS)
+    joints_usd = n_joints * ECONOMIC["joint"]
+    feeder = ECONOMIC["extended_feeder"]
+    added_usd = receptacles + taps + joints_usd + feeder
+    old, _ = akizuki_cost(boards, header_pins)
+    new, _ = akizuki_cost(boards, 0, without=(MODULE_CODE,))
+    base_yen = R02_JLCPCB_USD * JPY_PER_USD + old
+    net_yen = added_usd * JPY_PER_USD - (old - new)
+    return {"receptacle_qty": qty, "receptacles_usd": receptacles, "taps_usd": taps,
+            "joints": n_joints, "joints_usd": joints_usd, "feeder_usd": feeder,
+            "added_usd": added_usd, "akizuki_old": old, "akizuki_new": new,
+            "base_yen": base_yen, "net_yen": net_yen, "total_yen": base_yen + net_yen}
+
+
+def snapshot_codes() -> list[str]:
+    """Every code the snapshot holds: the Rev0.4 BOM and Rev0.5's receptacle."""
+    return list(EXACT) + list(EST_0402) + [RECEPTACLE]
 
 
 def fetch(codes: list[str]) -> int:
@@ -264,7 +310,7 @@ def fetch(codes: list[str]) -> int:
 
 def main(argv: list[str]) -> int:
     codes = list(EXACT) + list(EST_0402)
-    if "--fetch" in argv and fetch(codes):
+    if "--fetch" in argv and fetch(snapshot_codes()):
         return 2
     snap = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
     parts = snap["parts"]
@@ -321,6 +367,21 @@ def main(argv: list[str]) -> int:
         tot = usd * JPY_PER_USD + aki
         print(f"{tier}: {tot:,.0f} yen for {BOARDS_PCBA} units ({tot/BOARDS_PCBA:,.0f} yen per unit)")
     print(f"lid PCB, if ordered with it: +${LID_PCB_USD:.2f} = {LID_PCB_USD*JPY_PER_USD:,.0f} yen")
+
+    bad = class_errors(parts, [RECEPTACLE, TAP])
+    if bad:
+        print("sourcing rule (D13, D22): " + "; ".join(bad), file=sys.stderr)
+        return 1
+    d = rev05_delta(parts, BOARDS_PCBA, pins)
+    print(f"\n== Rev0.5 against r02 (D37 receptacles, D38 taps), {BOARDS_PCBA} units")
+    print(f"JLCPCB adds: {d['receptacle_qty']} x {RECEPTACLE} ${d['receptacles_usd']:.2f},"
+          f" 8 taps ${d['taps_usd']:.2f}, {d['joints']} joints ${d['joints_usd']:.2f},"
+          f" a third Extended feeder ${d['feeder_usd']:.2f}: ${d['added_usd']:.2f}"
+          f" = {d['added_usd']*JPY_PER_USD:,.0f} yen")
+    print(f"Akizuki: {d['akizuki_old']:,} -> {d['akizuki_new']:,} yen (the "
+          f"{RECEPTACLES_PER_BOARD * BOARDS_PCBA} modules and the header strips leave)")
+    print(f"r02 {d['base_yen']:,.0f} yen -> Rev0.5 {d['total_yen']:,.0f} yen for {BOARDS_PCBA} units"
+          f" ({d['net_yen']:+,.0f} yen; {d['total_yen']/BOARDS_PCBA:,.0f} yen per unit)")
     return 0
 
 

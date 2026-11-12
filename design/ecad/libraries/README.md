@@ -20,7 +20,7 @@ From the repository root, with KiCad's own Python:
 ```sh
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_libraries.py        # write + check
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/check_libraries.py       # check only
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_libraries.py  # 26 tests (a clean copy, 25 corruptions), about 60 s
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_libraries.py  # 29 tests (a clean copy, 28 corruptions), about 85 s
 ```
 
 `check_libraries.py` exits 0 only if every check passes. Its docstring lists what it checks
@@ -38,7 +38,6 @@ and what it cannot see. In short:
 - no CR byte in any file here: the repository stores LF (`.gitattributes`), so the checked
   bytes are the ones a checkout holds;
 - Kelvin net ties against their force / sense pairs;
-- the USB-C module courtyard against the OI-23 study;
 - the library tables;
 - a parse by `kicad-cli`;
 - a DRC run of every footprint on a copy of the project board with its rules.
@@ -72,9 +71,11 @@ and what it cannot see. In short:
 | `R_Shunt_0805_2012Metric_Kelvin` | RS12, RS22 (R_L) | KiCad R_0805 land, sense pads tied at each pad (net tie) |
 | `Fuse_Bourns_MF-R300_Style2_P5.10mm` | F1 | Bourns MF-R table and style 2 drawing |
 | `Converter_DCDC_Minmax_MAU104_SIP` | U5 | MAU100 pin pattern and body |
-| `Module_Akizuki_AE-USB2.0-TYPE-C` | J1–J4 | Akizuki drawing via the OI-23 study; PH-1x40SG headers (D33) |
+| `USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073` | J1–J4 | the maker's drawing of C2765186 (sheet 1 of 1): 12 contacts, 4 plated shell slots, 2 unplated pegs (D37) |
 
-The USB-C module's courtyard is only what stands on or hangs toward the board: the header
-insulators, the receptacle with its 1.06 mm overhang, its pins and the shell tabs. This
-leaves the D33 strip under the module free for parts up to 1.5 mm. The full 20 × 15 mm
-outline and the strip are drawn on F.Fab. The courtyard does not limit part height.
+The receptacle's land is the maker's recommended one, which the drawing gives for a 0.80 mm
+board; this board is 1.6 mm (OI-33). Contacts A1 and B1 (GND) are 0.035 mm shorter at their near
+end than the drawing: it leaves 0.165 mm from each peg hole to them, and JLCPCB asks 0.20 mm
+between an unplated hole and copper. `usb-power-hub.kicad_dru` holds a rule for this
+footprint's pegs alone. The courtyard is the body's outline and the shell pads' plus 0.25 mm;
+the front face lies past the board edge, so `check_pcb.py` cuts it to the board.

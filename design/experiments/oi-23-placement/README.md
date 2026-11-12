@@ -1,5 +1,10 @@
 # OI-23 placement study (Rev0.4) — non-authoritative
 
+> **Superseded for the USB-C modules by D37 (2026-11-12).** Rev0.5 replaces the four Akizuki
+> modules and their pin headers with machine-placed receptacles (C2765186), so the module
+> outlines, the header strips and the space under a module below describe Rev0.4. The study is
+> kept as that record and was not re-run; the board is placed from `design/ecad/PLACEMENT_Rev0.5.md`.
+
 **Question.** Does the Rev0.4 part set fit on the board? This is OI-23. D10 fixed the board at
 85 × 35 mm before Rev0.3/Rev0.4 moved the large parts onto Akizuki modules and DIP packages.
 

@@ -15,12 +15,11 @@ document with its own parser, not make_pcb.py's, and the board with pcbnew.
 
 Board frame: origin at the board's lower-left corner, x right, y up, in mm; a board point
 (x, y) is at (50 + x, 122 - y) on KiCad's sheet. Courtyards are taken as the bounding box of
-each courtyard outline.
+each courtyard outline's points.
 
- 1. Document: every region and keepout lies on the board; regions do not overlap, except an
-    `under` region, which lies inside exactly one `module` region; no keepout overlaps a
-    region; every part names an existing region; every under-list height is at most
-    UNDER_MAX_H (1.5 mm, the OI-23 study).
+ 1. Document: every region and keepout lies on the board; regions do not overlap; a keepout
+    lies outside every region or inside exactly one (a lane to a receptacle's pad row runs
+    inside its port block); every part names an existing region.
  2. Identity (`kicad-cli sch export netlist`): the board's footprints are exactly the
     netlist's components, each with the netlist's footprint, Value, sheet path, fields
     (hidden), BOM exclusion and, pad by pad, net; a pad with no netlist node has no net.
@@ -29,27 +28,23 @@ each courtyard outline.
  4. Top only (REQ-MFG-01): no pad on B.Paste, no SMD pad on B.Cu, no footprint text or
     graphic and no courtyard on a B.* layer.
  5. Outline: Edge.Cuts spans (0, 0)-(100, 72) (D24); every courtyard lies on the board,
-    except a USB-C module's receptacle, which may pass the edge its module stands on by the
-    library's overhang (1.06 mm) plus COURTYARD_MARGIN; every module outline
-    (library.json: origin_in_module, size) lies on the board.
- 6. Regions: each part's courtyard lies inside its region; each module's outline is its
-    module region.
+    except a USB-C receptacle's, which may pass the edge its front face stands past by
+    OVERHANG (1.06 mm, D37) plus the library's courtyard margin (0.25 mm).
+ 6. Regions: each part's courtyard, cut to the board, lies inside its region.
  7. Keepouts: no courtyard enters a keepout.
- 8. Under the modules: a courtyard that enters a module's outline belongs to a footprint on
-    the under list, has only SMD pads and its part's region is an `under` region inside that
-    outline.
- 9. Mechanics: J2 and J3 (OUT A/B) stand on the front edge, J1 and J4 (HOST, 5 V input) on
-    the back edge; J2-J3 pitch >= 18 mm (REQ-MECH-02); four mounting holes, one in each
+ 8. Mechanics: J2 and J3 (OUT A/B) stand on the front edge, J1 and J4 (HOST, 5 V input) on
+    the back edge, each with its opening toward that edge and its front face OVERHANG past
+    it (D37); J2-J3 pitch >= 18 mm (REQ-MECH-02); four mounting holes, one in each
     7 x 7 mm corner; >= 3 fiducials, each a 1.0 mm pad with a 2.0 mm mask opening, not on
     one line (CLAUDE.md 10.3).
-10. MAU104: its courtyard is >= SEP_MAU (6.0 mm, the OI-23 study) from every courtyard of a
+ 9. MAU104: its courtyard is >= SEP_MAU (6.0 mm, the OI-23 study) from every courtyard of a
     part in AFE_A, AFE_B, ADC, ADCSUP or REF.
-11. Notes, in the capture list and in the document: "at X pin N" (also "pins N/M",
-    "pad N") means the part has a pad on that pin's net within AT_MM (3.0 mm, centre to
-    centre) of it; "at X", "next to X" and "after X" mean the two courtyards are within
-    NEAR_MM (3.0 mm). A channel-table note is checked for channel B too, its designators
-    mapped by the table.
-12. DRC (`kicad-cli pcb drc --schematic-parity --severity-all`): no violation of any
+10. Notes, in the capture list and in the document: "at X pin N" (also "pins N/M",
+    "pad N"; a receptacle's pads are A1 to B8) means the part has a pad on that pin's net
+    within AT_MM (3.0 mm, centre to centre) of it; "at X", "next to X" and "after X" mean
+    the two courtyards are within NEAR_MM (3.0 mm). A channel-table note is checked for
+    channel B too, its designators mapped by the table.
+11. DRC (`kicad-cli pcb drc --schematic-parity --severity-all`): no violation of any
     severity and no schematic-parity item. Unconnected items are counted, not failed:
     routing is check_routing.py's (P4).
 Exit status: 0 = every check passed; 1 = at least one failed. Each failure prints as
@@ -57,14 +52,13 @@ Exit status: 0 = every check passed; 1 = at least one failed. Each failure print
 
 What it CANNOT see:
 - whether the placement is good: routability, return paths and thermal spread are P4's.
-  Check 11 measures distances, not trace lengths; "toward X" in a note is a direction and is
+  Check 10 measures distances, not trace lengths; "toward X" in a note is a direction and is
   not checked, and a note without "at", "next to" or "after" is not checked either.
-- part heights: the under list holds the study's planning values, not measured bodies
-  (V-MECH-01 measures the built board), and only the footprint name links a part to them.
 - footprint correctness: check_libraries.py (P1) checks the lands against the datasheets.
   Courtyards are bounding boxes here, which is exact for the rectangular ones and
   conservative for containment; DRC compares the true outlines with each other.
-- the mating plug's overmold and the enclosure (V-MECH-01, CLAUDE.md 7).
+- the receptacles' fit: that a 1.6 mm board takes the shell legs of a part drawn for 0.80 mm,
+  the mating plug's overmold and the enclosure (V-MFG-03, V-MECH-01, CLAUDE.md 7).
 """
 import argparse
 import importlib.util
@@ -89,19 +83,18 @@ EDGE_TOL = 0.03                 # half the 0.05 mm Edge.Cuts line, plus rounding
 POS_TOL = 0.0005
 AT_MM = 3.0
 NEAR_MM = 3.0
-UNDER_MAX_H = 1.5               # OI-23 study: UNDER_MAX_H
 SEP_MAU = 6.0                   # OI-23 study: SEP_MAU
 PITCH_MIN = 18.0                # REQ-MECH-02
-COURTYARD_MARGIN = 0.05         # the library draws the receptacle courtyard 0.045 mm out
+OVERHANG = 1.06                 # D37: a receptacle's front face past the board edge (V-MECH-01)
 CORNER = 7.0                    # the corner keepout of each M2 insert (D21)
 ANALOG = ("AFE_A", "AFE_B", "ADC", "ADCSUP", "REF")
 FRONT, BACK = ("J2", "J3"), ("J1", "J4")
-MODULE_FP = "Module_Akizuki_AE-USB2.0-TYPE-C"
 MAU_FP = "Converter_DCDC_Minmax_MAU104_SIP"
-KINDS = {"module", "under", "block", "mark"}
+KINDS = {"block", "mark"}
 B_LAYERS = ("B_SilkS", "B_Fab", "B_CrtYd", "B_Paste", "B_Adhes", "B_Mask", "B_Cu")
-PIN_RE = re.compile(r"\bat ([A-Z]+\d+) (?:pins? ((?:\d+/)*\d+)|pad (\d+))\b")
-PART_RE = re.compile(r"\b(at|next to|after) ([A-Z]+\d+)\b(?! pins? \d| pad \d)")
+PAD = r"[A-Z]?\d+"              # a pin number, or a receptacle's pad name (A1 to B8)
+PIN_RE = re.compile(rf"\bat ([A-Z]+\d+) (?:pins? ((?:{PAD}/)*{PAD})|pad ({PAD}))\b")
+PART_RE = re.compile(rf"\b(at|next to|after) ([A-Z]+\d+)\b(?! pins? {PAD}| pad {PAD})")
 
 
 def _load(name):
@@ -137,8 +130,16 @@ def box(bb):
 
 
 def courtyard(fp, layer=pcbnew.F_CrtYd):
+    """The bounding box of each courtyard outline, from the extremes of its points: the
+    outline's own BBox() is half a line width (0.05 mm) larger on every side."""
     s = fp.GetCourtyard(layer)
-    return [box(s.Outline(i).BBox()) for i in range(s.OutlineCount())]
+    rects = []
+    for i in range(s.OutlineCount()):
+        o = s.Outline(i)
+        pts = [frame(o.CPoint(k)) for k in range(o.PointCount())]
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        rects.append((min(xs), min(ys), max(xs), max(ys)))
+    return rects
 
 
 def inside(r, outer, tol=1e-6):
@@ -161,19 +162,24 @@ def gap(rects_a, rects_b):
     return best
 
 
-def module_outline(fp, params):
-    """The module board's rectangle (library.json) placed as the footprint is."""
-    ox, oy = params["origin_in_module"]
-    w, h = params["size"]
-    x0, y0 = frame(fp.GetPosition())
-    t = math.radians(fp.GetOrientationDegrees())
-    pts = []
-    for lx, ly in ((-ox, -oy), (w - ox, -oy), (w - ox, h - oy), (-ox, h - oy)):
-        sx_ = lx * math.cos(t) + ly * math.sin(t)          # KiCad local, y down, CCW on screen
-        sy_ = -lx * math.sin(t) + ly * math.cos(t)
-        pts.append((x0 + sx_, y0 - sy_))
-    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
-    return (round(min(xs), 4), round(min(ys), 4), round(max(xs), 4), round(max(ys), 4))
+def clip(r, outer):
+    """The part of rectangle r inside `outer`, or None when they share no area."""
+    c = (max(r[0], outer[0]), max(r[1], outer[1]), min(r[2], outer[2]), min(r[3], outer[3]))
+    return c if c[0] < c[2] and c[1] < c[3] else None
+
+
+def front_face(fp, params):
+    """(y, facing) of a receptacle: the board y of its front face, and 1 or -1 for the way its
+    opening points along y (-1 = toward the front edge, y = 0); facing is 0 for a rotation
+    that points it along x. The footprint's origin is the body centre, the opening local +y."""
+    _, y = frame(fp.GetPosition())
+    half = params["body"][1] / 2
+    rot = round(fp.GetOrientationDegrees()) % 360
+    if rot == 0:
+        return y - half, -1
+    if rot == 180:
+        return y + half, 1
+    return y, 0
 
 
 # ---- the documents (own parser) --------------------------------------------------------------
@@ -192,7 +198,7 @@ def marked_blocks(text):
 
 
 def read_doc(path):
-    regions, keepouts, under, parts, pairs, dx = {}, {}, {}, {}, {}, None
+    regions, keepouts, parts, pairs, dx = {}, {}, {}, {}, None
     for kind, arg, rows in marked_blocks(path.read_text(encoding="utf-8")):
         if kind == "regions":
             for r in rows:
@@ -202,8 +208,6 @@ def read_doc(path):
             for r in rows:
                 x, y, w, h = (float(r[k]) for k in ("x", "y", "w", "h"))
                 keepouts[r["Keepout"]] = (x, y, x + w, y + h)
-        elif kind == "under":
-            under.update({r["Footprint"]: float(r["Height (mm)"]) for r in rows})
         elif kind in ("place", "channel"):
             if kind == "channel":
                 dx = float(dict(a.split("=", 1) for a in arg.split())["dx"])
@@ -218,7 +222,7 @@ def read_doc(path):
                                       channel=ch)
                 if kind == "channel":
                     pairs[r["Ref A"]] = r["Ref B"]
-    return regions, keepouts, under, parts, pairs, dx
+    return regions, keepouts, parts, pairs, dx
 
 
 def read_capture_notes(path):
@@ -259,7 +263,7 @@ def read_netlist(path):
 
 
 # ---- checks ---------------------------------------------------------------------------------
-def check_document(rep, regions, keepouts, under, parts):
+def check_document(rep, regions, keepouts, parts):
     board = (0.0, 0.0) + BOARD
     for name, r in regions.items():
         rep.check(r["kind"] in KINDS, name, f"kind {r['kind']!r} is not one of {sorted(KINDS)}")
@@ -267,22 +271,12 @@ def check_document(rep, regions, keepouts, under, parts):
     names = sorted(regions)
     for i, a in enumerate(names):
         for b in names[i + 1:]:
-            ra, rb = regions[a], regions[b]
-            if not overlap(ra["rect"], rb["rect"]):
-                continue
-            nested = any(u["kind"] == "under" and m["kind"] == "module" and inside(u["rect"], m["rect"])
-                         for u, m in ((ra, rb), (rb, ra)))
-            rep.check(nested, f"{a}/{b}", "regions overlap")
-    for name, r in regions.items():
-        if r["kind"] == "under":
-            hosts = [m for m, q in regions.items() if q["kind"] == "module" and inside(r["rect"], q["rect"])]
-            rep.check(len(hosts) == 1, name, f"lies inside {len(hosts)} module regions: {hosts}")
+            rep.check(not overlap(regions[a]["rect"], regions[b]["rect"]), f"{a}/{b}", "regions overlap")
     for name, k in keepouts.items():
         rep.check(inside(k, board), name, f"keepout {k} is not on the board")
-        for rname, r in regions.items():
-            rep.check(not overlap(k, r["rect"]), name, f"keepout overlaps region {rname}")
-    for fp_name, h in under.items():
-        rep.check(h <= UNDER_MAX_H, fp_name, f"under-list height {h} mm > {UNDER_MAX_H} mm")
+        hit = [rname for rname, r in regions.items() if overlap(k, r["rect"])]
+        rep.check(not hit or (len(hit) == 1 and inside(k, regions[hit[0]]["rect"])), name,
+                  f"keepout lies partly in region(s) {hit}; it must be outside every region or inside one")
     for ref, p in parts.items():
         rep.check(p["region"] in regions, ref, f"region {p['region']} does not exist")
         rep.check(p["rot"] in (0, 90, 180, 270), ref, f"rotation {p['rot']}")
@@ -355,7 +349,7 @@ def check_top_only(rep, fps):
         rep.check(fp.GetCourtyard(pcbnew.B_CrtYd).OutlineCount() == 0, ref, "a courtyard on B.CrtYd")
 
 
-def check_outline(rep, board, fps, modules):
+def check_outline(rep, board, fps, receptacles):
     edges = [d for d in board.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts]
     bb = box(board.GetBoardEdgesBoundingBox())
     want = (0.0, 0.0) + BOARD
@@ -365,33 +359,30 @@ def check_outline(rep, board, fps, modules):
     for ref, fp in sorted(fps.items()):
         rects = courtyard(fp)
         rep.check(bool(rects), ref, "no courtyard")
-        if ref not in modules:
+        if ref not in receptacles:
             for r in rects:
                 rep.check(inside(r, board_r), ref, f"courtyard {tuple(round(v, 3) for v in r)} leaves the board")
             continue
-        outline, params = modules[ref]
-        rep.check(inside(outline, board_r), ref, f"module outline {outline} leaves the board")
-        room = params["overhang"] + COURTYARD_MARGIN
-        lo = -room if outline[1] <= 1e-6 else 0.0
-        hi = BOARD[1] + room if outline[3] >= BOARD[1] - 1e-6 else BOARD[1]
+        room = OVERHANG + receptacles[ref]["courtyard_margin"]
+        lo = -room if ref in FRONT else 0.0
+        hi = BOARD[1] + room if ref in BACK else BOARD[1]
         for r in rects:
             rep.check(inside(r, (0.0, lo, BOARD[0], hi)), ref,
-                      f"courtyard {tuple(round(v, 3) for v in r)} passes the edge by more than {room:.2f} mm")
+                      f"courtyard {tuple(round(v, 3) for v in r)} passes the edge it stands on by "
+                      f"more than {room:.2f} mm, or leaves the board elsewhere")
 
 
-def check_regions(rep, fps, parts, regions, modules):
+def check_regions(rep, fps, parts, regions):
+    """Each courtyard, cut to the board (a receptacle's front face is past the edge), lies in
+    its part's region."""
+    board_r = (0.0, 0.0) + BOARD
     for ref, p in sorted(parts.items()):
         fp, reg = fps.get(ref), regions.get(p["region"])
         if fp is None or reg is None:
             continue
-        if ref in modules:
-            outline = modules[ref][0]
-            rep.check(reg["kind"] == "module" and all(abs(a - b) <= 1e-3 for a, b in zip(outline, reg["rect"])),
-                      ref, f"module outline {outline} is not region {p['region']} {reg['rect']}")
-            continue
-        rep.check(reg["kind"] != "module", ref, f"a part in module region {p['region']}")
         for r in courtyard(fp):
-            rep.check(inside(r, reg["rect"]), ref,
+            c = clip(r, board_r)
+            rep.check(c is not None and inside(c, reg["rect"]), ref,
                       f"courtyard {tuple(round(v, 3) for v in r)} leaves region {p['region']} {reg['rect']}")
 
 
@@ -401,29 +392,16 @@ def check_keepouts(rep, fps, keepouts):
             rep.check(not any(overlap(r, k) for r in courtyard(fp)), ref, f"courtyard enters keepout {name}")
 
 
-def check_under(rep, fps, parts, regions, under, modules):
-    for mref, (outline, _) in sorted(modules.items()):
-        for ref, fp in sorted(fps.items()):
-            if ref == mref or not any(overlap(r, outline) for r in courtyard(fp)):
-                continue
-            name = fp.GetFPID().GetLibItemName().wx_str()
-            rep.check(name in under, ref, f"under {mref}, but {name} is not on the under list")
-            smd = all(p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD for p in fp.Pads())
-            rep.check(smd, ref, f"under {mref} with a through-hole or NPTH pad")
-            reg = regions.get(parts.get(ref, {}).get("region"))
-            rep.check(reg is not None and reg["kind"] == "under" and inside(reg["rect"], outline), ref,
-                      f"under {mref}, but its region is not an under region of {mref}")
-
-
-def check_mechanics(rep, fps, modules):
-    for refs, edge, y in ((FRONT, "front", 0.0), (BACK, "back", BOARD[1])):
+def check_mechanics(rep, fps, receptacles):
+    for refs, edge, y, facing in ((FRONT, "front", 0.0, -1), (BACK, "back", BOARD[1], 1)):
         for ref in refs:
-            if ref in modules:
-                o = modules[ref][0]
-                rep.check(abs((o[1] if edge == "front" else o[3]) - y) <= 1e-3, ref,
-                          f"module outline {o} does not stand on the {edge} edge")
-    if "J2" in modules and "J3" in modules:
-        pitch = abs(modules["J3"][0][0] - modules["J2"][0][0])
+            if ref in receptacles:
+                fy, got = front_face(fps[ref], receptacles[ref])
+                rep.check(got == facing and abs(fy - (y + facing * OVERHANG)) <= 1e-3, ref,
+                          f"front face at y = {fy:.3f}, opening {got:+d} along y; want the opening "
+                          f"toward the {edge} edge ({facing:+d}) and the face at y = {y + facing * OVERHANG:.2f}")
+    if "J2" in receptacles and "J3" in receptacles:
+        pitch = abs(frame(fps["J3"].GetPosition())[0] - frame(fps["J2"].GetPosition())[0])
         rep.check(pitch >= PITCH_MIN, "J2/J3", f"pitch {pitch:.2f} mm < {PITCH_MIN} mm")
     holes = {ref: frame(fp.GetPosition()) for ref, fp in fps.items()
              if fp.GetFPID().GetLibItemName().wx_str().startswith("MountingHole")}
@@ -528,9 +506,9 @@ def main(argv):
     prl_before = prl.exists()
     register = {p["id"]: p for p in json.loads((a.lib / "library.json").read_text(encoding="utf-8"))["parts"]}
     params = {p["footprint"]["name"]: p["footprint"]["params"] for p in register.values()
-              if p.get("footprint", {}).get("make") == "usbc_module"}
-    regions, keepouts, under, parts, pairs, dx = read_doc(a.doc)
-    check_document(rep, regions, keepouts, under, parts)
+              if p.get("footprint", {}).get("make") == "usbc_receptacle"}
+    regions, keepouts, parts, pairs, dx = read_doc(a.doc)
+    check_document(rep, regions, keepouts, parts)
     board = pcbnew.LoadBoard(str(pcb)) if pcb.exists() else None
     if board is None:
         print(f"FAIL board: pcbnew could not load {pcb}")
@@ -540,10 +518,9 @@ def main(argv):
     for fp in board.GetFootprints():
         rep.check(fp.GetReference() not in fps, fp.GetReference(), "twice on the board")
         fps[fp.GetReference()] = fp
-    modules = {ref: (module_outline(fp, params[fp.GetFPID().GetLibItemName().wx_str()]),
-                     params[fp.GetFPID().GetLibItemName().wx_str()])
-               for ref, fp in fps.items() if fp.GetFPID().GetLibItemName().wx_str() in params}
-    rep.check(set(modules) == set(FRONT + BACK), "modules", f"USB-C modules {sorted(modules)}")
+    receptacles = {ref: params[fp.GetFPID().GetLibItemName().wx_str()]
+                   for ref, fp in fps.items() if fp.GetFPID().GetLibItemName().wx_str() in params}
+    rep.check(set(receptacles) == set(FRONT + BACK), "receptacles", f"USB-C receptacles {sorted(receptacles)}")
     with tempfile.TemporaryDirectory() as tmp:
         out = pathlib.Path(a.reports) if a.reports else pathlib.Path(tmp)
         out.mkdir(parents=True, exist_ok=True)
@@ -558,11 +535,10 @@ def main(argv):
                   f"in the document, not on the board: {sorted(set(parts) - set(fps))}")
         check_position(rep, fps, parts, pairs, dx)
         check_top_only(rep, fps)
-        check_outline(rep, board, fps, modules)
-        check_regions(rep, fps, parts, regions, modules)
+        check_outline(rep, board, fps, receptacles)
+        check_regions(rep, fps, parts, regions)
         check_keepouts(rep, fps, keepouts)
-        check_under(rep, fps, parts, regions, under, modules)
-        check_mechanics(rep, fps, modules)
+        check_mechanics(rep, fps, receptacles)
         check_mau(rep, fps, parts)
         notes = [("capture list", ref, note, m) for ref, note, m in read_capture_notes(a.capture)]
         for ref, p in parts.items():

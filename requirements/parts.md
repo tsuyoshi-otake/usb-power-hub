@@ -2,7 +2,8 @@
 
 **State: WIP. No part is chosen.** First pass 2026-11-03 (Rev0.2). Reworked the same day for
 circuit Rev0.3 under the user's sourcing rule D13, and for Rev0.4 under D22 (Basic parts only);
-amended 2026-11-04 for D29 (the bare RP2040) and D31 (the bare CH335F). Every row is a *candidate* until a reviewer
+amended 2026-11-04 for D29 (the bare RP2040) and D31 (the bare CH335F), and 2026-11-12 for D37 (the
+USB-C receptacles C2765186, machine-placed). Every row is a *candidate* until a reviewer
 marks it confirmed against the actual PCBA order (CLAUDE.md Section 4.1).
 
 This is the single place for candidates, stock and datasheet facts. The circuit document
@@ -19,18 +20,20 @@ parts meet them.
   (circuit Rev0.5 §7.4).
 - **Avoid special or hard-to-source parts**, and **reduce part types and count** (the user's
   restated list, 2026-11-03; quoted in circuit Rev0.4's header). One part per value and one
-  voltage rating per value: 40 machine-placed types (the capture, D34, dropped the 1 nF
-  C1523).
+  voltage rating per value: 41 machine-placed types (the capture, D34, dropped the 1 nF
+  C1523; D37 adds the USB-C receptacle C2765186).
 - **No Preferred Extended either** (D22, user, 2026-11-03). Rev0.3's two Preferred Extended
   parts are removed; see "Removed in Rev0.4" below.
-- **Two exceptions, both Extended, both the user's:**
+- **Three exceptions, all Extended, all the user's:**
   - the RP2040, C2040 (D29, 2026-11-04; 「素の RP2040 (推奨)」), which replaces the
     hand-soldered PGA2040 module;
   - the CH335F, C5137013 (D31, 2026-11-04; 「IC 単体にする (推奨)」), which replaces the
-    hand-soldered Akizuki CH335F module.
+    hand-soldered Akizuki CH335F module;
+  - the USB-C receptacle, C2765186 (D37, 2026-11-12; 「USB-C直付けのみ (推奨)」), which
+    replaces the four hand-soldered Akizuki USB-C modules and their headers.
 
-  Every other machine-placed part is Basic, so the PCBA is not Extended-only (38 of 40 types
-  Basic). A third exception needs the user's decision.
+  Every other machine-placed part is Basic, so the PCBA is not Extended-only (38 of 41 types
+  Basic). A fourth exception needs the user's decision.
 
 ## How the numbers were obtained
 
@@ -67,7 +70,7 @@ parts meet them.
 - **Recheck** immediately before upload and again before payment (CLAUDE.md §4.1):
 
 ```
-python tools/jlc_stock.py C2040 C5137013 C97521 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25197 C25756 C26083 C25076 C25077 C1664 C1530 C15850 C45783 C307331 C52923 C15195 C1548 C25092
+python tools/jlc_stock.py C2040 C5137013 C2765186 C97521 C7433 C7955 C3113 C6186 C15127 C20917 C8545 C8543 C7420377 C32677 C9002 C2297 C84256 C318884 C14709 C17734 C25905 C25779 C25867 C11702 C25744 C25741 C22940 C25197 C25756 C26083 C25076 C25077 C1664 C1530 C15850 C45783 C307331 C52923 C15195 C1548 C25092
 ```
 
 Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it, or **Akizuki**
@@ -80,17 +83,18 @@ Class: **Basic** / **Preferred Extended** / **Extended**, as the API reports it,
 | Ref | Part | Akizuki code | Model | Stock | Price (tax incl.) | Checked |
 |---|---|---|---|---:|---:|---|
 | U7, U17 | 12-bit 8-channel SPI ADC, DIP16 | g100238 | MCP3208-CI/P (Microchip) | 733 | ¥500 | 2026-11-03 |
-| J1–J4 | USB Type-C receptacle DIP kit (simple), 4 per board | g113080 | AE-USB2.0-TYPE-C | 711 | ¥350 | 2026-11-03 |
 | U5 | 1 W isolated DC-DC, 12 V 84 mA | g104132 | MAU104 (Minmax) | 178 | ¥520 | 2026-11-03 |
 | RS10, RS20 | Current-sense chip resistor 0.1 Ω 1 W ±0.5 % | g109588 | TSL1TTER100D (KOA) | 374 | ¥130 | 2026-11-03 |
 | RS11, RS21 | Metal-film resistor 10 Ω 1 W ±1 % (1/4 W size) | g108805 | MFU100F10RB (Faithful Link) | 175 bags of 100 | ¥600 / bag | 2026-11-03 |
 | F1 | Resettable fuse (PTC), 3.00 A hold / 6.00 A trip, 30 V, radial | g112630 | MF-R300 (Bourns) | 2,865 | ¥40 | 2026-11-03 |
-| — | Pin header 1 × 40, 2.54 mm, for J1–J4 (D33): 44 pins per board, cut into pieces | g100167 | PH-1x40SG (Useconn) | 8,000 | ¥35 | 2026-11-04 |
 
 The thinnest is the MAU104, at 178 pcs. The PGA2040 (g116762, 41 pcs on 2026-11-03), U1
 until D29, is no longer used; its record is in Git at commit `6774bc5`. Nor is the CH335F
 module (AE-QFN28-DIP(CH335F), g129556, ¥420, 453 pcs on 2026-11-03), U6 until D31; its
-record is in Git at commit `3e11f68`.
+record is in Git at commit `3e11f68`. Nor are the four USB-C modules (AE-USB2.0-TYPE-C,
+g113080, ¥350, 711 pcs on 2026-11-03) and their PH-1x40SG pin headers (g100167, ¥35, 8,000
+pcs on 2026-11-04), J1–J4 until D37: the receptacles are machine-placed now. Their record
+is in Git at commit `5a697aa`.
 
 - *Verified (MCP3208, Microchip DS21298E):*
   - 12-bit, 8 single-ended channels, SPI; V<sub>DD</sub> 2.7–5.5 V; V<sub>REF</sub> 0.25 V to
@@ -111,13 +115,6 @@ record is in Git at commit `3e11f68`.
     figure's vector data).
   - *To confirm on the first board (V-MEAS-06, D28):* INL at V<sub>REF</sub> = 3.3 V, and
     the settling with the stretched sample.
-- *Verified (AE-USB2.0-TYPE-C page, schematic, drawing):*
-  - Pins on one 1 × 7 row, 2.54 mm pitch: VBUS, D−, D+, GND, CC1, CC2, GND.
-  - Plus mechanical pins beside the receptacle.
-  - **No CC resistors are fitted**, so the same kit serves as host (J1, J4: add Rd) and as
-    downstream port (J2, J3: add Rp).
-  - Rated 48 V, 5 A. Board ≈ 20 mm wide, the dimension that makes the J2–J3 pitch ≥ 20 mm.
-  - SBU is not brought out.
 - *Verified (MAU104 datasheet, Minmax REV:0 2005/04):*
   - Output 12 V, 84 mA max, 1.5 mA min load. Accuracy ±1 % typ / ±3 % max.
   - Line regulation ±1.2 % per 1 % V<sub>in</sub>; load regulation 7 % max (20–100 % load).
@@ -162,25 +159,6 @@ record is in Git at commit `3e11f68`.
     (PDF p3) has straight leads. The footprint `Fuse_Bourns_MF-R300_Style2_P5.10mm` puts the
     holes 5.1 mm apart (C nominal), drilled 1.1 mm for the ⌀0.81 mm lead, with a 12.0 × 3.0 mm
     body. *To confirm when the parts arrive (V-MECH-01):* that Akizuki's MF-R300 are style 2.
-- *Verified (PH-1x40SG, Useconn drawing PH-1xXXSG rev. B, Akizuki product page g100167, read
-  2026-11-04; D33):*
-  - Insulator 2.50 mm tall and 2.50 mm wide, 2.54 mm per pin; general tolerance ±0.2 mm on
-    two-decimal dimensions, so ≥ 2.30 mm tall. Glass-filled PBT, UL 94V-0.
-  - Pins sq 0.64 ± 0.02 mm, 11.6 mm long: 6.10 mm on one side of the insulator, 3.00 mm on
-    the other. Recommended hole ø1.02 mm.
-  - 3 A per contact, contact resistance 20 mΩ max, −40 to +105 °C.
-  - Use: each USB-C module (AE-USB2.0-TYPE-C) takes its 1 × 7 row and two 1 × 2 pieces for
-    the mechanical pins at x 2.38 / 17.62 mm, y 2.94 / 5.48 mm (module drawing), 11 pins
-    per module and 44 per board. With the 3.00 mm side in the 1.6 mm board, 1.40 mm stands
-    out of Bottom.
-  - The insulator stands on the board under the module. The OI-23 study keeps parts under a
-    module ≤ 1.5 mm, 0.80 mm below the 2.30 mm minimum (≥ 0.5 mm required).
-  - *To confirm on the first board (V-MECH-01):* the module board's thickness, which Akizuki
-    does not publish. The receptacle (Hirose CX70M-24P1, mid-mounted in the module's notch)
-    reaches 2.36 mm below the module's top face, so it hangs below the module by 2.36 mm
-    less that thickness; the layout keeps the zone under it empty.
-  - Sockets (FH2.54-40U1GF8.5-0.5, g110073) are not used: they add a contact pair to the D±
-    and port current paths and raise each module (D33).
 
 **Rejected at Akizuki:**
 - g110697 0.1 Ω 5 W metal plate: ±350 ppm/°C.
@@ -201,7 +179,7 @@ record is in Git at commit `3e11f68`.
 ## Machine-placed parts (JLCPCB)
 
 All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for D29 on
-2026-11-04 (marked †), and for D31 the same day (marked ‡).
+2026-11-04 (marked †), for D31 the same day (marked ‡), and for D37 on 2026-11-12 (marked §).
 
 ### Active parts
 
@@ -209,6 +187,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
 |---|---|---|---|---:|---|---|
 | U1 † | RP2040 | C2040 | LQFN-56 (7 × 7) | 5,845 | **Extended** (D29) | MCU |
 | U6 ‡ | CH335F | C5137013 | QFN-28 (4 × 4) | 4,937 | **Extended** (D31) | USB 2.0 HS hub, 4 downstream ports (MTT) |
+| J1–J4 § | TYPE-C 16PIN 2MD(073) (SHOU HAN) | C2765186 | SMD pads + 4 shell slots (8.94 × 7.35 × 3.16) | 1,070,668 | **Extended** (D37) | USB-C receptacles: HOST, PWR IN, OUT A, OUT B (4 per board) |
 | U8 † | W25Q128JVSIQ | C97521 | SOIC-8 208 mil | 75,419 | Basic | QSPI flash; its unique ID is the USB serial number |
 | U10–U12, U20–U22 | OP07CDR | C7433 | SOIC-8 | 248,598 | Basic | Mirror amplifiers |
 | U13, U23, U30 | LM393DR2G | C7955 | SOIC-8 | 357,235 | Basic | Range and OC comparators |
@@ -255,6 +234,34 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
     23, 24 and 25.
   - *To confirm on the first board (V-MEAS-06):* DVDD, the USB series resistance, Y1's start-up
     and frequency; before layout, the land against Figure 167 (Rev0.5 G20).
+- *Verified (C2765186, SHOU HAN drawing "TYPE-C 16PIN 2MD(073)" REV. A and its specification,
+  as LCSC lists them for C2765186; read 2026-11-12 for D37):*
+  - JLCPCB's assembly pool: class Extended (not Preferred), 1,070,668 in stock, $0.0728 each
+    at 1–199 pieces, attrition 3, minimum 2 (`tools/jlc_stock.py` and the API's price tiers,
+    2026-11-12). Its part page lists it as eligible for Economic PCBA.
+  - SMD receptacle with 16 contacts, body 8.94 × 7.35 × 3.16 mm: 12 pads at 0.5 mm pitch
+    (A1/B12, A4/B9, B4/A9 and B1/A12 are GND, VBUS, VBUS and GND, 0.60 mm wide; B8 SBU2,
+    A5 CC1, B7 DN2, A6 DP1, A7 DN1, B6 DP2, A8 SBU1 and B5 CC2 are 0.30 mm wide), four plated
+    shell slots (the shield, NOTE 4-2) and two unplated pegs, ø0.65 mm. The drawing's pad row
+    reads B7, A6, A7, B6 from left to right: D−, D+, D−, D+ alternate, so joining A6 to B6
+    and A7 to B7 needs one crossing (ROUTING_Rev0.5.md).
+  - Rating 5 V, 3 A, −25 to +85 °C. Insertion force 0.5–2.0 kgf, removal 0.8–2.0 kgf,
+    10,000 cycles (after them: contact resistance ≤ 0.1 Ω, removal 0.8–2.0 kgf). Contact
+    resistance (LLCR) 40 mΩ per pin at most for VBUS, GND and the other pins, 50 mΩ for the
+    shield, change ≤ 10 mΩ. J4 carries up to 2.46 A (circuit §7.2) through two VBUS pads, inside
+    the 3 A rating.
+  - IR reflow: the board at 260 °C held for 10 s (drawing note 6); the specification's
+    soldering-heat test says 260 ± 5 °C within 20 s. Hand-soldering iron: 330 ± 5 °C, 3 ± 0.5 s.
+  - *Footprint (issue #8, D37):* `USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073`, generated from
+    the drawing's recommended land and measured against it by `check_libraries.py`
+    (`design/ecad/libraries/library.json`). A1 and B1 are 0.035 mm shorter at their near end
+    than the drawing: it leaves 0.165 mm from each peg hole to them, under JLCPCB's 0.20 mm
+    non-plated-hole-to-copper figure (the user's choice of 2026-11-12, D37).
+  - *To confirm on the first board:* the drawing's land is for a **0.80 mm** board and this one
+    is 1.6 mm, so the shell legs may not reach through the slots (V-MFG-03); the part's
+    orientation in JLCPCB's placement preview, which is read when the JLCPCB step is run
+    (V-MFG-03); and that the enclosure opening carries the insertion force, which now
+    reaches the board through the four shell slots (V-MECH-01).
 - *Verified (CH335F, WCH CH334/CH335 datasheet V2.5, Akizuki copy; read 2026-11-04 for D31):*
   - Package (§5.6, QFN28_4×4×0.75-0.4, read visually): body 4.0 ± 0.1 mm, height
     0.75 ± 0.05 mm, pitch 0.4 mm; terminals 0.20 ± 0.05 mm wide and 0.35 ± 0.1 mm long; ePad
@@ -501,5 +508,6 @@ All Extended. The full Rev0.2 rows, with stock and datasheet notes, are in Git h
 
 - ~~**Pin headers and sockets for the modules and the DIP16 ADCs (OI-23).**~~ Selected by
   D33: PH-1x40SG (g100167) under the USB-C modules, no sockets, and the DIP16 ADCs soldered
-  directly (see the hand-soldered parts above).
+  directly. Since D37 the modules and their headers are gone; the DIP16 ADCs are still
+  soldered directly (see the hand-soldered parts above).
 - **Heat-set M2 inserts** (mechanical; not under D13).

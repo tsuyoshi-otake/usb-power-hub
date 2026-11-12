@@ -154,6 +154,27 @@ class CheckOutputsTest(unittest.TestCase):
                                                lambda t: re.sub(r"(?m)^T1(\r?\n)X[^\r\n]+\r?\n", r"T1\1", t, count=1)),
                          f"FAIL {PREFIX}_PTH.drl: holes by diameter")
 
+    # the receptacles' shell slots (D37): J4's front slot on its left side, 0.6 x 1.4 mm along y, is
+    # written at X13.18 from Y70.06 to Y70.86 (centres 0.8 mm apart + the 0.6 mm tool)
+    SLOT = "X13.18Y70.06G85X13.18Y70.86"
+
+    def test_plated_slot_shortened(self):
+        """The hole count by diameter is unchanged: only the slot rule sees a slot 0.2 mm short."""
+        self.assertFails(lambda o, s: edit_zip(o, f"{PREFIX}_PTH.drl",
+                                               lambda t: t.replace(self.SLOT, "X13.18Y70.06G85X13.18Y70.66")),
+                         f"FAIL {PREFIX}_PTH.drl: slots")
+
+    def test_plated_slot_as_round_hole(self):
+        self.assertFails(lambda o, s: edit_zip(o, f"{PREFIX}_PTH.drl",
+                                               lambda t: t.replace(self.SLOT, "X13.18Y70.06")),
+                         f"FAIL {PREFIX}_PTH.drl: slots")
+
+    def test_plated_slot_turned(self):
+        """The same length and centre, along x instead of y."""
+        self.assertFails(lambda o, s: edit_zip(o, f"{PREFIX}_PTH.drl",
+                                               lambda t: t.replace(self.SLOT, "X12.78Y70.46G85X13.58Y70.46")),
+                         f"FAIL {PREFIX}_PTH.drl: slots")
+
     def test_zip_times_not_fixed(self):
         self.assertFails(lambda o, s: edit_zip(o, when=(2026, 11, 6, 10, 0, 0)), "member times are not fixed")
 
@@ -184,6 +205,18 @@ class CheckOutputsTest(unittest.TestCase):
                          encoding="utf-8", newline="\n")
             rehash_sources(o, s)
         self.assertFails(corrupt, "FAIL BOM C1: class 'Extended (D29)'")
+
+    def test_receptacle_class_for_another_decision(self):
+        """C2765186 is an exception for D37 only: J2 claiming D29's is refused."""
+        def corrupt(o, s):
+            p = s / PCB
+            text = p.read_text(encoding="utf-8")
+            i = text.index('(property "Reference" "J2"')
+            j = text.index('(property "Class" "Extended (D37)"', i)
+            p.write_text(text[:j] + '(property "Class" "Extended (D29)"' + text[j + len('(property "Class" "Extended (D37)"'):],
+                         encoding="utf-8", newline="\n")
+            rehash_sources(o, s)
+        self.assertFails(corrupt, "FAIL BOM J2: class 'Extended (D29)'")
 
     def test_cpl_shifted(self):
         self.assertFails(lambda o, s: edit(o / CPL, b'"C1","13.2500"', b'"C1","13.3000"'),

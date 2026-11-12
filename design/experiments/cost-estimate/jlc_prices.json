@@ -1477,47 +1477,6 @@
    "lossNumber": 10,
    "minPurchaseNum": 1
   },
-  "C1523": {
-   "componentCode": "C1523",
-   "componentModelEn": "0402B102K500NT",
-   "componentLibraryType": "base",
-   "stockCount": 2294694,
-   "componentPrices": [
-    {
-     "startNumber": 1,
-     "endNumber": 999,
-     "productPrice": 0.0038
-    },
-    {
-     "startNumber": 1000,
-     "endNumber": 2999,
-     "productPrice": 0.0029
-    },
-    {
-     "startNumber": 3000,
-     "endNumber": 9999,
-     "productPrice": 0.0025
-    },
-    {
-     "startNumber": 10000,
-     "endNumber": 49999,
-     "productPrice": 0.0022
-    },
-    {
-     "startNumber": 50000,
-     "endNumber": 50199,
-     "productPrice": 0.002
-    },
-    {
-     "startNumber": 50200,
-     "endNumber": -1,
-     "productPrice": 0.002
-    }
-   ],
-   "leastPatchNumber": 20,
-   "lossNumber": 10,
-   "minPurchaseNum": 1
-  },
   "C15195": {
    "componentCode": "C15195",
    "componentModelEn": "CL05B103KB5NNNC",
@@ -1681,6 +1640,48 @@
    "leastPatchNumber": 0,
    "lossNumber": 0,
    "minPurchaseNum": 1
+  },
+  "C2765186": {
+   "componentCode": "C2765186",
+   "componentModelEn": "TYPE-C 16PIN 2MD(073)",
+   "componentLibraryType": "expand",
+   "stockCount": 1070668,
+   "componentPrices": [
+    {
+     "startNumber": 1,
+     "endNumber": 199,
+     "productPrice": 0.0728
+    },
+    {
+     "startNumber": 200,
+     "endNumber": 999,
+     "productPrice": 0.0581
+    },
+    {
+     "startNumber": 1000,
+     "endNumber": 1999,
+     "productPrice": 0.049
+    },
+    {
+     "startNumber": 2000,
+     "endNumber": 9999,
+     "productPrice": 0.0427
+    },
+    {
+     "startNumber": 10000,
+     "endNumber": 19999,
+     "productPrice": 0.0405
+    },
+    {
+     "startNumber": 20000,
+     "endNumber": -1,
+     "productPrice": 0.039
+    }
+   ],
+   "leastPatchNumber": 2,
+   "lossNumber": 3,
+   "minPurchaseNum": 1,
+   "checked_utc": "2026-11-12"
   }
  }
 }

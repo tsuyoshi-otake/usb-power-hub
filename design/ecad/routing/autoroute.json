@@ -1,6 +1,6 @@
 {
- "dsn_sha256": "3831ae8533ae8324dbdf718255f21a76d23899fb09661952439647030128e56c",
- "ses_sha256": "ba749005b862af144027d2ef158ff157865c58529669a3b608b192d0e5c64da8",
+ "dsn_sha256": "7291238cf56458df203b09d118dc060377f6b83826d77ccb22743dfe9194691f",
+ "ses_sha256": "c908c2349fcd4965ba991493cdb486820b2334d04959f8732a9f55e16bd9224a",
  "jar": "freerouting-2.5.0.jar",
  "jar_sha256": "f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7",
  "java_sha256": "f961fb8db73c7c546821bc6d30fdaa8ce2458da460a5e75e2c39189cd107e6ba",
@@ -14,8 +14,8 @@
   "--logging.file.enabled=false",
   "--router.autorouter.max_passes=60"
  ],
- "passes": 56,
- "router_unrouted": 18,
- "router_violations": 820,
+ "passes": 40,
+ "router_unrouted": 55,
+ "router_violations": 673,
  "note": "router_violations is the router's own count, fixed items included; DRC decides"
 }

@@ -5,11 +5,10 @@ Run with KiCad's own Python from the repository root (make_pcb.py runs it after 
 the board):
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/check_silk.py
-        [--src DIR] [--lib DIR] [--doc FILE]
+        [--src DIR] [--doc FILE]
 
---src holds the KiCad project (default design/ecad/source), --lib the project libraries
-(default design/ecad/libraries) and --doc the placement document (default
-design/ecad/PLACEMENT_Rev0.5.md); the tests pass corrupted copies. The document is read with
+--src holds the KiCad project (default design/ecad/source) and --doc the placement document
+(default design/ecad/PLACEMENT_Rev0.5.md); the tests pass corrupted copies. The document is read with
 check_pcb.py's parser, not make_pcb.py's, and the board with pcbnew. Distances are pcbnew's
 own shape collisions: a text is its stroked glyphs, a pad its F.Mask opening.
 
@@ -23,14 +22,14 @@ JLCPCB's legend limits (pcb-capabilities, Legend, read 2026-11-06): a 1.0 mm tex
     segments; nothing of the board's own is on B.SilkS; no footprint text is visible on a
     silkscreen layer (the reference designators stay hidden).
  3. Content (CLAUDE.md 6): the title block's title and revision; a port label beside each
-    USB-C module (HOST, OUT A, OUT B, 5V IN); at every test pad exactly one label, its pad's
-    net name.
+    USB-C receptacle (HOST, OUT A, OUT B, 5V IN); at every test pad exactly one label, its
+    pad's net name.
  4. Association: a test-pad label without a leader is within BESIDE_MM (1.5 mm) of its pad,
     and its centre is nearer that pad's centre than any other test pad's. A leader starts
     within LEAD_START_MM (0.3 mm) of its label without touching its glyphs (KiCad's DRC
     flags that as silk overlap) and ends within LEAD_END_MM (0.6 mm) of its pad's edge,
     nearer that pad than any other pad on the board. A port label lies outside
-    its module's outline (library.json) and within BESIDE_MM of it.
+    its receptacle's courtyard and within BESIDE_MM of it.
  5. Clearance of every label and leader: on the board, >= EDGE_MM (0.5 mm) from its edge;
     >= PAD_MM (0.15 mm) from every F.Mask opening; >= SILK_MM (0.1 mm) from every footprint's
     silkscreen and from every other label (a label's own leader excepted); a label enters no
@@ -48,12 +47,11 @@ What it CANNOT see:
   them and the generated ones as make_libraries.py draws them. The JLCPCB placement preview
   is the evidence for orientation (CLAUDE.md 4.2).
 - legibility after printing, and whether a label is under a case opening (V-MECH-01). A
-  module's body above the board is its outline only; a part's body is its courtyard.
+  part's body above the board is its courtyard.
 - KiCad's DRC checks silk-to-silk and silk-to-copper overlap too; check_pcb.py runs it.
 """
 import argparse
 import importlib.util
-import json
 import math
 import pathlib
 import sys
@@ -207,7 +205,7 @@ def ink(t):
     return box(t.GetEffectiveShape().BBox())
 
 
-def check_content(rep, board, labels, found, fps, modules):
+def check_content(rep, board, labels, found, fps, receptacles):
     tb = board.GetTitleBlock()
     for name, want in (("title", tb.GetTitle()), ("revision", tb.GetRevision())):
         rep.check(name in labels and labels[name]["text"] == want, f"silk {name}",
@@ -217,11 +215,11 @@ def check_content(rep, board, labels, found, fps, modules):
         if not rep.check(lab is not None and lab["text"] == want, f"silk {ref}",
                          f"port label {want!r} missing (table: {lab and lab['text']!r})"):
             continue
-        if ref in found and ref in modules:
-            r, outline = ink(found[ref]), modules[ref]
-            g = rect_gap(r, outline)
-            rep.check(not cp.overlap(r, outline) and g <= BESIDE_MM, f"silk {ref}",
-                      f"port label {g:.2f} mm from {ref}'s outline, want outside and <= {BESIDE_MM} mm")
+        if ref in found and ref in receptacles:
+            r, crt = ink(found[ref]), receptacles[ref]
+            g = rect_gap(r, crt)
+            rep.check(not cp.overlap(r, crt) and g <= BESIDE_MM, f"silk {ref}",
+                      f"port label {g:.2f} mm from {ref}'s courtyard, want outside and <= {BESIDE_MM} mm")
     pads = tp_pads(fps)
     for ref, pad in sorted(pads.items()):
         if not rep.check(pad is not None, ref, "a test pad with other than one pad"):
@@ -369,7 +367,6 @@ def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=pathlib.Path, default=ROOT / "design" / "ecad" / "source")
-    ap.add_argument("--lib", type=pathlib.Path, default=ROOT / "design" / "ecad" / "libraries")
     ap.add_argument("--doc", type=pathlib.Path, default=ROOT / "design" / "ecad" / "PLACEMENT_Rev0.5.md")
     a = ap.parse_args(argv[1:])
     rep = Report()
@@ -382,13 +379,14 @@ def main(argv):
         print(f"{rep.count + 1} checks, {len(rep.fails) + 1} failed: FAIL")
         return 1
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
-    register = json.loads((a.lib / "library.json").read_text(encoding="utf-8"))["parts"]
-    params = {p["footprint"]["name"]: p["footprint"]["params"] for p in register
-              if p.get("footprint", {}).get("make") == "usbc_module"}
-    modules = {ref: cp.module_outline(fp, params[fp.GetFPID().GetLibItemName().wx_str()])
-               for ref, fp in fps.items() if fp.GetFPID().GetLibItemName().wx_str() in params}
+    receptacles = {}
+    for ref in PORTS:
+        rects = cp.courtyard(fps[ref]) if ref in fps else []
+        if rects:
+            receptacles[ref] = (min(r[0] for r in rects), min(r[1] for r in rects),
+                                max(r[2] for r in rects), max(r[3] for r in rects))
     found = check_board_table(rep, board, labels)
-    check_content(rep, board, labels, found, fps, modules)
+    check_content(rep, board, labels, found, fps, receptacles)
     openings, fsilk, crts = mask_openings(fps), fp_silk(fps), courtyards(fps)
     check_clearance(rep, labels, found, fps, openings, fsilk, crts)
     check_footprint_silk(rep, fps, openings, fsilk)

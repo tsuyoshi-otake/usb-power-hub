@@ -40,11 +40,13 @@ SHA-256 instead of a Git commit, and check_outputs.py fails a set older than its
 Then it runs check_outputs.py in a new process, unless --no-check.
 Exit status: 0 = written and checked; 1 = a check failed or an export failed.
 
-What it CANNOT see: whether JLCPCB reads the files as meant. The upload of 2026-11-11 (DFM,
-part mapping, placement preview, quote; issue #6) is recorded in
-manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the Gerber zip, BOM and
-CPL it saw. This script does not read that file: a change to a source, to this script or to
-jlcpcb_model_rotation.json that changes one of those three hashes makes that review stale.
+What it CANNOT see: whether JLCPCB reads the files as meant. The uploads of Rev0.4 (2026-11-11
+and -12: DFM, part mapping, placement preview, quote; issues #6 and #8) are recorded in
+manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md (and r02's) with the SHA-256 of the Gerber
+zip, BOM and CPL they saw. Rev0.5's set has not been uploaded. This script does not read those
+files: a change to a source, to this script or to jlcpcb_model_rotation.json that changes one of
+those three hashes makes a review stale. The receptacle C2765186 (J1-J4) has no row in
+jlcpcb_model_rotation.json until the placement preview shows how its model sits.
 """
 import csv
 import hashlib
@@ -263,13 +265,13 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "| Mask, silkscreen colour | not decided; no decision records them |",
         "| Vias | 0.45 mm copper, 0.30 mm drill: JLCPCB's standard class \"0.3mm/(0.4/0.45mm)\" (issue #8); tented front and back (board setting); JLCPCB's form offers Plugged, not Tented, at $0.00 for this board (2026-11-12) |",
         "| Assembly side | Top only (REQ-MFG-01) |",
-        f"| Machine-placed parts | {len(machine)} footprints, {len(lcsc)} LCSC parts; Extended: {', '.join(extended) or 'none'} (D29, D31) |",
+        f"| Machine-placed parts | {len(machine)} footprints, {len(lcsc)} LCSC parts; Extended: {', '.join(extended) or 'none'} (D29, D31, D37) |",
         f"| Hand-soldered parts | {len(hand)} (`{PREFIX}_HandSolder.csv`), in neither BOM nor CPL |",
         f"| Not populated (BOM-excluded) | {len(dnp)}: {' '.join(dnp)} |",
         f"| ERC | {count(erc, 'violations')} violations |",
         f"| DRC | {count(drc, 'violations')} violations, {count(drc, 'unconnected_items')} unconnected items, "
         f"{count(drc, 'schematic_parity')} schematic-parity items |",
-        "| JLCPCB DFM, part mapping, placement preview | run once, 2026-11-11 (issue #6): `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`; it holds only while this set's Gerber, BOM and CPL SHA-256 equal the ones it records |",
+        "| JLCPCB DFM, part mapping, placement preview | not run on this set. Rev0.4's review (`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, r02's beside it) saw other files and does not carry over |",
         "| Firmware | none |",
         "| JLCPCB order number | none |",
         "| Approver, approval time | none: WIP |",
@@ -287,16 +289,20 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "## Residual risks",
         "",
         "- The CPL's origin is the board's lower-left corner and its angles are KiCad's plus the",
-        "  JLCPCB model rotation of design/ecad/jlcpcb_model_rotation.json (easy-stick 14.18). The",
-        "  placement preview of 2026-11-11 was read for every oriented part class after both were",
-        "  corrected; JLCPCB checks the final placement again in its DFM Analysis 4-6 hours after",
-        "  an order. The review is manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md.",
-        "- JLCDFM's Danger items of r01 (via annular ring, THT-to-SMD distance, mask opening",
+        "  JLCPCB model rotation of design/ecad/jlcpcb_model_rotation.json (easy-stick 14.18). That",
+        "  table holds what Rev0.4's placement preview of 2026-11-11 showed",
+        "  (manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md). The receptacle C2765186 (J1-J4)",
+        "  is not in it: its CPL angle is KiCad's alone, and nobody has seen how JLCPCB's model sits",
+        "  on the footprint. The preview must be read for it before an order, and JLCPCB checks the",
+        "  final placement again in its DFM Analysis 4-6 hours after one.",
+        "- The receptacle's land is the maker's, drawn for a 0.80 mm board; this one is 1.6 mm",
+        "  (OI-33). Whether the shell legs reach through the plated slots and the joints carry the",
+        "  plug's insertion force shows only on the first board (V-MFG-03, V-MECH-01).",
+        "- JLCDFM's Danger items of Rev0.4's r01 (via annular ring, THT-to-SMD distance, mask opening",
         "  exposing a trace, silkscreen over a plugged via) are judged in that review. It ran on the",
         "  0.25 mm via drill; the 0.30 mm drill (issue #8) leaves a 0.075 mm via ring, which JLCDFM",
-        "  has not seen. JLCPCB's own DFM at order time can differ.",
-        "- No footprint is proven on a board or in the JLCPCB preview; no order-time stock check",
-        "  has been done (CLAUDE.md 0).",
+        "  has not seen, and it has not seen the receptacles. JLCPCB's own DFM at order time can differ.",
+        "- No footprint is proven on a board; no order-time stock check has been done (CLAUDE.md 0).",
         "- The open issues of CLAUDE.md 11 stand; the set is not orderable until each is closed.",
         "",
     ]

@@ -9,15 +9,14 @@ What it checks, each against design/ecad/ROUTING_Rev0.5.md:
 1. DRC with schematic parity: no violation of any severity, no unconnected item, no parity
    issue (Section 8, Routing gate: zero unrouted nets).
 2. In1.Cu is a plane layer holding only the GND zone, with no track or arc on it.
-3. The HS pairs: every track of a pair net is on F.Cu, except the N conductor's crossing on
-   B.Cu; widths are 0.20 (the lead-ins at U6) or 0.31 mm; along the document's centreline each
-   0.31 mm conductor is 0.23 mm from it, or, where the pair's Tune cell names that conductor and
-   span, 0.23 mm up to 0.23 mm + the bump height (never nearer its partner); the two conductors' lengths (a via counted as 1.53 mm,
-   L1 to L4) differ by at most SKEW_MM.
+3. The HS pairs: every track of a pair net is on F.Cu and the pair's nets have no via; widths
+   are 0.20 (the lead-ins at U6 and at the receptacle, the hop and the branch of D37) or
+   0.31 mm; along the document's centreline each 0.31 mm conductor is 0.23 mm from it; the two
+   conductors' lengths, every track counted, differ by at most SKEW_MM.
 4. The pairs' surroundings: no copper of another net within 0.5 mm of a coupled conductor on
-   F.Cu or on In2.Cu (pads of U6 and of the pair's module excepted); the In1 GND fill under each
-   pair conductor reaches 0.3 mm beyond its edges, except within EXEMPT_MM of a via of the
-   pair's own nets or of a pad of its module (their antipads).
+   F.Cu or on In2.Cu (pads of U6 and of the pair's end parts, the receptacle and the tap
+   resistors, excepted); the In1 GND fill under each pair track reaches 0.3 mm beyond its
+   edges, except within EXEMPT_MM of a pad of an end part (their antipads).
 5. The Kelvin taps (rows whose Why is "Kelvin tap"): exactly the document's straight 0.20 mm
    F.Cu tracks, and no via, on each sense net.
 6. CLAUDE.md 5.1 as D36 applies it in the analog blocks (the keepouts table's `analog`
@@ -26,16 +25,36 @@ What it checks, each against design/ecad/ROUTING_Rev0.5.md:
    a 45-degree track a few millidegrees off); they never run along each other. A net over its
    own B.Cu track, at the via where it changes layer, is one signal, not two.
 7. Router classes with a layer list: their nets' tracks only on those layers.
-8. The port path copper of the port_path table: the sum per port at most its limit.
+8. The port path copper of the port_path table: the sum per port at most its limit. A `+`
+   joins the pads of one receptacle into one node (the plug ties its VBUS contacts).
+9. The In1 GND plane is one sheet, not a perforated one (CLAUDE.md 5.1, 8: no fragmented
+   reference plane). A void is one outline of the zone's outline less its stored fill.
+   a. Slots: no void is longer than PLANE_SLOT_MM between its two farthest points. The limit
+      stands just above the longest void one hole makes on this board (2.81 mm, a square
+      through-hole pad) and above the three merged vias of a hand-drawn power group (2.60 mm);
+      it is not a field calculation. What it catches is four or more antipads merged in a row.
+   b. The exposed pads of the epad table: on each of the pad's four sides, the plane copper
+      that joins the pad's area to the plane outside is at least EPAD_WEB of the pad's side.
+      A side's sector lies between the pad's two diagonals, from the pad's edge out to
+      EPAD_REACH_MM. Its web is the least copper a line from one diagonal to the other must
+      cross, voids being free to cross (a shortest path over the voids).
 
 What it CANNOT see: whether a track is a good one (lengths and detours DRC accepts), current
 density inside a pad or a via other than by the nodal model, the impedance of the pairs (D27's
-model value) or what the module and header add, and anything off the board. Rule 6 is checked
+model value) or what the receptacle's pads, the hop and the branch add, and anything off the
+board. Rule 6 is checked
 on whole In2 segments that touch an analog region, so a segment that only grazes a region's
 edge is held to the rule along its whole length.
+Rule 9 reads the fill stored in the board file and does not refill it: a stale fill is seen
+only through DRC. It measures copper widths, not inductance, and does not know which signal
+crosses which void. 9a does not see a row of short voids with narrow webs between them, away
+from an exposed pad. 9b looks only at the parts of the epad table and only as far as its
+reach; a void that reaches across a diagonal counts in both sectors up to the diagonal. Copper
+islands inside a void count as void. Neither looks at the pours on In2.Cu and B.Cu.
 Exit status: 0 = every check passed; 1 = a check failed.
 """
 import argparse
+import heapq
 import importlib.util
 import json
 import math
@@ -56,11 +75,14 @@ COPLANAR_MM = 0.50
 L2_MARGIN_MM = 0.30
 EXEMPT_MM = 1.5
 SKEW_MM = 1.25
-VIA_LENGTH_MM = 1.53               # L1 to L4 of JLC04161H-7628, 1.6 mm less the outer copper
 ANALOG_RULE_MM = 0.30
 CROSS_DEG = 45                     # D36: an In2 and a B.Cu track in an analog block may only cross
 CROSS_TOL_DEG = 0.1                # the session's 0.1 um grid: a 45-degree track measures 44.99x
 SAMPLE_MM = 0.1
+PLANE_SLOT_MM = 3.0                # rule 9a: the longest void allowed in the In1 GND fill
+EPAD_WEB = 0.5                     # rule 9b: of the exposed pad's side, the least copper on each side
+EPAD_REACH_MM = 5.0                # rule 9b: how far beyond the exposed pad its four sectors reach
+SLIVER_MM = 0.05                   # the fill stands this far inside the zone's outline at most
 RHO = 1.72e-8                      # ohm m, copper at 20 C
 THICK = {pcbnew.F_Cu: 35e-6, pcbnew.B_Cu: 35e-6, pcbnew.In1_Cu: 15.2e-6, pcbnew.In2_Cu: 15.2e-6}
 BARREL_M, PLATING_M = 1.6e-3, 18e-6
@@ -121,14 +143,6 @@ def interior(p, line, end_mm=0.3, bend_mm=0.5):
     return best, end_mm <= at <= run - end_mm and all(abs(at - s) >= bend_mm for s in bends)
 
 
-def in_span(p, span):
-    """Whether p projects onto the centreline between the Tune span's two points."""
-    (xa, ya), (xb, yb) = span
-    ux, uy = xb - xa, yb - ya
-    t = ((p[0] - xa) * ux + (p[1] - ya) * uy) / (ux * ux + uy * uy)
-    return 0.0 <= t <= 1.0
-
-
 def samples(a, b, step=SAMPLE_MM):
     L = math.hypot(b[0] - a[0], b[1] - a[1])
     n = max(1, int(L / step))
@@ -181,8 +195,9 @@ def check_in1(rep, board):
               f"zones {[(z.GetZoneName(), z.GetNetname()) for z in zones]}, want one GND zone")
 
 
-def _module_of(board, nets):
-    """The parts at the far end of a pair: every part with a pad on its nets except U6."""
+def _end_parts(board, nets):
+    """The parts at the ends of a pair's nets: every part with a pad on them except U6 (the
+    receptacle and, for the downstream pairs, the tap resistors)."""
     refs = set()
     for f in board.GetFootprints():
         if f.GetReference() != "U6" and any(p.GetNetname() in nets for p in f.Pads()):
@@ -198,12 +213,13 @@ def check_pairs(rep, board, routing):
     all_tracks, all_vias = tracks(board), vias(board)
     for pair in routing["pairs"]:
         name, nets, line = pair["name"], set(pair["nets"]), pair["centreline"]
-        ends_parts = _module_of(board, nets)
+        end_parts = _end_parts(board, nets)
         own_t = [t for t in all_tracks if t.GetNetname() in nets]
         own_v = [v for v in all_vias if v.GetNetname() in nets]
-        exempt = [frame(v.GetPosition()) for v in own_v]
+        rep.check(not own_v, f"pair {name}", f"{len(own_v)} via(s) on {' '.join(sorted(nets))}")
+        exempt = []
         for f in board.GetFootprints():
-            if f.GetReference() in ends_parts:
+            if f.GetReference() in end_parts:
                 exempt += [frame(p.GetPosition()) for p in f.Pads()]
         lengths = {n: 0.0 for n in nets}
         coupled = []
@@ -212,22 +228,18 @@ def check_pairs(rep, board, routing):
             w = round(to_mm(t.GetWidth()), 3)
             lengths[t.GetNetname()] += math.hypot(b[0] - a[0], b[1] - a[1])
             layer = t.GetLayer()
-            rep.check(layer == pcbnew.F_Cu or (layer == pcbnew.B_Cu and t.GetNetname() == pair["nets"][1]),
-                      f"pair {name}", f"{t.GetNetname()} track on {board.GetLayerName(layer)}")
+            rep.check(layer == pcbnew.F_Cu, f"pair {name}", f"{t.GetNetname()} track on {board.GetLayerName(layer)}")
             rep.check(w in PAIR_WIDTHS, f"pair {name}", f"{t.GetNetname()} track {w} mm wide at {a}")
             if layer != pcbnew.F_Cu:
                 continue
             is_coupled = False
-            tune = pair["tune"]
-            tuned = tune is not None and t.GetNetname() == tune["net"]
             for p in samples(a, b):
                 d, inside = interior(p, line)
                 if w == 0.31 and inside:
                     is_coupled = True
-                    hi = HALF_GAP + tune["height"] if tuned and in_span(p, tune["span"]) else HALF_GAP
-                    rep.check(HALF_GAP - 0.01 <= d <= hi + 0.01, f"pair {name}",
+                    rep.check(abs(d - HALF_GAP) <= 0.01, f"pair {name}",
                               f"{t.GetNetname()} {d:.3f} mm from the centreline at ({p[0]:.2f}, {p[1]:.2f}),"
-                              f" want {HALF_GAP}" + (f" to {hi:.2f}" if hi > HALF_GAP else ""))
+                              f" want {HALF_GAP}")
             if is_coupled:
                 coupled.append(t)
             if fill is not None:
@@ -244,19 +256,17 @@ def check_pairs(rep, board, routing):
                             rep.check(False, f"pair {name}", f"no In1 GND under {t.GetNetname()} at "
                                       f"({q[0]:.2f}, {q[1]:.2f})")
                             break
-        for v in own_v:
-            lengths[v.GetNetname()] += VIA_LENGTH_MM
         lp, ln = (lengths[n] for n in pair["nets"])
         rep.check(abs(lp - ln) <= SKEW_MM, f"pair {name}",
                   f"P {lp:.2f} mm, N {ln:.2f} mm: skew {abs(lp - ln):.2f} mm > {SKEW_MM}")
         rep.check(bool(coupled), f"pair {name}", "no coupled conductor along the centreline")
-        check_isolation(rep, board, name, nets, ends_parts, coupled)
+        check_isolation(rep, board, name, nets, end_parts, coupled)
 
 
-def check_isolation(rep, board, name, nets, ends_parts, coupled):
+def check_isolation(rep, board, name, nets, end_parts, coupled):
     items = []
     for f in board.GetFootprints():
-        if f.GetReference() in ends_parts or f.GetReference() == "U6":
+        if f.GetReference() in end_parts or f.GetReference() == "U6":
             continue
         items += [p for p in f.Pads() if p.GetNetname() not in nets]
     items += [t for t in board.GetTracks() if t.GetNetname() not in nets]
@@ -350,7 +360,10 @@ def check_class_layers(rep, board, routing):
 
 
 def net_resistance(board, net, a, b):
-    """Ohms between pads a and b ('REF.PAD') of one net, by nodal analysis of its copper."""
+    """Ohms between a and b of one net, by nodal analysis of its copper. Each end is a pad
+    ('REF.PAD') or several joined by '+': pads that the part itself ties together (a receptacle's
+    two VBUS contacts, which the plug shorts) are one node, and the current splits between them."""
+    joined = {pad: end for end in (a, b) for pad in end.split("+")}
     pads = {}
     for f in board.GetFootprints():
         for p in f.Pads():
@@ -364,7 +377,7 @@ def net_resistance(board, net, a, b):
     def at(pt, layer):
         for k, p in pads.items():
             if p.IsOnLayer(layer) and p.HitTest(pt):
-                return ("pad", k)
+                return ("pad", joined.get(k, k))
         return ("pt", layer, round(pt.x / 5000), round(pt.y / 5000))      # 5 um: joins the router's 0.5 um stubs
     edges = []
     items = [t for t in board.GetTracks() if t.GetNetname() == net]
@@ -453,6 +466,156 @@ def check_port_paths(rep, board, tables):
     return totals
 
 
+# ---- rule 9: the In1 plane ------------------------------------------------------------------
+def _ring(chain):
+    return [frame(chain.CPoint(j)) for j in range(chain.PointCount())]
+
+
+def _box(ring):
+    xs, ys = [p[0] for p in ring], [p[1] for p in ring]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _box_gap(p, q):
+    return math.hypot(max(p[0] - q[2], q[0] - p[2], 0.0), max(p[1] - q[3], q[1] - p[3], 0.0))
+
+
+def plane_voids(board):
+    """The voids of the In1 GND fill as a SHAPE_POLY_SET: the zone's outline, drawn in by
+    SLIVER_MM, less the stored fill. None when the board has no In1 GND zone."""
+    zones = [z for z in board.Zones() if z.IsOnLayer(pcbnew.In1_Cu) and z.GetNetname() == "GND"]
+    if not zones:
+        return None
+    voids = pcbnew.SHAPE_POLY_SET(zones[0].Outline())
+    voids.Deflate(mm(SLIVER_MM), pcbnew.CORNER_STRATEGY_ALLOW_ACUTE_CORNERS, mm(0.005))
+    voids.BooleanSubtract(zones[0].GetFilledPolysList(pcbnew.In1_Cu))
+    return voids
+
+
+def caliper(ring):
+    """The distance between the two farthest points of a closed polyline."""
+    return max(math.hypot(p[0] - q[0], p[1] - q[1]) for k, p in enumerate(ring) for q in ring[k:])
+
+
+def _crosses(a, b, c, d):
+    def side(p, q, r):
+        return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
+    return (side(a, b, c) > 0) != (side(a, b, d) > 0) and (side(c, d, a) > 0) != (side(c, d, b) > 0)
+
+
+def _ring_to_line(ring, a, b):
+    """The distance from a closed polyline to the segment ab: 0 when they cross."""
+    best = min(seg_dist(v, a, b)[0] for v in ring)
+    for c, d in zip(ring, ring[1:] + ring[:1]):
+        if _crosses(a, b, c, d):
+            return 0.0
+        best = min(best, seg_dist(a, c, d)[0], seg_dist(b, c, d)[0])
+    return best
+
+
+def _ring_to_ring(p, q):
+    """The distance between two closed polylines that do not cross: it is at a vertex of one."""
+    return min(seg_dist(v, c, d)[0] for r, s in ((p, q), (q, p)) for v in r for c, d in zip(s, s[1:] + s[:1]))
+
+
+def epad_webs(voids, box, reach):
+    """{side: mm} for the exposed pad `box` = (x0, y0, x1, y1): on each side N, E, S, W the least
+    plane copper a line from one diagonal of the pad to the other must cross inside the side's
+    sector, which reaches `reach` beyond the pad. Voids are free to cross, so this is a shortest
+    path from the left diagonal to the right one over the void pieces of the sector; the pad's
+    own edge, which costs its whole length, is the longest such line."""
+    x0, y0, x1, y1 = box
+    X0, Y0, X1, Y1 = x0 - reach, y0 - reach, x1 + reach, y1 + reach
+    sectors = {"N": ((x0, y1), (x1, y1), (X1, Y1), (X0, Y1)), "E": ((x1, y1), (x1, y0), (X1, Y0), (X1, Y1)),
+               "S": ((x1, y0), (x0, y0), (X0, Y0), (X1, Y0)), "W": ((x0, y0), (x0, y1), (X0, Y1), (X0, Y0))}
+    out = {}
+    for name, (a, b, c, d) in sectors.items():
+        sector = pcbnew.SHAPE_POLY_SET()
+        sector.NewOutline()
+        for p in (a, b, c, d):
+            sector.Append(route.to_sheet(*p))
+        part = pcbnew.SHAPE_POLY_SET(voids)
+        part.BooleanIntersection(sector)
+        rings = [_ring(part.Outline(i)) for i in range(part.OutlineCount())]
+        boxes = [_box(r) for r in rings]
+        direct = math.hypot(b[0] - a[0], b[1] - a[1])
+        n = len(rings)
+        left, right = n, n + 1
+        adj = {k: [] for k in range(n + 2)}
+
+        def join(i, j, w):
+            if w < direct:                       # a longer step never beats the pad's own edge
+                adj[i].append((j, w))
+                adj[j].append((i, w))
+        adj[left].append((right, direct))
+        for i in range(n):
+            join(left, i, _ring_to_line(rings[i], a, d))
+            join(i, right, _ring_to_line(rings[i], b, c))
+            for j in range(i + 1, n):
+                if _box_gap(boxes[i], boxes[j]) < direct:
+                    join(i, j, _ring_to_ring(rings[i], rings[j]))
+        dist, heap = {left: 0.0}, [(0.0, left)]
+        while heap:
+            du, u = heapq.heappop(heap)
+            if du > dist.get(u, 1e9):
+                continue
+            for v, w in adj[u]:
+                if du + w < dist.get(v, 1e9):
+                    dist[v] = du + w
+                    heapq.heappush(heap, (du + w, v))
+        out[name] = dist[right]
+    return out
+
+
+def _epad_box(board, token):
+    ref, num = route.PAD_RE.match(token).groups()
+    fp = board.FindFootprintByReference(ref)
+    pads = [p for p in fp.Pads() if p.GetNumber() == num] if fp else []
+    if len(pads) != 1:
+        return None
+    bb = pads[0].GetBoundingBox()
+    (xa, ya), (xb, yb) = (frame(pcbnew.VECTOR2I(x, y)) for x, y in ((bb.GetLeft(), bb.GetTop()),
+                                                                     (bb.GetRight(), bb.GetBottom())))
+    return min(xa, xb), min(ya, yb), max(xa, xb), max(ya, yb)
+
+
+def check_plane(rep, board, routing):
+    """Rule 9. Returns (the longest void in mm, {pad: {side: web in mm}}) for the statistics."""
+    voids = plane_voids(board)
+    if not rep.check(voids is not None, "L2", "no In1 GND zone to measure"):
+        return None, {}
+    holes = [(v.GetPosition(), f"via {v.GetNetname()}") for v in vias(board)]
+    for f in board.GetFootprints():
+        holes += [(p.GetPosition(), f"{f.GetReference()}.{p.GetNumber()}") for p in f.Pads() if p.GetDrillSize().x > 0]
+    longest = 0.0
+    for i in range(voids.OutlineCount()):
+        ring = _ring(voids.Outline(i))
+        length = caliper(ring)
+        longest = max(longest, length)
+        if length > PLANE_SLOT_MM:
+            one = pcbnew.SHAPE_POLY_SET()
+            one.AddOutline(voids.Outline(i))
+            inside = sorted({name for at, name in holes if one.Contains(at)})
+            x0, y0, x1, y1 = _box(ring)
+            rep.check(False, "L2 slot", f"void {length:.2f} mm long, x {x0:.2f}..{x1:.2f}, y {y0:.2f}..{y1:.2f}, "
+                      f"limit {PLANE_SLOT_MM}: {len(inside)} hole(s) in it: {' '.join(inside)[:160]}")
+    rep.check(True, "L2 slot", "ran")
+    webs = {}
+    for token in routing["epads"]:
+        box = _epad_box(board, token)
+        if not rep.check(box is not None, f"L2 web {token}", "no such pad on the board"):
+            continue
+        side = box[2] - box[0]
+        if not rep.check(abs((box[3] - box[1]) - side) < 1e-3, f"L2 web {token}", f"pad box {box} is not square"):
+            continue
+        webs[token] = epad_webs(voids, box, EPAD_REACH_MM)
+        for name, web in webs[token].items():
+            rep.check(web >= EPAD_WEB * side - 1e-6, f"L2 web {token} {name}",
+                      f"{web:.2f} mm of plane copper on this side, {100 * web / side:.0f} % of the pad's "
+                      f"{side:.2f} mm, want >= {100 * EPAD_WEB:.0f} % within {EPAD_REACH_MM} mm")
+    return longest, webs
+
+
 def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
@@ -473,6 +636,7 @@ def main(argv):
     n_in2, n_cross = check_analog(rep, board, routing, regions)
     check_class_layers(rep, board, routing)
     totals = check_port_paths(rep, board, tables)
+    longest, webs = check_plane(rep, board, routing)
     with tempfile.TemporaryDirectory() as tmp:
         out = pathlib.Path(a.reports) if a.reports else pathlib.Path(tmp)
         out.mkdir(parents=True, exist_ok=True)
@@ -485,6 +649,9 @@ def main(argv):
     print(f"{len(tracks(board))} tracks, {len(vias(board))} vias; {n_in2} In2 track(s) in the analog blocks,"
           f" {n_cross} In2/B.Cu crossing(s) there;"
           f" {ports}; {unconnected if unconnected is not None else '?'} unconnected items")
+    print(f"In1 plane: longest void {'?' if longest is None else f'{longest:.2f}'} mm; " + "; ".join(
+        f"{token} web " + " ".join(f"{side} {web:.2f}" for side, web in sides.items()) + " mm"
+        for token, sides in webs.items()))
     print(f"{rep.count} checks, {len(rep.fails)} failed: {'FAIL' if rep.fails else 'PASS'}")
     return 1 if rep.fails else 0
 
