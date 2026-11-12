@@ -15,3 +15,6 @@
 (rule "JLCPCB pad hole to pad hole 0.45"
   (constraint hole_to_hole (min 0.45mm))
   (condition "A.Type == 'Pad' && B.Type == 'Pad'"))
+(rule "JLCPCB NPTH to copper 0.20, USB-C receptacle pegs (D37)"
+  (constraint hole_clearance (min 0.20mm))
+  (condition "A.Pad_Type == 'NPTH, mechanical' && A.memberOfFootprint('usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073')"))

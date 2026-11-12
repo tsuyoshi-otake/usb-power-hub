@@ -46,7 +46,7 @@ NICK = "usb-power-hub"
 FLAG = "PWR_FLAG"
 SHEETS = ("power", "mcu", "hub", "adc", "channel_a", "channel_b")
 SHEET_TITLES = {"power": "J1, J4, rails, V_INJ, VREF_CHK, comparator threshold",
-                "mcu": "U1 RP2040, U8 flash, Y1, SWD", "hub": "U6 CH335F, Y2",
+                "mcu": "U1 RP2040, U8 flash, Y1, SWD", "hub": "U6 CH335F, Y2, data-line taps",
                 "adc": "U7, U17 MCP3208, SPI level shifters, U30 OC comparators",
                 "channel_a": "Port A: switch, ladder, mirrors, comparators, J2",
                 "channel_b": "Port B: switch, ladder, mirrors, comparators, J3"}

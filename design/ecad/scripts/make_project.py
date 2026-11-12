@@ -95,6 +95,10 @@ RULES = {
 # every other net's copper >= 0.30 mm from a PTH hole.
 VIA_HOLE_CLEARANCE = 0.20                # JLCPCB "Via hole to Track"
 VIA_HOLE_TO_HOLE = 0.20                  # JLCPCB "Via Hole-to-Hole Spacing"; route.py's fanout too
+# The USB-C receptacle's unplated pegs (D37): JLCPCB's "NPTH to Track" 0.20, for this footprint
+# only; every other unplated hole keeps the board's 0.25. Its land (library.json) keeps 0.200.
+RECEPTACLE_FP = "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+NPTH_PEG_CLEARANCE = 0.20
 HOLE_RULES = f"""(version 1)
 # Written by design/ecad/scripts/make_project.py; JLCPCB pcb-capabilities, read 2026-11-12 (issue #8).
 (rule "JLCPCB via hole to copper {VIA_HOLE_CLEARANCE:.2f}"
@@ -112,6 +116,9 @@ HOLE_RULES = f"""(version 1)
 (rule "JLCPCB pad hole to pad hole 0.45"
   (constraint hole_to_hole (min 0.45mm))
   (condition "A.Type == 'Pad' && B.Type == 'Pad'"))
+(rule "JLCPCB NPTH to copper {NPTH_PEG_CLEARANCE:.2f}, USB-C receptacle pegs (D37)"
+  (constraint hole_clearance (min {NPTH_PEG_CLEARANCE:.2f}mm))
+  (condition "A.Pad_Type == 'NPTH, mechanical' && A.memberOfFootprint('{RECEPTACLE_FP}')"))
 """
 TRACK_WIDTHS = [0.15, 0.20, 0.31]
 VIAS = [(0.45, 0.30), (0.60, 0.30)]

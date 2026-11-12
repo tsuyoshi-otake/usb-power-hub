@@ -26,7 +26,7 @@ CHECK = HERE / "check_libraries.py"
 LIBDIR = HERE.parent / "libraries"
 SRCDIR = HERE.parent / "source"
 NICK = "usb-power-hub"
-SRC_FILES = (f"{NICK}.kicad_pcb", f"{NICK}.kicad_pro", "fp-lib-table", "sym-lib-table")
+SRC_FILES = (f"{NICK}.kicad_pcb", f"{NICK}.kicad_pro", f"{NICK}.kicad_dru", "fp-lib-table", "sym-lib-table")
 
 _spec = importlib.util.spec_from_file_location("sexpr", HERE / "sexpr.py")
 sx = importlib.util.module_from_spec(_spec)
@@ -109,7 +109,8 @@ R_H = "R_Shunt_KOA_TSL1_6332Metric_Kelvin"
 R_M = "R_Shunt_Axial_MFU_L6.0mm_D2.3mm_P10.16mm_Kelvin"
 R_L = "R_Shunt_0805_2012Metric_Kelvin"
 MAU = "Converter_DCDC_Minmax_MAU104_SIP"
-USBC = "Module_Akizuki_AE-USB2.0-TYPE-C"
+USBC = "USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+USBC_ID = "TYPE-C-16PIN-2MD-073"
 TC2030 = "Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
 
 
@@ -267,16 +268,51 @@ class CheckLibrariesFails(unittest.TestCase):
             edit_fp(lib, MAU, lambda t: sx.first(pad(t, "2"), "drill").__setitem__(1, 0.6))
         self.assertFailsWith(run_check(c), "drill 0.6 outside 0.8..1.2")
 
-    def test_module_pad_renumbered(self):
+    def test_receptacle_pad_renumbered(self):
         def c(lib, src):
-            edit_fp(lib, USBC, lambda t: pad(t, "2").__setitem__(1, "8"))
-        self.assertFailsWith(run_check(c), "are not the symbol's pins", "is numbered '8', not '2'")
+            edit_fp(lib, USBC, lambda t: pad(t, "A6").__setitem__(1, "A9"))
+        self.assertFailsWith(run_check(c), "are not the symbol's pins", "no pad 'A6' at [-0.25, -3.67]")
 
-    def test_module_courtyard(self):
-        def shift(t):
-            rect = [n for n in sx.find(t, "fp_rect") if sx.first(n, "layer")[1] == "F.CrtYd"][0]
-            sx.first(rect, "start")[1] += 0.5
-        self.assertFailsWith(run_check(lambda lib, src: edit_fp(lib, USBC, shift)), "is not the study's")
+    def test_receptacle_mirrored(self):
+        # The land seen from below: every pad and hole at -x. D+ and D- would swap.
+        def mirror(t):
+            for n in sx.find(t, "pad"):
+                at = sx.first(n, "at")
+                at[1] = -at[1]
+        self.assertFailsWith(run_check(lambda lib, src: edit_fp(lib, USBC, mirror)),
+                             "no pad 'A1' at [-3.2, -3.6875]", "no pad 'B6' at [0.75, -3.67]")
+
+    def test_receptacle_slot_missing(self):
+        def drop(t):
+            t.remove(next(n for n in sx.find(t, "pad") if n[1] == "S1" and sx.first(n, "at")[2] < -3))
+        self.assertFailsWith(run_check(lambda lib, src: edit_fp(lib, USBC, drop)),
+                             "3 plated holes, the land has 4 plated slots", "no plated slot 'S1' at [-4.32, -3.105]")
+
+    def test_receptacle_slot_as_round_hole(self):
+        def round_hole(t):
+            p = next(n for n in sx.find(t, "pad") if n[1] == "S1")
+            p[p.index(sx.first(p, "drill"))] = ["drill", 0.6]
+        self.assertFailsWith(run_check(lambda lib, src: edit_fp(lib, USBC, round_hole)), "is not [0.6, 1.4]")
+
+    def test_receptacle_peg_015_from_pad(self):
+        # A1's near edge 0.015 closer than the drawing's: 0.15 mm from the peg hole. The register's
+        # land moves with it, so the pad's own position and size still match. KiCad's DRC does not
+        # compare a footprint's own pads with its own holes (tried 2026-11-12: no violation at
+        # 0.15 mm, with or without the project's rule), so only npth_copper_min can fail here.
+        def fp(t):
+            a1 = pad(t, "A1")
+            sx.first(a1, "at")[2] = -3.6625
+            sx.first(a1, "size")[2] = 1.165
+        def reg(parts):
+            w = next(x for x in parts[USBC_ID]["land"]["pads"] if x["n"] == "A1")
+            w["at"], w["size"] = [-3.2, -3.6625], [0.6, 1.165]
+        def c(lib, src):
+            edit_fp(lib, USBC, fp)
+            edit_register(lib, reg)
+        status, out = run_check(c)
+        self.assertFailsWith((status, out), "mm from pad 'A1'", "under 0.2 (land.npth_copper_min)")
+        self.assertNotIn("no pad 'A1'", out)
+        self.assertNotIn("FAIL DRC", out)
 
     def test_table_uri(self):
         def c(lib, src):

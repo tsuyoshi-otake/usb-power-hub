@@ -35,7 +35,7 @@ generator's.
     net; every exported net is a document net.
  7. Net classes: resolved by pcbnew from the project's net settings (the patterns
     make_project.py writes), the nets in USB_HS are exactly the nets on a USB D+/D- pin
-    (J1-J3 pins 2-3, U6 DMU/DPU and DM1-DP3, U1 USB_DM/DP) and the nets between two series
+    (J1-J3 pins A6, A7, B6, B7, U6 DMU/DPU and DM1-DP3, U1 USB_DM/DP) and the nets between two series
     resistors that lie on such nets (the 22 ohm + 5.1 ohm pairs), each with its partner.
 Exit status: 0 = every check passed; 1 = at least one failed. Each failure prints as
 `FAIL <who>: <what>`.
@@ -72,7 +72,7 @@ CLI = KICAD / "bin" / "kicad-cli.exe"
 CIRCUIT = ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.5.md"
 PARTS_MD = ROOT / "requirements" / "parts.md"
 NON_PARTS = {"R", "C", "TestPoint", "Fiducial", "MountingHole"}   # not in circuit 6.2
-USB_PINS = {"J1": ("2", "3"), "J2": ("2", "3"), "J3": ("2", "3"),
+USB_PINS = {"J1": ("A6", "A7", "B6", "B7"), "J2": ("A6", "A7", "B6", "B7"), "J3": ("A6", "A7", "B6", "B7"),
             "U6": ("6", "7", "8", "9", "13", "14", "20", "21"), "U1": ("46", "47")}
 EIA_TOL = 0.051
 

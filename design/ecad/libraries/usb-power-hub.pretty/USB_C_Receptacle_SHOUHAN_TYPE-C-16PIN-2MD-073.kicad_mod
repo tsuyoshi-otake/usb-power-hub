@@ -1,0 +1,195 @@
+(footprint "USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+	(version 20241229)
+	(generator "make_libraries.py")
+	(layer "F.Cu")
+	(descr "TYPE-C 16PIN 2MD(073) SHOU HAN USB Type-C receptacle, 16 contacts in one SMD row, 4 plated shell slots, 2 unplated pegs; land: PDF p1 RECOMMENDED PCB LAYOUT (TOP VIEW), THICKNESS 0.80MM, default tolerance 0.05: pad centres 6.40 / 4.80 / 3.50 / 2.50 / 1.50 / 0.50 apart, widths 0.60 (4X) and 0.30 (8X), each 4.17 to 5.32 behind the front slots' centres; slots 8.64 apart, front 0.60 x 1.40 hole in a 1.80 pad, rear 4.18 behind, 0.60 x 1.70 hole in a 2.10 pad; unplated pegs 0.65, 5.78 apart, 3.68 behind; product edge 2.60 in front of the front slots (side view); body 8.94 x 7.35 x 3.16")
+	(tags "USB Type-C receptacle SMD")
+	(property "Reference" "REF**"
+		(at 0 -5.695 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+		(at 0 1.975 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -4.58 -1.8)
+		(end -4.58 -0.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start 4.58 -1.8)
+		(end 4.58 -0.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_poly
+		(pts
+			(xy -3.2 -4.55)
+			(xy -3.5 -5)
+			(xy -2.9 -5)
+		)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+	)
+	(fp_rect
+		(start -5.07 -4.495)
+		(end 5.07 3.925)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+	)
+	(fp_rect
+		(start -4.47 -3.675)
+		(end 4.47 3.675)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+	)
+	(fp_line
+		(start -4.47 3.375)
+		(end 4.47 3.375)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0.075 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(pad "A1" smd rect
+		(at -3.2 -3.6875)
+		(size 0.6 1.115)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "A4" smd rect
+		(at -2.4 -3.67)
+		(size 0.6 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "B8" smd rect
+		(at -1.75 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "A5" smd rect
+		(at -1.25 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "B7" smd rect
+		(at -0.75 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "A6" smd rect
+		(at -0.25 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "A7" smd rect
+		(at 0.25 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "B6" smd rect
+		(at 0.75 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "A8" smd rect
+		(at 1.25 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "B5" smd rect
+		(at 1.75 -3.67)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "B4" smd rect
+		(at 2.4 -3.67)
+		(size 0.6 1.15)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "B1" smd rect
+		(at 3.2 -3.6875)
+		(size 0.6 1.115)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(pad "S1" thru_hole oval
+		(at -4.32 1.075)
+		(size 1 1.8)
+		(drill oval 0.6 1.4)
+		(layers "*.Cu" "*.Mask")
+	)
+	(pad "S1" thru_hole oval
+		(at 4.32 1.075)
+		(size 1 1.8)
+		(drill oval 0.6 1.4)
+		(layers "*.Cu" "*.Mask")
+	)
+	(pad "S1" thru_hole oval
+		(at -4.32 -3.105)
+		(size 1 2.1)
+		(drill oval 0.6 1.7)
+		(layers "*.Cu" "*.Mask")
+	)
+	(pad "S1" thru_hole oval
+		(at 4.32 -3.105)
+		(size 1 2.1)
+		(drill oval 0.6 1.7)
+		(layers "*.Cu" "*.Mask")
+	)
+	(pad "" np_thru_hole circle
+		(at -2.89 -2.605)
+		(size 0.65 0.65)
+		(drill 0.65)
+		(layers "*.Cu" "*.Mask")
+	)
+	(pad "" np_thru_hole circle
+		(at 2.89 -2.605)
+		(size 0.65 0.65)
+		(drill 0.65)
+		(layers "*.Cu" "*.Mask")
+	)
+	(embedded_fonts no)
+)

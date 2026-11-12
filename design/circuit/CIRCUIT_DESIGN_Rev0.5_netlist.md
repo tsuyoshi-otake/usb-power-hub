@@ -1,8 +1,9 @@
-# USB Power-Control Hub — Rev0.4 netlist
+# USB Power-Control Hub — Rev0.5 netlist
 
 > **WIP — MANUFACTURING PROHIBITED.** This is the capture list of
 > [`CIRCUIT_DESIGN_Rev0.5.md`](CIRCUIT_DESIGN_Rev0.5.md): every part, every pin and every net
-> of Rev0.5 §3–§6.6 with the capture values of D34. The circuit document stays the design;
+> of Rev0.5 §3–§6.6 with the capture values of D34, J1–J4 as the machine-placed receptacle C2765186
+> (D37) and the four data-line taps of D38 (issues #8, #10). The circuit document stays the design;
 > this file is its transcription in a form a script can read. Issue #6 P2.
 
 `design/ecad/scripts/make_schematic.py` generates the KiCad schematic from the tables below,
@@ -32,7 +33,7 @@ circuit document together.
   TP101…, and channel B the same + 100. Other channel-B designators follow Rev0.5 §6.2: U and
   RS + 10, Q + 20; D10/D11 → D12/D13, J2 → J3, SW1 → SW2.
 
-## GPIO map (U1, 24 of 30; Rev0.5 §6.4)
+## GPIO map (U1, 28 of 30; Rev0.5 §6.4)
 
 | GPIO | Pin | Net | GPIO | Pin | Net |
 |---|---:|---|---|---:|---|
@@ -49,8 +50,16 @@ circuit document together.
 | 10 | 13 | EVT_L_B | 22 | 34 | BTN_A |
 | 11 | 14 | EVT_M_B | 23 | 35 | BTN_B |
 
-GPIO24–29 (pins 36–41) are spare and unconnected. The PIO drives SCLK, CS and DIN on
-GPIO12–14 and reads DOUT_A and DOUT_B on GPIO15–16, so each group is contiguous.
+The PIO drives SCLK, CS and DIN on GPIO12–14 and reads DOUT_A and DOUT_B on GPIO15–16, so each
+group is contiguous. GPIO26–29 (pins 38–41, the RP2040's ADC0–3 pins) take the data-line taps
+of D38, D+ and D− of one port in consecutive pins as the PIO's `in` needs; GPIO24 and 25
+(pins 36, 37) are spare and unconnected:
+
+| GPIO | Pin | Net | GPIO | Pin | Net |
+|---|---:|---|---|---:|---|
+| 24 | 36 | spare, NC | 27 | 39 | TAP_A_N |
+| 25 | 37 | spare, NC | 28 | 40 | TAP_B_P |
+| 26 | 38 | TAP_A_P | 29 | 41 | TAP_B_N |
 
 ## Passive parts (D13 Basic; D34 bindings)
 
@@ -93,7 +102,7 @@ widest thickness code).
 <!-- netlist:begin sheet=power -->
 | Ref | Symbol | Value | Order | Pins | Note |
 |---|---|---|---|---|---|
-| J1 | AE-USB2.0-TYPE-C | AE-USB2.0-TYPE-C | Akizuki g113080 | 1=VBUS_J1 2=USB_UP_N 3=USB_UP_P 4=GND 5=CC1_J1 6=CC2_J1 7=GND | HOST: data and logic power |
+| J1 | TYPE-C-16PIN-2MD-073 | TYPE-C-16PIN-2MD-073 | C2765186 | A1=GND A4=VBUS_J1 A5=CC1_J1 A6=USB_UP_P A7=USB_UP_N A8=NC B1=GND B4=VBUS_J1 B5=CC2_J1 B6=USB_UP_P B7=USB_UP_N B8=NC S1=GND | HOST: data and logic power (D37) |
 | R1 | R | 5.1k | C25905 | 1=CC1_J1 2=GND | J1 Rd |
 | R2 | R | 5.1k | C25905 | 1=CC2_J1 2=GND | J1 Rd |
 | D1 | PSM712-LF-T7 | PSM712-LF-T7 | C32677 | 1=CC1_J1 2=CC2_J1 3=GND | J1 CC ESD, at J1 |
@@ -103,7 +112,7 @@ widest thickness code).
 | C35 | C | 100n | C307331 | 1=GJ1 2=V5L | Q53 Miller, gate to drain: sets V5L's ramp (D35) |
 | C36 | C | 1u | C52923 | 1=VBUS_J1 2=GJ1 | Q53 gate hold at plug-in, part 1 (D35) |
 | C37 | C | 1u | C52923 | 1=VBUS_J1 2=GJ1 | Q53 gate hold at plug-in, part 2 (D35) |
-| J4 | AE-USB2.0-TYPE-C | AE-USB2.0-TYPE-C | Akizuki g113080 | 1=VBUS_J4 2=NC 3=NC 4=GND 5=CC1_J4 6=CC2_J4 7=GND | PWR IN: power only |
+| J4 | TYPE-C-16PIN-2MD-073 | TYPE-C-16PIN-2MD-073 | C2765186 | A1=GND A4=VBUS_J4 A5=CC1_J4 A6=NC A7=NC A8=NC B1=GND B4=VBUS_J4 B5=CC2_J4 B6=NC B7=NC B8=NC S1=GND | PWR IN: power only (D37) |
 | R3 | R | 5.1k | C25905 | 1=CC1_J4 2=GND | J4 Rd |
 | R4 | R | 5.1k | C25905 | 1=CC2_J4 2=GND | J4 Rd |
 | D4 | PSM712-LF-T7 | PSM712-LF-T7 | C32677 | 1=CC1_J4 2=CC2_J4 3=GND | J4 CC ESD, at J4 |
@@ -163,7 +172,7 @@ widest thickness code).
 <!-- netlist:begin sheet=mcu -->
 | Ref | Symbol | Value | Order | Pins | Note |
 |---|---|---|---|---|---|
-| U1 | RP2040 | RP2040 | C2040 | 1=V3V3 2=EN_A 3=OC_A 4=HOLD_L_A 5=HOLD_M_A 6=EVT_L_A 7=EVT_M_A 8=EN_B 9=OC_B 10=V3V3 11=HOLD_L_B 12=HOLD_M_B 13=EVT_L_B 14=EVT_M_B 15=ADC_SCLK_3V 16=ADC_CS_3V 17=ADC_DIN_3V 18=DOUT_A_3V 19=GND 20=XIN 21=XOUT 22=V3V3 23=DVDD 24=SWCLK 25=SWDIO 26=RUN 27=DOUT_B_3V 28=LED_ON_A 29=LED_FLT_A 30=LED_ON_B 31=LED_FLT_B 32=CLKOUT 33=V3V3 34=BTN_A 35=BTN_B 36=NC 37=NC 38=NC 39=NC 40=NC 41=NC 42=V3V3 43=V3V3 44=V3V3 45=DVDD 46=USB_MCU_N 47=USB_MCU_P 48=V3V3 49=V3V3 50=DVDD 51=QSPI_SD3 52=QSPI_SCLK 53=QSPI_SD0 54=QSPI_SD2 55=QSPI_SD1 56=QSPI_SS 57=GND | MCU (D29); TESTEN (19) to GND |
+| U1 | RP2040 | RP2040 | C2040 | 1=V3V3 2=EN_A 3=OC_A 4=HOLD_L_A 5=HOLD_M_A 6=EVT_L_A 7=EVT_M_A 8=EN_B 9=OC_B 10=V3V3 11=HOLD_L_B 12=HOLD_M_B 13=EVT_L_B 14=EVT_M_B 15=ADC_SCLK_3V 16=ADC_CS_3V 17=ADC_DIN_3V 18=DOUT_A_3V 19=GND 20=XIN 21=XOUT 22=V3V3 23=DVDD 24=SWCLK 25=SWDIO 26=RUN 27=DOUT_B_3V 28=LED_ON_A 29=LED_FLT_A 30=LED_ON_B 31=LED_FLT_B 32=CLKOUT 33=V3V3 34=BTN_A 35=BTN_B 36=NC 37=NC 38=TAP_A_P 39=TAP_A_N 40=TAP_B_P 41=TAP_B_N 42=V3V3 43=V3V3 44=V3V3 45=DVDD 46=USB_MCU_N 47=USB_MCU_P 48=V3V3 49=V3V3 50=DVDD 51=QSPI_SD3 52=QSPI_SCLK 53=QSPI_SD0 54=QSPI_SD2 55=QSPI_SD1 56=QSPI_SS 57=GND | MCU (D29); TESTEN (19) to GND |
 | C4 | C | 10u | C15850 | 1=V3V3 2=GND | V3V3 at U1 (reference C17) |
 | C12 | C | 100n | C307331 | 1=V3V3 2=GND | at U1 pin 1 (IOVDD) |
 | C13 | C | 100n | C307331 | 1=V3V3 2=GND | at U1 pin 10 (IOVDD) |
@@ -196,7 +205,7 @@ widest thickness code).
 | TP12 | TestPoint | CLKOUT | none | 1=CLKOUT | D29, GPOUT0 (V-MEAS-06) |
 <!-- netlist:end -->
 
-### Sheet `hub` — U6 CH335F, Y2 (Rev0.5 §6.6)
+### Sheet `hub` — U6 CH335F, Y2, the data-line taps (Rev0.5 §6.6, D38)
 
 <!-- netlist:begin sheet=hub -->
 | Ref | Symbol | Value | Order | Pins | Note |
@@ -207,6 +216,10 @@ widest thickness code).
 | C28 | C | 100n | C307331 | 1=VDD33_HUB 2=GND | at U6 pin 28 (VDD33) |
 | C29 | C | 10u | C15850 | 1=VDD33_HUB 2=GND | at U6 pin 28 (VDD33) |
 | TP13 | TestPoint | VDD33_HUB | none | 1=VDD33_HUB | D31 |
+| R35 | R | 1k | C11702 | 1=USB_A_P 2=TAP_A_P | D38 tap of OUT A D+ to GPIO26, on U6's pair |
+| R36 | R | 1k | C11702 | 1=USB_A_N 2=TAP_A_N | D38 tap of OUT A D− to GPIO27, on U6's pair |
+| R37 | R | 1k | C11702 | 1=USB_B_P 2=TAP_B_P | D38 tap of OUT B D+ to GPIO28, on U6's pair |
+| R38 | R | 1k | C11702 | 1=USB_B_N 2=TAP_B_N | D38 tap of OUT B D− to GPIO29, on U6's pair |
 <!-- netlist:end -->
 
 ### Sheet `adc` — U7, U17, the SPI level shifters, U30 (Rev0.5 §3.3, §6.4)
@@ -318,7 +331,7 @@ widest thickness code).
 | R139 | R239 | R | 15k | C25756 | 1=TH_REF 2=THO_{x} | CMP_OC threshold, to U30 (D34) |
 | C114 | C214 | C | 220p | C1530 | 1=THO_{x} 2=GND | CMP_OC hysteresis divider (D34) |
 | C115 | C215 | C | 15p | C1548 | 1=EN_G_{x} 2=THO_{x} | CMP_OC hysteresis, output to +IN (D34) |
-| J2 | J3 | AE-USB2.0-TYPE-C | AE-USB2.0-TYPE-C | Akizuki g113080 | 1=VBUS_{x} 2=USB_{x}_N 3=USB_{x}_P 4=GND 5=CC1_{x} 6=CC2_{x} 7=GND | OUT A / OUT B |
+| J2 | J3 | TYPE-C-16PIN-2MD-073 | TYPE-C-16PIN-2MD-073 | C2765186 | A1=GND A4=VBUS_{x} A5=CC1_{x} A6=USB_{x}_P A7=USB_{x}_N A8=NC B1=GND B4=VBUS_{x} B5=CC2_{x} B6=USB_{x}_P B7=USB_{x}_N B8=NC S1=GND | OUT A / OUT B (D37) |
 | C116 | C216 | C | 10u | C15850 | 1=VBUS_{x} 2=GND | port capacitor |
 | D2 | D3 | PSM712-LF-T7 | PSM712-LF-T7 | C32677 | 1=CC1_{x} 2=CC2_{x} 3=GND | CC ESD, at the connector |
 | R140 | R240 | R | 510 | C17734 | 1=LED_ON_{x} 2=LEDA_ON_{x} | green LED resistor (D34) |

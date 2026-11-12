@@ -3989,21 +3989,137 @@
 		(at 86.36 99.06)
 		(uuid "0b9eb8f9-44e0-5425-8be8-38f5c018840c")
 	)
-	(no_connect
-		(at 86.36 104.14)
-		(uuid "eb61d1a4-800f-5941-9192-b85d05a8a864")
+	(wire
+		(pts
+			(xy 86.36 104.14)
+			(xy 88.9 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "705f0c3c-4773-520b-bdc0-587d3a6a0ab0")
 	)
-	(no_connect
-		(at 86.36 106.68)
-		(uuid "a5cc08db-fc45-5039-a3a2-50b7b883fbe7")
+	(global_label "TAP_A_P"
+		(shape passive)
+		(at 88.9 104.14 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7e1f67ea-6dbb-56ba-8fe5-99f653da6d78")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
 	)
-	(no_connect
-		(at 86.36 109.22)
-		(uuid "51c567f9-2e2c-5b11-ba0f-e9d993c1b600")
+	(wire
+		(pts
+			(xy 86.36 106.68)
+			(xy 88.9 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4b3fb34c-a289-5528-aba0-af9b4fe7e5b1")
 	)
-	(no_connect
-		(at 86.36 111.76)
-		(uuid "ea52f439-fc88-599b-aa33-3bc07187ecc3")
+	(global_label "TAP_A_N"
+		(shape passive)
+		(at 88.9 106.68 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "c8cf9291-eba9-50bd-bcb3-9b247d1e61c2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 86.36 109.22)
+			(xy 88.9 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1837cf10-f49d-571c-be71-b3b9f6cdf836")
+	)
+	(global_label "TAP_B_P"
+		(shape passive)
+		(at 88.9 109.22 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "5b3ece49-4946-583c-9122-1dec2e33963f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 86.36 111.76)
+			(xy 88.9 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5b7f68b0-cac3-59dd-b321-f9e1e6749492")
+	)
+	(global_label "TAP_B_N"
+		(shape passive)
+		(at 88.9 111.76 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "5e10b79d-437c-5efb-95fc-93fe3708fd6e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
 	)
 	(wire
 		(pts

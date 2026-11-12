@@ -6605,7 +6605,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "AE-USB2.0-TYPE-C"
+	(symbol "TYPE-C-16PIN-2MD-073"
 		(pin_names
 			(offset 1.016)
 		)
@@ -6613,7 +6613,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "J"
-			(at -5.08 11.43 0)
+			(at -10.16 16.51 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6621,8 +6621,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AE-USB2.0-TYPE-C"
-			(at 5.08 11.43 0)
+		(property "Value" "TYPE-C-16PIN-2MD-073"
+			(at 10.16 16.51 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6630,8 +6630,8 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "usb-power-hub:Module_Akizuki_AE-USB2.0-TYPE-C"
-			(at -5.08 -15.24 0)
+		(property "Footprint" "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+			(at -10.16 -20.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6639,7 +6639,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://akizukidenshi.com/goodsaffix/AE-USB2.0-TYPE-C_dimm_20190206.pdf"
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/2d53d8d8199c9dd6666d9bc9ac7c3a1e.pdf?productCode=C2765186"
 			(at 0 0 0)
 			(effects
 				(font
@@ -6648,7 +6648,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "USB Type-C receptacle module (USB 2.0), 1x7 pins at 2.54 mm, no CC resistors fitted. Akizuki AE-USB2.0-TYPE-C; Akizuki g113080 (Hand (module on PH-1x40SG, 11 pins, D33)); register: usb-power-hub library.json"
+		(property "Description" "USB Type-C receptacle (USB 2.0), 16 contacts, SMD with plated shell slots. SHOU HAN TYPE-C 16PIN 2MD(073); JLCPCB C2765186 (Extended (D37)); register: usb-power-hub library.json"
 			(at 0 0 0)
 			(effects
 				(font
@@ -6657,7 +6657,7 @@
 				(hide yes)
 			)
 		)
-		(property "ki_fp_filters" "Module_Akizuki_AE-USB2.0-TYPE-C"
+		(property "ki_fp_filters" "USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
 			(at 0 0 0)
 			(effects
 				(font
@@ -6666,7 +6666,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "AE-USB2.0-TYPE-C"
+		(property "MPN" "TYPE-C 16PIN 2MD(073)"
 			(at 0 0 0)
 			(effects
 				(font
@@ -6675,7 +6675,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Akizuki"
+		(property "Manufacturer" "SHOU HAN"
 			(at 0 0 0)
 			(effects
 				(font
@@ -6684,7 +6684,7 @@
 				(hide yes)
 			)
 		)
-		(property "Akizuki" "g113080"
+		(property "LCSC" "C2765186"
 			(at 0 0 0)
 			(effects
 				(font
@@ -6693,7 +6693,7 @@
 				(hide yes)
 			)
 		)
-		(property "Class" "Hand (module on PH-1x40SG, 11 pins, D33)"
+		(property "Class" "Extended (D37)"
 			(at 0 0 0)
 			(effects
 				(font
@@ -6702,10 +6702,10 @@
 				(hide yes)
 			)
 		)
-		(symbol "AE-USB2.0-TYPE-C_0_1"
+		(symbol "TYPE-C-16PIN-2MD-073_0_1"
 			(rectangle
-				(start -5.08 10.16)
-				(end 5.08 -10.16)
+				(start -10.16 15.24)
+				(end 10.16 -15.24)
 				(stroke
 					(width 0.254)
 					(type default)
@@ -6715,18 +6715,18 @@
 				)
 			)
 		)
-		(symbol "AE-USB2.0-TYPE-C_1_1"
+		(symbol "TYPE-C-16PIN-2MD-073_1_1"
 			(pin passive line
-				(at 7.62 7.62 180)
+				(at 12.7 12.7 180)
 				(length 2.54)
-				(name "VBUS"
+				(name "DP1"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(number "1"
+				(number "A6"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6735,16 +6735,16 @@
 				)
 			)
 			(pin passive line
-				(at 7.62 5.08 180)
+				(at 12.7 10.16 180)
 				(length 2.54)
-				(name "D-"
+				(name "DP2"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(number "2"
+				(number "B6"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6753,16 +6753,16 @@
 				)
 			)
 			(pin passive line
-				(at 7.62 2.54 180)
+				(at 12.7 5.08 180)
 				(length 2.54)
-				(name "D+"
+				(name "DN1"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(number "3"
+				(number "A7"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6771,16 +6771,16 @@
 				)
 			)
 			(pin passive line
-				(at 7.62 0 180)
+				(at 12.7 2.54 180)
 				(length 2.54)
-				(name "GND"
+				(name "DN2"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(number "4"
+				(number "B7"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6789,7 +6789,7 @@
 				)
 			)
 			(pin passive line
-				(at 7.62 -2.54 180)
+				(at 12.7 -2.54 180)
 				(length 2.54)
 				(name "CC1"
 					(effects
@@ -6798,7 +6798,7 @@
 						)
 					)
 				)
-				(number "5"
+				(number "A5"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6807,7 +6807,7 @@
 				)
 			)
 			(pin passive line
-				(at 7.62 -5.08 180)
+				(at 12.7 -5.08 180)
 				(length 2.54)
 				(name "CC2"
 					(effects
@@ -6816,7 +6816,7 @@
 						)
 					)
 				)
-				(number "6"
+				(number "B5"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6825,7 +6825,79 @@
 				)
 			)
 			(pin passive line
-				(at 7.62 -7.62 180)
+				(at 12.7 -10.16 180)
+				(length 2.54)
+				(name "SBU1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "A8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 12.7 -12.7 180)
+				(length 2.54)
+				(name "SBU2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "B8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -2.54 17.78 270)
+				(length 2.54)
+				(name "VBUS"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "A4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 17.78 270)
+				(length 2.54)
+				(name "VBUS"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "B4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -17.78 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -6834,7 +6906,43 @@
 						)
 					)
 				)
-				(number "7"
+				(number "A1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -17.78 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "B1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 -17.78 90)
+				(length 2.54)
+				(name "SHIELD"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "S1"
 					(effects
 						(font
 							(size 1.27 1.27)

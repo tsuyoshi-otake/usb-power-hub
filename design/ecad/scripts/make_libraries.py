@@ -9,7 +9,7 @@ Input: design/ecad/libraries/library.json, the parts register (one entry per sym
 - design/ecad/libraries/usb-power-hub.kicad_sym: every symbol, flattened. A stock symbol is
   copied from KiCad's library with its `extends` chain resolved, renamed to the register id,
   and given the register's Value, Footprint, Datasheet and sourcing properties. Two symbols
-  are drawn here (CH335F, the USB-C module), from the register's pin lists. One is
+  are drawn here (CH335F, the USB-C receptacle), from the register's pin lists. One is
   schematic-only (PWR_FLAG, footprint `none`): it has no Footprint and no footprint file.
 - design/ecad/libraries/usb-power-hub.pretty/: one file per footprint. A stock footprint is
   KiCad's file with its CRLF line endings written as LF: KiCad's Windows install ships CRLF,
@@ -20,7 +20,7 @@ Input: design/ecad/libraries/library.json, the parts register (one entry per sym
   pad: non-polar, and their silk cannot keep 0.15 mm from their pads) loses its silkscreen.
   Nothing else in the file changes. Eight are generated from the register's `params`:
   the two QFN lands (G20, G21), three Kelvin shunt lands (CLAUDE.md 5.4), the MF-R300
-  radial, the MAU104 SIP and the USB-C module.
+  radial, the MAU104 SIP and the USB-C receptacle (D37).
 - design/ecad/source/fp-lib-table and sym-lib-table: the project's library tables.
 
 Then it runs check_libraries.py in a new process. That checker measures the written files
@@ -485,71 +485,54 @@ def gen_sip(name, p, part):
     return fp
 
 
-def study_constants(path):
-    spec = importlib.util.spec_from_file_location("placement_study", ROOT / path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-def gen_usbc_module(name, p, part):
-    """The Akizuki module on PH-1x40SG headers (D33). Coordinates: the OI-23 study's module frame
-    shifted by `origin_in_module`, so pad 1 (VBUS) is at (0, 0) and the receptacle edge is at
-    -y. The courtyard is what stands on or hangs toward the board, from the study."""
-    st = study_constants(p["study"])
-    ox, oy = p["origin_in_module"]
-    w, h = p["size"]
-
-    def tr(x, y):
-        return r(x - ox), r(y - oy)
-
-    court = []
-    for (x, y, rw, rh) in st.USBC_INSULATORS:
-        court.append((x, y, rw, rh))
-    for label, (x, y, rw, rh) in st.USBC_BELOW:
-        if label == "receptacle body":
-            y, rh = y - p["overhang"], rh + p["overhang"]
-        court.append((x, y, rw, rh))
-    mx0, my0 = tr(0, 0)
-    mx1, my1 = tr(w, h)
-    fp = header(name, "Akizuki AE-USB2.0-TYPE-C module (20 x 15 mm) on PH-1x40SG pin headers, no "
-                "sockets (D33): 1 x 7 row (1 VBUS, 2 D-, 3 D+, 4 GND, 5 CC1, 6 CC2, 7 GND) and four "
-                "unnumbered mechanical pins; courtyard = header insulators and the receptacle "
-                "(OI-23 study), so parts <= 1.5 mm may sit in the strip under the module",
-                "USB Type-C module Akizuki", ["through_hole"], (r((mx0 + mx1) / 2), r(my1 + 1.2)),
-                (r((mx0 + mx1) / 2), r(my0 - 2.2)))
-    # The outline in silk on three sides. The receptacle edge sits on the board edge (the
-    # receptacle overhangs it), so the side lines stop `edge` short of it: silk there would be
-    # clipped by the board edge (DRC silk_edge_clearance; min_copper_edge_clearance 0.3 mm).
-    s, edge = 0.11, 0.5
-    fp.append(line((r(mx0 - s), r(my0 + edge)), (r(mx0 - s), r(my1 + s)), "F.SilkS", SILK_W))
-    fp.append(line((r(mx0 - s), r(my1 + s)), (r(mx1 + s), r(my1 + s)), "F.SilkS", SILK_W))
-    fp.append(line((r(mx1 + s), r(my1 + s)), (r(mx1 + s), r(my0 + edge)), "F.SilkS", SILK_W))
-    fp.append(poly([(-1.3, 0), (-1.8, -0.3), (-1.8, 0.3)], "F.SilkS", SILK_W))
-    for (x, y, rw, rh) in court:
-        a, b = tr(x, y), tr(x + rw, y + rh)
-        fp.append(rect(a, b, "F.CrtYd", 0.05))
-    fp.append(rect((mx0, my0), (mx1, my1), "F.Fab", 0.1))
-    for label, (x, y, rw, rh) in st.USBC_BELOW:
-        if label == "receptacle body":
-            fp.append(rect(tr(x, y - p["overhang"]), tr(x + rw, y + rh), "F.Fab", 0.1))
-    for (x, y, rw, rh) in st.USBC_UNDER:
-        fp.append(rect(tr(x, y), tr(x + rw, y + rh), "F.Fab", 0.1))
-        fp.append(["fp_text", S("user"), "parts <= 1.5 mm", ["at", *tr(x + rw / 2, y + rh / 2), 0],
-                   ["layer", "F.Fab"], text_effects(0.8, 0.12)])
-    fp.append(fab_ref(tr(w / 2, 7.0)))
-    for i in range(7):                       # 1 VBUS, 2 D-, 3 D+, 4 GND, 5 CC1, 6 CC2, 7 GND
-        fp.append(tht_pad(str(i + 1), (r(2.54 * i), 0), p["pad"], p["drill"], "rect" if i == 0 else "circle"))
-    for x in p["mech_x"]:
-        for y in p["mech_y"]:
-            fp.append(tht_pad("", tr(x, y), p["pad"], p["drill"]))
+def gen_usbc_receptacle(name, p, part):
+    """A USB-C receptacle with one row of SMD contacts and four plated shell slots (D37), in its
+    drawing's top view: origin at the body centre, the plug opening (product edge) toward +y,
+    contact A1 at -x. Every land length is measured from the front slots' centre line, as
+    the drawing dimensions it; `trim` shortens a pad at its near end (the end toward the
+    opening) to keep the unplated pegs' clearance (library.json)."""
+    bw, bd = p["body"]
+    front = r(bd / 2)                          # the product edge, at the body's front face
+    y0 = r(front - p["front_face"])            # the front slots' centre line
+    near, far = p["pad_row"]
+    court = r(max(bw / 2, max(s["x"] + s["pad"][0] / 2 for s in p["slots"])) + p["courtyard_margin"])
+    back = r(y0 - far - p["courtyard_margin"])
+    fp = header(name, f"{part['mpn']} {part['manufacturer']} USB Type-C receptacle, 16 contacts in one SMD "
+                f"row, 4 plated shell slots, 2 unplated pegs; land: {part['datasheet']['land']}",
+                "USB Type-C receptacle SMD", ["smd"], (0, r(back - 1.2)), (0, r(y0 + 0.9)))
+    # Silkscreen: the body's sides between the slots, and a pin-1 arrow behind contact A1.
+    gap = SILK_W / 2 + 0.15 + 0.03            # JLCPCB's 0.15 mm from a mask opening, and 0.03 spare
+    sx_ = r(bw / 2 + 0.11)
+    rear = next(s for s in p["slots"] if s["behind"] > 0)
+    fronts = next(s for s in p["slots"] if s["behind"] == 0)
+    top, bottom = r(y0 - rear["behind"] + rear["pad"][1] / 2 + gap), r(y0 - fronts["pad"][1] / 2 - gap)
+    for sgn in (-1, 1):
+        fp.append(line((r(sgn * sx_), top), (r(sgn * sx_), bottom), "F.SilkS", SILK_W))
+    a1 = next(x for n, x, _ in p["pads"] if n == "A1")
+    tip = r(y0 - far - gap - 0.05)
+    fp.append(poly([(a1, tip), (r(a1 - 0.3), r(tip - 0.45)), (r(a1 + 0.3), r(tip - 0.45))], "F.SilkS", SILK_W))
+    fp.append(rect((-court, back), (court, r(front + p["courtyard_margin"])), "F.CrtYd", 0.05))
+    fp.append(rect((r(-bw / 2), r(-bd / 2)), (r(bw / 2), front), "F.Fab", 0.1))
+    fp.append(line((r(-bw / 2), r(front - 0.3)), (r(bw / 2), r(front - 0.3)), "F.Fab", 0.1))
+    fp.append(fab_ref((0, r(y0 - 1.0))))
+    for num, x, w in p["pads"]:
+        n_end = r(near + p.get("trim", {}).get(num, 0.0))
+        fp.append(smd_pad(num, (x, r(y0 - (n_end + far) / 2)), (w, r(far - n_end)), shape="rect"))
+    for s in p["slots"]:
+        for sgn in (-1, 1):
+            fp.append(["pad", "S1", S("thru_hole"), S("oval"), ["at", r(sgn * s["x"]), r(y0 - s["behind"])],
+                       ["size", *s["pad"]], ["drill", S("oval"), *s["hole"]], ["layers", "*.Cu", "*.Mask"]])
+    h = p["npth"]
+    for sgn in (-1, 1):
+        fp.append(["pad", "", S("np_thru_hole"), S("circle"), ["at", r(sgn * h["x"]), r(y0 - h["behind"])],
+                   ["size", h["drill"], h["drill"]], ["drill", h["drill"]], ["layers", "*.Cu", "*.Mask"]])
     fp.append(["embedded_fonts", S("no")])
     return fp
 
 
 GENERATORS = {"qfn": gen_qfn, "kelvin_chip": gen_kelvin_chip, "chip_kelvin_tie": gen_chip_kelvin_tie,
               "axial_kelvin": gen_axial_kelvin, "radial": gen_radial, "sip": gen_sip,
-              "usbc_module": gen_usbc_module}
+              "usbc_receptacle": gen_usbc_receptacle}
 
 
 def write_footprints(parts, pretty):

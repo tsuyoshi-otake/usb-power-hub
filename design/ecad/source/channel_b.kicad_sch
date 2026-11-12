@@ -358,246 +358,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "usb-power-hub:AE-USB2.0-TYPE-C"
-			(pin_names
-				(offset 1.016)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "J"
-				(at -5.08 11.43 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Value" "AE-USB2.0-TYPE-C"
-				(at 5.08 11.43 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify right)
-				)
-			)
-			(property "Footprint" "usb-power-hub:Module_Akizuki_AE-USB2.0-TYPE-C"
-				(at -5.08 -15.24 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "https://akizukidenshi.com/goodsaffix/AE-USB2.0-TYPE-C_dimm_20190206.pdf"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "USB Type-C receptacle module (USB 2.0), 1x7 pins at 2.54 mm, no CC resistors fitted. Akizuki AE-USB2.0-TYPE-C; Akizuki g113080 (Hand (module on PH-1x40SG, 11 pins, D33)); register: usb-power-hub library.json"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "Module_Akizuki_AE-USB2.0-TYPE-C"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "MPN" "AE-USB2.0-TYPE-C"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Manufacturer" "Akizuki"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Akizuki" "g113080"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Class" "Hand (module on PH-1x40SG, 11 pins, D33)"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "AE-USB2.0-TYPE-C_0_1"
-				(rectangle
-					(start -5.08 10.16)
-					(end 5.08 -10.16)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "AE-USB2.0-TYPE-C_1_1"
-				(pin passive line
-					(at 7.62 7.62 180)
-					(length 2.54)
-					(name "VBUS"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 5.08 180)
-					(length 2.54)
-					(name "D-"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 2.54 180)
-					(length 2.54)
-					(name "D+"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 0 180)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -2.54 180)
-					(length 2.54)
-					(name "CC1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -5.08 180)
-					(length 2.54)
-					(name "CC2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -7.62 180)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "usb-power-hub:AO3400A"
 			(pin_names
 				(offset 0)
@@ -3889,6 +3649,354 @@
 						)
 					)
 					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "usb-power-hub:TYPE-C-16PIN-2MD-073"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at -10.16 16.51 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "TYPE-C-16PIN-2MD-073"
+				(at 10.16 16.51 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Footprint" "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+				(at -10.16 -20.32 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/2d53d8d8199c9dd6666d9bc9ac7c3a1e.pdf?productCode=C2765186"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "USB Type-C receptacle (USB 2.0), 16 contacts, SMD with plated shell slots. SHOU HAN TYPE-C 16PIN 2MD(073); JLCPCB C2765186 (Extended (D37)); register: usb-power-hub library.json"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "MPN" "TYPE-C 16PIN 2MD(073)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Manufacturer" "SHOU HAN"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "LCSC" "C2765186"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Class" "Extended (D37)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "TYPE-C-16PIN-2MD-073_0_1"
+				(rectangle
+					(start -10.16 15.24)
+					(end 10.16 -15.24)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "TYPE-C-16PIN-2MD-073_1_1"
+				(pin passive line
+					(at 12.7 12.7 180)
+					(length 2.54)
+					(name "DP1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 10.16 180)
+					(length 2.54)
+					(name "DP2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 5.08 180)
+					(length 2.54)
+					(name "DN1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 2.54 180)
+					(length 2.54)
+					(name "DN2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 -2.54 180)
+					(length 2.54)
+					(name "CC1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 -5.08 180)
+					(length 2.54)
+					(name "CC2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 -10.16 180)
+					(length 2.54)
+					(name "SBU1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 -12.7 180)
+					(length 2.54)
+					(name "SBU2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -2.54 17.78 270)
+					(length 2.54)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 2.54 17.78 270)
+					(length 2.54)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -17.78 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -17.78 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -17.78 90)
+					(length 2.54)
+					(name "SHIELD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "S1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -10336,18 +10444,51 @@
 	)
 	(wire
 		(pts
-			(xy 167.64 160.02)
-			(xy 170.18 160.02)
+			(xy 160.02 203.2)
+			(xy 160.02 205.74)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "005c3404-4bf9-5d79-9804-5e8cd5a5c66b")
+		(uuid "1da6f850-b3db-5bd9-8ba5-06310dbf4034")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 160.02 205.74 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2fd90a22-5b00-5f8f-89c4-61d989e3ee43")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 160.02 205.74 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 162.56 167.64)
+			(xy 162.56 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4f2e1c88-5fb3-5269-8d14-9451f3325a64")
 	)
 	(global_label "VBUS_B"
 		(shape passive)
-		(at 170.18 160.02 0)
+		(at 162.56 165.1 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10355,9 +10496,9 @@
 			)
 			(justify left)
 		)
-		(uuid "b58ac92b-b2dc-5cd0-9321-2af6b165abb1")
+		(uuid "6be984ed-7599-57c6-b25a-7182cab2fb39")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 170.18 160.02 0)
+			(at 162.56 165.1 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10369,66 +10510,33 @@
 	)
 	(wire
 		(pts
-			(xy 167.64 162.56)
-			(xy 170.18 162.56)
+			(xy 165.1 203.2)
+			(xy 165.1 205.74)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "d3583bd4-9ac4-548b-a597-6f802ccb8b9d")
+		(uuid "aff11999-7e5c-582a-b6a7-a63cc9e505f9")
 	)
-	(global_label "USB_B_N"
+	(global_label "GND"
 		(shape passive)
-		(at 170.18 162.56 0)
+		(at 165.1 205.74 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
-		(uuid "4a7df74c-3ae2-5220-bca7-d7e921cdda8f")
+		(uuid "bb324816-05fe-5ed4-bce0-7bef85176ae7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 170.18 162.56 0)
+			(at 165.1 205.74 270)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 167.64 165.1)
-			(xy 170.18 165.1)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ea038722-fab8-5572-8e08-2708990adb18")
-	)
-	(global_label "USB_B_P"
-		(shape passive)
-		(at 170.18 165.1 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "f730766e-408f-581c-b6bb-054cb8da8151")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 170.18 165.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
@@ -10436,17 +10544,17 @@
 	(wire
 		(pts
 			(xy 167.64 167.64)
-			(xy 170.18 167.64)
+			(xy 167.64 165.1)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "e63cbb04-39f6-5ef8-869e-f47f87151887")
+		(uuid "4edd3f5d-f500-5cf7-83d4-dfc02c88953b")
 	)
-	(global_label "GND"
+	(global_label "VBUS_B"
 		(shape passive)
-		(at 170.18 167.64 0)
+		(at 167.64 165.1 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10454,9 +10562,9 @@
 			)
 			(justify left)
 		)
-		(uuid "bb31d3cf-b5b7-55a8-964d-b279e1fc1236")
+		(uuid "742ad8db-89e2-52bf-bb57-d055a23afae3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 170.18 167.64 0)
+			(at 167.64 165.1 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10468,18 +10576,183 @@
 	)
 	(wire
 		(pts
-			(xy 167.64 170.18)
-			(xy 170.18 170.18)
+			(xy 170.18 203.2)
+			(xy 170.18 205.74)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "e340d67a-1b41-5c7b-8eeb-b480f8c82ebb")
+		(uuid "44bb15d5-1dbb-559f-98f2-641bb288adbc")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 170.18 205.74 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "43a203bd-0846-5568-874e-f7f6d1084d63")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 170.18 205.74 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 177.8 172.72)
+			(xy 180.34 172.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dbcf83f2-1b4b-5290-906e-148125373c24")
+	)
+	(global_label "USB_B_P"
+		(shape passive)
+		(at 180.34 172.72 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "1eacf46a-00ef-57ba-b789-8f6a293b0d20")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180.34 172.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 177.8 175.26)
+			(xy 180.34 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "06c94fe4-b763-5b78-a550-49c4d2155208")
+	)
+	(global_label "USB_B_P"
+		(shape passive)
+		(at 180.34 175.26 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d7456fd2-8806-5990-a694-ca762e1f70d2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180.34 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 177.8 180.34)
+			(xy 180.34 180.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5b01baff-963d-5c6c-9b94-ec295ff8717b")
+	)
+	(global_label "USB_B_N"
+		(shape passive)
+		(at 180.34 180.34 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "8b1b27fd-cfa7-554f-b58d-f454683a9ec3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180.34 180.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 177.8 182.88)
+			(xy 180.34 182.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b9448946-c1dd-522c-af44-19d7644e454a")
+	)
+	(global_label "USB_B_N"
+		(shape passive)
+		(at 180.34 182.88 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "6d04c2cb-c407-562a-8148-d680ae75a894")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 180.34 182.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 177.8 187.96)
+			(xy 180.34 187.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "58799a23-554b-56f5-b705-ad3756b5bb00")
 	)
 	(global_label "CC1_B"
 		(shape passive)
-		(at 170.18 170.18 0)
+		(at 180.34 187.96 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10487,9 +10760,9 @@
 			)
 			(justify left)
 		)
-		(uuid "59a9e7ff-a687-5bd6-9bc5-e069765f94a8")
+		(uuid "c0b9b720-2f30-5242-8846-adbf82c82dc3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 170.18 170.18 0)
+			(at 180.34 187.96 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10501,18 +10774,18 @@
 	)
 	(wire
 		(pts
-			(xy 167.64 172.72)
-			(xy 170.18 172.72)
+			(xy 177.8 190.5)
+			(xy 180.34 190.5)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "2403148c-9150-5d72-bbf5-f0117dc7b118")
+		(uuid "0c56bce4-844e-58ad-8be9-a2c69a39ba52")
 	)
 	(global_label "CC2_B"
 		(shape passive)
-		(at 170.18 172.72 0)
+		(at 180.34 190.5 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10520,9 +10793,9 @@
 			)
 			(justify left)
 		)
-		(uuid "fe779ebc-db8e-5e89-aed5-960d08f7aafe")
+		(uuid "2649cc8f-f330-5160-b41f-493957263764")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 170.18 172.72 0)
+			(at 180.34 190.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10532,43 +10805,18 @@
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 167.64 175.26)
-			(xy 170.18 175.26)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ac9ef4a6-c1b4-51b3-8b4e-4a5f976e4695")
+	(no_connect
+		(at 177.8 195.58)
+		(uuid "c64bf801-a7c3-5794-a4c0-b1f6a855008f")
 	)
-	(global_label "GND"
-		(shape passive)
-		(at 170.18 175.26 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "96200239-dcc1-571d-a3c5-bb13f96616a4")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 170.18 175.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
+	(no_connect
+		(at 177.8 198.12)
+		(uuid "54af41b9-a10f-52c3-8b37-468f302150b5")
 	)
 	(wire
 		(pts
-			(xy 193.04 168.91)
-			(xy 193.04 166.37)
+			(xy 203.2 168.91)
+			(xy 203.2 166.37)
 		)
 		(stroke
 			(width 0)
@@ -10578,7 +10826,7 @@
 	)
 	(global_label "VBUS_B"
 		(shape passive)
-		(at 193.04 166.37 90)
+		(at 203.2 166.37 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10588,7 +10836,7 @@
 		)
 		(uuid "6eedc41d-7703-5f4c-9bb3-c9cb84031335")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 193.04 166.37 90)
+			(at 203.2 166.37 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10600,8 +10848,8 @@
 	)
 	(wire
 		(pts
-			(xy 193.04 176.53)
-			(xy 193.04 179.07)
+			(xy 203.2 176.53)
+			(xy 203.2 179.07)
 		)
 		(stroke
 			(width 0)
@@ -10611,7 +10859,7 @@
 	)
 	(global_label "GND"
 		(shape passive)
-		(at 193.04 179.07 270)
+		(at 203.2 179.07 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10621,7 +10869,7 @@
 		)
 		(uuid "00764507-5ecc-50ca-9575-5d61898c77ac")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 193.04 179.07 270)
+			(at 203.2 179.07 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10633,8 +10881,8 @@
 	)
 	(wire
 		(pts
-			(xy 217.17 160.02)
-			(xy 214.63 160.02)
+			(xy 227.33 160.02)
+			(xy 224.79 160.02)
 		)
 		(stroke
 			(width 0)
@@ -10644,7 +10892,7 @@
 	)
 	(global_label "CC1_B"
 		(shape passive)
-		(at 214.63 160.02 180)
+		(at 224.79 160.02 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10654,7 +10902,7 @@
 		)
 		(uuid "513852ee-1a79-5201-a4fb-57e2e6ca4483")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 214.63 160.02 180)
+			(at 224.79 160.02 180)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10666,8 +10914,8 @@
 	)
 	(wire
 		(pts
-			(xy 226.06 163.83)
-			(xy 226.06 166.37)
+			(xy 236.22 163.83)
+			(xy 236.22 166.37)
 		)
 		(stroke
 			(width 0)
@@ -10677,7 +10925,7 @@
 	)
 	(global_label "GND"
 		(shape passive)
-		(at 226.06 166.37 270)
+		(at 236.22 166.37 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10687,7 +10935,7 @@
 		)
 		(uuid "852e6592-1184-5d54-94a0-3c4e8d304390")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 226.06 166.37 270)
+			(at 236.22 166.37 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10699,8 +10947,8 @@
 	)
 	(wire
 		(pts
-			(xy 234.95 160.02)
-			(xy 237.49 160.02)
+			(xy 245.11 160.02)
+			(xy 247.65 160.02)
 		)
 		(stroke
 			(width 0)
@@ -10710,7 +10958,7 @@
 	)
 	(global_label "CC2_B"
 		(shape passive)
-		(at 237.49 160.02 0)
+		(at 247.65 160.02 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10720,7 +10968,7 @@
 		)
 		(uuid "e74c2616-3bef-5f26-a2d3-7dd24e0b4ef8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 237.49 160.02 0)
+			(at 247.65 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10732,8 +10980,8 @@
 	)
 	(wire
 		(pts
-			(xy 256.54 168.91)
-			(xy 256.54 166.37)
+			(xy 266.7 168.91)
+			(xy 266.7 166.37)
 		)
 		(stroke
 			(width 0)
@@ -10743,7 +10991,7 @@
 	)
 	(global_label "LED_ON_B"
 		(shape passive)
-		(at 256.54 166.37 90)
+		(at 266.7 166.37 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10753,7 +11001,7 @@
 		)
 		(uuid "d980a7a7-2f44-5c99-8499-de5c3ed08083")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 256.54 166.37 90)
+			(at 266.7 166.37 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10765,8 +11013,8 @@
 	)
 	(wire
 		(pts
-			(xy 256.54 176.53)
-			(xy 256.54 179.07)
+			(xy 266.7 176.53)
+			(xy 266.7 179.07)
 		)
 		(stroke
 			(width 0)
@@ -10776,7 +11024,7 @@
 	)
 	(global_label "LEDA_ON_B"
 		(shape passive)
-		(at 256.54 179.07 270)
+		(at 266.7 179.07 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10786,7 +11034,7 @@
 		)
 		(uuid "553b70e9-a250-5e32-a0f2-faa9a9af3634")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 256.54 179.07 270)
+			(at 266.7 179.07 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10798,8 +11046,8 @@
 	)
 	(wire
 		(pts
-			(xy 280.67 157.48)
-			(xy 278.13 157.48)
+			(xy 290.83 157.48)
+			(xy 288.29 157.48)
 		)
 		(stroke
 			(width 0)
@@ -10809,7 +11057,7 @@
 	)
 	(global_label "GND"
 		(shape passive)
-		(at 278.13 157.48 180)
+		(at 288.29 157.48 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10819,7 +11067,7 @@
 		)
 		(uuid "a97fcec5-fa89-5509-81df-37b7e1bb8072")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 278.13 157.48 180)
+			(at 288.29 157.48 180)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10831,8 +11079,8 @@
 	)
 	(wire
 		(pts
-			(xy 288.29 157.48)
-			(xy 290.83 157.48)
+			(xy 298.45 157.48)
+			(xy 300.99 157.48)
 		)
 		(stroke
 			(width 0)
@@ -10842,7 +11090,7 @@
 	)
 	(global_label "LEDA_ON_B"
 		(shape passive)
-		(at 290.83 157.48 0)
+		(at 300.99 157.48 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10852,7 +11100,7 @@
 		)
 		(uuid "d39c8ffb-b59d-5352-b40b-c30f1c80797c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 290.83 157.48 0)
+			(at 300.99 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10864,8 +11112,8 @@
 	)
 	(wire
 		(pts
-			(xy 314.96 171.45)
-			(xy 314.96 168.91)
+			(xy 325.12 171.45)
+			(xy 325.12 168.91)
 		)
 		(stroke
 			(width 0)
@@ -10875,7 +11123,7 @@
 	)
 	(global_label "LED_FLT_B"
 		(shape passive)
-		(at 314.96 168.91 90)
+		(at 325.12 168.91 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10885,7 +11133,7 @@
 		)
 		(uuid "18a95db2-527c-5a84-af6d-a5a4a39e5c40")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 314.96 168.91 90)
+			(at 325.12 168.91 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10897,8 +11145,8 @@
 	)
 	(wire
 		(pts
-			(xy 314.96 179.07)
-			(xy 314.96 181.61)
+			(xy 325.12 179.07)
+			(xy 325.12 181.61)
 		)
 		(stroke
 			(width 0)
@@ -10908,7 +11156,7 @@
 	)
 	(global_label "LEDA_FLT_B"
 		(shape passive)
-		(at 314.96 181.61 270)
+		(at 325.12 181.61 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10918,7 +11166,7 @@
 		)
 		(uuid "9d329fd5-68d9-5e39-bc7b-9a19bb99dc10")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 314.96 181.61 270)
+			(at 325.12 181.61 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10930,8 +11178,8 @@
 	)
 	(wire
 		(pts
-			(xy 339.09 157.48)
-			(xy 336.55 157.48)
+			(xy 349.25 157.48)
+			(xy 346.71 157.48)
 		)
 		(stroke
 			(width 0)
@@ -10941,7 +11189,7 @@
 	)
 	(global_label "GND"
 		(shape passive)
-		(at 336.55 157.48 180)
+		(at 346.71 157.48 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10951,7 +11199,7 @@
 		)
 		(uuid "b5d25344-98dd-5035-ba33-e60dc5164060")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 336.55 157.48 180)
+			(at 346.71 157.48 180)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10963,8 +11211,8 @@
 	)
 	(wire
 		(pts
-			(xy 346.71 157.48)
-			(xy 349.25 157.48)
+			(xy 356.87 157.48)
+			(xy 359.41 157.48)
 		)
 		(stroke
 			(width 0)
@@ -10974,7 +11222,7 @@
 	)
 	(global_label "LEDA_FLT_B"
 		(shape passive)
-		(at 349.25 157.48 0)
+		(at 359.41 157.48 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10984,7 +11232,7 @@
 		)
 		(uuid "b9b12ad6-d19a-5242-8ccb-d0d4eaccaea9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 349.25 157.48 0)
+			(at 359.41 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10996,8 +11244,8 @@
 	)
 	(wire
 		(pts
-			(xy 383.54 157.48)
-			(xy 381 157.48)
+			(xy 393.7 157.48)
+			(xy 391.16 157.48)
 		)
 		(stroke
 			(width 0)
@@ -11007,7 +11255,7 @@
 	)
 	(global_label "BTN_B"
 		(shape passive)
-		(at 381 157.48 180)
+		(at 391.16 157.48 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11017,7 +11265,7 @@
 		)
 		(uuid "ebc2d355-7b2c-5c6c-9348-d79b6931d8dd")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 381 157.48 180)
+			(at 391.16 157.48 180)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11029,8 +11277,8 @@
 	)
 	(wire
 		(pts
-			(xy 393.7 157.48)
-			(xy 396.24 157.48)
+			(xy 403.86 157.48)
+			(xy 406.4 157.48)
 		)
 		(stroke
 			(width 0)
@@ -11040,7 +11288,7 @@
 	)
 	(global_label "GND"
 		(shape passive)
-		(at 396.24 157.48 0)
+		(at 406.4 157.48 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11050,7 +11298,7 @@
 		)
 		(uuid "6abf1d7e-e99f-519e-bf92-0c56a47d8c2f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 396.24 157.48 0)
+			(at 406.4 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11062,8 +11310,8 @@
 	)
 	(wire
 		(pts
-			(xy 414.02 162.56)
-			(xy 414.02 165.1)
+			(xy 424.18 162.56)
+			(xy 424.18 165.1)
 		)
 		(stroke
 			(width 0)
@@ -11073,7 +11321,7 @@
 	)
 	(global_label "OUT_H_B"
 		(shape passive)
-		(at 414.02 165.1 270)
+		(at 424.18 165.1 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11083,7 +11331,7 @@
 		)
 		(uuid "72a503c0-eca1-5d25-b899-25ad877868ff")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 414.02 165.1 270)
+			(at 424.18 165.1 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11095,8 +11343,8 @@
 	)
 	(wire
 		(pts
-			(xy 429.26 162.56)
-			(xy 429.26 165.1)
+			(xy 439.42 162.56)
+			(xy 439.42 165.1)
 		)
 		(stroke
 			(width 0)
@@ -11106,7 +11354,7 @@
 	)
 	(global_label "GATE_H_B"
 		(shape passive)
-		(at 429.26 165.1 270)
+		(at 439.42 165.1 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11116,7 +11364,7 @@
 		)
 		(uuid "87e09659-162f-55c8-b3c0-745d9b77bcb2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 429.26 165.1 270)
+			(at 439.42 165.1 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11128,8 +11376,8 @@
 	)
 	(wire
 		(pts
-			(xy 444.5 162.56)
-			(xy 444.5 165.1)
+			(xy 454.66 162.56)
+			(xy 454.66 165.1)
 		)
 		(stroke
 			(width 0)
@@ -11139,7 +11387,7 @@
 	)
 	(global_label "HOLD_M_B"
 		(shape passive)
-		(at 444.5 165.1 270)
+		(at 454.66 165.1 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11149,7 +11397,7 @@
 		)
 		(uuid "5a2c27df-4200-51b9-b6bd-983f04cd2ff6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 444.5 165.1 270)
+			(at 454.66 165.1 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11161,8 +11409,8 @@
 	)
 	(wire
 		(pts
-			(xy 459.74 162.56)
-			(xy 459.74 165.1)
+			(xy 469.9 162.56)
+			(xy 469.9 165.1)
 		)
 		(stroke
 			(width 0)
@@ -11172,7 +11420,7 @@
 	)
 	(global_label "HOLD_L_B"
 		(shape passive)
-		(at 459.74 165.1 270)
+		(at 469.9 165.1 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11182,7 +11430,7 @@
 		)
 		(uuid "adffa859-0b04-5dc8-97d8-87965a4d5e0d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 459.74 165.1 270)
+			(at 469.9 165.1 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11194,8 +11442,8 @@
 	)
 	(wire
 		(pts
-			(xy 474.98 162.56)
-			(xy 474.98 165.1)
+			(xy 485.14 162.56)
+			(xy 485.14 165.1)
 		)
 		(stroke
 			(width 0)
@@ -11205,7 +11453,7 @@
 	)
 	(global_label "VSUP_B"
 		(shape passive)
-		(at 474.98 165.1 270)
+		(at 485.14 165.1 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11215,7 +11463,7 @@
 		)
 		(uuid "44c95ff5-663c-51e6-9a8a-9fd03028ab90")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 474.98 165.1 270)
+			(at 485.14 165.1 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11227,8 +11475,8 @@
 	)
 	(wire
 		(pts
-			(xy 490.22 162.56)
-			(xy 490.22 165.1)
+			(xy 500.38 162.56)
+			(xy 500.38 165.1)
 		)
 		(stroke
 			(width 0)
@@ -11238,7 +11486,7 @@
 	)
 	(global_label "VBUS_B"
 		(shape passive)
-		(at 490.22 165.1 270)
+		(at 500.38 165.1 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11248,7 +11496,7 @@
 		)
 		(uuid "b745ea7a-7743-5f6a-b443-cac2a4aac272")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 490.22 165.1 270)
+			(at 500.38 165.1 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19638,8 +19886,8 @@
 		)
 	)
 	(symbol
-		(lib_id "usb-power-hub:AE-USB2.0-TYPE-C")
-		(at 160.02 167.64 0)
+		(lib_id "usb-power-hub:TYPE-C-16PIN-2MD-073")
+		(at 165.1 185.42 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19647,7 +19895,7 @@
 		(dnp no)
 		(uuid "fd10fc36-12da-5915-83d9-4f6e7da554b1")
 		(property "Reference" "J3"
-			(at 154.94 156.21 0)
+			(at 154.94 168.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19655,8 +19903,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AE-USB2.0-TYPE-C"
-			(at 165.1 156.21 0)
+		(property "Value" "TYPE-C-16PIN-2MD-073"
+			(at 175.26 168.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19664,8 +19912,8 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "usb-power-hub:Module_Akizuki_AE-USB2.0-TYPE-C"
-			(at 154.94 182.88 0)
+		(property "Footprint" "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
+			(at 154.94 205.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19673,8 +19921,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://akizukidenshi.com/goodsaffix/AE-USB2.0-TYPE-C_dimm_20190206.pdf"
-			(at 160.02 167.64 0)
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/2d53d8d8199c9dd6666d9bc9ac7c3a1e.pdf?productCode=C2765186"
+			(at 165.1 185.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19682,8 +19930,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "USB Type-C receptacle module (USB 2.0), 1x7 pins at 2.54 mm, no CC resistors fitted. Akizuki AE-USB2.0-TYPE-C; Akizuki g113080 (Hand (module on PH-1x40SG, 11 pins, D33)); register: usb-power-hub library.json"
-			(at 160.02 167.64 0)
+		(property "Description" "USB Type-C receptacle (USB 2.0), 16 contacts, SMD with plated shell slots. SHOU HAN TYPE-C 16PIN 2MD(073); JLCPCB C2765186 (Extended (D37)); register: usb-power-hub library.json"
+			(at 165.1 185.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19691,8 +19939,8 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "AE-USB2.0-TYPE-C"
-			(at 160.02 167.64 0)
+		(property "MPN" "TYPE-C 16PIN 2MD(073)"
+			(at 165.1 185.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19700,8 +19948,8 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Akizuki"
-			(at 160.02 167.64 0)
+		(property "Manufacturer" "SHOU HAN"
+			(at 165.1 185.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19709,8 +19957,8 @@
 				(hide yes)
 			)
 		)
-		(property "Akizuki" "g113080"
-			(at 160.02 167.64 0)
+		(property "LCSC" "C2765186"
+			(at 165.1 185.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19718,8 +19966,8 @@
 				(hide yes)
 			)
 		)
-		(property "Class" "Hand (module on PH-1x40SG, 11 pins, D33)"
-			(at 160.02 167.64 0)
+		(property "Class" "Extended (D37)"
+			(at 165.1 185.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19727,26 +19975,44 @@
 				(hide yes)
 			)
 		)
-		(pin "1"
-			(uuid "1053985a-d015-5039-8412-225972003971")
+		(pin "A1"
+			(uuid "99ab8954-d8f8-5193-9509-d62249a6cfdf")
 		)
-		(pin "2"
-			(uuid "52c95589-903c-52e6-b111-8f5517ca966e")
+		(pin "A4"
+			(uuid "4e616ba0-ac69-5d8d-ac40-6c5778713504")
 		)
-		(pin "3"
-			(uuid "658e1545-2202-505f-b50a-205a79ab2322")
+		(pin "A5"
+			(uuid "f49a3701-0486-52c6-9ed5-962025f5125d")
 		)
-		(pin "4"
-			(uuid "30fd7a35-1cb7-5c96-99f1-ed1c24c83fe6")
+		(pin "A6"
+			(uuid "e312c416-855b-51d7-ae02-35d6bfc2dc8e")
 		)
-		(pin "5"
-			(uuid "b96a969a-d3de-540b-93c6-2ab30093b5fd")
+		(pin "A7"
+			(uuid "52d81ad8-f0d1-5d9c-a29d-ee2ff98dc155")
 		)
-		(pin "6"
-			(uuid "35fff532-5a95-5814-93d6-abecd12cd643")
+		(pin "A8"
+			(uuid "40aa5eb3-a6da-5e20-8025-f711112d1900")
 		)
-		(pin "7"
-			(uuid "2df84d48-f65c-5569-869f-fdb42365d5f3")
+		(pin "B1"
+			(uuid "c9df8969-e88d-5ab4-b545-ce9178dba45a")
+		)
+		(pin "B4"
+			(uuid "1b54df48-4e00-5615-9056-d386d41dfed2")
+		)
+		(pin "B5"
+			(uuid "61ecdf2c-b32d-5cba-b65c-49c4b894b3c2")
+		)
+		(pin "B6"
+			(uuid "015bdae9-c396-5a4d-a5da-fe99355e3fa4")
+		)
+		(pin "B7"
+			(uuid "dc0ff221-a1f4-57b7-ba36-65c1603583c4")
+		)
+		(pin "B8"
+			(uuid "ca6ae81c-78f6-5d03-9ed7-b54fa84e4560")
+		)
+		(pin "S1"
+			(uuid "c4d85a95-f264-57a2-a9f3-a28e63a1fdb3")
 		)
 		(instances
 			(project "usb-power-hub"
@@ -19759,7 +20025,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:C")
-		(at 193.04 172.72 0)
+		(at 203.2 172.72 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19767,7 +20033,7 @@
 		(dnp no)
 		(uuid "489203af-357e-504b-bec7-4cc7c0c9680d")
 		(property "Reference" "C216"
-			(at 193.675 170.18 0)
+			(at 203.835 170.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19776,7 +20042,7 @@
 			)
 		)
 		(property "Value" "10u"
-			(at 193.675 175.26 0)
+			(at 203.835 175.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19785,7 +20051,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:C_0805_2012Metric"
-			(at 194.0052 176.53 0)
+			(at 204.1652 176.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19794,7 +20060,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 193.04 172.72 0)
+			(at 203.2 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19803,7 +20069,7 @@
 			)
 		)
 		(property "Description" "10u X5R, ±10 %, 25 V, 0805; Samsung CL21A106KAYNNNE; JLCPCB C15850 (Basic)"
-			(at 193.04 172.72 0)
+			(at 203.2 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19812,7 +20078,7 @@
 			)
 		)
 		(property "Class" "Basic"
-			(at 193.04 172.72 0)
+			(at 203.2 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19821,7 +20087,7 @@
 			)
 		)
 		(property "MPN" "CL21A106KAYNNNE"
-			(at 193.04 172.72 0)
+			(at 203.2 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19830,7 +20096,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung"
-			(at 193.04 172.72 0)
+			(at 203.2 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19839,7 +20105,7 @@
 			)
 		)
 		(property "LCSC" "C15850"
-			(at 193.04 172.72 0)
+			(at 203.2 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19864,7 +20130,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:PSM712-LF-T7")
-		(at 226.06 160.02 0)
+		(at 236.22 160.02 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19872,7 +20138,7 @@
 		(dnp no)
 		(uuid "9e9cb0eb-a5f3-5c21-b512-91909c21b4ff")
 		(property "Reference" "D3"
-			(at 226.06 155.575 0)
+			(at 236.22 155.575 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19880,7 +20146,7 @@
 			)
 		)
 		(property "Value" "PSM712-LF-T7"
-			(at 226.06 157.48 0)
+			(at 236.22 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19888,7 +20154,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:SOT-23"
-			(at 226.06 168.91 0)
+			(at 236.22 168.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19897,7 +20163,7 @@
 			)
 		)
 		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/c2ed56a8cad54293a14003751ad8d348.pdf?productCode=C32677"
-			(at 222.25 160.02 0)
+			(at 232.41 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19906,7 +20172,7 @@
 			)
 		)
 		(property "Description" "ProTek Devices PSM712-LF-T7; JLCPCB C32677 (Basic); register: usb-power-hub library.json"
-			(at 226.06 160.02 0)
+			(at 236.22 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19915,7 +20181,7 @@
 			)
 		)
 		(property "MPN" "PSM712-LF-T7"
-			(at 226.06 160.02 0)
+			(at 236.22 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19924,7 +20190,7 @@
 			)
 		)
 		(property "Manufacturer" "ProTek Devices"
-			(at 226.06 160.02 0)
+			(at 236.22 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19933,7 +20199,7 @@
 			)
 		)
 		(property "LCSC" "C32677"
-			(at 226.06 160.02 0)
+			(at 236.22 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19942,7 +20208,7 @@
 			)
 		)
 		(property "Class" "Basic"
-			(at 226.06 160.02 0)
+			(at 236.22 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19970,7 +20236,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:R")
-		(at 256.54 172.72 0)
+		(at 266.7 172.72 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19978,7 +20244,7 @@
 		(dnp no)
 		(uuid "fd2d4d6d-f5e0-5144-b82d-2eeb948c4aa0")
 		(property "Reference" "R240"
-			(at 258.572 172.72 90)
+			(at 268.732 172.72 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19986,7 +20252,7 @@
 			)
 		)
 		(property "Value" "510"
-			(at 256.54 172.72 90)
+			(at 266.7 172.72 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19994,7 +20260,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:R_0805_2012Metric"
-			(at 254.762 172.72 90)
+			(at 264.922 172.72 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20003,7 +20269,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 256.54 172.72 0)
+			(at 266.7 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20012,7 +20278,7 @@
 			)
 		)
 		(property "Description" "510 ±1 %, ±100 ppm/°C, 1/8 W, 0805; UNI-ROYAL 0805W8F5100T5E; JLCPCB C17734 (Basic)"
-			(at 256.54 172.72 0)
+			(at 266.7 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20021,7 +20287,7 @@
 			)
 		)
 		(property "Class" "Basic"
-			(at 256.54 172.72 0)
+			(at 266.7 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20030,7 +20296,7 @@
 			)
 		)
 		(property "MPN" "0805W8F5100T5E"
-			(at 256.54 172.72 0)
+			(at 266.7 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20039,7 +20305,7 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 256.54 172.72 0)
+			(at 266.7 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20048,7 +20314,7 @@
 			)
 		)
 		(property "LCSC" "C17734"
-			(at 256.54 172.72 0)
+			(at 266.7 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20073,7 +20339,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:KT-0805G")
-		(at 284.48 157.48 0)
+		(at 294.64 157.48 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -20081,7 +20347,7 @@
 		(dnp no)
 		(uuid "8d67e3d0-d094-5e44-ada9-81ce77a97e53")
 		(property "Reference" "D12"
-			(at 284.48 154.94 0)
+			(at 294.64 154.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20089,7 +20355,7 @@
 			)
 		)
 		(property "Value" "KT-0805G"
-			(at 284.48 160.02 0)
+			(at 294.64 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20097,7 +20363,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:LED_0805_2012Metric"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20106,7 +20372,7 @@
 			)
 		)
 		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/de342fde3322df0797012cd7a04e2194.pdf?productCode=C2297"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20115,7 +20381,7 @@
 			)
 		)
 		(property "Description" "Hubei KENTO KT-0805G; JLCPCB C2297 (Basic); register: usb-power-hub library.json"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20124,7 +20390,7 @@
 			)
 		)
 		(property "Sim.Pins" "1=K 2=A"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20133,7 +20399,7 @@
 			)
 		)
 		(property "MPN" "KT-0805G"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20142,7 +20408,7 @@
 			)
 		)
 		(property "Manufacturer" "Hubei KENTO"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20151,7 +20417,7 @@
 			)
 		)
 		(property "LCSC" "C2297"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20160,7 +20426,7 @@
 			)
 		)
 		(property "Class" "Basic"
-			(at 284.48 157.48 0)
+			(at 294.64 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20185,7 +20451,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:R")
-		(at 314.96 175.26 0)
+		(at 325.12 175.26 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -20193,7 +20459,7 @@
 		(dnp no)
 		(uuid "edf2b2e9-ca10-5697-8a50-b3f4866fe3ac")
 		(property "Reference" "R241"
-			(at 316.992 175.26 90)
+			(at 327.152 175.26 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20201,7 +20467,7 @@
 			)
 		)
 		(property "Value" "510"
-			(at 314.96 175.26 90)
+			(at 325.12 175.26 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20209,7 +20475,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:R_0805_2012Metric"
-			(at 313.182 175.26 90)
+			(at 323.342 175.26 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20218,7 +20484,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 314.96 175.26 0)
+			(at 325.12 175.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20227,7 +20493,7 @@
 			)
 		)
 		(property "Description" "510 ±1 %, ±100 ppm/°C, 1/8 W, 0805; UNI-ROYAL 0805W8F5100T5E; JLCPCB C17734 (Basic)"
-			(at 314.96 175.26 0)
+			(at 325.12 175.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20236,7 +20502,7 @@
 			)
 		)
 		(property "Class" "Basic"
-			(at 314.96 175.26 0)
+			(at 325.12 175.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20245,7 +20511,7 @@
 			)
 		)
 		(property "MPN" "0805W8F5100T5E"
-			(at 314.96 175.26 0)
+			(at 325.12 175.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20254,7 +20520,7 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 314.96 175.26 0)
+			(at 325.12 175.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20263,7 +20529,7 @@
 			)
 		)
 		(property "LCSC" "C17734"
-			(at 314.96 175.26 0)
+			(at 325.12 175.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20288,7 +20554,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:NCD0805R1")
-		(at 342.9 157.48 0)
+		(at 353.06 157.48 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -20296,7 +20562,7 @@
 		(dnp no)
 		(uuid "56c9613d-5d63-568f-b4f0-9ec298036332")
 		(property "Reference" "D13"
-			(at 342.9 154.94 0)
+			(at 353.06 154.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20304,7 +20570,7 @@
 			)
 		)
 		(property "Value" "NCD0805R1"
-			(at 342.9 160.02 0)
+			(at 353.06 160.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20312,7 +20578,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:LED_0805_2012Metric"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20321,7 +20587,7 @@
 			)
 		)
 		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/e3e35db60c068efe42b02d21fe498cf3.pdf?productCode=C84256"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20330,7 +20596,7 @@
 			)
 		)
 		(property "Description" "NATIONSTAR NCD0805R1; JLCPCB C84256 (Basic); register: usb-power-hub library.json"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20339,7 +20605,7 @@
 			)
 		)
 		(property "Sim.Pins" "1=K 2=A"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20348,7 +20614,7 @@
 			)
 		)
 		(property "MPN" "NCD0805R1"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20357,7 +20623,7 @@
 			)
 		)
 		(property "Manufacturer" "NATIONSTAR"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20366,7 +20632,7 @@
 			)
 		)
 		(property "LCSC" "C84256"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20375,7 +20641,7 @@
 			)
 		)
 		(property "Class" "Basic"
-			(at 342.9 157.48 0)
+			(at 353.06 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20400,7 +20666,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TS-1187A-B-A-B")
-		(at 388.62 157.48 0)
+		(at 398.78 157.48 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -20408,7 +20674,7 @@
 		(dnp no)
 		(uuid "00ebda37-7f4f-5f7a-b1ab-db6086fa2cfd")
 		(property "Reference" "SW2"
-			(at 389.89 154.94 0)
+			(at 400.05 154.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20417,7 +20683,7 @@
 			)
 		)
 		(property "Value" "TS-1187A-B-A-B"
-			(at 388.62 159.004 0)
+			(at 398.78 159.004 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20425,7 +20691,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:SW_Push_1P1T_XKB_TS-1187A"
-			(at 388.62 152.4 0)
+			(at 398.78 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20434,7 +20700,7 @@
 			)
 		)
 		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/56c8799ae5193945a16a1ffbe378246a.pdf?productCode=C318884"
-			(at 388.62 152.4 0)
+			(at 398.78 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20443,7 +20709,7 @@
 			)
 		)
 		(property "Description" "XKB Connection TS-1187A-B-A-B; JLCPCB C318884 (Basic); register: usb-power-hub library.json"
-			(at 388.62 157.48 0)
+			(at 398.78 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20452,7 +20718,7 @@
 			)
 		)
 		(property "MPN" "TS-1187A-B-A-B"
-			(at 388.62 157.48 0)
+			(at 398.78 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20461,7 +20727,7 @@
 			)
 		)
 		(property "Manufacturer" "XKB Connection"
-			(at 388.62 157.48 0)
+			(at 398.78 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20470,7 +20736,7 @@
 			)
 		)
 		(property "LCSC" "C318884"
-			(at 388.62 157.48 0)
+			(at 398.78 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20479,7 +20745,7 @@
 			)
 		)
 		(property "Class" "Basic"
-			(at 388.62 157.48 0)
+			(at 398.78 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20504,7 +20770,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 414.02 162.56 0)
+		(at 424.18 162.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -20512,7 +20778,7 @@
 		(dnp no)
 		(uuid "b9d567d3-7b69-5041-8ef2-7517ead875b6")
 		(property "Reference" "TP201"
-			(at 414.02 155.702 0)
+			(at 424.18 155.702 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20520,7 +20786,7 @@
 			)
 		)
 		(property "Value" "OUT_H"
-			(at 414.02 157.48 0)
+			(at 424.18 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20528,7 +20794,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 419.1 162.56 0)
+			(at 429.26 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20537,7 +20803,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 419.1 162.56 0)
+			(at 429.26 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20546,7 +20812,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 414.02 162.56 0)
+			(at 424.18 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20555,7 +20821,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 414.02 162.56 0)
+			(at 424.18 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20577,7 +20843,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 429.26 162.56 0)
+		(at 439.42 162.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -20585,7 +20851,7 @@
 		(dnp no)
 		(uuid "7a4cbd61-259f-5767-8300-d76a46a38859")
 		(property "Reference" "TP202"
-			(at 429.26 155.702 0)
+			(at 439.42 155.702 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20593,7 +20859,7 @@
 			)
 		)
 		(property "Value" "GATE_H"
-			(at 429.26 157.48 0)
+			(at 439.42 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20601,7 +20867,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 434.34 162.56 0)
+			(at 444.5 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20610,7 +20876,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 434.34 162.56 0)
+			(at 444.5 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20619,7 +20885,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 429.26 162.56 0)
+			(at 439.42 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20628,7 +20894,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 429.26 162.56 0)
+			(at 439.42 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20650,7 +20916,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 444.5 162.56 0)
+		(at 454.66 162.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -20658,7 +20924,7 @@
 		(dnp no)
 		(uuid "587d2dec-a1db-54e1-98ce-407920fd872f")
 		(property "Reference" "TP203"
-			(at 444.5 155.702 0)
+			(at 454.66 155.702 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20666,7 +20932,7 @@
 			)
 		)
 		(property "Value" "HOLD_M"
-			(at 444.5 157.48 0)
+			(at 454.66 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20674,7 +20940,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 449.58 162.56 0)
+			(at 459.74 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20683,7 +20949,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 449.58 162.56 0)
+			(at 459.74 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20692,7 +20958,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 444.5 162.56 0)
+			(at 454.66 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20701,7 +20967,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 444.5 162.56 0)
+			(at 454.66 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20723,7 +20989,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 459.74 162.56 0)
+		(at 469.9 162.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -20731,7 +20997,7 @@
 		(dnp no)
 		(uuid "ccd54e00-b5cf-5adc-81d3-4e05edf4d71d")
 		(property "Reference" "TP204"
-			(at 459.74 155.702 0)
+			(at 469.9 155.702 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20739,7 +21005,7 @@
 			)
 		)
 		(property "Value" "HOLD_L"
-			(at 459.74 157.48 0)
+			(at 469.9 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20747,7 +21013,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 464.82 162.56 0)
+			(at 474.98 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20756,7 +21022,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 464.82 162.56 0)
+			(at 474.98 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20765,7 +21031,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 459.74 162.56 0)
+			(at 469.9 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20774,7 +21040,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 459.74 162.56 0)
+			(at 469.9 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20796,7 +21062,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 474.98 162.56 0)
+		(at 485.14 162.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -20804,7 +21070,7 @@
 		(dnp no)
 		(uuid "44ec955b-4fab-5b7f-b46b-5a181b4bcf17")
 		(property "Reference" "TP205"
-			(at 474.98 155.702 0)
+			(at 485.14 155.702 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20812,7 +21078,7 @@
 			)
 		)
 		(property "Value" "VSUP"
-			(at 474.98 157.48 0)
+			(at 485.14 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20820,7 +21086,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 480.06 162.56 0)
+			(at 490.22 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20829,7 +21095,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 480.06 162.56 0)
+			(at 490.22 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20838,7 +21104,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 474.98 162.56 0)
+			(at 485.14 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20847,7 +21113,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 474.98 162.56 0)
+			(at 485.14 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20869,7 +21135,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 490.22 162.56 0)
+		(at 500.38 162.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -20877,7 +21143,7 @@
 		(dnp no)
 		(uuid "d0dbeba8-7185-5f39-aa53-6a3aa3ac2530")
 		(property "Reference" "TP206"
-			(at 490.22 155.702 0)
+			(at 500.38 155.702 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20885,7 +21151,7 @@
 			)
 		)
 		(property "Value" "VBUS"
-			(at 490.22 157.48 0)
+			(at 500.38 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20893,7 +21159,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 495.3 162.56 0)
+			(at 505.46 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20902,7 +21168,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 495.3 162.56 0)
+			(at 505.46 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20911,7 +21177,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 490.22 162.56 0)
+			(at 500.38 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20920,7 +21186,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 490.22 162.56 0)
+			(at 500.38 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)

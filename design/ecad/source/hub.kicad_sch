@@ -11,7 +11,7 @@
 		(comment 1 "WIP - MANUFACTURING PROHIBITED")
 		(comment 2 "Source: design/circuit/CIRCUIT_DESIGN_Rev0.5.md")
 		(comment 3 "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
-		(comment 4 "Sheet: U6 CH335F, Y2")
+		(comment 4 "Sheet: U6 CH335F, Y2, data-line taps")
 	)
 	(lib_symbols
 		(symbol "usb-power-hub:C"
@@ -781,6 +781,130 @@
 						)
 					)
 					(number "0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "usb-power-hub:R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "R; JLCPCB per value (requirements/parts.md Passives) (Basic); register: usb-power-hub library.json"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "R_0402_1005Metric R_0603_1608Metric R_0805_2012Metric"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Class" "Basic"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2170,6 +2294,270 @@
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 195.58 31.75)
+			(xy 195.58 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "14a52f95-2b93-5add-8710-9c3502177fdf")
+	)
+	(global_label "USB_A_P"
+		(shape passive)
+		(at 195.58 29.21 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "c74325d5-d9ed-509b-8548-8178161dc5c2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 29.21 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 39.37)
+			(xy 195.58 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7463424e-d084-58b2-a0c7-0ca5c36e5599")
+	)
+	(global_label "TAP_A_P"
+		(shape passive)
+		(at 195.58 41.91 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "91567f2d-7815-5df0-94e3-a7ec688e776d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 41.91 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 210.82 31.75)
+			(xy 210.82 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5e1b5f94-2bd5-50b3-88f1-9b782c150d2f")
+	)
+	(global_label "USB_A_N"
+		(shape passive)
+		(at 210.82 29.21 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9bdcb3cf-3ba0-517b-a9de-1cff8e22fae2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 210.82 29.21 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 210.82 39.37)
+			(xy 210.82 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "85dfbb10-4cec-5c7b-931e-8f55ad68cc73")
+	)
+	(global_label "TAP_A_N"
+		(shape passive)
+		(at 210.82 41.91 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e4d58382-4c4f-5ac1-bcb9-b94a55091178")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 210.82 41.91 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 226.06 31.75)
+			(xy 226.06 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eb7394a3-aac3-53f0-9e03-3dddabf39fa6")
+	)
+	(global_label "USB_B_P"
+		(shape passive)
+		(at 226.06 29.21 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "0fc03775-f1a3-5b3c-ae11-2f44551d39d5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 226.06 29.21 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 226.06 39.37)
+			(xy 226.06 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d07815d5-fe69-5fcc-8e3b-13c93b836caa")
+	)
+	(global_label "TAP_B_P"
+		(shape passive)
+		(at 226.06 41.91 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "bf21651d-e0a6-55e5-a3e0-632b8870718a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 226.06 41.91 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 241.3 31.75)
+			(xy 241.3 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc7ec723-8113-5fe3-9c6b-ffd92d2eae24")
+	)
+	(global_label "USB_B_N"
+		(shape passive)
+		(at 241.3 29.21 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e673cf68-ebb6-509e-ba1d-04a954c7f014")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 241.3 29.21 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 241.3 39.37)
+			(xy 241.3 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "15de441e-4ef8-5fe3-bf75-85bf47fce5a5")
+	)
+	(global_label "TAP_B_N"
+		(shape passive)
+		(at 241.3 41.91 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "dfd94a58-ae91-5296-91e8-1b28d22c9c56")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 241.3 41.91 270)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(symbol
 		(lib_id "usb-power-hub:CH335F")
 		(at 50.8 63.5 0)
@@ -2850,6 +3238,418 @@
 			(project "usb-power-hub"
 				(path "/d22f7430-a824-5395-8835-5937190d797a/e7940347-d1d6-5ce9-91f9-9fb941cf7c86"
 					(reference "TP13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 195.58 35.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b7be72de-4a87-5a56-829d-9e83ee30a383")
+		(property "Reference" "R35"
+			(at 197.612 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 195.58 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 193.802 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 195.58 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1001TCE; JLCPCB C11702 (Basic)"
+			(at 195.58 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 195.58 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1001TCE"
+			(at 195.58 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 195.58 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C11702"
+			(at 195.58 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2e8e19ca-420b-5b77-b69f-ccf0399e5d63")
+		)
+		(pin "2"
+			(uuid "24c2dd2a-e4bf-5af1-b54e-6de121729dac")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/e7940347-d1d6-5ce9-91f9-9fb941cf7c86"
+					(reference "R35")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 210.82 35.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "601e892d-42c4-5631-a49c-260965cffeae")
+		(property "Reference" "R36"
+			(at 212.852 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 210.82 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 209.042 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 210.82 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1001TCE; JLCPCB C11702 (Basic)"
+			(at 210.82 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 210.82 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1001TCE"
+			(at 210.82 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 210.82 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C11702"
+			(at 210.82 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "524b67ac-e7b1-54cd-bc53-aa36a80ae5e1")
+		)
+		(pin "2"
+			(uuid "912e2452-1b33-565c-9bac-1b9d4e5d231b")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/e7940347-d1d6-5ce9-91f9-9fb941cf7c86"
+					(reference "R36")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 226.06 35.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "cb075ace-0afa-5739-bc9a-761def187bc0")
+		(property "Reference" "R37"
+			(at 228.092 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 226.06 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 224.282 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 226.06 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1001TCE; JLCPCB C11702 (Basic)"
+			(at 226.06 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 226.06 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1001TCE"
+			(at 226.06 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 226.06 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C11702"
+			(at 226.06 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e8c1efdc-e307-59a3-b6da-458177ac82a5")
+		)
+		(pin "2"
+			(uuid "1aa833c8-cc5e-5f69-8c44-4374de5bc684")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/e7940347-d1d6-5ce9-91f9-9fb941cf7c86"
+					(reference "R37")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "usb-power-hub:R")
+		(at 241.3 35.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "e3ccd49c-e98c-5b72-b23c-736a41eb623f")
+		(property "Reference" "R38"
+			(at 243.332 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 241.3 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "usb-power-hub:R_0402_1005Metric"
+			(at 239.522 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 241.3 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1k ±1 %, ±100 ppm/°C, 1/16 W, 0402; UNI-ROYAL 0402WGF1001TCE; JLCPCB C11702 (Basic)"
+			(at 241.3 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Class" "Basic"
+			(at 241.3 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1001TCE"
+			(at 241.3 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 241.3 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C11702"
+			(at 241.3 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "5a394d63-2c12-5046-849c-a2839576a288")
+		)
+		(pin "2"
+			(uuid "375caa62-1d5a-56e3-b9ff-062d5bc31a53")
+		)
+		(instances
+			(project "usb-power-hub"
+				(path "/d22f7430-a824-5395-8835-5937190d797a/e7940347-d1d6-5ce9-91f9-9fb941cf7c86"
+					(reference "R38")
 					(unit 1)
 				)
 			)

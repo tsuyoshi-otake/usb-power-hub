@@ -32,20 +32,20 @@ say) and never the generator's `params`, and it measures footprints as KiCad loa
       compliance; it proves the lead lands on its own pad and nowhere else.
     - kelvin_chip: every force and sense pad covers its end's nominal electrode length and
       overlaps its width; the two sense pads leave on one side.
-    - pads: exact pad numbers, centres, sizes, mask openings and unplated holes.
+    - pads: exact pad numbers, centres, sizes, mask openings, plated slots (centre, slot,
+      pad) and unplated holes; with `npth_copper_min`, every unplated hole at least that far
+      from every copper pad of the footprint (edge to edge).
     - holes: exact hole positions and numbers, drill inside the datasheet range, annular ring.
     - Kelvin parts: sense pads are joined to their force pads either by the part's electrode
       (no copper, no net tie) or by copper strips inside a KiCad net tie whose groups are
       exactly the force / sense pairs; no strip touches another pad.
-    - The USB-C module's courtyard is the OI-23 study's obstacle rectangles, read from the
-      study, in the frame where pad 1 sits on the 1 x 7 row's VBUS pin.
  4. Library tables: SRCDIR's fp-lib-table and sym-lib-table name only this library and
     resolve to LIBDIR. No file in LIBDIR, and neither table, holds a CR byte: the repository
     stores LF, so these are the bytes a checkout holds.
  5. kicad-cli exports every symbol and every footprint to SVG (it parses them).
  6. DRC: every footprint is placed on a scratch copy of the project board (its rules, its
-    stackup; a larger outline; the board's own parts removed), each pad number on its own
-    net, and `kicad-cli pcb drc` must
+    stackup; its custom hole rules, the .kicad_dru; a larger outline; the board's own parts
+    removed), each pad number on its own net, and `kicad-cli pcb drc` must
     report no violation. Unconnected items are expected (a switch has two pads per pin) and
     are not counted.
 Exit status: 0 = every check passed; 1 = at least one failed; each failure prints as
@@ -56,7 +56,7 @@ What it CANNOT see:
   revision for each one; that citation is the evidence, and a reviewer reads it.
 - IPC fillet sizes, paste reduction, or whether a land solders well. Only the coverage rule.
 - the generic R and C lands. Their per-value datasheets are bound at P2.
-- 3D models; part heights (the strip under a USB-C module is 2D here).
+- 3D models; part heights.
 - whether a pin's electrical type suits ERC (P2's ERC sees that).
 - silkscreen against another footprint's pads (check_pcb.py measures that on the board), and
   whether a mark is readable beyond JLCPCB's two limits.
@@ -131,6 +131,7 @@ class Pad:
         self.num = p.GetNumber()
         self.attr = ATTR[p.GetAttribute()]
         self.circle = p.GetShape() == pcbnew.PAD_SHAPE_CIRCLE
+        self.oval = p.GetShape() == pcbnew.PAD_SHAPE_OVAL
         pos = p.GetPosition()
         self.x, self.y = pcbnew.ToMM(pos.x), pcbnew.ToMM(pos.y)
         size = p.GetSize(pcbnew.F_Cu)
@@ -139,6 +140,8 @@ class Pad:
         self.rotated_badly = rot not in (0, 90)
         self.w, self.h = (h, w) if rot == 90 else (w, h)
         self.drill = pcbnew.ToMM(p.GetDrillSize().x)
+        dw, dh = pcbnew.ToMM(p.GetDrillSize().x), pcbnew.ToMM(p.GetDrillSize().y)
+        self.slot = (dh, dw) if rot == 90 else (dw, dh)
         self.paste = p.IsOnLayer(pcbnew.F_Paste)
         self.copper = p.IsOnLayer(pcbnew.F_Cu)
         m = p.GetLocalSolderMaskMargin()
@@ -147,6 +150,21 @@ class Pad:
     @property
     def box(self):
         return (self.x - self.w / 2, self.y - self.h / 2, self.x + self.w / 2, self.y + self.h / 2)
+
+    def gap_to_circle(self, x, y, radius):
+        """Edge-to-edge distance from this pad's copper to a circle (a round hole). A rectangle
+        or rounded rectangle is measured as its bounding box, which is never farther than its
+        copper; an oval as the stadium it is."""
+        if self.circle:
+            return math.hypot(x - self.x, y - self.y) - self.w / 2 - radius
+        if self.oval:
+            r_end = min(self.w, self.h) / 2
+            hx, hy = max(self.w / 2 - r_end, 0), max(self.h / 2 - r_end, 0)
+            dx = max(abs(x - self.x) - hx, 0)
+            dy = max(abs(y - self.y) - hy, 0)
+            return math.hypot(dx, dy) - r_end - radius
+        x0, y0, x1, y1 = self.box
+        return math.hypot(max(x0 - x, 0, x - x1), max(y0 - y, 0, y - y1)) - radius
 
     def contains_point(self, x, y):
         if self.circle:
@@ -426,7 +444,27 @@ def land_pads(rep, who, pads, land):
             margin = (w["mask"] - w["size"][0]) / 2
             rep.check(p.mask_margin is not None and same(p.mask_margin, margin), who,
                       f"{p}: mask margin {p.mask_margin}, a {w['mask']} mm opening needs {margin}")
-    land_npth(rep, who, [p for p in pads if p.attr == "npth"], land.get("npth", []))
+    pth = [p for p in pads if p.attr == "pth"]
+    slots = land.get("slots", [])
+    rep.check(len(pth) == len(slots), who, f"{len(pth)} plated holes, the land has {len(slots)} plated slots")
+    for w in slots:
+        m = [p for p in match_at(pth, w["at"]) if p.num == w["n"]]
+        if not rep.check(len(m) == 1, who, f"no plated slot {w['n']!r} at {w['at']}"):
+            continue
+        p = m[0]
+        rep.check(p.oval and same(p.slot[0], w["drill"][0]) and same(p.slot[1], w["drill"][1]), who,
+                  f"{p}: slot {p.slot[0]:.3f} x {p.slot[1]:.3f} (oval {p.oval}) is not {w['drill']}")
+        rep.check(same(p.w, w["size"][0]) and same(p.h, w["size"][1]), who, f"{p}: size is not {w['size']}")
+    npth = [p for p in pads if p.attr == "npth"]
+    land_npth(rep, who, npth, land.get("npth", []))
+    if "npth_copper_min" in land:
+        lim = land["npth_copper_min"]
+        for h in npth:
+            for p in pads:
+                if p.copper and p.attr != "npth":
+                    gap = p.gap_to_circle(h.x, h.y, h.drill / 2)
+                    rep.check(gap >= lim - 1e-4, who, f"unplated hole at ({h.x:.3f}, {h.y:.3f}) is {gap:.4f} mm "
+                              f"from {p}, under {lim} (land.npth_copper_min)")
 
 
 def check_tie(rep, who, pads, land, fp, tree):
@@ -465,30 +503,6 @@ def seg_clear(seg, pad):
         dx, dy = max(bx0 - x, 0, x - bx1), max(by0 - y, 0, y - by1)
         best = min(best, math.hypot(dx, dy) - w / 2)
     return best
-
-
-def check_usbc_courtyard(rep, who, fp, pads, land):
-    spec = importlib.util.spec_from_file_location("placement_study", ROOT / land["study"])
-    st = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(st)
-    row = st.USBC_INSULATORS[0]
-    ox, oy = row[0] + st.HDR_PITCH / 2, row[1] + st.HDR_W / 2
-    want = []
-    for x, y, w, h in st.USBC_INSULATORS:
-        want.append((x, y, w, h))
-    for label, (x, y, w, h) in st.USBC_BELOW:
-        if label == "receptacle body":
-            y, h = y - land["receptacle_overhang"], h + land["receptacle_overhang"]
-        want.append((x, y, w, h))
-    want = sorted((round(x - ox, 4), round(y - oy, 4), round(x + w - ox, 4), round(y + h - oy, 4))
-                  for x, y, w, h in want)
-    have = rects(fp, pcbnew.F_CrtYd)
-    other = [s for s in shapes(fp, pcbnew.F_CrtYd) if s[0] != "Rect"]
-    ok = len(have) == len(want) and all(all(same(a, b) for a, b in zip(h, w)) for h, w in zip(have, want))
-    rep.check(ok and not other, who, f"courtyard {have} (+{len(other)} other) is not the study's {want}")
-    for k in range(7):                        # the row pins, as the study places them
-        at = [round(row[0] + st.HDR_PITCH / 2 + k * st.HDR_PITCH - ox, 4), 0.0]
-        rep.check(bool(match_at(pads, at)), who, f"no pad on the study's row position {k + 1} {at}")
 
 
 def courtyard_contains(rep, who, fp, pads, generated):
@@ -719,9 +733,7 @@ def check_footprints(rep, parts, pretty, pins_of):
                 check_tie(rep, who, pads, land, fp, tree)
             if land.get("paste") is False:
                 rep.check(not any(p.paste for p in pads), who, "a pad has paste; the land has none")
-            if land.get("courtyard_from_study"):
-                check_usbc_courtyard(rep, who, fp, pads, land)
-            courtyard_contains(rep, who, fp, pads, generated=not stock and not land.get("courtyard_from_study"))
+            courtyard_contains(rep, who, fp, pads, generated=not stock)
     return sorted(wanted)
 
 
@@ -777,7 +789,7 @@ def check_cli(rep, sym_path, pretty, parts, fp_names):
 def check_drc(rep, srcdir, pretty, fp_names):
     with tempfile.TemporaryDirectory(prefix="libcheck-drc-") as tmp:
         t = pathlib.Path(tmp)
-        for ext in (".kicad_pcb", ".kicad_pro"):
+        for ext in (".kicad_pcb", ".kicad_pro", ".kicad_dru"):
             shutil.copyfile(srcdir / f"{NICK}{ext}", t / f"sandbox{ext}")
         (t / "fp-lib-table").write_text(
             f'(fp_lib_table (version 7) (lib (name "{NICK}")(type "KiCad")(uri "{pretty.resolve().as_posix()}")'
