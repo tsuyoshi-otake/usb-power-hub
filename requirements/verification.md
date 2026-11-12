@@ -1,11 +1,11 @@
 # USB Power-Control Hub — Verification Plan
 
-**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03 and for D28, D29,
-D30 and D31 on 2026-11-04. Nothing below has
+**State: WIP.** Opened 2026-11-03; revised for circuit Rev0.4 on 2026-11-03, for D28, D29,
+D30 and D31 on 2026-11-04 and for Rev0.5 (D37, D38) on 2026-11-12. Nothing below has
 been executed — no board exists.
 
 Every requirement in `requirements/product.md` is covered by at least one entry here, and
-every entry cites the requirements it proves. Design-review gates G1 – G21 live in
+every entry cites the requirements it proves. Design-review gates G1 – G23 live in
 `design/circuit/CIRCUIT_DESIGN_Rev0.5.md` Section 8; entries here reference them rather than
 restate them. CLAUDE.md Section 8 ("Functional" gate) requires these to pass before release.
 
@@ -352,8 +352,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
 
 ## Host interface
 
-### V-HOST-01 — Enumeration, identity, hub passthrough
-- **Covers:** REQ-HOST-01, REQ-HOST-02, REQ-HOST-06, REQ-HOST-07, REQ-HOST-08
+### V-HOST-01 — Enumeration, identity, hub passthrough, data-line taps
+- **Covers:** REQ-HOST-01, REQ-HOST-02, REQ-HOST-06, REQ-HOST-07, REQ-HOST-08, REQ-HOST-09
 - **When:** Bring-up (three OSes) + Production (serial uniqueness)
 - **Method:**
   - Plug into Windows 11, macOS and Linux, and inspect the device tree.
@@ -364,12 +364,22 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Read the descriptors (USB Tree View on Windows, `lsusb -v` on Linux). Measure J1's
     current with both ports ON, the stream running and all LEDs lit.
   - Light each LED alone and measure the voltage across its 510 Ω (D34).
+  - With R35–R38 fitted, plug a Low-Speed device (a keyboard or mouse) and a Full-Speed device
+    into J2 and into J3 in turn, and watch the tap on the same port with an oscilloscope or a
+    logic analyser at pad 2 of R35–R38 (TAP_A_P, TAP_A_N, TAP_B_P, TAP_B_N), or on GPIO26–29
+    with a debug firmware.
+  - If the High-Speed transfer above fell back to FS with the taps fitted, remove R35–R38 and
+    repeat it.
 - **Pass:**
   - A CH335F hub plus one composite device with two CDC-ACM interfaces; no driver install on
     any OS.
   - Two units report different serials, and COM numbers stay stable across replugs.
-  - The DUT enumerates at High-Speed and the transfer verifies with no errors. If it falls
-    back to FS, record it against OI-26.
+  - The DUT enumerates at High-Speed and the transfer verifies with no errors, with R35–R38
+    fitted. If it falls back to FS, record it against OI-26; if it falls back only with the
+    taps fitted, D38's taps are the cause and D38 reopens (the resistors are removable).
+  - The tap of the port in use follows the DUT's D+ and D−: the idle and J/K levels, and the
+    enumeration's packets, appear on it at 3.3 V logic levels, and the other port's tap stays at
+    its idle level.
   - VID/PID matches an allocation we hold.
   - The hub reports self-powered with MaxPower 100 mA. The control function reports
     bus-powered with MaxPower 200 mA.
@@ -404,28 +414,25 @@ pass counts. Entries that rely on a script note this under *Limits*.
 
 ### V-MECH-01 — Outline, connectors, fastening
 - **Covers:** REQ-MECH-01, REQ-MECH-02, REQ-MECH-03, REQ-MECH-04, REQ-MECH-05
-- **When:** Design review (mechanical overlay with the real USB-C module outlines and the
-  PH-1x40SG header, D33) + Bring-up (real parts)
+- **When:** Design review (`check_pcb.py` on the receptacle positions, D37) + Bring-up (real
+  parts)
 - **Method:**
-  - Run `python -I design/experiments/oi-23-placement/placement_study.py` (design review). It
-    must exit 0 with the D33 header (insulator ≥ 2.30 mm) and its under-module strips. Since
-    D31 no outline in it comes from a photo: the CH335F module's did (OI-24).
-  - Before soldering one USB-C module, measure its board thickness and how far its
-    receptacle hangs below the board (calipers). After soldering, measure the gap between
-    each module's underside and the tallest part under it (feeler gauge).
+  - Run `check_pcb.py` (design review): J1–J4 stand on the placement's positions with their
+    courtyards inside the outline, and J2 and J3 are ≥ 18 mm apart.
   - Measure the Gerber outline and the fabricated board.
   - Insert the two widest cables on hand into J2 and J3 together, lid fitted.
   - Count mounting points and measure thread engagement or insert depth.
-  - Insert and remove a cable 50 times per connector module.
+  - Insert and remove a cable 50 times per connector, and read the insertion and removal force
+    on one connector (the part is rated 0.5–2.0 kgf and 0.8–2.0 kgf).
 - **Pass:**
   - 100.0 × 72.0 mm ± 0.2 mm, 4 layers, stackup JLC04161H-7628 per the fab drawing and the
     order.
   - Both plugs seat fully together.
   - ≥ 3 mounting points, one near each connector end; ≥ 4 mm engagement or heat-set inserts.
-  - After 50 cycles, no solder-joint cracking and no module movement.
-  - Under every module, ≥ 0.5 mm between its underside and the tallest part under it, and
-    the receptacle's lowest point clear of the board. A failure reopens D33 (the header
-    height) and the study's under-module strip.
+  - After 50 cycles, no solder-joint cracking and no receptacle movement.
+- **Failing:** a receptacle that moves or cracks its joints reopens D37: the maker's land is
+  drawn for a 0.80 mm board and this one is 1.6 mm (V-MFG-03), and the enclosure's openings,
+  not the shell slots, may have to take the plug's force.
 
 ## Manufacturing and test
 
@@ -450,31 +457,39 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Open each hand-soldered part's Akizuki page and record its stock.
   - Compare each BOM line's class with the rule.
 - **Pass:**
-  - Every BOM line is Basic with ≥ 500 assembly stock, except two: C2040 (RP2040, D29) and
-    C5137013 (CH335F, D31), the Extended lines the user allowed, which also need ≥ 500. No
-    other Extended line, and no Preferred Extended line (D22, D29, D31).
+  - Every BOM line is Basic with ≥ 500 assembly stock, except three: C2040 (RP2040, D29),
+    C5137013 (CH335F, D31) and C2765186 (USB-C receptacle, D37), the Extended lines the user
+    allowed, which also need ≥ 500. No other Extended line, and no Preferred Extended line
+    (D22, D29, D31, D37).
   - Every hand-soldered part shows stock ≥ the build quantity.
 - **Limits:** `jlc_stock.py` sees the class and stock only, not suitability. It was shown
   failing (exit 1) on a non-existent code on 2026-11-03. Akizuki stock is read by hand,
   because there is no checked tool.
 
-### V-MFG-03 — U1's and U6's joints on leaded HASL, at bring-up (D30, D31)
+### V-MFG-03 — U1's, U6's and the receptacles' joints, at bring-up (D30, D31, D37)
 - **Covers:** REQ-MECH-01 (finish), REQ-MFG-01
 - **When:** Bring-up, on both PCBA boards, on arrival and before the first power-up.
 - **Method:**
   - Inspect U1's 56 pins and U6's 28 pins from all four sides under ≥ 10× magnification.
+  - Inspect each receptacle's four shell slots from the Bottom, and its 12 pads' toes from the
+    front: the maker's land is drawn for a 0.80 mm board, and this one is 1.6 mm, so the shell
+    legs may not reach through the slots.
   - Unpowered, measure V3V3, DVDD, V5L and VDD33_HUB to GND at their test pads.
 - **Pass:**
   - No bridge between adjacent U1 or U6 pins, and every visible toe is wetted.
   - V3V3, DVDD, V5L and VDD33_HUB each read ≥ 100 Ω to GND (a hard short reads a few ohms).
+  - Every shell slot of J1–J4 shows wetted solder on the Bottom side, and no receptacle moves
+    when pushed by hand along the cable axis.
   - At the first power-up, VDD33_HUB reads 3.2–3.5 V (U6's LDO, CH334/335 datasheet §4.2).
   - The board then passes V-MEAS-06's U1 checks, which exercise U1's supply, USB, QSPI and
     crystal pins, and V-HOST-01's hub enumeration, which exercises U6's supply, crystal and
     USB pins.
 - **Failing:** a bridge or open is reworked under the microscope. If both boards need it on
-  either QFN, D30 reopens: ENIG for the next order is the user's decision.
+  either QFN, D30 reopens: ENIG for the next order is the user's decision. A receptacle whose
+  shell slots stay empty is reworked by hand; if it recurs on both boards, D37 reopens.
 - **Limits:** the two ePads and the inner ends of the pads are not visible; an open there
-  shows only as a V-MEAS-06 or V-HOST-01 failure.
+  shows only as a V-MEAS-06 or V-HOST-01 failure. The 12 pads under each receptacle body are not
+  visible either; a pad open or a bridge there shows as a V-HOST-01 or V-PORT failure.
 
 ## Safety and fail-safe
 

@@ -6,9 +6,12 @@ the host PC over a plain COM port.
 
 > **Status: WIP — MANUFACTURING PROHIBITED.** The design exists as documents and a
 > generated KiCad project: its part library (a symbol and a footprint for every part,
-> checked on paper) and a captured schematic (ERC clean, checked against the circuit
-> document by script). There is no layout, no manufacturing output, no firmware, and
-> nothing has been built or measured. Do not order anything from this repository.
+> checked on paper), a captured schematic (ERC clean, checked against the circuit
+> document by script), and a placed, routed and labelled board (DRC clean). The
+> candidate manufacturing set of Rev0.5 (`manufacturing/releases/rev0.5/r01/`, state `WIP`)
+> is not orderable: the JLCPCB gate has not run on it, nothing has been ordered or paid,
+> and there is no firmware. Nothing has been built or measured. Do not order anything from
+> this repository.
 
 ## What it is meant to do
 
@@ -20,7 +23,9 @@ the host PC over a plain COM port.
     at 1 A (0.48 V when the other port also draws 1 A; the input fuse is shared).
 - **Downstream:** two USB-C receptacles (`OUT A`, `OUT B`), each switched on and off
   independently by firmware. They are OFF at power-up and after any reset (REQ-PORT-01),
-  and offer Default USB power (500 mA), with a hardware over-current trip at 1.16 A.
+  and offer Default USB power (500 mA), with a hardware over-current trip at 1.16 A. Each
+  port's D+ and D− are also tapped through 1 kΩ to four RP2040 GPIO for a Low-Speed and
+  Full-Speed capture of the device under test (D38, issue #10); firmware for it does not exist.
 - **Measurement:** per port, a 3-range shunt ladder (510 Ω / 10 Ω / 0.1 Ω) with hardware
   up-ranging, discrete current-mirror amplifiers, and two 12-bit MCP3208 ADCs (one per
   port, sampled together), at 14.0 kSPS per channel. Accuracy target: ±(1 % + 3 LSB of the range).
@@ -32,11 +37,11 @@ the host PC over a plain COM port.
   default options, leaded HASL) was $8.00 at 85 × 35, 100 × 72 and 100 × 100 mm; ENIG would
   add $16.90 and $17.40 at the two sizes. Recheck the live quote before ordering. The stackup is
   JLC04161H-7628, named on the order, without impedance control for the prototype (D27).
-  - JLCPCB machine-places the small parts, the RP2040 and the CH335F, all JLCPCB **Basic**
-    except those two chips (Extended, the user's two exceptions, D29 and D31).
-  - You hand-solder the large parts, all bought from **Akizuki**: four USB-C modules,
-    two DIP16 ADCs, the 12 V module, two shunts per port and the input
-    fuse.
+  - JLCPCB machine-places the small parts, the RP2040, the CH335F and the four USB-C
+    receptacles, all JLCPCB **Basic** except those three parts (Extended, the user's three
+    exceptions, D29, D31 and D37).
+  - You hand-solder the large parts, all bought from **Akizuki**: two DIP16 ADCs, the 12 V
+    module, two shunts per port and the input fuse.
   - This is the sourcing rule D13. D22 excludes Preferred Extended parts too, so the
     D+/D− lines of J1–J3 have no ESD protection (`requirements/product.md` §9).
 
@@ -49,12 +54,12 @@ Read in this order:
 | `CLAUDE.md` | Engineering policy, release discipline, and the open-issue list (Section 11). Every unstruck open issue blocks manufacturing. |
 | `requirements/product.md` | What the product must do — the authority. REQ-* IDs, each marked Settled / Delegated / Proposed / Open / Withdrawn. Includes the control protocol. |
 | `requirements/verification.md` | How each requirement is proven (V-* IDs: method, pass criterion, limits). |
-| `design/circuit/CIRCUIT_DESIGN_Rev0.5.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.3 are in Git history. |
+| `design/circuit/CIRCUIT_DESIGN_Rev0.5.md` | The schematic as a document: topology, nets, designators, calculations, decisions (§10), and what was given up to meet the sourcing rule (§7.4). Rev0.1–Rev0.4 are in Git history (Rev0.4 at commit `5a697aa`). |
 | `requirements/parts.md` | Candidate parts: JLCPCB Basic rows (LCSC number, assembly stock, class, date) and Akizuki rows (code, stock, price, date). Candidates only — none is confirmed. |
 | `design/ecad/` | The KiCad 9 project (D32): `source/` holds the project, the source of truth until the EasyEDA import; `scripts/` holds its generators and checks; `libraries/` holds the project's symbols and footprints and the parts register they are checked against (its README). So far: stackup, outline, rules, net classes, the libraries, the schematic, written from `design/circuit/CIRCUIT_DESIGN_Rev0.5_netlist.md` (the capture list: every part, pin and net) and checked against it, the placement and silkscreen, written from `design/ecad/PLACEMENT_Rev0.5.md` (where every part and label sits, and why), and the routing, from `design/ecad/ROUTING_Rev0.5.md`; `make_outputs.py` writes the candidate manufacturing set from the board. `design/ecad/README.md` gives the order to run the generators in. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
 | `design/experiments/stackup-impedance/` | The stackup study behind D27: JLCPCB's 4-layer stackups, the 90 Ω USB pair width on each, and a model checked against JLCPCB's single-ended calculator. A non-authoritative study, not design data. |
-| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03 and re-run 2026-11-04 for D29, D30, D31 and D33: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
+| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03, re-run 2026-11-04 for D29, D30, D31 and D33, with Rev0.4's real quote (2026-11-12) and the Rev0.5 delta for D37 and D38: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
 | `host/profiler/` | The PC software (issue #9): a native Win32 current profiler in Rust that plots both channels, switches the ports and exports CSV. Runs against its demo device until firmware exists (its README). |
 | `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the board-size decisions D10 and D24 (100 × 72 mm). |
 
@@ -92,17 +97,20 @@ python -m http.server 8000 --directory mockup
 ## Building and programming
 
 Not possible yet. The board is captured and laid out in KiCad 9.0.8 until the design is
-complete, then imported into EasyEDA (decision D32, issue #6). The module headers are
-chosen (D33) and every part has a symbol and a footprint, the RP2040's and the CH335F's
-lands drawn from their datasheets (G20, G21). The schematic is captured (issue #6 P2,
-D34) and includes J1's soft start (D35, issue #7). The parts are placed (P3) and routed
-(P4, under D36's L3/L4 rule): DRC reports 0 violations and 0 unconnected items. The silkscreen
-labels are placed, and a candidate manufacturing set (P5: Gerber, drill, JLCPCB BOM and CPL,
-schematic PDF, renders, a `WIP` manifest) is generated into `manufacturing/working/rev0.4/`,
-which Git does not track and nobody may order from. The next step is the EasyEDA import
-(P6). The front-end checks are made on
-the first assembled board, not on a bench beforehand (decision D28). Firmware does not
-exist.
+complete, then imported into EasyEDA (decision D32, issue #6). Every part has a symbol and
+a footprint, the RP2040's, the CH335F's and the USB-C receptacle's lands drawn from their
+datasheets or maker's drawing (G20, G21, D37). The schematic is captured (issue #6 P2,
+D34) and includes J1's soft start (D35, issue #7) and the four data-line taps (D38, issue
+#10). The parts are placed (P3) and routed (P4, under D36's L3/L4 rule): DRC reports 0
+violations and 0 unconnected items, and `check_routing.py` rule 9 keeps the L2 plane whole
+under U1 and U6. The silkscreen labels are placed, and a candidate manufacturing set (P5:
+Gerber, drill, JLCPCB BOM and CPL, schematic PDF, renders, a `WIP` manifest) is generated
+into `manufacturing/working/rev0.5/`, which Git does not track and nobody may order from;
+`manufacturing/releases/rev0.5/r01/` holds the same files as a release candidate (state
+`WIP`, nothing ordered). The next step is the JLCPCB gate on Rev0.5 (JLCDFM, part mapping,
+the placement preview of the receptacle, a quote), which needs the user's sign-in, then the
+EasyEDA import (P6). The front-end checks are made on the first assembled board, not on a
+bench beforehand (decision D28). Firmware does not exist.
 
 The KiCad project, its libraries, its schematic and its board are generated, not hand-edited. With KiCad
 9.0's own Python, from the repository root:
@@ -119,7 +127,7 @@ The KiCad project, its libraries, its schematic and its board are generated, not
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_pcb.py         # its negative tests
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_routing.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_silk.py
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py           # writes manufacturing/working/rev0.4, runs check_outputs.py
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py           # writes manufacturing/working/rev0.5, runs check_outputs.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_outputs.py     # its negative tests
 ```
 

@@ -1,7 +1,9 @@
 # USB Power-Control Hub — Product Requirements
 
 **State: WIP — MANUFACTURING PROHIBITED.** Opened 2026-11-03. Revised for circuit Rev0.4
-on 2026-11-03; amended 2026-11-04 for D29 (the bare RP2040), D30 (leaded HASL) and D31 (the bare CH335F).
+on 2026-11-03; amended 2026-11-04 for D29 (the bare RP2040), D30 (leaded HASL) and D31 (the bare CH335F);
+amended 2026-11-12 for circuit Rev0.5, D37 (the USB-C receptacles machine-placed, issue #8) and D38 (the
+data-line taps, issue #10).
 
 This file is the authority for **what** the product must do (CLAUDE.md Section 2).
 **How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.5.md`. **How each requirement is
@@ -12,7 +14,7 @@ Status legend:
 | Status | Meaning |
 |---|---|
 | **Settled** | Traced to a user decision (D-number) or a CLAUDE.md MUST. Change only with the user |
-| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.5 §10, D14–D21 and D23; D23's MCU choice is superseded by D29 and D15's hub module by D31, both user decisions). Binding until the user reverts it; the user may revert any one |
+| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.5 §10, D14–D21 and D23; D23's MCU choice is superseded by D29, D15's hub module by D31 and D33's USB-C module headers by D37, all user decisions). Binding until the user reverts it; the user may revert any one |
 | **Proposed** | Written by Claude to fill a gap and **not** covered by the delegation. Becomes Settled when the user accepts it |
 | **Open** | Cannot be written until the named Open Issue (CLAUDE.md Section 11) is resolved |
 | **Withdrawn** | Retired with a reason; the ID is not reused |
@@ -70,8 +72,9 @@ This section answers "can firmware stop power to a port?": yes, and this is the 
 | REQ-HOST-04 | The control port implements the protocol in Section 4.1. | Delegated | D21 |
 | REQ-HOST-05 | The stream is binary and framed per Section 4.2. | Settled (binary, framed) / Delegated (frame layout) | Rev0.1 §3.3 |
 | REQ-HOST-06 | The MCU's USB function uses a VID/PID we are entitled to (pid.codes for open hardware, or a purchased VID), never a squatted one. Value not yet chosen. | Settled (rule) / Open (value) | CLAUDE.md §10.5 |
-| REQ-HOST-07 | DUT data passes through a USB 2.0 High-Speed hub (CH335F, U6) on each downstream port. Each HS path still passes through one Akizuki USB-C module and its headers (J1, and J2 or J3; since D31 the hub itself is on the board). HS through them is unverified (OI-26); if HS fails at bring-up, FS operation is the documented fallback. | Delegated | D15, D31 (D11 superseded by D13) |
+| REQ-HOST-07 | DUT data passes through a USB 2.0 High-Speed hub (CH335F, U6) on each downstream port. Each HS path ends at the pads of a USB-C receptacle on the board (J1, and J2 or J3), through the hop and the branch that join its alternating D+ and D− pads (circuit §3.3); until D37 it crossed an Akizuki USB-C module and its headers instead. HS through the on-board layout is unverified (OI-26); if HS fails at bring-up, FS operation is the documented fallback. | Delegated | D15, D31, D37 (D11 superseded by D13) |
 | REQ-HOST-08 | **Power declaration.** The MCU function's configuration descriptor declares bus-powered with bMaxPower 200 mA. The CH335F stays self-powered (PSELF default) and declares its default 100 mA. | Delegated | D26 |
+| REQ-HOST-09 | **Data-line taps (hardware).** The D+ and D− of the hub ports behind J2 and J3 reach RP2040 GPIO26–29 (U1 pins 38–41: USB_A_P, USB_A_N, USB_B_P, USB_B_N) through 1 kΩ resistors R35–R38 that stand on U6's pairs, so that firmware can sample Low-Speed and Full-Speed traffic with the PIO. High-Speed signalling is not captured. The capture itself (PIO program, trigger, buffer, packet decoding and the host application's lane) is later work and is not a requirement of this revision. The resistors can be removed. | Settled (the capability, the user's request in issue #10) / Delegated (1 kΩ, the pin map) | D38 |
 
 ### 4.1 Control protocol v0 — Delegated
 
@@ -144,9 +147,9 @@ which implements and tests it); firmware follows it. Every multi-byte field is l
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
-| REQ-MECH-01 | PCB 100 × 72 mm, 1.6 mm, 4 layers, leaded HASL (D30; not RoHS), JLCPCB stackup JLC04161H-7628 named on the order. The outline stays within 100 × 100 mm (JLCPCB's base price tier as quoted on 2026-11-03, the user's condition in D24). A block placement is checked with the module headers' height (PH-1x40SG, D33); OI-23 and OI-24 are closed. | Settled (4 layers, ≤ 100 × 100 mm, finish) / Delegated (100 × 72 mm, stackup, headers) | D10, D24, D27, D30, D33, CLAUDE.md §10.3 |
-| REQ-MECH-02 | Two USB-C plugs fit J2 and J3 at the same time, verified with real cables. Design input: J2–J3 centre pitch ≥ 18 mm. The J2/J3 modules are 20 mm wide, so side-by-side placement gives ≥ 20 mm. | Settled (requirement, OI-1) / Delegated (18 mm) | OI-1, D21 |
-| REQ-MECH-03 | ≥ 3 mounting points, at least one near each connector end; insertion force is not carried by solder joints. The connector modules' mechanical pins are soldered, on 1 × 2 header pieces (D33), and the modules sit on the PCB, not on their header pins alone. | Settled | CLAUDE.md §7 |
+| REQ-MECH-01 | PCB 100 × 72 mm, 1.6 mm, 4 layers, leaded HASL (D30; not RoHS), JLCPCB stackup JLC04161H-7628 named on the order. The outline stays within 100 × 100 mm (JLCPCB's base price tier as quoted on 2026-11-03, the user's condition in D24). The outline was sized with the USB-C modules and their headers (D24, D33); since D37 the receptacles themselves stand on it; OI-23 and OI-24 are closed. | Settled (4 layers, ≤ 100 × 100 mm, finish) / Delegated (100 × 72 mm, stackup) | D10, D24, D27, D30, D37, CLAUDE.md §10.3 |
+| REQ-MECH-02 | Two USB-C plugs fit J2 and J3 at the same time, verified with real cables. Design input: J2–J3 centre pitch ≥ 18 mm. J2 and J3 stand 33.8 mm apart (the receptacles are 8.94 mm wide; the 20 mm modules gave ≥ 20 mm before D37). | Settled (requirement, OI-1) / Delegated (18 mm) | OI-1, D21, D37 |
+| REQ-MECH-03 | ≥ 3 mounting points, at least one near each connector end; insertion force is not carried by solder joints. Each receptacle's four plated shell slots are soldered and its two pegs sit in the PCB's holes (D37); the plug's insertion force (0.5–2.0 kgf) enters the PCB through those slots, by design, and the enclosure's openings and the mounting points keep the rest of it off the board. Whether the slots hold on a 1.6 mm board, against a land drawn for 0.80 mm, is read in V-MECH-01 and V-MFG-03. | Settled | CLAUDE.md §7, D37 |
 | REQ-MECH-04 | Fasteners have ≥ 4 mm thread engagement or use heat-set inserts. | Settled (rule) / Delegated (heat-set M2 ×4) | CLAUDE.md §7, D21 |
 | REQ-MECH-05 | Case openings clear the mating plug's overmould, verified with a real cable. | Settled | CLAUDE.md §7 |
 
@@ -154,11 +157,11 @@ which implements and tests it); firmware follows it. Every multi-byte field is l
 
 | ID | Requirement | Status | Source |
 |---|---|---|---|
-| REQ-MFG-01 | JLCPCB PCBA places SMD parts on Top only, the MCU U1, its flash U8 and crystal Y1 included (D29), and the hub U6 with its crystal Y2 (D31). The user hand-solders the Akizuki modules and large parts after delivery: through-hole pins are soldered from Bottom, and the two large SMD shunts on Top. No part body on Bottom; leaded HASL (D30). | Settled | D13, D29, D30, D31; changes CLAUDE.md §1 "Top-side assembly" |
+| REQ-MFG-01 | JLCPCB PCBA places SMD parts on Top only, the MCU U1, its flash U8 and crystal Y1 included (D29), and the hub U6 with its crystal Y2 (D31). The user hand-solders the large Akizuki parts after delivery: through-hole pins (the MAU104, the two DIP16 ADCs, the 10 Ω metal-film shunts R_M and the fuse F1) are soldered from Bottom, and the two 0.1 Ω SMD shunts R_H on Top. The USB-C receptacles J1–J4 are machine-placed since D37. No part body on Bottom; leaded HASL (D30). | Settled | D13, D29, D30, D31; changes CLAUDE.md §1 "Top-side assembly" |
 | REQ-MFG-02 | ≥ 3 global fiducials, 1 mm copper / 2 mm mask opening. | Settled | CLAUDE.md §10.3 |
 | REQ-MFG-03 | SWD reachable by a fixture with mechanical datums, for debug; programming does not need it (REQ-BOOT-02). Method: Tag-Connect TC2030-NL footprint. | Settled (need, OI-8) / Delegated (method) | OI-8, D21 |
 | REQ-MFG-04 | Test pads on VBUS_IN, VSUP_A, VSUP_B, VBUS_A, VBUS_B, V5L, V5A, V12F, V_INJ, V3V3, VDDA and GND; since D29 also on U1's DVDD, RUN and one GPOUT clock pin (GPIO21, 23, 24 or 25), which V-MEAS-06 reads; since D31 also on U6's VDD33_HUB, which V-MFG-03 reads. | Delegated (D21) / Settled (the D29 and D31 pads) | D21, D29, D31 |
-| REQ-MFG-05 | **Sourcing.** Every machine-placed part is JLCPCB **Basic** with ≥ 500 assembly-pool stock at order time, with **two exceptions: the RP2040, C2040 (Extended, D29), and the CH335F, C5137013 (Extended, D31)**, which need the same ≥ 500 stock. Every hand-soldered part is in stock at Akizuki at order time. No other Extended part of any kind, Preferred Extended included; a third one needs the user's decision. Special or hard-to-source parts SHOULD be avoided, and part types and count SHOULD be kept low. | Settled | D13, D22, D29, D31 |
+| REQ-MFG-05 | **Sourcing.** Every machine-placed part is JLCPCB **Basic** with ≥ 500 assembly-pool stock at order time, with **three exceptions: the RP2040, C2040 (Extended, D29), the CH335F, C5137013 (Extended, D31), and the USB-C receptacle, C2765186 (Extended, D37)**, which need the same ≥ 500 stock. Every hand-soldered part is in stock at Akizuki at order time. No other Extended part of any kind, Preferred Extended included; a fourth one needs the user's decision. Special or hard-to-source parts SHOULD be avoided, and part types and count SHOULD be kept low. | Settled | D13, D22, D29, D31, D37 |
 
 ## 8. Safety and fail-safe
 
