@@ -26,6 +26,9 @@ __pycache__/
 # Firmware build output
 firmware/build/
 
+# Host app build output (Cargo, issue #9)
+host/profiler/target/
+
 # Disposable candidate exports (CLAUDE.md Section 2: never orderable).
 # Approved releases live under manufacturing/releases/ and stay tracked.
 manufacturing/working/*

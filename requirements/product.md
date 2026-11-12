@@ -95,7 +95,7 @@ Line-based ASCII, so a plain terminal (TeraTerm, PuTTY, `screen`) is a complete 
 | `PORT <A\|B> CYCLE [ms]` | `OK` once ON again | `ERR 02 BAD ARGUMENT` (unchanged) · `ERR 04` (OFF) |
 | `PORT <A\|B>?` | `OK ON` · `OK OFF` · `OK FAULT:OVERCURRENT` · `OK FAULT:UNDERVOLTAGE` · `OK FAULT:BUDGET` · `OK FAULT:STUCKRANGE` | — |
 | `ZERO <A\|B>` | `OK <offset per range, nA>` | `ERR 05 NOT ALLOWED: PORT OFF` |
-| `CAL? <A\|B>` | `OK <gain and offset per range>` — what the host tool needs to convert stream codes to amperes | `ERR 02 BAD ARGUMENT` |
+| `CAL? <A\|B>` | `OK LOW=<g>,<o> MID=<g>,<o> HIGH=<g>,<o>` — per range, the gain `<g>` in nA per code (finite, > 0) and the offset `<o>` in codes, so that I = (code − o) × g; what the host tool needs to convert stream codes to amperes (Section 4.2) | `ERR 02 BAD ARGUMENT` |
 | `RANGE <A\|B> <AUTO\|HIGH\|MID\|LOW>` | `OK` — a fixed range is a firmware hold; hardware up-ranging still overrides it on over-range (REQ-SAFE-02), and firmware returns to it after 1 ms below threshold | `ERR 02 BAD ARGUMENT` |
 | `STREAM <ON\|OFF>` | `OK` | — |
 | `BOOT` | `OK`, then reboot into the RP2040 ROM USB bootloader within 100 ms; ports OFF (REQ-PORT-01) | — |
@@ -107,20 +107,29 @@ REQ-PORT-04) and are not reused.
 
 ### 4.2 Stream framing — Delegated
 
-- Frame: sync `0xA5 0x5A`, version (u8), flags (u8), sequence number (u16, wraps), sample
-  count n (u16), n sample records, CRC-16/CCITT over everything after the sync bytes.
+The bit layout below was chosen with the host tool (issue #9, `host/profiler/src/protocol.rs`,
+which implements and tests it); firmware follows it. Every multi-byte field is little endian.
+
+- Frame: sync `0xA5 0x5A`; version (u8) = 1; flags (u8): bit 0 fault A, bit 1 fault B (a port
+  opened by hardware), other bits 0; sequence number (u16, wraps at 65536); sample count n
+  (u16, a non-zero multiple of 14, at most 2800 = 200 ms); n sample records; CRC (u16).
+- CRC: CRC-16/CCITT-FALSE (polynomial 0x1021, initial 0xFFFF, no reflection, no final XOR;
+  `123456789` gives 0x29B1) over everything after the sync bytes, from the version byte to
+  the last record.
 - Timing: the ADCs deliver 1 ms frames of 14 samples, 69 µs apart, with a 103 µs gap across
   each frame's aux conversion (circuit §3.3). A stream frame carries whole 1 ms ADC frames
   (n is a multiple of 14), and its sequence number is the index of its first 1 ms ADC frame.
-  The host therefore knows every sample's time exactly.
+  Sample k (0–13) of ADC frame f is taken at f × 1000 µs + k × 69 µs, so the host knows every
+  sample's time exactly.
 - Sample record, 5 bytes:
-  - channel A (u16, one 12-bit conversion of the active range's amplifier);
+  - channel A (u16, one 12-bit conversion of the active range's amplifier; the upper 4 bits
+    are 0);
   - channel B (u16, the same);
-  - one byte holding each channel's range code (2 bits each) and the settling and clipped
-    flags (REQ-MEAS-06).
+  - one byte: bits 0–1 range A, bits 2–3 range B (0 LOW, 1 MID, 2 HIGH, 3 reserved), bit 4
+    settling A, bit 5 clipped A, bit 6 settling B, bit 7 clipped B (REQ-MEAS-06).
 - At 14.0 kSPS that is 70.0 kB/s, about 5.9 % of Full-Speed bulk.
-- The host tool converts codes to amperes with the constants from `CAL?`. Fault events are
-  carried in the frame `flags` byte.
+- The host tool converts codes to amperes with the constants from `CAL?` (Section 4.1). Fault
+  events are carried in the frame `flags` byte.
 - A sequence number other than the previous one + n / 14 is reported by the host tool as lost
   data, never silently bridged.
 

@@ -167,6 +167,8 @@ usb-power-hub/
 │  │  └─ reports/
 │  └─ experiments/              # non-authoritative trials
 ├─ firmware/                    # RP2040 (bare chip, D29) — src/ include/ tests/ tools/ reports/
+├─ host/
+│  └─ profiler/                 # PC software: native Win32 Rust current profiler (issue #9)
 ├─ manufacturing/
 │  ├─ working/                  # disposable candidate exports — never orderable
 │  └─ releases/<rev>/<rNN>/     # immutable approved or ordered releases
