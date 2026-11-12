@@ -1243,3 +1243,94 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Learning.** Read a connector's pin order from the drawing's own labels, enlarged, before writing it down;
   a remembered order is not evidence.
 - **Commit.** The one that adds this entry. Not pushed.
+
+## 2026-11-13 - #8 step 2 / #10: Rev0.5 captured, placed, routed and exported (release candidate r01, nothing ordered)
+
+- **Request.** The user pasted the #8 handoff (issuecomment-6811380017): J1-J4 become machine-placed C2765186
+  receptacles (D37, 「安価に製造できないとね、製造コストを下げて」, 「USB-C直付けのみ (推奨)」) and issue #10's data-line
+  taps join the same revision (D38, 「可能ならデータ線部分もロジックアナライズできると USB接続機器を開発するのに便利なんだけど、
+  出来る?」). Work order: rename, documents, capture, library, placement, routing, outputs, release candidate. The
+  JLCPCB gate (step 9) needs the user's sign-in and was not run. Nothing pushed, ordered or paid.
+- **Library and capture.** The receptacle's land is the maker's drawing (read from its labels, enlarged), with
+  one recorded deviation, the user's 「GND パッドを 0.035 mm 短く (推奨)」: A1 and B1 end 0.035 mm short so each NPTH
+  peg keeps 0.200 mm from copper. `check_libraries.py` fails a mirrored pad order, a missing slot and a peg 0.15 mm
+  from a pad. Taps R35-R38 (1 kΩ, C11702) join USB_A_P/N and USB_B_P/N to U1 pins 38-41 (GPIO26-29): 28 of 30 GPIO.
+  304 footprints (300 at Rev0.4).
+- **Symptom (routing).** The first Rev0.5 router session passed DRC and left U1's exposed pad no plane copper on its
+  east side: a slot 5.04 mm long (ROUTING_Rev0.5.md, *Router*). The checker had no rule for the plane, so nothing
+  flagged it.
+- **Root cause.** Freerouting knows no antipad. On L2 a via of a net other than GND stands in an 0.85 mm antipad
+  (0.45 + 2 × 0.20), and the fill drops plane copper narrower than 0.20 mm, so two such vias closer than 1.05 mm make
+  one void and a row of them a slot. Measured with rule 9's own functions: a later Rev0.5 candidate had voids of
+  6.23, 3.33, 3.28 and 3.02 mm and U1's pad webs N 0.53, E 0.00, S 0.58, W 1.05 mm; **Rev0.4's committed board fails
+  too**: voids of 3.65, 3.43 and 3.35 mm and 0.47 mm of plane beside U1's east side. The defect predates D37.
+- **Fix.**
+  - `check_routing.py` rule 9 (`plane_voids`, `epad_webs`): no void longer than 3.0 mm; each side of U1.57 and U6.0 keeps
+    at least half the pad's width (1.6 mm for U1's 3.20 mm) in plane copper within 5.0 mm.
+  - `route.py` / `ROUTING_Rev0.5.md`: `plane_via=0.60` (every via padstack 0.60 mm larger on In1.Cu in the router's
+    input, so different-net vias stand ≥ 1.20 mm apart: 48 pairs closer before, none after on one pass), `PLANE_HOLES`
+    (no via within 0.45 mm of a drilled pad's copper or hole on In1.Cu), and a `_gnd` padstack copy for GND vias, which
+    have no antipad.
+  - 22 parts around U1 moved 0.4-0.8 mm outward (`PLACEMENT_Rev0.5.md`, *Deviations*): two router runs that differed
+    only in these positions left 80 connections open, then 33.
+  - U1's stubborn pins are drawn before the router starts (the hand-drawn rows whose Why names a U1 pin); the router
+    joins them.
+  - The committed session still leaves 16 connections, 11 D36 places and 5 dangling stubs. The patch table of
+    `ROUTING_Rev0.5.md` (259 rows, 32 remove and 227 drawn) closes them in four stages: the window north of U1 routed
+    as a whole by negotiated congestion (nets routed one after another left three connections open), three U1 pads
+    joined with the plane rule off (with it on no path exists: the pockets around those pads hold no cell where a via
+    keeps rule 9), one via nudged 0.25 mm, and the analog blocks. Scratch tools found the rows; DRC and rule 9 prove them.
+- **Mistake, kept.** A trial added 22 pre-route rows to the committed input (13 long V_INJ rows along y = 24.2 in the AFE
+  band and 5 U1-pin escapes): 41 connections open against 16. I first read it as router randomness. The router is
+  deterministic, and the diff of the two DSNs named the rows; removing them restored the committed input's digest and
+  result.
+- **Dead end, kept.** A ring keepout that allowed a via only in twelve 0.85 mm windows around U1 left the north side
+  of the pad 1.51 mm of plane (rule 9 wants 1.60 mm) and 33 connections open against 24 without it; dropped, the ring
+  is open with the two spacing rules only. A 0.55 mm window placed no via at all: the router keeps its 0.15 mm
+  clearance inside the window's edge.
+- **Process incident.** Parallel router sweeps froze the machine on 2026-11-12 (「固まってるけど」, 「負荷かけすぎじゃない」). Since then:
+  at most two processes at a time (the router is one), no sweeps, tests one at a time. The router is deterministic, so
+  one trial per input is enough and the official run reproduces it.
+- **Two test traps.** `test_make_project.py`'s `peg_drc` called `board.Remove()`, and the next `FootprintLoad` raised
+  `SwigPyObject has no attribute ...` in three tests; rules.md already had this rule (2026-11-05), and a new helper
+  broke it again: it now strips the board's items in the text. The independent BOM/CPL check (`c2_check.py`, scratch,
+  outside the repository) reported "MISSED hand designator J1 added to BOM": J1 is machine-placed since D37, so the
+  corruption had become valid input; it now takes the first designator of the hand-solder list from the data.
+- **Result.** Board: 2563 tracks, 405 vias, DRC 0 violations, 0 unconnected, 0 parity; U1's plane webs N 1.66, E 1.70,
+  S 1.65, W 1.80 mm against 1.60 mm, longest void 2.81 mm; port paths 35.24 and 37.89 mΩ. `make_pcb.py` run twice gave
+  the same bytes, and the chain make_project, make_libraries, make_schematic, make_pcb (twice) reproduced all 43 source
+  and library files. All seven suites (176 tests; 175 before `fc85c78` added the pitch test), the cost estimate's 18 and the
+  OI-23 study's 21 pass, one at a time. `manufacturing/releases/rev0.5/r01/`: ten output files byte-identical to a fresh `make_outputs.py`
+  (`check_outputs.py`, 2933 checks), manifest (WIP), `SOURCING_CHECK.md` (PASS, 2026-11-13) and `SHA256SUMS.txt`
+  (`sha256sum -c` OK); Rev0.4's releases unchanged.
+- **Grading (rubric C1-C9, `.claude/goal-loop/rev05-receptacles/`, not tracked).** First pass on `c3accc1` by an
+  independent rubric-verifier: C1, C2, C3, C5, C6, C8 and C9 pass; **C4 and C7 failed**, on two gaps that I had found
+  by grepping the Expect clauses a few minutes before its verdict arrived. C4: `test_check_pcb.py`'s own docstring
+  disclaimed the J2-J3 pitch rule, so REQ-MECH-02's check had never been seen to fail. C7: D38 did not cite CLAUDE.md
+  5.3's "No stubs" as the rule it departs from, and said nothing of the RP2040's reset state on GPIO26-29 (an input with
+  its pull-down on, 50-80 kΩ). Fixed in `fc85c78`: `test_receptacles_too_close` (J3 moved to a 17.00 mm pitch; 29 tests
+  OK) and the text in circuit §3.3, the D38 row and CLAUDE.md 5.3. The numbers added are computed, not measured: with
+  the tap's 51-81 kΩ in parallel with the hub's 15 kΩ pull-down, a Full-Speed device's idle D+ is 2.92-2.95 V
+  against 3.00 V (nominal 1.5 kΩ pull-up to 3.3 V); the CH335F's own pull-down value and the margin to its detection
+  threshold are not in the repository. `autoroute.py` (which now runs the router in its temporary directory) got
+  absolute `--java` and `--jar` paths; a 40 s run with relative paths started from the committed input digest
+  (`7291238cf564`), left no `en/` and no java.exe. Second pass on `fc85c78` (C2, C3, C4, C6, C7, C8, C9; C1 and C5
+  read nothing that changed, `git diff --stat c3accc1 HEAD` lists four files): **all seven pass.** ERC 0 and
+  `check_schematic` 4068 checks; `check_pcb` 13,676 checks and `test_check_pcb` 29 tests, `test_receptacles_too_close`
+  among them; `check_outputs` 2933 checks, `sha256sum -c` 12 files OK, Rev0.4's releases unchanged; the seven suites OK
+  (19, 29, 19, 29, 22, 28 and 30 tests: 176) and make_libraries, make_schematic and make_pcb each run twice without a
+  changed byte; 0 CR bytes, no leftover process, no `en/` in the repository.
+- **Not verified.** The JLCPCB gate on Rev0.5 and the placement preview of the receptacle (its CPL angle is KiCad's
+  alone), the receptacle's shell legs on a 1.6 mm board (OI-33), the taps' effect on the High-Speed eye (OI-26), the
+  router's session on another JRE, and the signal-integrity effect of the long routes (V_INJ 87.9 mm with 8 vias, the
+  taps 102.9-110.6 mm). The patch rows belong to the committed session: a new router run needs a new patch, and the
+  tools that found these rows are scratch, not in the repository. Nothing is built.
+- **Learning.** rules.md: "Datasheet text extraction" (a connector's pad order and land come from the drawing's own
+  labels, enlarged; confirmed by the first grading's C1), "Freerouting 2.5.0" (the router's antipad, the DSN diff, the
+  patch, the `en/` folder), "KiCad 9 (pcbnew ...)" (`board.Remove()` again), "KiCad 9 silkscreen and manufacturing
+  outputs" (a negative test that becomes valid input), "Shell and Python on this box" (the load limit), "Git" (a commit
+  message's list of tests comes from the diff: the first draft of `0cdbbda`'s named tests that did not exist) and
+  "Delegated verifiers" (grep each Expect clause against the repository before grading).
+- **Commits.** `0cdbbda` (placement, routing, outputs, release candidate r01), `c3accc1` (CLAUDE.md, README, requirements),
+  `fc85c78` (the pitch test, D38's exception and pull-down, the router's absolute paths); the commit that adds this entry
+  follows. Not pushed.

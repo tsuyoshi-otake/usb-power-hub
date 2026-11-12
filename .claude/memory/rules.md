@@ -119,6 +119,13 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   MCP3208 DS21298E Figure 2-2 at V<sub>REF</sub> 3.3 V: the image was read as −0.5 LSB, the
   vector paths give −0.37 LSB. An independent verifier caught the difference, and the main
   session's own path extraction reproduced it.
+- **Read a connector's pad order and land from the drawing's own labels, enlarged, not from
+  memory or a familiar pinout.** Verified 2026-11-12/13 (#8): the C2765186 pads alternate the
+  two signal rows (A1 A4 B8 A5 B7 A6 A7 B6 A8 B5 B4 B1 from left to right in the top view).
+  The land came from the maker's "RECOMMENDED PCB LAYOUT" page, rendered and enlarged, and
+  `check_libraries.py` fails a mirrored order. The first independent grading (C1) re-read the
+  same drawing and agreed with every figure within 0.002 mm, bar the 0.035 mm the user chose
+  for pads A1 and B1.
 
 ## Git
 
@@ -128,6 +135,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   the content. Verified 2026-11-03: `2a83480` (rename only) keeps
   `git log --follow -- design/circuit/CIRCUIT_DESIGN_Rev0.2.md` reaching
   `4dd10fb`.
+- **Write a commit message's list of tests from the diff, not from memory or the rubric.**
+  The first draft of #8's main commit (`0cdbbda`) named tests that did not exist, among them
+  "pitch below 18 mm", which the rubric's Expect clause also listed. `git diff --cached -U0 |
+  grep "def test_"` gave the real names and the message was rewritten before the commit
+  (2026-11-13). The pitch test did not exist until `fc85c78`.
 
 ## Decision records
 
@@ -181,6 +193,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   line it printed 3, the same grep outside `$(...)` printed 1, and `${#p}` of `$'\r'` was 0
   inside and 1 outside (2026-11-04). Assign the pattern to a variable outside the
   substitution, or count in Python.
+- **Run at most two heavy processes at a time, and one test suite at a time.** A parallel
+  sweep of Freerouting runs froze this box on 2026-11-12 (#8; the user: 「固まってるけど」,
+  then 「負荷かけすぎじゃない」). Since then the router, each test suite and each KiCad
+  check run alone, with a timeout. The router is deterministic (see "Freerouting 2.5.0"),
+  so one trial per input is enough and the official run reproduces it.
 
 ## Design documents
 
@@ -261,8 +278,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **Do not `board.Remove()` any item and then call `FootprintLoad` in the same process.**
   In KiCad 9.0.8 the later `FootprintLoad` raised `AttributeError` on a `SwigPyObject`
   (2026-11-05, #6 P3, footprints; again 2026-11-06, #6 P5, Edge.Cuts drawings, in
-  check_libraries' DRC sandbox). Cut the `footprint`, `segment`, `arc`, `via`, `zone` and
-  every `gr_*` node from the board's text before `LoadBoard`: 3559 checks PASS.
+  check_libraries' DRC sandbox; a third time 2026-11-13, #8, when a new `peg_drc` helper in
+  `test_make_project.py` broke three tests). Cut the `footprint`, `segment`, `arc`, `via`,
+  `zone` and every `gr_*` node from the board's text before `LoadBoard`: 3559 checks PASS.
+  A new test helper that edits a board does it in the text from the start.
 - **A footprint's silkscreen can lie outside its courtyard.** The RP2040 land's pin-1
   triangle sits outside the courtyard, so a 0402 placed clear of the courtyard still gave DRC
   `silk_over_copper` and `silk_overlap` (2026-11-05, #6 P3). Courtyard spacing does not guard
@@ -345,6 +364,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **`-l en` with file logging on writes `<cwd>/en/freerouting.log`.**
   - Pass `--logging.file.enabled=false`.
   - Even then an empty `en/` was left in the repo and failed rubric C8 (2026-11-06).
+  - `autoroute.py` therefore runs the router with `cwd` set to its temporary directory, and
+    makes `--java` and `--jar` absolute for that (a relative path would break the run).
+    Checked 2026-11-13 (#8) with relative paths and a 40 s timeout: the run started from the
+    committed input's digest, no `en/` appeared in the working directory or the repository,
+    and no java.exe was left.
 - **With neck-down off, the router still narrows a wire to 0.10–0.12 mm at a 0.4 mm-pitch
   pin.** `--router.neck_width_um=150` holds it at the board minimum, so DRC's track-width
   rule passes (#6 P4).
@@ -359,6 +383,32 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
     then proved the result.
   - Off-grid endpoints make 44° segments, so set end points by hand to exactly 45° or 90°.
   - The first grid search left out the 0.25 mm hole clearance for tracks, and DRC caught it.
+- **A patch belongs to one router session.** (#8, 2026-11-13)
+  - The Rev0.5 patch is 259 rows (32 remove, 227 drawn) in four stages. It closes the
+    committed session's 16 open connections and 11 D36 places. A new router run needs a new
+    patch, and the scratch tools that found the rows are not in the repository.
+  - In the window north of U1, nets routed one after another left three connections open;
+    the window routed as a whole by negotiated congestion closed them.
+  - Three U1 pads were joined with the plane rule off. With it on no path exists: the
+    pockets around those pads hold no cell where a via keeps rule 9.
+- **Freerouting knows no antipad, so a DRC-clean board can still have a broken L2 plane.**
+  (#8, 2026-11-13)
+  - On L2 a via of another net stands in an 0.85 mm antipad (0.45 + 2 x 0.20) and the fill
+    drops plane copper narrower than 0.20 mm. Two such vias closer than 1.05 mm make one
+    void, a row of them a slot. The first Rev0.5 session passed DRC and left U1's exposed pad
+    no plane copper on its east side (a slot 5.04 mm long); Rev0.4's committed board has
+    voids up to 3.65 mm, and nothing had flagged them.
+  - Give the router the antipad (`route.py`, ROUTING_Rev0.5.md *Router*): every via padstack
+    0.60 mm larger on In1.Cu (`plane_via`, so different-net vias stand at least 1.20 mm
+    apart; 48 pairs closer before, none after, on one pass), a keepout around drilled pads
+    (`PLANE_HOLES`), and a copy `_gnd` of the padstack for GND vias, which have no antipad.
+  - Check the plane itself: `check_routing.py` rule 9 (no void over 3.0 mm; at least half of
+    each side of an exposed pad kept in plane copper within 5.0 mm). DRC has no such rule.
+- **A worse result from a changed router input has a cause in the input: diff the two DSNs
+  before calling it randomness.** (#8, 2026-11-13) A trial with 22 extra pre-route rows
+  (13 long V_INJ rows along y = 24.2 among them, and 5 U1-pin escapes) left 41 connections
+  open against 16. I first read that as noise; the router is deterministic, the DSN diff
+  named the rows, and removing them restored the committed input's digest and result.
 
 ## KiCad 9 routing checks
 
@@ -442,6 +492,12 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   re-saved.** SaveBoard orders segments by UUID; P5's re-save made test_check_routing pick a
   0.7 mm stub ending on a via, whose B.Cu copy joined the via's net and was exempt (#6 P5).
   Pick by a property (the longest) and keep a copied track off the original's endpoints.
+- **A negative test that names a designator stops being a fault when the part changes
+  class.** (#8, 2026-11-13) The independent BOM/CPL check's corruption "hand designator J1
+  added to BOM" reported MISSED after D37 made J1 machine-placed: the input was valid now,
+  and the checker was right. Take the corrupted item from the data (the first designator of
+  the hand-solder list), and read a MISSED as "is it still a fault?" before touching the
+  checker.
 
 ## JLCPCB quote, placement preview and the account (#6 P6, 2026-11-11/12)
 
@@ -500,6 +556,12 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   receptacles overhang the board edge by 1.06 mm, which the placement document allows. The
   verifier had to interpret, and said so (2026-11-05, #6 P3). A literal reading would have
   failed a correct board.
+- **Grep each Expect clause's key phrase against the repository before launching the
+  verifier.** The first grading of the Rev0.5 rubric failed C4 and C7 (2026-11-13, #8): no
+  test made the J2-J3 pitch rule fail (the test file's own docstring disclaimed it), and D38
+  cited neither CLAUDE.md 5.3's "No stubs" nor the RP2040's reset pull-down. A grep of the
+  clauses' own words found both gaps a few minutes before the verdict arrived, so one
+  grading pass went to what a grep finds.
 
 ## Devin CLI
 
