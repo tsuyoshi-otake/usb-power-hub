@@ -13,8 +13,9 @@ test breaks. The unchanged copy must pass; every corruption must fail and be nam
 output. The repository's files are never modified. Each run includes DRC and a netlist
 export, about 3 s.
 
-Not covered here: the J2-J3 pitch rule (moving J3 means moving all of channel B) and the
-board-outline rule (make_project.py --check and test_make_project.py own the outline).
+Not covered here: the board-outline rule (make_project.py --check and test_make_project.py own
+the outline). The J2-J3 pitch rule is covered by test_receptacles_too_close, which moves J3
+alone, so that the checker names other lines as well as the pitch.
 The board in design/ecad/source must be the placed one: make_pcb.py writes it.
 """
 import importlib.util
@@ -227,6 +228,13 @@ class CheckTest(unittest.TestCase):
         self.assertFailsWith(run_check(board=board, doc=edit),
                              "passes the edge it stands on by more than 1.31 mm",
                              "FAIL J2: front face at y = -2.060, opening -1 along y")
+
+    def test_receptacles_too_close(self):
+        """J3 moved 16.8 mm toward J2: the pitch of 17.00 mm is under REQ-MECH-02's 18 mm, so two
+        plugs would not fit side by side. Only J3 moves (channel B's own parts stay behind), so
+        the checker names other lines too; the pitch line is the one under test."""
+        self.assertFailsWith(run_check(board=lambda t: move(t, "J3", 34.5, 2.615)),
+                             "FAIL J2/J3: pitch 17.00 mm < 18.0 mm")
 
     def test_receptacle_turned_around(self):
         """J4 at rotation 0 opens toward the board's interior, not the back edge."""

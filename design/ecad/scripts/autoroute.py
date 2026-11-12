@@ -84,7 +84,8 @@ def main(argv):
         # the JVM's NIO selector binds an AF_UNIX socket under its temp directory; under the
         # user's %TEMP% on this box that bind fails (~/.claude/notes/jvm-loopback-windows.md)
         unix_tmp = pathlib.Path(os.environ.get("SystemRoot", r"C:\Windows")) / "Temp"
-        cmd = [str(a.java), f"-Djdk.net.unixdomain.tmpdir={unix_tmp}", "-jar", str(a.jar),
+        # the router runs in the temporary directory (below), so its two paths are made absolute
+        cmd = [str(a.java.resolve()), f"-Djdk.net.unixdomain.tmpdir={unix_tmp}", "-jar", str(a.jar.resolve()),
                "-de", str(dsn), "-do", str(ses), "-l", "en", *args]
         print(f"routing {digest[:12]} with {a.jar.name}, at most {a.passes} passes")
         sys.stdout.flush()

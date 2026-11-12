@@ -393,7 +393,8 @@ USB 2.0 high-speed:
 - **Never split the reference plane under a pair.** Stitch GND at every layer
   transition near the pair.
 - Keep pairs away from the MAU104, the shunt ladder, and LED drive.
-- No stubs. No test points on the pairs.
+- No stubs, except the four 1 kΩ data-line taps of D38 (issue #10), each a stub of one resistor
+  pad. No test points on the pairs.
 
 Power:
 
