@@ -1444,3 +1444,102 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   page's campaign banner; the help article on new-customer and monthly coupons). "None found" from one list is not "none
   exist". Event coupons show their terms only after a claim, and a claim is the user's to approve.
 - **Commits.** The commit that adds this entry and the rule. Not pushed.
+
+## 2026-11-13 - #11: enclosure Rev0.1, a first design on paper (nothing printed, the lid PCB not drawn)
+
+- **Request.** 「筐体デザインはあるんだっけ?」 (there was none: `design/mechanical/` did not exist, and the mockup's case,
+  64.4 × 28.4 × 9.7 mm, belongs to the superseded 60 × 24 mm board), 「だいぶデカくなったね」, 「USBの位置はUX的に問題ない?」,
+  then 「筐体もデザインして」. Tracking issue #11. The open choices (E1-E9) are Claude's, under the 2026-11-03 delegation.
+  Nothing printed, ordered or paid; nothing pushed.
+- **Result.** `design/mechanical/`: the document `ENCLOSURE_Rev0.1.md` (every dimension in its tables), the board's
+  interface exported from the tracked KiCad board (`reference/board_interface_Rev0.5.json`: the outline, 304 footprints
+  with their courtyards, 73 holes), `assembly/` (Tray, Frame and Plunger as STL, the lid PCB's interface as JSON, a
+  manifest) and `reports/` (seven pictures). A printed tray and frame under a 100 × 72 mm PCB lid, 104.8 × 76.8 × 27.7 mm
+  outside: the seam at the board's top face, the board clamped at H1-H4 between the tray's bosses and the frame's posts,
+  four countersunk M2 × 10 from below and four M2 × 5 through the lid into heat-set inserts in the posts, a rib under
+  each receptacle, a 15.0 × 8.0 mm pocket for a plug's overmould at each opening, two printed plungers over SW1 and SW2,
+  light wells over the LEDs and a pinhole over BOOT. F1 (18.3 mm) sets the height.
+- **Pipeline.** `export_board_interface.py` (KiCad's Python) → `make_enclosure.py --derived` (builds, rewrites the
+  document's derived table, draws the pictures and runs the checker: 17 s) → `test_check_enclosure.py` (72 tests, about
+  1 min). `check_enclosure.py` (E01-E16, 96 checks on the repository's files) reads the STL files, the lid interface, the
+  manifest, the board interface and the document's tables, and does not import the generator. The build is
+  byte-reproducible: a second build left all 13 generated files (5 in `assembly/`, 7 pictures, the document) with the same
+  SHA-256.
+- **Symptom 1 (three bodies in one file).** The first checker run (91 checks, 1 failed): `FAIL E02 Frame: watertight True,
+  winding consistent True, volume 18664.5 mm3, bodies 3`.
+  **Root cause.** The two light-well blocks shared only a face with the button columns, and a manifold3d union of two
+  solids with no volume in common keeps them as separate bodies (bounding boxes [27.6, 7.7, 2.2, 31.9, 14.6, 19.0] and
+  [61.4, 7.7, 2.2, 65.7, 14.6, 19.0], 355.488 mm3 each, listed by a scratch script). "Watertight" and "consistently
+  wound" were both true of that file.
+  **Fix.** `JOIN = 0.5`: every joined solid (bosses, ribs, flange, posts, columns, wells, tube) reaches 0.5 mm into its
+  neighbour, and the plunger's segments are built as hulls. Re-check: one body each. E02 counts bodies with manifold3d's
+  `decompose()`; trimesh's `split` fails in the venv ("no graph engines available").
+- **Symptom 2 (a check that could not fail).** The negative test `lid_overlap=-0.6` (no flange under the lid's edge)
+  passed the checker: E13 asked for 200 mm2 of contact under the lid, and the frame without its flange still gave 258 mm2.
+  **Root cause.** An area threshold that no corruption had ever pushed below its limit.
+  **Fix.** E13 asks that the outer 0.5 mm of the lid lies on the frame all round (≥ 99.5 % of that band). Both
+  `lid_overlap=-0.6` and `lid_overlap=0.3` fail it.
+- **Symptom 3 (expectations written from memory).** Of the first 54 negative tests, 4 failed on their first run, 3 of them
+  because the expectation was wrong and the checker right: `btn_cbore_depth=1.8` does not fail (the counterbore's floor is a
+  45° cone, so the collar keeps its 0.4 mm of travel; 1.6 does fail); `corner_r=6` was expected as an E03 box failure (the
+  bounding box does not change: it fails E14's skin check, and `corner_r=1.0` fails E03's outline check); `plunger_play=-0.2`
+  prints "lifted 0.45 mm the plunger meets the lid by", not "meets plastic". The fourth was symptom 2.
+  **Fix.** Each corruption was run and its FAIL line read before the assertion was written.
+- **Other defects, each fixed.**
+  - By reasoning, before a check existed: with `corner_r` 3.0 and mitred offsets the ridge's corner stood 3.11 mm from the
+    outer arc's centre, 0.11 mm outside the wall. Offsets are round-cornered now and `corner_r` = `wall` = 2.0; E03
+    (nothing outside the outline) and E14 (the outer 0.3 mm whole round the seam) were added for it. The posts' feet
+    shared a plane with the ridge's inner face: a relief ring `lip_clear` wide, and E14 measures the smallest
+    tray-to-frame gap, 0.20 mm. A pan-head counterbore on the bed side had a flat unsupported ceiling: the bottom screws
+    are countersunk, and a 45° cone prints without support.
+  - The checker would have died with a KeyError on a manifest whose piece list lacked a piece. E01 now stops with a FAIL
+    line (`test_piece_not_in_the_manifest`).
+  - The document said that 17 of 24 part heights were assumed; a count of its table gave 20 (4 read: F1, the MAU104, the
+    receptacle and the switch). Three figures in its prose came from no script (the receptacle's face 1.34 mm inside the
+    wall, OUT B 45 mm from a screw, the SWD footprint 1.2 mm from the wall). They are derived figures now (`face_inset`,
+    `port_to_screw_max`, `swd_wall_clearance`), measured a second time by the checker (E15), and each was seen failing:
+    `gap=0.6`, J3 moved 0.6 mm, J5 moved 0.455 mm.
+  - The pictures are tracked, and each carries the manifest's SHA-256 in a PNG text chunk: E16 fails a picture drawn from
+    another build. The renderer's first pictures had a dark grey background (background pixels counted as edges, because
+    their normal is zero).
+  - A scratch AST scan (this box has no pyflakes or ruff) found an unused variable, an unused import and a dead
+    assignment.
+- **A rounding edge.** The SWD courtyard stands 1.155 mm from the wall, which the table prints as 1.16. A variant that
+  moves the wall by 0.2 mm prints 1.35, not 1.36. The test asserts that value with `1\.3[56]`, and the other SWD test moves
+  J5 by 0.455 mm so that the result (0.70) lies in the middle of a rounding step.
+- **Mistake, kept.** The rubric's "How to run" told the verifier to remove its scratch directory at the end, against
+  rules.md ("Tell a verifier to delete nothing"). Found by re-reading that section while the verifier ran, and corrected
+  by a message to the running verifier and in the rubric. The verifier deleted nothing and reported its directory
+  (`~/tmp/verify-enc`, 1.4 MB), which the main session removed.
+- **Checked by hand.** The export against `PLACEMENT_Rev0.5.md`: the positions and rotations of 18 footprints (J1-J5,
+  H1-H4, SW1-SW3, F1, U5, D10-D13) agree. Read outside the checker, with trimesh: each piece watertight and consistently
+  wound, Euler numbers -6 (Tray: 4 through-holes), -10 (Frame: 6) and 2 (Plunger).
+- **Grading (rubric C1-C9, `.claude/goal-loop/enclosure-rev01/`, not tracked).** One pass by an independent
+  rubric-verifier on the staged tree that became `f97c51f`: **all nine pass.** It ran each Verify itself: the checker (96
+  checks, 0 failed, at least one PASS for each of E01-E16); a rebuild with `make_enclosure.py --derived` that left the 13
+  sums and `git status` unchanged; the 72 tests (64 s) and the 16 IDs in the test file; three fault variants that no test
+  uses (`cavity_h=17.5`: `FAIL E05 F1: 58.89 mm3 of the Lid inside its envelope`; `pocket_w=13.0`: `FAIL E08` on J1-J4;
+  `standoff=1.5`: `FAIL E06 F1 pad '1'`); no import of the generator in the checker and no typed board coordinate; the
+  trimesh facts above, with volumes within 0.003 % of the manifest's; the pictures Assembled and Back read as images (one
+  closed box under a flat lid, four screw heads, two port openings in the facing wall, two button caps); the 18 derived
+  rows against the manifest; 4 read and 20 assumed heights against both sentences; WIP in the header and the manifest,
+  OI-1 and OI-5 open, both section 12 items unchecked; no by-product in the tree.
+- **The answer to 「USBの位置はUX的に問題ない?」** (given with this work's report). No major problem. The two inputs are on
+  the back edge (5V IN at x 17.5, HOST at x 76.0, 58.5 mm apart) and the two outputs on the front edge (OUT A at x 17.5,
+  OUT B at x 51.3, pitch 33.8 mm), each with its button 14.0 mm to its right and its two LEDs behind the button. Weak
+  points: HOST and 5V IN are the same receptacle on one edge and can be swapped (by design a swap gives a board that does
+  not enumerate, not a damaged one; not tested), so the lid's legend has to be large; OUT B is 45.21 mm from the nearest
+  screw, hence the rib and the tight shell hole; the front is not symmetric (the MAU104 takes its right third); whether a
+  plug seats depends on the wall's opening, which only real cables show; SWD needs the lid off.
+- **Not verified.** Nothing is printed, and no cable has been tried in an opening (V-MECH-01). The lid PCB is not drawn
+  (only its interface). 20 of the 24 part heights are assumed. The insert's hole (3.2 mm) and the screw heads' sizes are
+  from memory. The overmould envelope of 14.0 × 7.0 mm is the document's choice. About 1 W of heat is an estimate, not a
+  calculation. The print process (FDM or MJF) is the user's decision. The plungers' feel and BOOT through the pinhole
+  (V-BOOT-01) need the built unit. The export script has no check of its own beyond the 18 footprints compared by hand.
+  OI-1 and OI-5 stay open.
+- **Learning.** rules.md: a new section "Printed parts" (a union needs volume in common; "watertight" does not count
+  bodies; a threshold that no corruption can cross is not a check; build a corruption before asserting its line; keep an
+  asserted figure off a rounding edge; a picture carries the hash of the build it shows). "Shell and Python": `-I` does
+  not find a sibling module, and a compound command with `rm -rf` is refused here. "Delegated verifiers": the no-delete
+  rule now says to read it before writing a rubric's "How to run".
+- **Commits.** `f97c51f` (the enclosure); the commit that adds this entry and the rules follows. Not pushed.

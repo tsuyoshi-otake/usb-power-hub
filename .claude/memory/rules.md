@@ -164,7 +164,9 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **Pass multi-line Python through a quoted heredoc (`python -I - <<'EOF'`) or a file written
   with the Write tool, never through `-c` with mixed quotes.** A `-c` string holding both quote
   kinds failed with "unexpected EOF while looking for matching `''" (2026-11-03); the
-  quoted-heredoc form ran every non-ASCII edit of this session correctly.
+  quoted-heredoc form ran every non-ASCII edit of this session correctly. It recurred on
+  2026-11-13 (#11): a `-c` filter holding a regex with brackets and backslashes failed with
+  "unterminated character set", and the same filter written to a file ran.
 - **In that heredoc, a doubled backslash arrives as one.** A Python literal written as
   `"<bs><bs>n"` reached Python as `"<bs>n"` and put a real newline into the generated file
   (SyntaxError, 2026-11-03). Build a literal backslash with `chr(92)`, or write the script with
@@ -201,6 +203,15 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   then 「負荷かけすぎじゃない」). Since then the router, each test suite and each KiCad
   check run alone, with a timeout. The router is deterministic (see "Freerouting 2.5.0"),
   so one trial per input is enough and the official run reproduces it.
+- **Under `python -I` a script does not find the module beside it.** Isolated mode leaves the
+  script's directory off `sys.path`: a two-file probe gave `ModuleNotFoundError: No module
+  named 'sibling_mod'` with `-I` and ran without it (2026-11-13, #11). The scripts in
+  `design/mechanical/scripts/` load their siblings by path, with
+  `importlib.util.spec_from_file_location(name, HERE / f"{name}.py")`.
+- **A compound command that contains `rm -rf` is refused here; `rm -r` of one explicit path,
+  alone, runs.** Two such commands were denied on 2026-11-13 (#11): one with the path in a
+  variable, one followed by `&& cd ...`. `rm -r /c/Users/developer/tmp/<dir>` as its own
+  command ran. Do not retry a denied command; delete with one command per explicit path.
 
 ## Design documents
 
@@ -596,6 +607,41 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   A JavaScript call that prints hrefs is blocked as "Cookie/query string data": read a link's `href` with
   `read_page` on its ref.
 
+## Printed parts (manifold3d 3.5.4 and trimesh 5.2.0 in `~/tmp/cadvenv`; #11, 2026-11-13)
+
+- **A union needs volume in common: two solids that share only a face stay two bodies.** The
+  first build of the frame was three bodies (`FAIL E02 Frame: watertight True, winding
+  consistent True, volume 18664.5 mm3, bodies 3`): the light-well blocks met the button
+  columns at a face. In `make_enclosure.py` every joined solid now reaches `JOIN` = 0.5 mm
+  into its neighbour, and each piece is one body.
+- **"Watertight" does not count bodies: count them with manifold3d's `decompose()`.** That
+  three-body file was watertight and consistently wound. trimesh's `split` fails in the venv
+  ("no graph engines available"), so `check_enclosure.py` E02 uses `decompose()`, and a test
+  that adds a 1 mm cube to a piece expects `bodies 2`. A reading outside the checker:
+  trimesh's `euler_number` is 2 − 2 × (through-holes) for one closed body (Tray −6, Frame −10,
+  Plunger 2).
+- **A threshold that no corruption can cross is not a check.** E13 asked for 200 mm² of
+  contact under the lid. A frame built without its flange (`lid_overlap=-0.6`) still gave
+  258 mm² and passed; the negative test found it. The check now measures what the requirement
+  says: the outer 0.5 mm of the lid lies on the frame all round (≥ 99.5 % of that band). For
+  a check of the form "at least N of something", build the fault it is meant to catch and
+  read the number before choosing N.
+- **Build a corruption and read its FAIL line before asserting it.** Of the first 54 negative
+  tests of `check_enclosure.py`, 3 held an expectation written from memory that was wrong
+  while the checker was right: a counterbore 0.4 mm shallower did not fail (its floor is a
+  45° cone), a larger corner radius fails the seam's skin check and not the bounding box, and
+  one message had other words. A parameter's effect on a solid is not arithmetic on the
+  parameter.
+- **Keep an asserted figure off a rounding edge.** The SWD courtyard stands 1.155 mm from the
+  wall: the table prints 1.16, and a variant 0.2 mm farther out prints 1.35, not 1.36. Choose
+  the corruption so that the result lies mid-step (J5 moved 0.455 mm gives 0.70), or assert
+  `1\.3[56]`.
+- **A generated picture carries the hash of the build it shows.** `render_enclosure.py`
+  writes the manifest's SHA-256 into a PNG `tEXt` chunk and E16 compares it, so a picture of
+  an older build fails the checker. The manifest is byte-reproducible, so an unchanged
+  rebuild keeps the pictures byte-identical too (13 files; checked by the main session and
+  again by the verifier).
+
 ## Delegated verifiers
 
 - **Tell a verifier to delete nothing.** A rubric that said "delete it when done" let a
@@ -607,6 +653,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   Forbid git commands that write to the index as well: a verifier told only "edit, move or
   delete nothing" ran `git add -N` on the graded directory on 2026-11-03. It undid this with
   `git reset` and disclosed it.
+  Read this rule before writing a rubric's "How to run". The #11 rubric (2026-11-13) again
+  said "which you remove at the end"; re-reading this section while the verifier ran found
+  it. A message to the running verifier (SendMessage, delivered at its next tool call)
+  corrected it: the verifier deleted nothing and reported `~/tmp/verify-enc`.
 - **Check delegated numeric work against an independent implementation and a hand-worked
   value, not only against the reference it was fitted to.** A fitted parameter can absorb a
   formula bug. Verified 2026-11-03: Devin's Hammerstad–Jensen thickness correction gave
