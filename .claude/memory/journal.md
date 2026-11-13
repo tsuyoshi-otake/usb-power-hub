@@ -1334,3 +1334,79 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Commits.** `0cdbbda` (placement, routing, outputs, release candidate r01), `c3accc1` (CLAUDE.md, README, requirements),
   `fc85c78` (the pitch test, D38's exception and pull-down, the router's absolute paths); the commit that adds this entry
   follows. Not pushed.
+
+## 2026-11-13 - #8 / #10: the JLCPCB gate on Rev0.5 (release candidate r02, nothing ordered)
+
+- **Request.** Work order step 9 of the #8 handoff: JLCDFM, part mapping, the placement preview of the receptacle C2765186
+  and a quote, in the user's Chrome once they had signed in to JLCPCB and JLCDFM (「頑張って続けてくれ」, 「ログインしたよ」).
+  Nothing ordered, paid or saved to the cart; no terms or consent accepted; "Confirm Parts Placement" left at No.
+  Nothing pushed.
+- **Symptom 1 (placement preview).** With r01's CPL the JLCPCB model of the receptacle sat about 1.375 mm toward its mouth
+  from the footprint's body centre, at the right orientation.
+  **Root cause.** JLCPCB places its own model at the CPL point and angle (easy-stick 14.18); r01's CPL held KiCad's origin
+  and angle alone, and the model's own origin is offset from it by 1.375 mm along the receptacle's axis.
+  **Fix.** `jlcpcb_model_rotation.json` became `jlcpcb_model_frame.json`: per LCSC part `add` (rotation) and `shift`
+  ([dx, dy] in the footprint's frame, turned with it); C2765186 has [0.0, -1.375]; J1/J4 Mid Y 69.385 to 68.010, J2/J3
+  2.615 to 3.990. With it the viewer shows the front face 1.054 mm past the edge on all four (design 1.06), a viewer
+  reading with an error of about 0.04 mm.
+- **Symptom 2 (JLCDFM run 1).** "Plated through-hole spacing": 8 Danger (limit 0.18 mm). The GND fanout vias beside the
+  rear plated shell slots of the contact pads A1/B1 of J1-J4 stood 0.046 mm from the slot's hole; KiCad's DRC had said 0.
+  **Root cause.** `route.py` `_Copper` reads an oblong pad hole as a round one at the pad's centre, so the router kept clear
+  of a round hole instead of the slot, and DRC reported nothing either (rules.md: a slot is invisible to both).
+  **Fix.** `check_routing.py` rule 10 (every pair of drilled holes, a slot as a capsule: via-via 0.20, pad-pad 0.45,
+  via-pad 0.25 mm; `HoleGapTest`, 7 tests, and two more) and patch stage 5 of `ROUTING_Rev0.5.md` (the 8 vias deleted, each
+  stub drawn again into the slot's pad, ending 0.05 mm inside the ring; 275 rows, 397 vias). `route.py`'s search was left
+  alone so the committed session's digest still matches; the next router session must read the slot as a capsule.
+- **JLCDFM, judged.** The two runs (r01's Gerber, then r02's) are identical except for that item (run 2: 0). Six items
+  with Danger remain; each was judged against measurements on the KiCad board (scratch scripts, evidence outside the
+  repository): slot width (16 rows: the plated shell slots, 0.60 mm; JLCDFM Danger below 0.61 mm, JLCPCB's page allows
+  0.35 mm: the user's decision), annular ring (the 0.45/0.30 mm vias, ring 0.075 mm: JLCPCB's preferred via pad),
+  THT-to-SMD (hand-soldered parts), silkscreen to hole (123 pairs, all involving a via), pad spacing (JLCDFM seems to read
+  rounded-rectangle pads as sharp ones; no different-net pair under 0.15 mm) and mask opening exposing a trace (no other-net
+  copper within 0.15 mm of an opening; the closest is 0.152 mm). Part mapping 41 of 41, 0 substituted. Quote $51.94 without
+  shipping against the estimate's $51.80; impedance control would add $34.13.
+- **Found while verifying: KiCad's zone filler is not deterministic.** The second `make_pcb.py` run of the final
+  verification wrote a board with another SHA-256 than the one in r02's manifest. Thirty-two runs in a scratch copy of
+  `design/` gave two boards: 29 `d354d21a…` (two extra 0.11 mm2 B.Cu GND islands touching pad J3.S1, at x 96.73-97.23 and
+  105.37-105.87, y 117.0-117.3) and 3 `3205d4c4…` (r02's board, without them). The text diff is two added `filled_polygon`
+  blocks of 11 and 10 lines; the Gerber's `B_Cu` member differs by the same two regions and every other member is
+  identical; a pcbnew probe: island mode "always remove", both islands touch J3.S1. Both boards pass every check. The
+  tracked board is r02's state, restored byte for byte from a scratch run whose hash equals the manifest's (never by
+  editing the fill); the ten output files regenerate identically from it. The independent verifier's own 10 runs gave 4 and 6
+  of the two boards, so the share of r02's state is not fixed (7 of 42 in all) and "rare" was too strong; no third
+  state appeared. README, `make_pcb.py`'s docstring, CLAUDE.md sections 0 and 12, r02's manifest and rules.md no longer
+  promise a byte-identical `make_pcb.py`. Untried: filling the zones one at a time in a fixed order (a new board, so a new gate).
+- **Mistakes, kept.** (1) `git add` failed with a pathspec error on the old name of the renamed table (already staged
+  as a rename) and added nothing; re-run without it. (2) A pre-grading grep of the rubric's Expect clauses found a stale
+  sentence in the root README.md (it still said the JLCPCB gate had not run); fixed in `5ea2675` before the verifier read it.
+  (3) A rubric grep matched the field name `pcbFileNo` in a rule of rules.md: a false positive, not a leak; the rubric
+  now asks for a value next to the name.
+- **Verification (tests one at a time).** Two rounds before grading: the checkers (`check_pcb`, `check_routing`,
+  `check_silk`, `make_outputs` with its 2970 checks) pass; r02's ten files are byte-identical to a fresh `make_outputs.py`
+  from the tracked board; the suites outputs 40, silk 28, libraries 29, make_project 19, schematic 19, pcb 29 and routing
+  31 (195 tests), the cost estimate's 18, the OI-23 study's 21 and the stackup study's 25 pass; no runner process left.
+  `c2_check.py` (the independent BOM/CPL check, a scratch script outside the repository): 30 checks, 0 failed, 8
+  corruptions caught.
+- **Grading (rubric C1-C9, `.claude/goal-loop/rev05-gate/`, not tracked).** One pass by an independent rubric-verifier on
+  `5ea2675`: **all nine pass, no feedback.** It ran each Verify itself: `sha256sum -c` of r02 (12 files) and r01 (13), a
+  corrupted copy failing with exit 1; a fresh `make_outputs.py` (2970 checks) reproducing the ten files byte for byte; the
+  Gerber's members 9 same / 6 different and the drill hits 405 to 397 (0.30 mm) with 16 (0.60 mm) unchanged; the CPL
+  differing only in J1-J4 Mid Y; `check_pcb` 13,676 checks, `check_routing` PASS (closest holes: pad-pad 0.805, pad-via
+  0.669, via-via 0.313 mm), 365 + 32 vias; `HoleGapTest` 7 tests and the suites outputs 40, pcb 29, silk 28 and routing 31
+  OK; 10 `make_pcb.py --no-check` runs in a scratch copy (the filler finding above); no private-data pattern in the
+  changed files, 0 CR bytes, a clean tree, no leftover process, no `en/` in the repository. The pre-grading grep of the
+  Expect clauses (mistake 2) is why the first pass was clean; the previous entry's first pass had failed two criteria.
+- **Not verified.** The PCBA quote line by line (only the total), r02's own total, the placement preview's and the form's
+  screenshots (none saved), six pad-spacing and three mask-exposure Danger rows (not identified one by one), the
+  silkscreen-to-pad rows, JLCDFM's 271 silkscreen-hole count against my 123, JLCPCB's own DFM after an order, the
+  receptacle's shift beyond a viewer reading, how many quote drafts JLCPCB auto-saved, and whether the filler has a third
+  state (none in 42 runs).
+- **Learning.** rules.md: the CPL rule now covers a per-part shift; JLCDFM (50 rows per layer, the Gerber's frame, its
+  rounded-rectangle reading, its limits against JLCPCB's page); the browser tool facts of the gate; "a slot is invisible to
+  the router and DRC"; the zone filler is not deterministic, with how to treat a changed board hash and now both counts
+  (3 of 32, 4 of 10). A count from one session is not a rate: write "in N runs", not "rare". A "run it again and compare"
+  step is worth its cost: it is the only thing that found the filler. Grep a rubric's Expect clauses, and every document
+  that may say the opposite, before grading.
+- **Commits.** `1ba282f` (the two fixes, the board), `effc321` (r02, its review, r01 marked superseded), `5ea2675` (README,
+  CLAUDE.md, cost estimate, rules.md); the commit that adds this entry, which also refines the zone-filler rule of rules.md
+  with the verifier's 10 runs, follows. Not pushed.

@@ -452,14 +452,16 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   `B_Cu` member differs by the same two regions and every other member is identical). Both boards
   pass DRC, `check_pcb`, `check_routing`, `check_silk` and every suite. It surfaced only because the
   final "run it again and compare" step compared the board's hash with the one in the release
-  manifest, and r02's was the rare state. Rules: the tracked board is the source of truth and the
-  manifest records its hash; never regenerate it to prove a release; diff a changed hash after a
-  re-run (two `filled_polygon` blocks?) before looking for a changed design; to get a given board
-  back, re-run in a scratch copy of `design/` until the hash matches, never edit the fill by hand.
-  `make_outputs.py` is deterministic for a given board. Not tried: filling the zones one at a time
-  in a fixed order, which may remove the variation. Verified by: the 32 runs, `diff` of the two
-  boards, a Gerber member comparison, a pcbnew probe (island mode 0 = always remove; both islands
-  touch `J3.S1`).
+  manifest, and r02's was the less frequent state. The share is not fixed: 3 of 32 runs here, 4 of
+  the independent verifier's own 10 (7 of 42 together), and no third state in the 42. Rules: the
+  tracked board is the source of truth and the manifest records its hash; never regenerate it to
+  prove a release; diff a changed hash after a re-run (two `filled_polygon` blocks?) before looking
+  for a changed design; to get a given board back, re-run in a scratch copy of `design/` until the
+  hash matches, never edit the fill by hand. `make_outputs.py` is deterministic for a given board.
+  Not tried: filling the zones one at a time in a fixed order, which may remove the variation.
+  Verified by: the 32 runs, `diff` of the two boards, a Gerber member comparison, a pcbnew probe
+  (island mode 0 = always remove; both islands touch `J3.S1`), and the verifier's 10 runs (4 ×
+  `3205d4c4…`, 6 × `d354d21a…`, the diff exactly the two blocks).
 - **Freerouting with the same input repeats its session.** The 17-minute run on input that differed
   only in the via's padstack name gave the old session with that name replaced (56 passes both times).
 - **A slot (an oblong hole) is invisible to both the router's search and KiCad's DRC.** (#8, 2026-11-13)
