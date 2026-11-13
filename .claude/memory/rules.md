@@ -192,7 +192,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   "$f")` greps for the empty pattern and counts every line. On a 3-line file with one CRLF
   line it printed 3, the same grep outside `$(...)` printed 1, and `${#p}` of `$'\r'` was 0
   inside and 1 outside (2026-11-04). Assign the pattern to a variable outside the
-  substitution, or count in Python.
+  substitution, or count in Python. The simplest exact form is `tr -cd '\r' < "$f" | wc -c`: it
+  counts bytes, works inside `$(...)` too, and its negative control `printf 'a\r\nb\n' | tr -cd
+  '\r' | wc -c` prints 1 (checked 2026-11-13, #8, after `n=$(grep -c $'\r' journal.md)` printed
+  1336, every line of a file with no CR byte: the rule above, hit again after a context reset).
 - **Run at most two heavy processes at a time, and one test suite at a time.** A parallel
   sweep of Freerouting runs froze this box on 2026-11-12 (#8; the user: 「固まってるけど」,
   then 「負荷かけすぎじゃない」). Since then the router, each test suite and each KiCad
