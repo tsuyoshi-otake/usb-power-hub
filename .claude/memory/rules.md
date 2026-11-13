@@ -581,6 +581,20 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **Browser evidence:** `computer screenshot` keeps nothing unless `save_to_disk` is true; a
   large `zoom` region can time out (take a plain scaled screenshot instead). Screenshots can show
   account details, so they live outside the repository.
+- **JLCPCB coupons live in four places, and the coupon center is only one** (#8, 2026-11-13). A first pass
+  over the coupon center and My Coupons ("0 unused; PCBA Special Offer $9 is the best") missed the Black
+  Friday warm-up coupons, which are claimable only on the event page (`jlcpcb.com/events/black-friday-2026`;
+  the home page's hero banner links to it): "BF PCBA $12" and ten more, limited quantity, with no minimum
+  order, validity or region on the card, in the page text, in the lucky draw's Rules dialog or in the help
+  article "Coupon Terms and Conditions". Look, in this order, at: My Coupons, **all three tabs** (Used shows
+  what the account has redeemed, e.g. the monthly PCBA Special Offers); `/coupon-center`; the home page's
+  banner and the campaign page it links to; the help article "JLCPCB New Customer Coupon Guide" (the monthly
+  coupons, and a $10 PCBA coupon that needs EasyEDA-exported files). A coupon's terms show only after it is
+  claimed, and claiming is an account change: the user says yes first. One coupon per order, so only the
+  largest applicable one counts. Switching the wallet's tabs and opening a "Rules" dialog are read only;
+  "Get Coupon", "Get All Coupons", "Spin Now" and the social-share icons are not (a share is a public post).
+  A JavaScript call that prints hrefs is blocked as "Cookie/query string data": read a link's `href` with
+  `read_page` on its ref.
 
 ## Delegated verifiers
 

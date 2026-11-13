@@ -1410,3 +1410,37 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Commits.** `1ba282f` (the two fixes, the board), `effc321` (r02, its review, r01 marked superseded), `5ea2675` (README,
   CLAUDE.md, cost estimate, rules.md); the commit that adds this entry, which also refines the zone-filler rule of rules.md
   with the verifier's 10 runs, follows. Not pushed.
+
+## 2026-11-13 - #8: coupons for the Rev0.5 order (read only, nothing claimed)
+
+- **Request.** After the cost answer: 「使えるクーポンなかった?」; then, after my answer, 「受け取れるのないかチェックして」. A
+  check, not a claim: no "Get Coupon", no "Get All Coupons", no "Spin Now", no social share, nothing saved to the cart, no
+  terms accepted. Nothing ordered or paid. Nothing pushed.
+- **Symptom.** My first answer said the account had 0 unused coupons and that the coupon center's PCBA Special Offer $9 was
+  the best candidate. The user asked for a second look.
+  **Root cause.** The first pass read only the coupon center and the Unused tab of My Coupons. The Black Friday warm-up
+  (11-17 Nov, ET) has its own claimable coupons on an event page that the home page's hero banner links to; the coupon
+  center does not list them.
+  **Fix.** None in the repository: the answer was corrected in chat, and rules.md now names the four places to look.
+- **Found (read only, 2026-11-13, the user's signed-in Chrome).**
+  - Event page `jlcpcb.com/events/black-friday-2026`: 11 warm-up coupons, "Limited quantities", all still "Get Coupon":
+    BF PCBA $12, BF PCBA Parts $10, BF 6-32L PCB $30, BF PCB $12 - EasyEDA, three JLCONE ones ($5 shipping, $8 prototype,
+    $20 batch), Layout $80, Stencil $10, Flex Heater $15, FPC $20. No card shows a minimum order, a validity or a region;
+    neither does the page text, the lucky draw's Rules dialog or the help article "Coupon Terms and Conditions" (one coupon
+    per order). The news item of 12 Nov says the official sale runs 18 Nov to 2 Dec (ET), with more coupons.
+  - Lucky draw: up to 3 spins per account, earned by sharing the event on social media; prizes include a 20 % OFF coupon.
+    A share is a public post, so it is the user's to make.
+  - My Coupons: Unused empty (every filter), Used 6 (among them PCBA Special Offer $9 and $6, valid until 2026/07/31),
+    Expired 4 (among them "Review Reward Coupon $5", until 2026/11/02).
+  - Help article "JLCPCB New Customer Coupon Guide" (updated 10 Nov 2026): the monthly SMT Special Offer $9 and $6 (orders
+    over $1, excluding shipping) and a $10 PCBA coupon that needs EasyEDA-exported files.
+  - Effect, one coupon per order: on the quote of $51.94 without shipping, $12 is 1,920 yen at the planning rate of 160 yen
+    per USD, so 12,337 yen for 2 units with OCS Express against 14,257 yen without a coupon ($9: 12,817 yen).
+- **Not verified.** The terms of "BF PCBA $12" (minimum order, validity after claiming, region, whether it applies to a
+  Japanese address and to Economic PCBA), which show only after claiming; whether a claim succeeds (limited quantity); the
+  hour at which the warm-up ends on 17 Nov (ET); the scope of "BF PCBA Parts $10"; JLCONE Desktop's own per-order discount
+  ("Save $1-$20 Every Time"), which needs an app install.
+- **Learning.** rules.md, JLCPCB section: coupons are in four places (My Coupons, all three tabs; the coupon center; the home
+  page's campaign banner; the help article on new-customer and monthly coupons). "None found" from one list is not "none
+  exist". Event coupons show their terms only after a claim, and a claim is the user's to approve.
+- **Commits.** The commit that adds this entry and the rule. Not pushed.
