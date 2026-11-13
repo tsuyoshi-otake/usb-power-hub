@@ -5,15 +5,20 @@ Run with KiCad's Python from the repository root, after make_outputs.py has writ
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_outputs.py
 
-Each test copies manufacturing/working/rev0.5 and design/ecad/source into a temporary
-directory, corrupts the copies and runs check_outputs.py on them in a new process. After a
-corruption the test rewrites SHA256SUMS.txt (and, when it edits the board, the manifest's
-source hashes), so that only the rule under test breaks; the tests of those two rules leave
-them as the corruption left them. The unchanged copy must pass; every corruption must fail
-and be named in the output. The repository's files are never modified. Each run takes under
-1 s.
+Each test copies manufacturing/working/rev0.5, design/ecad/source and the model frame table
+into a temporary directory, corrupts the copies and runs check_outputs.py on them in a new
+process. After a corruption the test rewrites SHA256SUMS.txt (and, when it edits the board,
+the manifest's source hashes), so that only the rule under test breaks; the tests of those two
+rules leave them as the corruption left them. The unchanged copy must pass; every corruption
+must fail and be named in the output. The repository's files are never modified. Each run
+takes under 1 s.
+
+TurnedTest does not run the checker: it loads make_outputs.py and check_outputs.py as modules
+and compares the turned() of each with where KiCad puts every pad of a copy of the board, at
+every orientation the board has; a turned() with a flipped sign must fail the same comparison.
 """
 import hashlib
+import importlib.util
 import io
 import pathlib
 import re
@@ -29,7 +34,7 @@ CHECK = HERE / "check_outputs.py"
 ROOT = HERE.parents[2]
 OUT = ROOT / "manufacturing" / "working" / "rev0.5"
 SRC = ROOT / "design" / "ecad" / "source"
-ROTATIONS = ROOT / "design" / "ecad" / "jlcpcb_model_rotation.json"
+FRAMES = ROOT / "design" / "ecad" / "jlcpcb_model_frame.json"
 PREFIX = "UsbPowerHub_Main_Rev0.5"
 ZIP = f"{PREFIX}_Gerber.zip"
 BOM = f"{PREFIX}_BOM_JLCPCB.csv"
@@ -90,14 +95,14 @@ def run_check(corrupt=None, sums=True):
         out, src = t / "rev0.5", t / "source"
         shutil.copytree(OUT, out)
         shutil.copytree(SRC, src)
-        table = t / ROTATIONS.name              # a corruption reaches it as src.parent / ROTATIONS.name
-        shutil.copy(ROTATIONS, table)
+        table = t / FRAMES.name                 # a corruption reaches it as src.parent / FRAMES.name
+        shutil.copy(FRAMES, table)
         if corrupt:
             corrupt(out, src)
         if sums:
             rehash(out)
         r = subprocess.run([sys.executable, "-I", "-B", str(CHECK), "--out", str(out), "--src", str(src),
-                            "--rotations", str(table)],
+                            "--frames", str(table)],
                            capture_output=True, text=True, encoding="utf-8", timeout=600)
         return r.returncode, r.stdout + r.stderr
 
@@ -232,10 +237,53 @@ class CheckOutputsTest(unittest.TestCase):
                                            b'"U6","94.0000","27.0000","Top","0"'),
                          "FAIL CPL U6: rotation 0.0, expected 270 (footprint 0 + JLCPCB model 270)")
 
-    def test_model_rotation_table_dead_entry(self):
-        self.assertFails(lambda o, s: edit(s.parent / ROTATIONS.name, b'"C6186": {"add": 180,',
+    # the receptacles' model shift (C2765186, J1-J4, issue #8): the CPL point is the footprint's origin
+    # moved 1.375 mm away from the mouth, turned with the footprint. J1 and J4 stand at the top edge
+    # at 180 degrees (CPL Y 68.01, 1.375 below the origin's 69.385); J2 and J3 at the bottom edge at 0
+    # (CPL Y 3.99, 1.375 above the origin's 2.615).
+    def test_cpl_model_shift_missing(self):
+        """J1 at the footprint's origin, as r01's CPL had it: JLCPCB's model sits 1.375 mm off."""
+        self.assertFails(lambda o, s: edit(o / CPL, b'"J1","76.0000","68.0100"', b'"J1","76.0000","69.3850"'),
+                         "FAIL CPL J1: Mid (76.0, 69.385), footprint origin (76.0000, 69.3850) + "
+                         "JLCPCB model shift (0, -1.375) turned by 180 = (76.0000, 68.0100)")
+
+    def test_cpl_model_shift_toward_the_mouth(self):
+        """J2's shift the wrong way: 1.375 mm toward the mouth instead of away from it."""
+        self.assertFails(lambda o, s: edit(o / CPL, b'"J2","17.5000","3.9900"', b'"J2","17.5000","1.2400"'),
+                         "FAIL CPL J2: Mid (17.5, 1.24)")
+
+    def test_cpl_model_shift_not_turned(self):
+        """J1 (180 degrees) given J2's shift, which is the same vector left unturned."""
+        self.assertFails(lambda o, s: edit(o / CPL, b'"J1","76.0000","68.0100"', b'"J1","76.0000","70.7600"'),
+                         "FAIL CPL J1: Mid (76.0, 70.76)")
+
+    def test_model_frame_table_dead_entry(self):
+        self.assertFails(lambda o, s: edit(s.parent / FRAMES.name, b'"C6186": {"add": 180,',
                                            b'"C9999999": {"add": 180,'),
-                         "FAIL model rotation table: entries no BOM line uses: ['C9999999']")
+                         "FAIL model frame table: entries no BOM line uses: ['C9999999']")
+
+    def test_model_frame_table_dead_shift_entry(self):
+        self.assertFails(lambda o, s: edit(s.parent / FRAMES.name, b'"C2765186": {"shift"',
+                                           b'"C9999999": {"shift"'),
+                         "FAIL model frame table: entries no BOM line uses: ['C9999999']",
+                         "FAIL CPL J2: Mid (17.5, 3.99), footprint origin (17.5000, 2.6150)")
+
+    def test_model_frame_table_entry_changes_nothing(self):
+        self.assertFails(lambda o, s: edit(s.parent / FRAMES.name, b'"shift": [0.0, -1.375], ', b''),
+                         "FAIL model frame table: C2765186: an entry with neither add nor shift")
+
+    def test_model_frame_table_add_not_a_quarter_turn(self):
+        self.assertFails(lambda o, s: edit(s.parent / FRAMES.name, b'"C6186": {"add": 180,',
+                                           b'"C6186": {"add": 45,'),
+                         "FAIL model frame table: C6186: add 45 is not 90, 180 or 270")
+
+    def test_model_frame_table_shift_slipped_decimal(self):
+        self.assertFails(lambda o, s: edit(s.parent / FRAMES.name, b'[0.0, -1.375]', b'[0.0, -13.75]'),
+                         "FAIL model frame table: C2765186: shift [0.0, -13.75] is not between 0 and 5 mm long")
+
+    def test_model_frame_table_shift_malformed(self):
+        self.assertFails(lambda o, s: edit(s.parent / FRAMES.name, b'[0.0, -1.375]', b'[0.0]'),
+                         "FAIL model frame table: C2765186: shift [0.0] is not [dx, dy] in mm")
 
     def test_cpl_bottom(self):
         self.assertFails(lambda o, s: edit(o / CPL, b'"55.8000","Top"', b'"55.8000","Bottom"'),
@@ -284,6 +332,60 @@ class CheckOutputsTest(unittest.TestCase):
     def test_creation_date(self):
         self.assertFails(lambda o, s: edit(o / f"{PREFIX}_ERC.json", b"1980-01-01", b"2026-11-06"),
                          f"FAIL {PREFIX}_ERC.json: creation date '2026-11-06")
+
+
+def load_module(name):
+    spec = importlib.util.spec_from_file_location(name, HERE / f"{name}.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class TurnedTest(unittest.TestCase):
+    """turned() of the generator and of the checker is KiCad's own placement of a pad, at every
+    orientation of the board. The four receptacles stand at 0 and 180 degrees, where the sine is
+    0, so the real CPL cannot show a wrong sense of rotation: this comparison does."""
+
+    @classmethod
+    def setUpClass(cls):
+        import pcbnew                        # KiCad's own Python, like the rest of the suite
+        cls.pcbnew = pcbnew
+        cls.tmp = tempfile.TemporaryDirectory(prefix="turned-")
+        src = pathlib.Path(cls.tmp.name) / "source"
+        shutil.copytree(SRC, src)            # the board is loaded from a copy: the repository stays unchanged
+        cls.board = pcbnew.LoadBoard(str(src / PCB))
+        cls.modules = {n: load_module(n) for n in ("make_outputs", "check_outputs")}
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def pad_error(self, turned):
+        """Worst distance in mm between a pad's place on the board and the footprint's origin plus
+        the pad's place in the footprint's own frame, turned; and the orientations the pads came from."""
+        mm = self.pcbnew.ToMM
+        worst, seen = 0.0, set()
+        for fp in self.board.GetFootprints():
+            deg = fp.GetOrientationDegrees()
+            seen.add(round(deg % 360, 3))
+            for pad in fp.Pads():
+                rel = pad.GetFPRelativePosition()
+                kx, ky = turned(mm(rel.x), mm(rel.y), deg)
+                worst = max(worst, abs(mm(fp.GetPosition().x) + kx - mm(pad.GetPosition().x)),
+                            abs(mm(fp.GetPosition().y) + ky - mm(pad.GetPosition().y)))
+        return worst, seen
+
+    def test_turned_is_kicads_pad_placement(self):
+        for name, mod in self.modules.items():
+            worst, seen = self.pad_error(mod.turned)
+            self.assertLess(worst, 1e-4, f"{name}.turned is {worst} mm off a pad")
+            self.assertTrue({0.0, 90.0, 180.0, 270.0} <= seen, f"orientations on the board: {sorted(seen)}")
+
+    def test_flipped_turn_fails_the_same_comparison(self):
+        """The comparison can fail: the other sense of rotation lands pads far from where they are."""
+        mod = self.modules["check_outputs"]
+        worst, _ = self.pad_error(lambda dx, dy, deg: mod.turned(dx, dy, -deg))
+        self.assertGreater(worst, 1.0)
 
 
 if __name__ == "__main__":

@@ -38,6 +38,13 @@ What it checks, each against design/ecad/ROUTING_Rev0.5.md:
       A side's sector lies between the pad's two diagonals, from the pad's edge out to
       EPAD_REACH_MM. Its web is the least copper a line from one diagonal to the other must
       cross, voids being free to cross (a shortest path over the voids).
+10. Hole to hole, as JLCPCB's DFM measures it (issue #8): every pair of drilled holes, vias and
+   pad holes, plated or not, stands at least the figure of make_project.py apart, edge to edge:
+   VIA_HOLE_TO_HOLE for two vias, PAD_HOLE_TO_HOLE for two pad holes, and RULES["min_hole_to_hole"]
+   for a via and a pad's hole. An oblong hole (the receptacles' plated shell slots) is a capsule,
+   its long axis and its radius. KiCad's DRC does not see it that way: it reported nothing for 8
+   GND vias 0.046 mm from a slot, which JLCDFM called Danger. The statistics line gives the
+   closest pair of each kind.
 
 What it CANNOT see: whether a track is a good one (lengths and detours DRC accepts), current
 density inside a pad or a via other than by the nodal model, the impedance of the pairs (D27's
@@ -51,6 +58,10 @@ crosses which void. 9a does not see a row of short voids with narrow webs betwee
 from an exposed pad. 9b looks only at the parts of the epad table and only as far as its
 reach; a void that reaches across a diagonal counts in both sectors up to the diagonal. Copper
 islands inside a void count as void. Neither looks at the pours on In2.Cu and B.Cu.
+Rule 10 looks at the drilled holes alone: not at the copper around a hole (DRC's hole_clearance
+does), not at a slot's plated wall, and it adds no drill tolerance (JLCPCB: hole +0.13/-0.08 mm,
+position +-0.075 mm; JLCDFM measures the files as drawn). The figures are JLCPCB's published
+capabilities of 2026-11-13, not what its CAM accepts at order time.
 Exit status: 0 = every check passed; 1 = a check failed.
 """
 import argparse
@@ -616,6 +627,70 @@ def check_plane(rep, board, routing):
     return longest, webs
 
 
+# ---- rule 10: hole to hole ------------------------------------------------------------------
+def pad_hole(pad):
+    """A pad's drilled hole as a capsule (x1, y1, x2, y2, r) in mm, KiCad's frame, or None for a
+    pad without a hole. A round hole has a zero-length axis. An oblong hole lies along the drill's
+    longer side, which is the pad's own x or y axis; the pad's angle turns it (on the y-down
+    board a vector (dx, dy) of the pad's frame becomes (dx cos a + dy sin a, -dx sin a + dy cos a))."""
+    d = pad.GetDrillSize()
+    if d.x <= 0 or d.y <= 0:
+        return None
+    cx, cy = to_mm(pad.GetPosition().x), to_mm(pad.GetPosition().y)
+    half = to_mm(max(d.x, d.y) - min(d.x, d.y)) / 2.0
+    a = math.radians(pad.GetOrientationDegrees())
+    ux, uy = (math.cos(a), -math.sin(a)) if d.x > d.y else (math.sin(a), math.cos(a))
+    return cx - ux * half, cy - uy * half, cx + ux * half, cy + uy * half, to_mm(min(d.x, d.y)) / 2.0
+
+
+def hole_gap(a, b):
+    """The edge-to-edge distance in mm between two holes, each a capsule (x1, y1, x2, y2, r): the
+    distance between their axes less both radii, negative when they overlap."""
+    if _crosses(a[:2], a[2:4], b[:2], b[2:4]):
+        axes = 0.0
+    else:
+        axes = min(seg_dist(a[:2], b[:2], b[2:4])[0], seg_dist(a[2:4], b[:2], b[2:4])[0],
+                   seg_dist(b[:2], a[:2], a[2:4])[0], seg_dist(b[2:4], a[:2], a[2:4])[0])
+    return axes - a[4] - b[4]
+
+
+def drilled_holes(board):
+    """Every drilled hole of the board, (x1, y1, x2, y2, r, kind, label): kind is "via" or "pad";
+    the capsule is in KiCad's frame, the label gives the board frame's position."""
+    holes = []
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            h = pad_hole(p)
+            if h:
+                x, y = frame(p.GetPosition())
+                holes.append((*h, "pad", f"{f.GetReference()}.{p.GetNumber()} at ({x:.3f}, {y:.3f})"))
+    for v in vias(board):
+        x, y = frame(v.GetPosition())
+        px, py = to_mm(v.GetPosition().x), to_mm(v.GetPosition().y)
+        holes.append((px, py, px, py, to_mm(v.GetDrillValue()) / 2.0, "via",
+                      f"via {v.GetNetname()} at ({x:.3f}, {y:.3f})"))
+    return holes
+
+
+def check_holes(rep, board):
+    """Rule 10. Returns {"via-via": the least gap in mm, "pad-via": ..., "pad-pad": ...}."""
+    proj = make_pcb.proj
+    limits = {("via", "via"): proj.VIA_HOLE_TO_HOLE, ("pad", "via"): proj.RULES["min_hole_to_hole"],
+              ("pad", "pad"): proj.PAD_HOLE_TO_HOLE}
+    holes = drilled_holes(board)
+    closest = {}
+    for i, a in enumerate(holes):
+        for b in holes[i + 1:]:
+            kind = tuple(sorted((a[5], b[5])))
+            gap = hole_gap(a, b)
+            closest["-".join(kind)] = min(closest.get("-".join(kind), gap), gap)
+            if gap < limits[kind] - 1e-6:
+                rep.check(False, "holes",
+                          f"{a[6]} and {b[6]}: {gap:.3f} mm between the holes, want >= {limits[kind]:.2f}")
+    rep.check(True, "holes", "ran")
+    return closest
+
+
 def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
@@ -637,6 +712,7 @@ def main(argv):
     check_class_layers(rep, board, routing)
     totals = check_port_paths(rep, board, tables)
     longest, webs = check_plane(rep, board, routing)
+    holes = check_holes(rep, board)
     with tempfile.TemporaryDirectory() as tmp:
         out = pathlib.Path(a.reports) if a.reports else pathlib.Path(tmp)
         out.mkdir(parents=True, exist_ok=True)
@@ -652,6 +728,7 @@ def main(argv):
     print(f"In1 plane: longest void {'?' if longest is None else f'{longest:.2f}'} mm; " + "; ".join(
         f"{token} web " + " ".join(f"{side} {web:.2f}" for side, web in sides.items()) + " mm"
         for token, sides in webs.items()))
+    print("closest holes: " + ", ".join(f"{kind} {gap:.3f}" for kind, gap in sorted(holes.items())) + " mm")
     print(f"{rep.count} checks, {len(rep.fails)} failed: {'FAIL' if rep.fails else 'PASS'}")
     return 1 if rep.fails else 0
 

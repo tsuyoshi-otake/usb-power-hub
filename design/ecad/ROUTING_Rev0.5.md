@@ -349,7 +349,8 @@ left open in a trial: drawn here, they are fixed before it starts.
 ## GND fanout
 
 Every GND surface pad (SMD, or a connector pad without paste: J5's pad 5) gets the board's via,
-the Default class's 0.45/0.30 (`make_project.py`), to L2 on the nearest free spot (16 directions, outward
+the Default class's 0.45/0.30 (`make_project.py`; eight of them are deleted again, below), to L2
+on the nearest free spot (16 directions, outward
 from its part first, 0.1 mm rings) and a 0.20 mm stub to it; the search keeps 0.15 mm from other
 copper, 0.5 mm from the HS pairs, 0.20 mm from another via's hole (JLCPCB's via figure, the
 custom rule `VIA_HOLE_TO_HOLE`), the board's 0.25 mm hole-to-hole minimum from a pad's hole, and
@@ -358,6 +359,20 @@ custom rule `VIA_HOLE_TO_HOLE`), the board's 0.25 mm hole-to-hole minimum from a
 the via's name (`450:250` → `450:300`), so every fanout via landed where it was. Each exposed
 pad gets five vias, at its centre and at the offset on the four axes, inside the cross of its
 paste windows; the residual risk is solder wicking into them (V-MFG-03 inspects U1 and U6).
+
+The search reads a pad's oblong hole as a round hole of the drill's width at the pad's centre
+(`route.py`, `_Copper`). The receptacles' plated shell slots (0.60 x 1.70 mm at the rear, 0.60 x
+1.40 mm at the front, D37) are oblong: beside each rear slot the search put the via of the
+contact pad A1 or B1 on the pad's own row, 0.046 mm from the slot's hole, which JLCDFM called
+Danger (issue #8, 2026-11-13; 8 vias) and KiCad's DRC did not see. The session had been routed
+around those 8 vias, so they stay in the router's input and the patch (stage 5, below) deletes
+them: for J1.B1 no free spot for a via exists within 3 mm, and for J2.B1 and J3.B1 only across
+the slot, 1.9 mm from the pad (measured with the slot as a capsule, 0.25 mm of hole-to-hole,
+against the board's copper). Each of the 8 contact pads keeps its 0.20 mm stub, which ends
+0.05 mm inside the ring of its plated slot's pad, and reaches L2 through the slot's wall (the
+plane joins a plated pad solid), a much wider path than a 0.30 mm via. `check_routing.py` rule
+10 measures every pair of drilled holes with a slot as a capsule. When a new session is routed,
+read the slot as a capsule in `_Copper` and delete stage 5.
 
 <!-- epad:begin -->
 | Pad | Offset | Why |
@@ -474,7 +489,7 @@ the stubs of 5 of those connections. Its L2 plane is sound: the webs of U1's exp
 table on the board after the session and before the zones are filled. At each point of a `remove`
 row, the via of its net centred exactly there is deleted (such a point is the via's position to
 7 decimals, as KiCad wrote it), or else every track of its net through the point. The other rows
-draw tracks and vias as the route table does. The 259 rows, 32 `remove` and 227 drawn, leave 0
+draw tracks and vias as the route table does. The 275 rows, 40 `remove` and 235 drawn, leave 0
 unconnected items, 0 DRC violations and no D36 place, and bring U1's webs down to 1.65–1.80 mm
 (N 1.66, E 1.70, S 1.65, W 1.80).
 
@@ -505,6 +520,11 @@ obstacles:
    EN_G_A on L3, and LED_FLT_A on L4 (the *D36* rows name the places). They are ripped up and
    routed again, together with the 11 connections the router left open there (INP_L_A, INP_L_B,
    LAD2_B, V_INJ ×7, X_L_B; *unrouted by the router*).
+5. **Slot vias.** Not the router's: found by JLCDFM on the first Rev0.5 Gerber (issue #8). The 8
+   GND fanout vias beside the receptacles' rear slots, and their stubs, are deleted (*remove*
+   rows: the via by its exact position, the stub by its middle), and each stub is drawn again
+   from its contact pad into the slot's pad (*stub ends in its plated slot's pad*). See *GND
+   fanout*. The routing of every other net is the session's and the stages above, untouched.
 
 The programs that wrote the rows (a negotiated-congestion window router, an exact-obstacle search
 and a dead-end remover) are scratch tools and are not in the repository. The table is their
@@ -776,6 +796,22 @@ new session, rewrite the table.
 | LED_FLT_A | via | 0.45/0.3 | 47.35,41.75 | D36: routed again, no L3 run along an L4 track |
 | LED_FLT_A | via | 0.45/0.3 | 49,63.9 | D36: routed again, no L3 run along an L4 track |
 | LED_FLT_A | via | 0.45/0.3 | 45.85,63.25 | D36: routed again, no L3 run along an L4 track |
+| GND | remove | - | 79.825,65.6975 79.5125,65.6975 | Slot vias: J1.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | remove | - | 72.175,65.6975 72.4875,65.6975 | Slot vias: J1.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | remove | - | 21.325,65.6975 21.0125,65.6975 | Slot vias: J4.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | remove | - | 13.675,65.6975 13.9875,65.6975 | Slot vias: J4.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | remove | - | 21.325,6.3025 21.0125,6.3025 | Slot vias: J2.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | remove | - | 13.675,6.3025 13.9875,6.3025 | Slot vias: J2.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | remove | - | 55.125,6.3025 54.8125,6.3025 | Slot vias: J3.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | remove | - | 47.475,6.3025 47.7875,6.3025 | Slot vias: J3.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
+| GND | F.Cu | 0.2 | J1.A1 79.87,65.6975 | Slot vias: J1.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | F.Cu | 0.2 | J1.B1 72.13,65.6975 | Slot vias: J1.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | F.Cu | 0.2 | J4.A1 21.37,65.6975 | Slot vias: J4.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | F.Cu | 0.2 | J4.B1 13.63,65.6975 | Slot vias: J4.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | F.Cu | 0.2 | J2.B1 21.37,6.3025 | Slot vias: J2.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | F.Cu | 0.2 | J2.A1 13.63,6.3025 | Slot vias: J2.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | F.Cu | 0.2 | J3.B1 55.17,6.3025 | Slot vias: J3.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | F.Cu | 0.2 | J3.A1 47.43,6.3025 | Slot vias: J3.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
 <!-- patch:end -->
 
 ## Not settled

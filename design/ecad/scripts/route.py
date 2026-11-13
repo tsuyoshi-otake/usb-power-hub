@@ -286,7 +286,13 @@ FAN_DIRECTIONS = 16
 
 
 class _Copper:
-    """The board's copper items, bucketed on a grid: (net, item, frame box, hole or None)."""
+    """The board's copper items, bucketed on a grid: (net, item, frame box, hole or None). A hole
+    is (x, y, radius): a pad's from its position and the drill's width, so an oblong hole, a
+    plated slot, is read as a round one at its centre. That put the GND fanout via of 8
+    receptacle contact pads 0.046 mm from a slot's hole (issue #8); ROUTING_Rev0.5.md's patch,
+    stage 5, deletes them, because the committed session was routed around them, and
+    check_routing.py rule 10 measures the slot as a capsule. Read it as a capsule here before the
+    next session is routed."""
 
     def __init__(self, board):
         self.items, self.grid = [], {}

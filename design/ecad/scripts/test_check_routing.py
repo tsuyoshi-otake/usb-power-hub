@@ -248,6 +248,28 @@ class CheckTest(unittest.TestCase):
             add_via(tree, "GND", (round(at[1] + 0.45, 6), at[2]))
         self.assertFailsWith(run_check(board=edit), "FAIL DRC", "hole_to_hole")
 
+    # ---- rule 10: hole to hole, a slot as a capsule (issue #8) ----------------------------------
+
+    @staticmethod
+    def via_beyond_slot_end(gap):
+        """An edit adding a GND via whose hole stands `gap` mm (edge to edge) beyond the lower end
+        of J1's rear plated slot: centre (130.32, 55.72), 0.60 x 1.70 mm, so its capsule's axis
+        ends at y 56.27 with radius 0.30. The slot's centre is gap + 0.15 + 0.30 + 0.55 mm from the
+        via's hole: a slot read as a round hole at its centre passes the via, as KiCad's DRC
+        did the committed board's 8 vias 0.046 mm from the slots."""
+        def edit(tree):
+            add_via(tree, "GND", (130.32, round(56.27 + 0.30 + gap + 0.15, 6)))
+        return edit
+
+    def test_via_beyond_slot_end_too_close(self):
+        self.assertFailsWith(run_check(board=self.via_beyond_slot_end(0.24)), "FAIL holes: J1.S1 at (80.320, 66.280)",
+                             "0.240 mm between the holes, want >= 0.25")
+
+    def test_via_beyond_slot_end_far_enough(self):
+        status, out = run_check(board=self.via_beyond_slot_end(0.26))
+        self.assertNotIn("FAIL holes", out)
+        self.assertRegex(out, r"closest holes: pad-pad [\d.]+, pad-via 0\.260, via-via [\d.]+ mm")
+
     def test_copper_near_pair(self):
         # 0.415 mm from USB_A_P's edge, on F.Cu, away from any other copper of the corridor
         self.assertFailsWith(run_check(board=lambda t: add_segment(t, "V3V3", (50.0, 17.0), (51.0, 17.0), 0.2, "F.Cu")),
@@ -401,6 +423,79 @@ class CheckTest(unittest.TestCase):
     def test_port_path_limit_lowered(self):
         doc = sub_once(r"<!-- port_path:begin limit=40 -->", "<!-- port_path:begin limit=1 -->")
         self.assertFailsWith(run_check(doc=doc), "FAIL port A: ", "limit 1")
+
+
+class HoleGapTest(unittest.TestCase):
+    """Rule 10's geometry on its own, in this process: no board is checked. A hole is a capsule
+    (x1, y1, x2, y2, r)."""
+
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("check_routing", CHECK)
+        cls.cr = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.cr)
+        import pcbnew
+        cls.pcbnew = pcbnew
+
+    def test_round_holes(self):
+        self.assertAlmostEqual(self.cr.hole_gap((0, 0, 0, 0, 0.15), (0.45, 0, 0.45, 0, 0.15)), 0.15)
+
+    def test_slot_end_and_side(self):
+        slot = (0, 0, 0, 1, 0.3)
+        self.assertAlmostEqual(self.cr.hole_gap(slot, (0, 1.6, 0, 1.6, 0.15)), 0.15)     # beyond its end
+        self.assertAlmostEqual(self.cr.hole_gap(slot, (0.8, 0.5, 0.8, 0.5, 0.15)), 0.35)  # beside its middle
+
+    def test_parallel_slots(self):
+        self.assertAlmostEqual(self.cr.hole_gap((0, 0, 0, 1, 0.3), (0.9, 0, 0.9, 1, 0.3)), 0.3)
+
+    def test_crossing_slots_overlap(self):
+        """The axes cross: the distance of the nearest ends is not 0, the holes overlap."""
+        self.assertAlmostEqual(self.cr.hole_gap((-1, 0, 1, 0, 0.3), (0, -1, 0, 1, 0.3)), -0.6)
+
+    def test_committed_defect_needs_the_capsule(self):
+        """One of the 8 vias of r01 and J1's rear slot: 0.046 mm as drawn, 0.314 mm when the slot
+        is read as a round hole at its centre, which clears the 0.25 mm the board asks."""
+        via = (129.825, 56.3025, 129.825, 56.3025, 0.15)
+        self.assertAlmostEqual(self.cr.hole_gap((130.32, 55.17, 130.32, 56.27, 0.30), via), 0.046, places=3)
+        self.assertAlmostEqual(self.cr.hole_gap((130.32, 55.72, 130.32, 55.72, 0.30), via), 0.314, places=3)
+
+    def test_pad_hole_of_the_committed_slots(self):
+        """J1 stands turned by 180 degrees: its slots lie along y, 1.10 mm (rear) and 0.80 mm
+        (front) between the ends of the axis, radius 0.30."""
+        board = self.pcbnew.LoadBoard(str(ECAD / "source" / "usb-power-hub.kicad_pcb"))
+        slots = []
+        for p in board.FindFootprintByReference("J1").Pads():
+            if p.GetDrillShape() == self.pcbnew.PAD_DRILL_SHAPE_OBLONG:
+                x1, y1, x2, y2, r = self.cr.pad_hole(p)
+                self.assertAlmostEqual(x1, x2, places=6)
+                self.assertAlmostEqual(r, 0.30, places=6)
+                slots.append(round(abs(y2 - y1), 3))
+        self.assertEqual(sorted(slots), [0.8, 0.8, 1.1, 1.1])
+
+    def test_pad_hole_turned_by_a_quarter(self):
+        """A drill 0.6 x 1.7 mm is long along the pad's y axis, and 1.7 x 0.6 along its x axis;
+        the pad's angle turns either. A round hole is a point."""
+        pcbnew = self.pcbnew
+        board = pcbnew.BOARD()
+        fp = pcbnew.FOOTPRINT(board)
+
+        def hole(size, degrees):
+            pad = pcbnew.PAD(fp)
+            pad.SetDrillShape(pcbnew.PAD_DRILL_SHAPE_OBLONG)
+            pad.SetDrillSize(pcbnew.VECTOR2I(pcbnew.FromMM(size[0]), pcbnew.FromMM(size[1])))
+            pad.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(10), pcbnew.FromMM(20)))
+            pad.SetOrientationDegrees(degrees)
+            x1, y1, x2, y2, r = self.cr.pad_hole(pad)
+            return round(abs(x2 - x1), 3), round(abs(y2 - y1), 3), round(r, 3), (round((x1 + x2) / 2, 3), round((y1 + y2) / 2, 3))
+        self.assertEqual(hole((0.6, 1.7), 0), (0.0, 1.1, 0.3, (10.0, 20.0)))
+        self.assertEqual(hole((0.6, 1.7), 90), (1.1, 0.0, 0.3, (10.0, 20.0)))
+        self.assertEqual(hole((1.7, 0.6), 0), (1.1, 0.0, 0.3, (10.0, 20.0)))
+        self.assertEqual(hole((1.7, 0.6), 270), (0.0, 1.1, 0.3, (10.0, 20.0)))
+        round_pad = pcbnew.PAD(fp)
+        round_pad.SetDrillSize(pcbnew.VECTOR2I(pcbnew.FromMM(0.8), pcbnew.FromMM(0.8)))
+        x1, y1, x2, y2, r = self.cr.pad_hole(round_pad)
+        self.assertEqual((x1, y1), (x2, y2))
+        self.assertAlmostEqual(r, 0.4, places=6)
 
 
 if __name__ == "__main__":

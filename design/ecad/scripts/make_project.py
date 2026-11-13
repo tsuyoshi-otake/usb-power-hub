@@ -95,6 +95,11 @@ RULES = {
 # every other net's copper >= 0.30 mm from a PTH hole.
 VIA_HOLE_CLEARANCE = 0.20                # JLCPCB "Via hole to Track"
 VIA_HOLE_TO_HOLE = 0.20                  # JLCPCB "Via Hole-to-Hole Spacing"; route.py's fanout too
+PAD_HOLE_TO_HOLE = 0.45                  # JLCPCB "Pad Hole-to-Hole Spacing"
+# KiCad 9.0.8's DRC reported nothing for 8 vias whose holes stood 0.046 mm from a receptacle's
+# plated slot (issue #8, JLCDFM found them): check_routing.py rule 10 measures every pair of holes
+# with a slot as a capsule, against the three figures here (via-via, pad-pad, and the board's
+# min_hole_to_hole for a via and a pad's hole).
 # The USB-C receptacle's unplated pegs (D37): JLCPCB's "NPTH to Track" 0.20, for this footprint
 # only; every other unplated hole keeps the board's 0.25. Its land (library.json) keeps 0.200.
 RECEPTACLE_FP = "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
@@ -113,8 +118,8 @@ HOLE_RULES = f"""(version 1)
 (rule "JLCPCB PTH annular ring 0.15"
   (constraint annular_width (min 0.15mm))
   (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'"))
-(rule "JLCPCB pad hole to pad hole 0.45"
-  (constraint hole_to_hole (min 0.45mm))
+(rule "JLCPCB pad hole to pad hole {PAD_HOLE_TO_HOLE:.2f}"
+  (constraint hole_to_hole (min {PAD_HOLE_TO_HOLE:.2f}mm))
   (condition "A.Type == 'Pad' && B.Type == 'Pad'"))
 (rule "JLCPCB NPTH to copper {NPTH_PEG_CLEARANCE:.2f}, USB-C receptacle pegs (D37)"
   (constraint hole_clearance (min {NPTH_PEG_CLEARANCE:.2f}mm))

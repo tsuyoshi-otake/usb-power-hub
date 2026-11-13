@@ -20,11 +20,13 @@ orderable (CLAUDE.md 2, manufacturing/working/), and not a release. Every file i
   parts (D13). A part on two footprints is one row, with the first designator's Comment and
   Footprint: JLCPCB's part mapping does not select two rows of one LCSC number.
 - _CPL_JLCPCB.csv: Designator, Mid X, Mid Y, Layer, Rotation for the same parts: the
-  footprint origin in the board frame (lower-left corner, y up, mm), Top, KiCad's
-  orientation plus the part's JLCPCB model rotation (counter-clockwise, degrees), which
-  design/ecad/jlcpcb_model_rotation.json holds: JLCPCB's models are not drawn at KiCad's
-  zero (the placement preview of 2026-11-11 showed the CH335F, the SOIC-8s, the SOT-23s and
-  the SOT-223 90 or 180 degrees off, issue #6).
+  footprint origin in the board frame (lower-left corner, y up, mm) plus the part's JLCPCB
+  model shift (turned with the footprint), Top, KiCad's orientation plus the part's JLCPCB
+  model rotation (counter-clockwise, degrees). design/ecad/jlcpcb_model_frame.json holds
+  both: JLCPCB's models are not drawn at KiCad's zero (the placement preview of 2026-11-11
+  showed the CH335F, the SOIC-8s, the SOT-23s and the SOT-223 90 or 180 degrees off, issue
+  #6) and not about the footprint's origin (the preview of 2026-11-13 showed the USB-C
+  receptacle's model 1.375 mm toward its mouth of the footprint's centre, issue #8).
 - _HandSolder.csv: the parts with an Akizuki field, which the user solders (D13, V-MFG-01);
   they are in neither the BOM nor the CPL.
 - _Schematic.pdf, _Assembly_Top.pdf (F.Fab and the outline with the title block: the
@@ -43,15 +45,18 @@ Exit status: 0 = written and checked; 1 = a check failed or an export failed.
 What it CANNOT see: whether JLCPCB reads the files as meant. The uploads of Rev0.4 (2026-11-11
 and -12: DFM, part mapping, placement preview, quote; issues #6 and #8) are recorded in
 manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md (and r02's) with the SHA-256 of the Gerber
-zip, BOM and CPL they saw. Rev0.5's set has not been uploaded. This script does not read those
-files: a change to a source, to this script or to jlcpcb_model_rotation.json that changes one of
-those three hashes makes a review stale. The receptacle C2765186 (J1-J4) has no row in
-jlcpcb_model_rotation.json until the placement preview shows how its model sits.
+zip, BOM and CPL they saw; Rev0.5's (2026-11-13, issue #8) in manufacturing/releases/rev0.5/
+r01/JLCPCB_REVIEW.md and r02's. This script does not read those files: a change to a source, to
+this script or to jlcpcb_model_frame.json that changes one of those three hashes makes a review
+stale. The table's shift for the receptacle C2765186 (J1-J4) is what the placement preview
+showed, to about 0.04 mm; whether JLCPCB's pick-and-place puts the part where its viewer draws
+the model is not something any file here shows.
 """
 import csv
 import hashlib
 import io
 import json
+import math
 import pathlib
 import re
 import shutil
@@ -65,7 +70,7 @@ import pcbnew
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 SRC = ROOT / "design" / "ecad" / "source"
-ROTATIONS = ROOT / "design" / "ecad" / "jlcpcb_model_rotation.json"
+FRAMES = ROOT / "design" / "ecad" / "jlcpcb_model_frame.json"
 OUT = ROOT / "manufacturing" / "working" / "rev0.5"
 NICK = "usb-power-hub"
 PREFIX = "UsbPowerHub_Main_Rev0.5"
@@ -147,20 +152,32 @@ def bom(machine):
     return csv_bytes(BOM_HEAD, sorted(rows, key=lambda r: natural(r[1].split(",")[0])))
 
 
-def model_rotation():
-    """{LCSC: degrees} from design/ecad/jlcpcb_model_rotation.json (see its _doc)."""
-    table = json.loads(ROTATIONS.read_text(encoding="utf-8"))["parts"]
-    return {lcsc: float(v["add"]) for lcsc, v in table.items()}
+def model_frames():
+    """{LCSC: (rotation degrees, (dx, dy) mm)} from design/ecad/jlcpcb_model_frame.json (see its _doc)."""
+    table = json.loads(FRAMES.read_text(encoding="utf-8"))["parts"]
+    return {lcsc: (float(v.get("add", 0)), tuple(float(c) for c in v.get("shift", (0.0, 0.0))))
+            for lcsc, v in table.items()}
+
+
+def turned(dx, dy, degrees):
+    """(dx, dy) in a footprint's own frame (x right, y down) as a vector of the board's y-down frame,
+    for a footprint turned `degrees` counter-clockwise on the screen. KiCad places a pad this way:
+    test_check_outputs.py compares it with every pad of the board, at 0, 90, 180 and 270 degrees."""
+    a = math.radians(degrees)
+    return dx * math.cos(a) + dy * math.sin(a), -dx * math.sin(a) + dy * math.cos(a)
 
 
 def cpl(machine):
-    """Rotation = the footprint's KiCad orientation plus its part's JLCPCB model rotation."""
-    add = model_rotation()
+    """Mid = the footprint's origin plus its part's JLCPCB model shift turned with the footprint;
+    Rotation = the footprint's KiCad orientation plus its part's JLCPCB model rotation."""
+    frames = model_frames()
     rows = []
     for fp in machine:
-        x = pcbnew.ToMM(fp.GetPosition().x) - ORIGIN[0]
-        y = ORIGIN[1] - pcbnew.ToMM(fp.GetPosition().y)
-        rot = (fp.GetOrientationDegrees() + add.get(field(fp, "LCSC"), 0.0)) % 360
+        add, (sx, sy) = frames.get(field(fp, "LCSC"), (0.0, (0.0, 0.0)))
+        kx, ky = turned(sx, sy, fp.GetOrientationDegrees())
+        x = pcbnew.ToMM(fp.GetPosition().x) + kx - ORIGIN[0]
+        y = ORIGIN[1] - (pcbnew.ToMM(fp.GetPosition().y) + ky)
+        rot = (fp.GetOrientationDegrees() + add) % 360
         rows.append([fp.GetReference(), f"{x:.4f}", f"{y:.4f}", "Top", f"{rot:g}"])
     return csv_bytes(CPL_HEAD, rows)
 
@@ -271,7 +288,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         f"| ERC | {count(erc, 'violations')} violations |",
         f"| DRC | {count(drc, 'violations')} violations, {count(drc, 'unconnected_items')} unconnected items, "
         f"{count(drc, 'schematic_parity')} schematic-parity items |",
-        "| JLCPCB DFM, part mapping, placement preview | not run on this set. Rev0.4's review (`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, r02's beside it) saw other files and does not carry over |",
+        "| JLCPCB DFM, part mapping, placement preview | Rev0.5's review is `manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md` (r01's beside it); it holds only for the Gerber zip, BOM and CPL whose SHA-256 it records. Rev0.4's review (`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, r02's beside it) saw other files and does not carry over |",
         "| Firmware | none |",
         "| JLCPCB order number | none |",
         "| Approver, approval time | none: WIP |",
@@ -288,20 +305,22 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "",
         "## Residual risks",
         "",
-        "- The CPL's origin is the board's lower-left corner and its angles are KiCad's plus the",
-        "  JLCPCB model rotation of design/ecad/jlcpcb_model_rotation.json (easy-stick 14.18). That",
-        "  table holds what Rev0.4's placement preview of 2026-11-11 showed",
-        "  (manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md). The receptacle C2765186 (J1-J4)",
-        "  is not in it: its CPL angle is KiCad's alone, and nobody has seen how JLCPCB's model sits",
-        "  on the footprint. The preview must be read for it before an order, and JLCPCB checks the",
-        "  final placement again in its DFM Analysis 4-6 hours after one.",
+        "- The CPL's origin is the board's lower-left corner. Its Mid is the footprint's origin, plus the",
+        "  JLCPCB model shift of design/ecad/jlcpcb_model_frame.json for the receptacle C2765186 (J1-J4),",
+        "  and its angles are KiCad's plus the model rotation of that table (easy-stick 14.18). The table",
+        "  holds what JLCPCB's placement previews showed: the rotations on 2026-11-11 (Rev0.4,",
+        "  manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md) and the receptacle's shift on 2026-11-13",
+        "  (Rev0.5, manufacturing/releases/rev0.5/r01/JLCPCB_REVIEW.md), to about 0.04 mm. A preview is",
+        "  the drawing of JLCPCB's model, not its pick-and-place; JLCPCB checks the final placement again",
+        "  in its DFM Analysis 4-6 hours after an order.",
         "- The receptacle's land is the maker's, drawn for a 0.80 mm board; this one is 1.6 mm",
         "  (OI-33). Whether the shell legs reach through the plated slots and the joints carry the",
         "  plug's insertion force shows only on the first board (V-MFG-03, V-MECH-01).",
-        "- JLCDFM's Danger items of Rev0.4's r01 (via annular ring, THT-to-SMD distance, mask opening",
-        "  exposing a trace, silkscreen over a plugged via) are judged in that review. It ran on the",
-        "  0.25 mm via drill; the 0.30 mm drill (issue #8) leaves a 0.075 mm via ring, which JLCDFM",
-        "  has not seen, and it has not seen the receptacles. JLCPCB's own DFM at order time can differ.",
+        "- JLCDFM's Danger items of this Gerber (via annular ring of the 0.30 mm vias, THT-to-SMD",
+        "  distance, mask opening exposing a trace, pad spacing, silkscreen over a plugged via, the",
+        "  receptacles' plated-slot width) are judged one by one in",
+        "  manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md: most are JLCDFM's own reading of the",
+        "  geometry, the slot width is a decision for the user. JLCPCB's own DFM at order time can differ.",
         "- No footprint is proven on a board; no order-time stock check has been done (CLAUDE.md 0).",
         "- The open issues of CLAUDE.md 11 stand; the set is not orderable until each is closed.",
         "",

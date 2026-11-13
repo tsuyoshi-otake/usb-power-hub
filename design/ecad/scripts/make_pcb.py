@@ -27,7 +27,13 @@ Output: design/ecad/source/usb-power-hub.kicad_pcb, rebuilt from nothing on ever
 - the silk table's labels, each a text on F.SilkS with its leader segments. They are added
   after the session, so they are not in the router input; the footprints' own silkscreen is.
 The UUID generator is seeded, so the items come out in the same order, and
-make_project.fix_uuids derives every UUID from its position: a re-run writes the same bytes.
+make_project.fix_uuids derives every UUID from its position. A re-run writes the same bytes
+except for one thing: KiCad's zone filler (route.fill) is not deterministic. In 3 of 32 runs
+(2026-11-13) it left out two 0.11 mm2 islands of the B.Cu GND pour that touch pad J3.S1 (at
+x 96.73-97.23 and 105.37-105.87, y 117.0-117.3 mm), which the other 29 runs kept; the board then
+differs by those two filled polygons, and the Gerber's B_Cu member with it. The tracked board is
+therefore the source of truth (release r02 was made from a run without the islands): do not
+regenerate it to compare, and do not treat a changed board hash after a re-run as a changed design.
 
 The session is imported only when the router input of this run (KiCad's DSN of the board before
 the session, with the document's classes and keepouts) has the SHA-256 autoroute.json records:

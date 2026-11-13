@@ -29,10 +29,12 @@ script's own parsers, the board with pcbnew; nothing of make_outputs.py is impor
     not BOM-excluded; every part's Class is Basic, or Extended for C2040 (D29), C5137013
     (D31) or C2765186 (D37) only (D22).
  6. CPL: JLCPCB's header; the BOM's designators; Mid X/Y the footprint's origin in the
-    board frame (0.0001 mm), inside the outline and within MID_TOL (0.05 mm) of the centre of
-    its F.Fab body (a Kelvin land's sense pads make its pads' centre another point); Layer Top;
-    Rotation the footprint's orientation plus the part's entry in design/ecad/jlcpcb_model_rotation.json
-    (--rotations); every entry of that table is used by a BOM line and adds 90, 180 or 270.
+    board frame plus the part's shift in design/ecad/jlcpcb_model_frame.json (--frames), turned
+    with the footprint (0.0001 mm), inside the outline; the footprint's origin within MID_TOL
+    (0.05 mm) of the centre of its F.Fab body (a Kelvin land's sense pads make its pads' centre
+    another point); Layer Top; Rotation the footprint's orientation plus the part's add in that
+    table. The table: every entry is used by a BOM line, has an add (90, 180 or 270), a shift
+    (two numbers, none longer than SHIFT_MAX) or both, and nothing else changes the CPL.
  7. Hand list: exactly the footprints with an Akizuki field, none of them in the BOM or CPL.
  8. Documents: the schematic PDF has one page per sheet instance; the assembly PDF one page;
     each preview a PNG at least PREVIEW_MIN_W wide with the board's aspect (3 %); ERC and DRC reports with 0 violations, 0 unconnected
@@ -46,10 +48,16 @@ What it CANNOT see:
 - whether JLCPCB reads the files as meant: its DFM, part mapping and placement preview are
   the evidence (CLAUDE.md 8, JLCPCB gate). The uploads of Rev0.4 (2026-11-11 and -12) are
   recorded in manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the three
-  files they saw; Rev0.5's set has not been uploaded. This checker does not read those files,
-  so it cannot tell a review that has gone stale.
-- whether JLCPCB's model of the receptacle C2765186 sits on its footprint at the CPL angle:
-  that part has no row in jlcpcb_model_rotation.json until the placement preview shows it.
+  files they saw, Rev0.5's (2026-11-13) in manufacturing/releases/rev0.5/r01/JLCPCB_REVIEW.md
+  and r02's. This checker does not read those files, so it cannot tell a review that has gone
+  stale.
+- whether the table's numbers are right: it checks that the CPL follows the table and that the
+  table is well formed, not what JLCPCB's models look like. The receptacle C2765186's shift
+  (1.375 mm) is what the placement preview showed, to about 0.04 mm, and a preview is not
+  JLCPCB's pick-and-place.
+- the turn of a shift at 90 and 270 degrees: the four receptacles stand at 0 and 180, where
+  the sine is 0. turned() is compared with KiCad's own placement of every pad by
+  test_check_outputs.py, at all four orientations.
 - Gerber geometry beyond the outline's extent and object counts: the copper is the board's
   because kicad-cli plotted it, and DRC (check_pcb.py) checks the board itself.
 - the content of the PDFs and renders beyond their page count and image size.
@@ -76,6 +84,7 @@ ORIGIN = (50.0, 122.0)
 BOARD = (100.0, 72.0)
 MID_TOL = 0.05
 POS_TOL = 0.0001
+SHIFT_MAX = 5.0                           # mm: a guard against a slipped decimal (13.75 for 1.375), not a measurement
 EXTENDED = {"C2040": "D29", "C5137013": "D31", "C2765186": "D37"}
 PREVIEW_MIN_W = 1200                      # kicad-cli renders a little under the size asked
 ASPECT = 100.0 / 72.0
@@ -312,7 +321,49 @@ def fab_centre(fp):
     return frame(pcbnew.VECTOR2I((x0 + x1) // 2, (y0 + y1) // 2))
 
 
-def check_lists(rep, files, fps, rotations):
+def turned(dx, dy, degrees):
+    """A vector of a footprint's own frame (x right, y down) in the board's y-down frame, for a
+    footprint turned `degrees` counter-clockwise on the screen: where KiCad puts a pad."""
+    a = math.radians(degrees)
+    return dx * math.cos(a) + dy * math.sin(a), -dx * math.sin(a) + dy * math.cos(a)
+
+
+def is_number(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def entry_frame(entry):
+    """(add, sx, sy) of a table entry. A malformed field counts as absent: check_frames reports it."""
+    add, shift = entry.get("add"), entry.get("shift")
+    if isinstance(shift, list) and len(shift) == 2 and all(is_number(c) for c in shift):
+        sx, sy = float(shift[0]), float(shift[1])
+    else:
+        sx = sy = 0.0
+    return (float(add) if is_number(add) else 0.0), sx, sy
+
+
+def check_frames(rep, frames, lines):
+    """design/ecad/jlcpcb_model_frame.json against the BOM's LCSC numbers: each entry is used, and
+    changes the CPL by a quarter-turn rotation, a shift of at most SHIFT_MAX, or both."""
+    dead = sorted(set(frames) - set(lines))
+    rep.check(not dead, "model frame table", f"entries no BOM line uses: {dead}")
+    for lcsc, v in sorted(frames.items()):
+        if not rep.check(isinstance(v, dict), "model frame table", f"{lcsc}: an entry that is not an object"):
+            continue
+        add, shift = v.get("add"), v.get("shift")
+        rep.check(add is not None or shift is not None, "model frame table",
+                  f"{lcsc}: an entry with neither add nor shift (a part with none is left out)")
+        rep.check(add is None or add in (90, 180, 270), "model frame table",
+                  f"{lcsc}: add {add!r} is not 90, 180 or 270")
+        if shift is not None:
+            ok = isinstance(shift, list) and len(shift) == 2 and all(is_number(c) for c in shift)
+            rep.check(ok, "model frame table", f"{lcsc}: shift {shift!r} is not [dx, dy] in mm")
+            if ok:
+                rep.check(0 < math.hypot(*shift) <= SHIFT_MAX, "model frame table",
+                          f"{lcsc}: shift {shift} is not between 0 and {SHIFT_MAX:g} mm long")
+
+
+def check_lists(rep, files, fps, frames):
     bom = read_csv(rep, "BOM", files.get(f"{PREFIX}_BOM_JLCPCB.csv", b""), BOM_HEAD)
     cpl = read_csv(rep, "CPL", files.get(f"{PREFIX}_CPL_JLCPCB.csv", b""), CPL_HEAD)
     hand = read_csv(rep, "hand list", files.get(f"{PREFIX}_HandSolder.csv", b""), HAND_HEAD)
@@ -336,14 +387,11 @@ def check_lists(rep, files, fps, rotations):
             cls = field(fp, "Class")
             lcsc = field(fp, "LCSC")
             ok = cls == "Basic" or (lcsc in EXTENDED and cls == f"Extended ({EXTENDED[lcsc]})")
-            rep.check(ok, f"BOM {ref}", f"class {cls!r} for {lcsc}: Basic only, except C2040 (D29) and C5137013 (D31)")
+            rep.check(ok, f"BOM {ref}", f"class {cls!r} for {lcsc}: Basic only, except C2040 (D29), C5137013 (D31) and C2765186 (D37)")
     rep.check(len(seen) == len(set(seen)), "BOM", "a designator in two rows")
     rep.check(len(lines) == len(set(lines)), "BOM",
               "an LCSC part in two rows: JLCPCB's part mapping selects neither (quote of 2026-11-11)")
-    dead = sorted(set(rotations) - set(lines))
-    rep.check(not dead, "model rotation table", f"entries no BOM line uses: {dead}")
-    rep.check(all(v["add"] in (90, 180, 270) for v in rotations.values()), "model rotation table",
-              "an entry whose add is not 90, 180 or 270 (a part with none is left out)")
+    check_frames(rep, frames, lines)
     rep.check(set(seen) == machine, "BOM", f"designators: extra {sorted(set(seen) - machine)}, "
               f"missing {sorted(machine - set(seen))}")
     cpl_refs = [r["Designator"] for r in cpl]
@@ -361,16 +409,20 @@ def check_lists(rep, files, fps, rotations):
             rep.check(False, f"CPL {ref}", f"not numbers: {row}")
             continue
         fx, fy = frame(fp.GetPosition())
-        rep.check(abs(x - fx) <= POS_TOL and abs(y - fy) <= POS_TOL, f"CPL {ref}",
-                  f"Mid ({x}, {y}), footprint origin ({fx:.4f}, {fy:.4f})")
+        orient = fp.GetOrientationDegrees() % 360
+        add, sx, sy = entry_frame(frames.get(field(fp, "LCSC"), {}))
+        kx, ky = turned(sx, sy, orient)
+        ex, ey = fx + kx, fy - ky                # the CPL's y points up, the board's down
+        what = f"Mid ({x}, {y}), footprint origin ({fx:.4f}, {fy:.4f})"
+        if sx or sy:
+            what += f" + JLCPCB model shift ({sx:g}, {sy:g}) turned by {orient:g} = ({ex:.4f}, {ey:.4f})"
+        rep.check(abs(x - ex) <= POS_TOL and abs(y - ey) <= POS_TOL, f"CPL {ref}", what)
         rep.check(0 < x < W and 0 < y < H, f"CPL {ref}", f"Mid ({x}, {y}) is off the board")
         body = fab_centre(fp)
         if rep.check(body is not None, f"CPL {ref}", "no F.Fab body outline to find its centre"):
             rep.check(abs(body[0] - fx) <= MID_TOL and abs(body[1] - fy) <= MID_TOL, f"CPL {ref}",
                       f"origin ({fx:.3f}, {fy:.3f}) is not its body's centre ({body[0]:.3f}, {body[1]:.3f})")
         rep.check(row["Layer"] == "Top", f"CPL {ref}", f"layer {row['Layer']}")
-        orient = fp.GetOrientationDegrees() % 360
-        add = float(rotations.get(field(fp, "LCSC"), {"add": 0})["add"])
         want = (orient + add) % 360
         rep.check(abs(rot - want) < 1e-6, f"CPL {ref}",
                   f"rotation {rot}, expected {want:g} (footprint {orient:g} + JLCPCB model {add:g})")
@@ -455,7 +507,7 @@ def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=pathlib.Path, default=ROOT / "manufacturing" / "working" / "rev0.5")
     ap.add_argument("--src", type=pathlib.Path, default=ROOT / "design" / "ecad" / "source")
-    ap.add_argument("--rotations", type=pathlib.Path, default=ROOT / "design" / "ecad" / "jlcpcb_model_rotation.json")
+    ap.add_argument("--frames", type=pathlib.Path, default=ROOT / "design" / "ecad" / "jlcpcb_model_frame.json")
     a = ap.parse_args(argv[1:])
     rep = Report()
     pcb = a.src / f"{NICK}.kicad_pcb"
@@ -467,7 +519,7 @@ def main(argv):
     check_manifest(rep, files.get("RELEASE_MANIFEST.md", b"").decode("utf-8", "replace"), a.src, board,
                    pcb.read_text(encoding="utf-8"))
     z = check_gerber(rep, files.get(f"{PREFIX}_Gerber.zip", b""), board)
-    check_lists(rep, files, fps, json.loads(a.rotations.read_text(encoding="utf-8"))["parts"])
+    check_lists(rep, files, fps, json.loads(a.frames.read_text(encoding="utf-8"))["parts"])
     check_documents(rep, files, a.src)
     check_private(rep, files, z)
     if prl.exists() and not prl_before:
