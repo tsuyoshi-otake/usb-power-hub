@@ -31,7 +31,7 @@ written and checked.
 | 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.5_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
 | 4 | `autoroute.py` | what `make_pcb.py --dsn` writes from the step-5 inputs | `routing/usb-power-hub.ses`, `routing/autoroute.json` | `make_pcb.py`, which refuses a session made from other input | — |
 | 5 | `make_pcb.py` | the schematic's exported netlist, `PLACEMENT_Rev0.5.md`, `ROUTING_Rev0.5.md`, the session, the footprints | `.kicad_pcb` | `make_project.py --check`, `check_pcb.py`, `check_routing.py` (each with DRC), `check_silk.py` | `test_check_pcb.py`, `test_check_routing.py`, `test_check_silk.py` |
-| 6 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_rotation.json` | `manufacturing/working/rev0.5/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
+| 6 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_frame.json` | `manufacturing/working/rev0.5/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
 
 ```sh
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py
@@ -51,30 +51,44 @@ and its best pass was the 30th) on this machine. A new session also needs a new 
 (`ROUTING_Rev0.5.md`, *After the router*).
 
 `make_project.py` writes a bare board, so `make_pcb.py` runs after it; until then
-`check_pcb.py` fails, because the board holds no footprints. A re-run of any generator writes
-the same bytes: UUIDs are derived, and `make_pcb.py` seeds pcbnew's UUID generator, which
-decides the order footprints are saved in.
+`check_pcb.py` fails, because the board holds no footprints. A re-run of any generator but
+`make_pcb.py` writes the same bytes: UUIDs are derived, and `make_pcb.py` seeds pcbnew's UUID
+generator, which decides the order footprints are saved in.
+
+`make_pcb.py` writes the same bytes except for the pours' fill: KiCad's zone filler is not
+deterministic. In 32 runs on 2026-11-13 (a scratch copy of `design/`, `--no-check`), 3 left out
+two 0.11 mm² islands of the B.Cu GND pour that touch pad J3.S1 (x 96.73-97.23 and 105.37-105.87,
+y 117.0-117.3 mm) and 29 kept them; the board file then differs by those two filled polygons
+(SHA-256 `3205d4c4…` without them, `d354d21a…` with them) and the Gerber's `B_Cu` member with it.
+Nothing else differed, and both boards pass every check. The tracked `source/usb-power-hub.kicad_pcb`
+is therefore the source of truth: it is the board without the islands, because release r02 was made
+from that one. Do not regenerate it to compare, and read a changed board hash after a re-run as
+this, not as a changed design, before looking for another cause. Step 6 is deterministic given the
+board.
 
 Step 6 writes a candidate, not a release. `manufacturing/working/` is not tracked
 (`.gitignore`; CLAUDE.md §2: disposable, never orderable), so the set is regenerated rather
-than checked out: the same sources give the same bytes, because creation dates are fixed to
-1980-01-01 and paths made relative. Its manifest records the SHA-256 of every source file
+than checked out: the same sources, the board included, give the same bytes, because creation
+dates are fixed to 1980-01-01 and paths made relative. Its manifest records the SHA-256 of every source file
 instead of a Git commit, and `check_outputs.py` fails a set older than its sources. A
 release is copied to `manufacturing/releases/<rev>/<rNN>/` and tracked there (CLAUDE.md §2).
 
-The CPL's angles are KiCad's plus a per-LCSC rotation, `jlcpcb_model_rotation.json`, because
-JLCPCB applies a CPL angle to its own model of the part (easy-stick 14.18); `make_outputs.py`
-reads it and `check_outputs.py` fails an entry no BOM line uses. Gerber and drill files are
-written with the auxiliary origin at the board's lower-left corner, the CPL's origin. A new
-entry or a new part class is confirmed only in JLCPCB's placement preview, after the corrected
-CPL is uploaded; the first review is `manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, and
-its candidate release is the first one under `manufacturing/releases/` (state `WIP`, not
-approved). Rev0.4's `r02` beside it is the same copper with every via drilled at 0.30 mm,
-JLCPCB's standard via class (issue #8); its `JLCPCB_REVIEW.md` records only what changed.
-Rev0.5's candidate release is `manufacturing/releases/rev0.5/r01/` (state `WIP`, not approved).
-The gate has not run on it: the receptacle C2765186 (D37) is a part class the preview has not
-shown, and `jlcpcb_model_rotation.json` has no entry for it, so its model's orientation is
-unconfirmed until then.
+The CPL's angles are KiCad's plus a per-LCSC rotation, and its positions KiCad's plus a per-LCSC
+shift; both are in `jlcpcb_model_frame.json` (until 2026-11-13 `jlcpcb_model_rotation.json`,
+rotations only), because JLCPCB applies a CPL point and angle to its own model of the part
+(easy-stick 14.18). `make_outputs.py` reads it and `check_outputs.py` fails an entry no BOM line
+uses. Gerber and drill files are written with the auxiliary origin at the board's lower-left
+corner, the CPL's origin. A new entry or a new part class is confirmed only in JLCPCB's
+placement preview, after the corrected CPL is uploaded; the first review is
+`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, and its candidate release is the first one
+under `manufacturing/releases/` (state `WIP`, not approved). Rev0.4's `r02` beside it is the
+same copper with every via drilled at 0.30 mm, JLCPCB's standard via class (issue #8); its
+`JLCPCB_REVIEW.md` records only what changed. Rev0.5's gate ran on 2026-11-13 on
+`manufacturing/releases/rev0.5/r01/` and found two defects: the receptacle C2765186's (D37)
+model sat 1.375 mm off the CPL point, hence the `shift`, and eight vias stood 0.046 mm from the
+receptacles' plated slots, hence rule 10 of `check_routing.py` and stage 5 of the routing patch.
+`manufacturing/releases/rev0.5/r02/` fixes both (state `WIP`, not approved); its
+`JLCPCB_REVIEW.md` is the gate's record, and r01's beside it a short one.
 
 The negative tests corrupt copies of the files in a temporary directory and expect the
 checker to name each fault; they never write to `source/`, `libraries/` or `manufacturing/`.
@@ -87,6 +101,8 @@ checker to name each fault; they never write to `source/`, `libraries/` or `manu
 | A part's position or rotation | `PLACEMENT_Rev0.5.md` | steps 4 to 6 |
 | A silkscreen label | `PLACEMENT_Rev0.5.md`, *Silkscreen* | steps 5 and 6 (labels are not router input) |
 | A hand-drawn track, a zone, a router class or keepout | `ROUTING_Rev0.5.md` | steps 4 to 6 |
+| A row of the patch table (*After the router*) | `ROUTING_Rev0.5.md` | steps 5 and 6 (the session stays: the patch is not router input) |
+| A part's JLCPCB model rotation or shift | `jlcpcb_model_frame.json` | step 6, then the JLCPCB placement preview |
 | A symbol or footprint | `libraries/library.json`, `make_libraries.py` | steps 2 to 6 |
 | Rules, net classes, stackup, outline | `make_project.py` | step 1, then 4 to 6 |
 

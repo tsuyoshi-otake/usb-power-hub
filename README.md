@@ -8,8 +8,9 @@ the host PC over a plain COM port.
 > generated KiCad project: its part library (a symbol and a footprint for every part,
 > checked on paper), a captured schematic (ERC clean, checked against the circuit
 > document by script), and a placed, routed and labelled board (DRC clean). The
-> candidate manufacturing set of Rev0.5 (`manufacturing/releases/rev0.5/r01/`, state `WIP`)
-> is not orderable: the JLCPCB gate has not run on it, nothing has been ordered or paid,
+> candidate manufacturing set of Rev0.5 (`manufacturing/releases/rev0.5/r02/`, state `WIP`)
+> is not orderable: it has been through the JLCPCB gate once (2026-11-13), which found two
+> defects that r02 fixes, and the user has not approved it. Nothing has been ordered or paid,
 > and there is no firmware. Nothing has been built or measured. Do not order anything from
 > this repository.
 
@@ -59,7 +60,7 @@ Read in this order:
 | `design/ecad/` | The KiCad 9 project (D32): `source/` holds the project, the source of truth until the EasyEDA import; `scripts/` holds its generators and checks; `libraries/` holds the project's symbols and footprints and the parts register they are checked against (its README). So far: stackup, outline, rules, net classes, the libraries, the schematic, written from `design/circuit/CIRCUIT_DESIGN_Rev0.5_netlist.md` (the capture list: every part, pin and net) and checked against it, the placement and silkscreen, written from `design/ecad/PLACEMENT_Rev0.5.md` (where every part and label sits, and why), and the routing, from `design/ecad/ROUTING_Rev0.5.md`; `make_outputs.py` writes the candidate manufacturing set from the board. `design/ecad/README.md` gives the order to run the generators in. |
 | `design/experiments/oi-23-placement/` | The OI-23 placement study: why 85 × 35 mm cannot work, and the checked 100 × 72 mm block placement. A trial, not design data. |
 | `design/experiments/stackup-impedance/` | The stackup study behind D27: JLCPCB's 4-layer stackups, the 90 Ω USB pair width on each, and a model checked against JLCPCB's single-ended calculator. A non-authoritative study, not design data. |
-| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03, re-run 2026-11-04 for D29, D30, D31 and D33, with Rev0.4's real quote (2026-11-12) and the Rev0.5 delta for D37 and D38: 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
+| `design/experiments/cost-estimate/` | Prototype cost estimate, dated 2026-11-03, re-run 2026-11-04 for D29, D30, D31 and D33, with Rev0.4's real quote (2026-11-12), the Rev0.5 delta for D37 and D38 and Rev0.5's quote (2026-11-13): 5 bare PCBs with 2 assembled by JLCPCB, plus the Akizuki parts. An estimate, not a quote. |
 | `host/profiler/` | The PC software (issue #9): a native Win32 current profiler in Rust that plots both channels, switches the ports and exports CSV. Runs against its demo device until firmware exists (its README). |
 | `mockup/` | three.js appearance model of an earlier 60 × 24 mm, 6-layer concept. Reference only; superseded by the board-size decisions D10 and D24 (100 × 72 mm). |
 
@@ -106,10 +107,13 @@ violations and 0 unconnected items, and `check_routing.py` rule 9 keeps the L2 p
 under U1 and U6. The silkscreen labels are placed, and a candidate manufacturing set (P5:
 Gerber, drill, JLCPCB BOM and CPL, schematic PDF, renders, a `WIP` manifest) is generated
 into `manufacturing/working/rev0.5/`, which Git does not track and nobody may order from;
-`manufacturing/releases/rev0.5/r01/` holds the same files as a release candidate (state
-`WIP`, nothing ordered). The next step is the JLCPCB gate on Rev0.5 (JLCDFM, part mapping,
-the placement preview of the receptacle, a quote), which needs the user's sign-in, then the
-EasyEDA import (P6). The front-end checks are made on the first assembled board, not on a
+`manufacturing/releases/rev0.5/r02/` holds the same files as a release candidate (state
+`WIP`, nothing ordered; r01 beside it is superseded). The JLCPCB gate ran on 2026-11-13
+(JLCDFM, part mapping, the placement preview of the receptacle, a quote of $51.94 without
+shipping; `JLCPCB_REVIEW.md`) and found two defects in r01, both fixed in r02: the receptacle's
+JLCPCB model sat 1.375 mm off the CPL point, and eight vias stood 0.046 mm from its plated
+slots. The decisions it leaves are the user's (the 0.60 mm slot width, impedance control,
+shipping, approval); then comes the EasyEDA import (P6). The front-end checks are made on the first assembled board, not on a
 bench beforehand (decision D28). Firmware does not exist.
 
 The KiCad project, its libraries, its schematic and its board are generated, not hand-edited. With KiCad

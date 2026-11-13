@@ -1,4 +1,4 @@
-# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29, D30, D31 and D33; Rev0.5 delta 2026-11-12) — non-authoritative
+# Prototype cost estimate (Rev0.4, 2026-11-03; re-run 2026-11-04 for D29, D30, D31 and D33; Rev0.5 delta 2026-11-12, quote 2026-11-13) — non-authoritative
 
 **Question.** What does a first prototype cost? The order is JLCPCB fabricating **5 bare
 PCBs** and assembling **2** of them, plus the Akizuki parts the user solders by hand onto
@@ -155,6 +155,16 @@ price of the new BOM and CPL, which only the JLCPCB form gives (CLAUDE.md §9); 
 D37 reopens and does not decide (CIRCUIT_DESIGN_Rev0.5.md §9: $33.08 and an auto-selected $1.05 on
 2026-11-03, 5,461 yen at 160 yen/USD); and the receptacle's joints, whose yield the first board shows
 (V-MFG-03, OI-33).
+
+**The quote, 2026-11-13 (issue #8, the JLCPCB gate).** JLCPCB's form gave **$51.94 without shipping**
+for the Rev0.5 BOM and CPL: PCB $8.00, PCBA lines $43.94 by difference. It was read with r01's Gerber;
+r02's Gerber leaves every option of the form unchanged and the PCB line stayed $8.00. That is $0.14
+above the delta's $51.80 (r02's $47.69 + $4.11). With OCS Express ($7.23, read on 2026-11-12) the
+JLCPCB order is $59.17, 9,467 yen, and with the Akizuki order of 4,790 yen **14,257 yen for 2 units,
+7,129 yen per unit**, against the delta's 14,235 yen. Not in it: the PCBA lines one by one (read as a
+total), the assembled parcel's shipping (in the cart only; DHL Express $17.67 is the default for the
+0.24 kg PCB-only parcel) and impedance control (+$34.13 including the Confirm Production file).
+`manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md`, section 6.
 
 ## Akizuki (2 units, prices tax included)
 

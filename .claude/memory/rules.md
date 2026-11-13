@@ -442,10 +442,34 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   board minimum fixed when the router input must stay the same.
 - **Changing only a via's drill changes the zone fill.** The poured layers (B.Cu, In2) differed by
   slivers under 6 µm wide, although the hole's knockout lies inside the copper's. Refilling the old
-  board alone reproduced its own fill exactly. Prove "copper unchanged" by tracks, via positions and
-  pads, footprints, plus a 3 µm erosion of the fill difference, not by Gerber bytes.
+  board alone reproduced its own fill in the runs tried then (not guaranteed: next rule). Prove
+  "copper unchanged" by tracks, via positions and pads, footprints, plus a 3 µm erosion of the fill
+  difference, not by Gerber bytes.
+- **KiCad's zone filler is not deterministic, so `make_pcb.py`'s board is not byte-reproducible.**
+  (#8, 2026-11-13) Same inputs, 32 runs (a scratch copy of `design/`, `make_pcb.py --no-check`, 5 s
+  each): 29 gave board `d354d21a…`, 3 gave `3205d4c4…`, which lacks two 0.11 mm² B.Cu GND islands that
+  touch pad J3.S1 (text diff: two added `filled_polygon` blocks of 11 and 10 lines; the Gerber's
+  `B_Cu` member differs by the same two regions and every other member is identical). Both boards
+  pass DRC, `check_pcb`, `check_routing`, `check_silk` and every suite. It surfaced only because the
+  final "run it again and compare" step compared the board's hash with the one in the release
+  manifest, and r02's was the rare state. Rules: the tracked board is the source of truth and the
+  manifest records its hash; never regenerate it to prove a release; diff a changed hash after a
+  re-run (two `filled_polygon` blocks?) before looking for a changed design; to get a given board
+  back, re-run in a scratch copy of `design/` until the hash matches, never edit the fill by hand.
+  `make_outputs.py` is deterministic for a given board. Not tried: filling the zones one at a time
+  in a fixed order, which may remove the variation. Verified by: the 32 runs, `diff` of the two
+  boards, a Gerber member comparison, a pcbnew probe (island mode 0 = always remove; both islands
+  touch `J3.S1`).
 - **Freerouting with the same input repeats its session.** The 17-minute run on input that differed
   only in the via's padstack name gave the old session with that name replaced (56 passes both times).
+- **A slot (an oblong hole) is invisible to both the router's search and KiCad's DRC.** (#8, 2026-11-13)
+  `route.py` `_Copper` reads an oblong pad hole as a round hole at the pad's centre, so beside each rear
+  shell slot of the receptacles it put the GND via of contact pad A1 or B1 0.046 mm from the slot's hole
+  (8 vias). The board had 0 DRC violations; JLCDFM's plated-through-hole spacing called them Danger (below
+  0.18 mm), and the board's own limit is 0.25 mm. `check_routing.py` rule 10 now measures every pair of
+  drilled holes with a slot as a capsule (via-via 0.20, pad-pad 0.45, via-pad 0.25 mm). The router's
+  input must not change (its digest is checked), so the patch deletes the 8 vias and ties each stub into
+  the slot's pad (stage 5); the next session reads the slot as a capsule in `_Copper`.
 
 ## KiCad 9 silkscreen and manufacturing outputs
 
@@ -501,12 +525,21 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 
 ## JLCPCB quote, placement preview and the account (#6 P6, 2026-11-11/12)
 
-- **A CPL angle is applied to JLCPCB's own model of the part** (easy-stick 14.18), so the KiCad
-  angle alone was wrong for 11 classes: U6, U8, the OP07 and LM393 SOICs by +270; the SOT-23 family,
-  the PSM712 and the SOT-223 by +180. The table is `design/ecad/jlcpcb_model_rotation.json`, keyed
-  by LCSC number (the model belongs to the part, not the footprint). In the viewer the magenta or
-  purple dot is the model's pin 1 and the LED's "+" is the anode. Confirm each class only after
-  the corrected CPL is uploaded: a first +180 on the LEDs put the anode on pad 1 and was removed.
+- **A CPL angle and a CPL point are applied to JLCPCB's own model of the part** (easy-stick 14.18), so
+  the KiCad angle alone was wrong for 11 classes: U6, U8, the OP07 and LM393 SOICs by +270; the SOT-23
+  family, the PSM712 and the SOT-223 by +180. The table is `design/ecad/jlcpcb_model_frame.json` (until
+  2026-11-13 `jlcpcb_model_rotation.json`, rotations only), keyed by LCSC number (the model belongs to
+  the part, not the footprint): `add` is a rotation, `shift` a position in the footprint's own frame,
+  turned with it. In the viewer the magenta or purple dot is the model's pin 1 and the LED's "+" is
+  the anode. Confirm each class only after the corrected CPL is uploaded: a first +180 on the LEDs
+  put the anode on pad 1 and was removed.
+- **The receptacle C2765186's model sat about 1.375 mm toward its mouth from the footprint's body
+  centre** (#8, 2026-11-13: the CPL point is the footprint origin, the model's origin is elsewhere).
+  The entry is `shift: [0.0, -1.375]`; J1-J4's CPL Mid Y moved by 1.375 mm away from the mouth. With it
+  the viewer showed, on all four: front face 1.054 mm past the board edge (design 1.06 mm), tails
+  6.325 mm (J1, J4) and 6.34 mm (J2, J3) from the edge against the pad row at 6.285 mm, pegs 2.82 mm
+  either side (design 2.89 mm), reading error about 0.04 mm. Read a connector class twice: with the KiCad
+  point first, to see the offset, then with the corrected CPL.
 - **The 0.25 mm via class costs $34.16.** The form adds "4-Wire Kelvin Test" ($17.02) and
   "Min via hole size/diameter" ($17.14) by itself, and offers Plugged, not Tented, at $0.00
   (2026-11-12, 4 layers, 100 × 72 mm). An estimate that ignores the via class is $28 short.
@@ -514,9 +547,27 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   form's default: $8.00 with neither line, FR4 TG135 (r02, issue #8). The form does not show that it
   reads the via size from the Gerber (a fresh form shows the same default); choose the class from the
   board's smallest hole.
-- **JLCDFM lists only the first 50 results of an item** and says via results of the annular-ring
-  check may be ignored. Judge an item by measuring the board (via-to-pad pairs by net, silkscreen
-  against holes), not by the 50 rows. Keep a note of what stays unexplained.
+- **JLCDFM lists only the first 50 results of an item per layer** (a count of 100 is a cap) and says
+  via results of the annular-ring check may be ignored. Judge an item by measuring the board (via-to-pad
+  pairs by net, silkscreen against holes), not by the 50 rows. Keep a note of what stays unexplained.
+  (#8, 2026-11-13, https://jlcdfm.com/ with the user's sign-in: a Details dialog gives each item's limits
+  and rows; its viewer is in the Gerber's frame, x = x_KiCad - 50 mm, y = 122 mm - y_KiCad, so a row's
+  position finds the part on the KiCad board; a row click recentres the view.)
+- **JLCDFM appears to read KiCad's rounded-rectangle pads as plain rectangles.** Its first pad-spacing
+  row was a C20 pad against a V3V3 via at 0.05 mm; with sharp corners the same measure gives 0.05 mm and
+  the real shape 0.105 mm (checked for that row only). On the real shapes every pad-to-via pair under
+  0.15 mm was on one net, and different nets are the DRC's (0.15 mm clearance).
+- **JLCDFM's limits are its own and can contradict JLCPCB's capabilities page.** Plated slot width:
+  JLCDFM Danger below 0.61 mm, Warning 0.61-0.81, Good above 0.81; JLCPCB's page (read 2026-11-13) gives
+  0.35 mm minimum for multi-layer boards with a length of at least twice the width. 16 Danger rows for the
+  receptacles' 0.60 mm slots were left to the user. Its plated-hole spacing: Danger below 0.18 mm,
+  Warning 0.18-0.2 mm.
+- **Browser tool facts (Claude in Chrome, 2026-11-13).** `browser_batch` takes `{"actions": [{"name": ...,
+  "input": {...}}]}` (`calls` is rejected); `computer` has `hover`, not `mouse_move`; a JavaScript result is cut
+  at about 1,000 characters, so print compactly. A JLCDFM Details dialog is the `_eda-modal-body_...` div,
+  found by its text (`.el-dialog` is not it). A click on "My Account" on the quote page navigates that tab to
+  Order History, where screenshots are refused: read the drafts another way or leave them. Close only the tabs
+  of the session's own group; the tab group can vanish after a navigation error.
 - **Uploading to JLCPCB creates auto-saved drafts** under My Account > Projects > **Quotes**; the
   pcbFileNo in the URL is account data and does not go into the repository. Tell the user the
   drafts exist and how to delete them ("..." > Delete). BOM upload, JLCDFM and EasyEDA Pro's
