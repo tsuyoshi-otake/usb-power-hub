@@ -97,6 +97,16 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > procurement specifications, and D10/D24 (100 × 72 mm, 4 layers) supersede its
 > outline and layer count. Section 11 lists the blocking issues.
 >
+> The enclosure is a first design on paper (issue #11, 2026-11-13):
+> `design/mechanical/ENCLOSURE_Rev0.1.md`, a printed tray and frame under a PCB lid,
+> 104.8 × 76.8 × 27.7 mm, with its decisions E1–E9 (Claude, delegated). Its STL files, the
+> lid PCB's interface and seven pictures are generated from that document and from the
+> board's interface (`design/mechanical/reference/`, exported from the tracked KiCad board) by
+> `make_enclosure.py`, and checked by `check_enclosure.py` (`design/mechanical/README.md`).
+> **Nothing is printed, no cable has been tried in an opening, and the lid PCB is not drawn**;
+> 20 of the 24 part heights it clears are assumed, and the print process is not chosen
+> (Section 7). OI-1 and OI-5 stay open.
+>
 > The repository is under Git since 2026-11-03 (commit `4dd10fb` is the design
 > as it was paused on 2026-08-16). Its one remote, `origin`, is the **private**
 > GitHub repository `tsuyoshi-otake/usb-power-hub`, created on 2026-11-03 at the
@@ -185,10 +195,11 @@ usb-power-hub/
 │  │  ├─ libraries/             #   project-only symbols and footprints
 │  │  ├─ previews/              #   2D/3D and vendor placement previews
 │  │  └─ reports/               #   ERC, DRC, unrouted-net output
-│  ├─ mechanical/
+│  ├─ mechanical/               # ENCLOSURE_Rev<X.Y>.md — the enclosure, as a document
+│  │  ├─ scripts/               #   generators and checks run with the CAD venv's Python
 │  │  ├─ reference/             #   authoritative outline and connector geometry
 │  │  ├─ assembly/              #   enclosure CAD, lid PCB, fit studies
-│  │  └─ reports/
+│  │  └─ reports/               #   pictures of the generated enclosure
 │  └─ experiments/              # non-authoritative trials
 ├─ firmware/                    # RP2040 (bare chip, D29) — src/ include/ tests/ tools/ reports/
 ├─ host/
@@ -491,7 +502,9 @@ The enclosure is part of the release, not an afterthought.
 
 - The board outline, mounting holes, connector positions, and every case
   opening MUST come from **one** dimension source. Record which file is
-  authoritative; the three.js mockup is not it.
+  authoritative; the three.js mockup is not it. It is
+  `design/mechanical/reference/board_interface_Rev0.5.json`, written from the tracked
+  KiCad board by `design/mechanical/scripts/export_board_interface.py` (issue #11).
 - Connector openings MUST clear the **mating plug's overmold**, not just the
   receptacle shell. Verify against a real cable, not a datasheet outline.
 - Fastener bosses MUST give at least 2 × D thread engagement (≥ 4 mm for M2),
@@ -711,11 +724,11 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 
 | ID | Issue | Evidence |
 |---|---|---|
-| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). *Rev0.5 (D37):* J2 and J3 are 8.94 mm receptacles, 33.8 mm apart. Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.5 §10 D21, D37 |
+| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). *Rev0.5 (D37):* J2 and J3 are 8.94 mm receptacles, 33.8 mm apart. *Enclosure Rev0.1 (issue #11):* each opening has a 15.0 × 8.0 mm pocket for the plug's overmould, on paper. Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.5 §10 D21, D37; `design/mechanical/ENCLOSURE_Rev0.1.md` E6 |
 | OI-2 | ~~No crystal for the USB hub.~~ **Closed by decision** (D19, Claude delegated, 2026-11-03): a 12 MHz Basic crystal (C9002), Y2 → CH335F. D23 removed Y1 (→ STM32 HSE) because the MCU module carried its own crystal; D29 restored Y1, the same C9002, → RP2040 XOSC, checked on the first board (V-MEAS-06). The history: D6's shared oscillator was superseded by D11; the USB2514B (24 MHz) was itself superseded by D13. Y2 against CH335F's built-in load capacitors is checked at bring-up (G9). | Rev0.5 §6.3 |
 | OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D9/D17): ranges 0.1 Ω / 10 Ω / 510 Ω in a nested bypass ladder, LM393 up-ranging ≤ 3 µs per stage, firmware hold ≤ 100 µs, bypass default ON. Bring-up proves the budget (V-MEAS-02). | Rev0.5 §3.2, §4 |
 | OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D14): D1's PD sink is superseded; port power comes from J4, a power-only 5 V input. Its USB-C advertisement drives the advertisement and budget rules (REQ-PWR-04/05). | Rev0.5 §3.1, §7.2 |
-| OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *Rev0.3:* heat-set M2 inserts at 4 corners adopted (D21). *Rev0.5 (D37):* the plug's force enters the PCB through each receptacle's four shell slots, read in V-MECH-01 with OI-33. Open until built and checked (V-MECH-01). | boss height = `GAP` = 1.6 |
+| OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *Rev0.3:* heat-set M2 inserts at 4 corners adopted (D21). *Rev0.5 (D37):* the plug's force enters the PCB through each receptacle's four shell slots, read in V-MECH-01 with OI-33. *Enclosure Rev0.1 (issue #11):* on paper, four bosses and posts clamp the board at H1–H4, the screws go into heat-set inserts (3.10 mm and 3.40 mm of thread), and a rib stands under each receptacle. Open until built and checked (V-MECH-01). | boss height = `GAP` = 1.6; `design/mechanical/ENCLOSURE_Rev0.1.md` E4, E7 |
 | OI-6 | **Silkscreen below fab minimum.** Reference designators 0.80 mm; user-facing kanji 0.81 mm. | canvas px/mm scale |
 | OI-7 | ~~Protection incomplete.~~ **Closed by decision** (D18), with two residuals moved to their own issues. ESD: PSM712 on the CC pins of J1–J4; D+/D− of J1–J3 are unprotected since D22 removed SRV05-4 (product.md §9). TVS: SMBJ6.5CA on the J1 and J4 VBUS. Reverse blocking: back-to-back AO3401A. No TVS on VBUS_A/B, by design: its leakage would be measured, and the port capacitor absorbs ESD. No common-mode choke: not needed for USB 2.0, and none is Basic. Residual: the J4 fuse (OI-29, closed by D25). SRV05-4's class (OI-30) ended with its removal (D22). | Rev0.5 §3.1, §3.4, G10 |
 | OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. *Rev0.3:* TC2030-NL SWD footprint and test pads adopted (D21, REQ-MFG-03/04). Panelization still undefined. | — |
@@ -764,7 +777,9 @@ evidence does not carry over. The `[x]` items hold for r02 only: any regenerated
 - [x] ERC critical errors: 0. DRC critical errors: 0. Unrouted nets: 0. *`check_schematic.py`,
       `check_pcb.py`, `check_routing.py` exit 0; `r02/UsbPowerHub_Main_Rev0.5_ERC.json`, `_DRC.json`.*
 - [ ] Board dimensions and mechanical overlay accepted against the authoritative
-      mechanical source. *Not done: there is no `design/mechanical/`; the user decides the print process.*
+      mechanical source. *Not done: `design/mechanical/` holds a first enclosure on paper (Rev0.1,
+      issue #11; `check_enclosure.py` passes on its files), nothing is printed, and the user decides
+      the print process and accepts the overlay.*
 - [ ] JLCPCB stackup ID recorded; differential impedance computed against it. *Half: the ID
       (JLC04161H-7628) is recorded; the impedance is D27's model value, JLCPCB's calculator was not rerun
       (Claude).*

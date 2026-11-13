@@ -1,0 +1,204 @@
+{
+ "schema": 1,
+ "about": "Interface of the enclosure's lid PCB, written by design/mechanical/scripts/make_enclosure.py. Do not edit.",
+ "frame": "the board frame of board_interface_Rev0.5.json; the lid's outline is the main board's, seen from above",
+ "outline": {
+  "x0": 0.0,
+  "y0": 0.0,
+  "x1": 100.0,
+  "y1": 72.0
+ },
+ "thickness": 1.6,
+ "underside_above_board": 19.0,
+ "holes": [
+  {
+   "ref": "H1",
+   "kind": "screw",
+   "x": 3.5,
+   "y": 3.5,
+   "d": 2.3,
+   "keepout_d": 4.5
+  },
+  {
+   "ref": "H2",
+   "kind": "screw",
+   "x": 96.5,
+   "y": 3.5,
+   "d": 2.3,
+   "keepout_d": 4.5
+  },
+  {
+   "ref": "H3",
+   "kind": "screw",
+   "x": 3.5,
+   "y": 68.5,
+   "d": 2.3,
+   "keepout_d": 4.5
+  },
+  {
+   "ref": "H4",
+   "kind": "screw",
+   "x": 96.5,
+   "y": 68.5,
+   "d": 2.3,
+   "keepout_d": 4.5
+  },
+  {
+   "ref": "SW1",
+   "kind": "button",
+   "x": 31.5,
+   "y": 4.5,
+   "d": 4.6
+  },
+  {
+   "ref": "SW2",
+   "kind": "button",
+   "x": 65.3,
+   "y": 4.5,
+   "d": 4.6
+  },
+  {
+   "ref": "SW3",
+   "kind": "pinhole",
+   "x": 31.85,
+   "y": 68.6,
+   "d": 2.0
+  }
+ ],
+ "windows": [
+  {
+   "refs": [
+    "D10",
+    "D11"
+   ],
+   "rect": [
+    28.6,
+    9.9,
+    30.9,
+    13.6
+   ],
+   "note": "no copper and no solder mask on either side: bare FR-4 passes the LEDs' light"
+  },
+  {
+   "refs": [
+    "D12",
+    "D13"
+   ],
+   "rect": [
+    62.4,
+    9.9,
+    64.7,
+    13.6
+   ],
+   "note": "no copper and no solder mask on either side: bare FR-4 passes the LEDs' light"
+  }
+ ],
+ "ports": [
+  {
+   "ref": "J1",
+   "x": 76.0,
+   "edge": "back"
+  },
+  {
+   "ref": "J2",
+   "x": 17.5,
+   "edge": "front"
+  },
+  {
+   "ref": "J3",
+   "x": 51.3,
+   "edge": "front"
+  },
+  {
+   "ref": "J4",
+   "x": 17.5,
+   "edge": "back"
+  }
+ ],
+ "frame_contact": {
+  "edge_band": 0.8,
+  "rects": [
+   {
+    "what": "post H1",
+    "rect": [
+     -0.4,
+     -0.4,
+     6.7,
+     6.7
+    ]
+   },
+   {
+    "what": "post H2",
+    "rect": [
+     93.3,
+     -0.4,
+     100.4,
+     6.7
+    ]
+   },
+   {
+    "what": "post H3",
+    "rect": [
+     -0.4,
+     65.3,
+     6.7,
+     72.4
+    ]
+   },
+   {
+    "what": "post H4",
+    "rect": [
+     93.3,
+     65.3,
+     100.4,
+     72.4
+    ]
+   },
+   {
+    "what": "tower SW1",
+    "rect": [
+     28.3,
+     -0.4,
+     34.7,
+     7.7
+    ]
+   },
+   {
+    "what": "tower SW2",
+    "rect": [
+     62.1,
+     -0.4,
+     68.5,
+     7.7
+    ]
+   },
+   {
+    "what": "light well SW1",
+    "rect": [
+     27.6,
+     7.7,
+     31.9,
+     14.6
+    ]
+   },
+   {
+    "what": "light well SW2",
+    "rect": [
+     61.4,
+     7.7,
+     65.7,
+     14.6
+    ]
+   },
+   {
+    "what": "tube SW3",
+    "rect": [
+     29.85,
+     66.6,
+     33.85,
+     72.4
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,176 @@
+{
+ "schema": 1,
+ "about": "Enclosure Rev0.1, written by design/mechanical/scripts/make_enclosure.py. Do not edit.",
+ "state": "WIP",
+ "revision": "Rev0.1",
+ "document": {
+  "path": "design/mechanical/ENCLOSURE_Rev0.1.md",
+  "inputs_sha256": "3f7f9b33fa9a98666a94405298a67c2599944b10a1c5ff0457b3d9403d236396"
+ },
+ "overrides": {},
+ "board_interface": {
+  "path": "design/mechanical/reference/board_interface_Rev0.5.json",
+  "sha256": "9ddc245087e593d9b9bbe7f5c1ac78facd8175851837b6f7fb0b92a7c53dfd5d",
+  "board_sha256": "3205d4c42fe63b5acdec07c3e2959914dbbca246025d93fb2a04ccfc96125530"
+ },
+ "frame": "assembly frame: the board frame, z = 0 at the board's top face, z up, mm; a piece's to_assembly rows are [r00 r01 r02 t] applied to its STL coordinates",
+ "pieces": [
+  {
+   "name": "Tray",
+   "file": "UsbPowerHub_Enclosure_Rev0.1_Tray.stl",
+   "sha256": "2227d841a508902d2a5418ee8b8355446402c616985b24ba7d0df9ad3c928ec3",
+   "triangles": 3028,
+   "volume_mm3": 20501.7,
+   "print_size": [
+    104.8,
+    76.8,
+    7.9
+   ],
+   "print": "as modelled, the floor on the bed",
+   "quantity": 1,
+   "to_assembly": [
+    [
+     [
+      1,
+      0,
+      0,
+      -2.4
+     ],
+     [
+      0,
+      1,
+      0,
+      -2.4
+     ],
+     [
+      0,
+      0,
+      1,
+      -7.1
+     ]
+    ]
+   ]
+  },
+  {
+   "name": "Frame",
+   "file": "UsbPowerHub_Enclosure_Rev0.1_Frame.stl",
+   "sha256": "8b6195b1ef14c3d234a6753f8030c83a7487f022eabc8aee30ab3ab0831d8b33",
+   "triangles": 4956,
+   "volume_mm3": 18757.71,
+   "print_size": [
+    104.8,
+    76.8,
+    19.0
+   ],
+   "print": "turned over, its top face on the bed",
+   "quantity": 1,
+   "to_assembly": [
+    [
+     [
+      1,
+      0,
+      0,
+      -2.4
+     ],
+     [
+      0,
+      -1,
+      0,
+      74.4
+     ],
+     [
+      0,
+      0,
+      -1,
+      19.0
+     ]
+    ]
+   ]
+  },
+  {
+   "name": "Plunger",
+   "file": "UsbPowerHub_Enclosure_Rev0.1_Plunger.stl",
+   "sha256": "3ab9979e37ae541994020f56ceb9c042a151559af46ff78afbb52d2251b5ac6f",
+   "triangles": 892,
+   "volume_mm3": 171.56,
+   "print_size": [
+    5.0,
+    5.0,
+    20.1
+   ],
+   "print": "turned over, the cap on the bed",
+   "quantity": 2,
+   "to_assembly": [
+    [
+     [
+      1,
+      0,
+      0,
+      31.5
+     ],
+     [
+      0,
+      -1,
+      0,
+      4.5
+     ],
+     [
+      0,
+      0,
+      -1,
+      21.6
+     ]
+    ],
+    [
+     [
+      1,
+      0,
+      0,
+      65.3
+     ],
+     [
+      0,
+      -1,
+      0,
+      4.5
+     ],
+     [
+      0,
+      0,
+      -1,
+      21.6
+     ]
+    ]
+   ]
+  }
+ ],
+ "lid_interface": {
+  "file": "UsbPowerHub_Enclosure_Rev0.1_LidInterface.json",
+  "sha256": "97064396c8855bac2a117e883889657083e3f33eb86cc12cddbd5c9f260ee9b7"
+ },
+ "derived": {
+  "outer_x": 104.8,
+  "outer_y": 76.8,
+  "outer_z": 27.7,
+  "printed_z": 26.1,
+  "tray_z": 7.9,
+  "frame_z": 19.0,
+  "lid_margin": 2.4,
+  "web_t": 0.56,
+  "face_inset": 1.34,
+  "port_to_screw_max": 45.2087,
+  "swd_wall_clearance": 1.155,
+  "lid_clearance_min": 0.7,
+  "bottom_engagement": 3.1,
+  "lid_engagement": 3.4,
+  "plunger_len": 20.1,
+  "tray_volume": 20.5017,
+  "frame_volume": 18.7577,
+  "plunger_volume": 0.1716
+ },
+ "tools": {
+  "python": "3.13.17",
+  "numpy": "2.5.4",
+  "manifold3d": "3.5.4"
+ }
+}

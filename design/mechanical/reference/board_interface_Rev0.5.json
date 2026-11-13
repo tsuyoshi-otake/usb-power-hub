@@ -1,0 +1,5383 @@
+{
+ "schema": 1,
+ "about": "Mechanical interface of the Rev0.5 board, written by design/mechanical/scripts/export_board_interface.py. Do not edit.",
+ "source": {
+  "path": "design/ecad/source/usb-power-hub.kicad_pcb",
+  "sha256": "3205d4c42fe63b5acdec07c3e2959914dbbca246025d93fb2a04ccfc96125530"
+ },
+ "frame": "origin at the board's lower-left corner, x right, y up, mm (PLACEMENT_Rev0.5.md); KiCad sheet (xk, yk) = (x + 50, 122 - y)",
+ "thickness": 1.6,
+ "outline": {
+  "x0": 0.0,
+  "y0": 0.0,
+  "x1": 100.0,
+  "y1": 72.0
+ },
+ "footprints": [
+  {
+   "ref": "C1",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "22u",
+   "x": 13.25,
+   "y": 55.8,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    11.505,
+    54.775,
+    14.995,
+    56.825
+   ]
+  },
+  {
+   "ref": "C10",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "10u",
+   "x": 86.3,
+   "y": 47.15,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    84.555,
+    46.125,
+    88.045,
+    48.175
+   ]
+  },
+  {
+   "ref": "C101",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "10n",
+   "x": 5.05,
+   "y": 39.0,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    4.095,
+    38.495,
+    6.005,
+    39.505
+   ]
+  },
+  {
+   "ref": "C102",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "10n",
+   "x": 5.05,
+   "y": 37.85,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    4.095,
+    37.345,
+    6.005,
+    38.355
+   ]
+  },
+  {
+   "ref": "C103",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 5.4,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    4.445,
+    31.795,
+    6.355,
+    32.805
+   ]
+  },
+  {
+   "ref": "C104",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 2.26,
+   "y": 30.45,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.305,
+    29.945,
+    3.215,
+    30.955
+   ]
+  },
+  {
+   "ref": "C105",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 16.4,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    15.445,
+    31.795,
+    17.355,
+    32.805
+   ]
+  },
+  {
+   "ref": "C106",
+   "footprint": "usb-power-hub:C_0603_1608Metric",
+   "value": "330p",
+   "x": 13.26,
+   "y": 30.25,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    11.735,
+    29.475,
+    14.785,
+    31.025
+   ]
+  },
+  {
+   "ref": "C107",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 27.4,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    26.445,
+    31.795,
+    28.355,
+    32.805
+   ]
+  },
+  {
+   "ref": "C108",
+   "footprint": "usb-power-hub:C_0603_1608Metric",
+   "value": "330p",
+   "x": 24.26,
+   "y": 30.25,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    22.735,
+    29.475,
+    25.785,
+    31.025
+   ]
+  },
+  {
+   "ref": "C109",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 23.1,
+   "y": 40.65,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    22.595,
+    39.695,
+    23.605,
+    41.605
+   ]
+  },
+  {
+   "ref": "C11",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 56.6,
+   "y": 56.8,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    56.095,
+    55.845,
+    57.105,
+    57.755
+   ]
+  },
+  {
+   "ref": "C110",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 30.3,
+   "y": 36.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    29.345,
+    35.795,
+    31.255,
+    36.805
+   ]
+  },
+  {
+   "ref": "C111",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 23.1,
+   "y": 34.55,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    22.595,
+    33.595,
+    23.605,
+    35.505
+   ]
+  },
+  {
+   "ref": "C112",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 30.3,
+   "y": 40.95,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    29.345,
+    40.445,
+    31.255,
+    41.455
+   ]
+  },
+  {
+   "ref": "C113",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 26.6,
+   "y": 41.95,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    25.645,
+    41.445,
+    27.555,
+    42.455
+   ]
+  },
+  {
+   "ref": "C114",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 52.2,
+   "y": 56.8,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    51.695,
+    55.845,
+    52.705,
+    57.755
+   ]
+  },
+  {
+   "ref": "C115",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 55.45,
+   "y": 56.85,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    54.945,
+    55.895,
+    55.955,
+    57.805
+   ]
+  },
+  {
+   "ref": "C116",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "10u",
+   "x": 21.3,
+   "y": 9.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    19.555,
+    8.175,
+    23.045,
+    10.225
+   ]
+  },
+  {
+   "ref": "C12",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 39.25,
+   "y": 52.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    38.295,
+    52.095,
+    40.205,
+    53.105
+   ]
+  },
+  {
+   "ref": "C13",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 42.85,
+   "y": 52.8,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    41.895,
+    52.295,
+    43.805,
+    53.305
+   ]
+  },
+  {
+   "ref": "C14",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 47.35,
+   "y": 60.2,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    46.845,
+    59.245,
+    47.855,
+    61.155
+   ]
+  },
+  {
+   "ref": "C15",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 43.2,
+   "y": 63.98,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    42.245,
+    63.475,
+    44.155,
+    64.485
+   ]
+  },
+  {
+   "ref": "C16",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 39.6,
+   "y": 63.98,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    38.645,
+    63.475,
+    40.555,
+    64.485
+   ]
+  },
+  {
+   "ref": "C17",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 36.2,
+   "y": 57.74,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    35.245,
+    57.235,
+    37.155,
+    58.245
+   ]
+  },
+  {
+   "ref": "C18",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 36.2,
+   "y": 58.85,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    35.245,
+    58.345,
+    37.155,
+    59.355
+   ]
+  },
+  {
+   "ref": "C19",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 36.2,
+   "y": 62.57,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    35.245,
+    62.065,
+    37.155,
+    63.075
+   ]
+  },
+  {
+   "ref": "C2",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "10u",
+   "x": 52.9,
+   "y": 62.65,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    51.875,
+    60.905,
+    53.925,
+    64.395
+   ]
+  },
+  {
+   "ref": "C20",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 36.2,
+   "y": 61.46,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    35.245,
+    60.955,
+    37.155,
+    61.965
+   ]
+  },
+  {
+   "ref": "C201",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "10n",
+   "x": 38.85,
+   "y": 39.0,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    37.895,
+    38.495,
+    39.805,
+    39.505
+   ]
+  },
+  {
+   "ref": "C202",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "10n",
+   "x": 38.85,
+   "y": 37.85,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    37.895,
+    37.345,
+    39.805,
+    38.355
+   ]
+  },
+  {
+   "ref": "C203",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 39.2,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    38.245,
+    31.795,
+    40.155,
+    32.805
+   ]
+  },
+  {
+   "ref": "C204",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 36.06,
+   "y": 30.45,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    35.105,
+    29.945,
+    37.015,
+    30.955
+   ]
+  },
+  {
+   "ref": "C205",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 50.2,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    49.245,
+    31.795,
+    51.155,
+    32.805
+   ]
+  },
+  {
+   "ref": "C206",
+   "footprint": "usb-power-hub:C_0603_1608Metric",
+   "value": "330p",
+   "x": 47.06,
+   "y": 30.25,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    45.535,
+    29.475,
+    48.585,
+    31.025
+   ]
+  },
+  {
+   "ref": "C207",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 61.2,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    60.245,
+    31.795,
+    62.155,
+    32.805
+   ]
+  },
+  {
+   "ref": "C208",
+   "footprint": "usb-power-hub:C_0603_1608Metric",
+   "value": "330p",
+   "x": 58.06,
+   "y": 30.25,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    56.535,
+    29.475,
+    59.585,
+    31.025
+   ]
+  },
+  {
+   "ref": "C209",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 56.9,
+   "y": 40.65,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    56.395,
+    39.695,
+    57.405,
+    41.605
+   ]
+  },
+  {
+   "ref": "C21",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 36.2,
+   "y": 60.35,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    35.245,
+    59.845,
+    37.155,
+    60.855
+   ]
+  },
+  {
+   "ref": "C210",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 64.1,
+   "y": 36.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    63.145,
+    35.795,
+    65.055,
+    36.805
+   ]
+  },
+  {
+   "ref": "C211",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 56.9,
+   "y": 34.55,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    56.395,
+    33.595,
+    57.405,
+    35.505
+   ]
+  },
+  {
+   "ref": "C212",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 64.1,
+   "y": 40.95,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    63.145,
+    40.445,
+    65.055,
+    41.455
+   ]
+  },
+  {
+   "ref": "C213",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 60.4,
+   "y": 41.95,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    59.445,
+    41.445,
+    61.355,
+    42.455
+   ]
+  },
+  {
+   "ref": "C214",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "220p",
+   "x": 61.5,
+   "y": 51.1,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    60.545,
+    50.595,
+    62.455,
+    51.605
+   ]
+  },
+  {
+   "ref": "C215",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 59.85,
+   "y": 54.05,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    59.345,
+    53.095,
+    60.355,
+    55.005
+   ]
+  },
+  {
+   "ref": "C216",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "10u",
+   "x": 55.1,
+   "y": 9.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    53.355,
+    8.175,
+    56.845,
+    10.225
+   ]
+  },
+  {
+   "ref": "C22",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 48.5,
+   "y": 60.25,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    47.995,
+    59.295,
+    49.005,
+    61.205
+   ]
+  },
+  {
+   "ref": "C23",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 36.2,
+   "y": 56.63,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    35.245,
+    56.125,
+    37.155,
+    57.135
+   ]
+  },
+  {
+   "ref": "C24",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 34.05,
+   "y": 56.62,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    33.095,
+    56.115,
+    35.005,
+    57.125
+   ]
+  },
+  {
+   "ref": "C25",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 49.65,
+   "y": 54.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    48.695,
+    53.695,
+    50.605,
+    54.705
+   ]
+  },
+  {
+   "ref": "C26",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "15p",
+   "x": 50.09,
+   "y": 59.85,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    49.135,
+    59.345,
+    51.045,
+    60.355
+   ]
+  },
+  {
+   "ref": "C27",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 93.1,
+   "y": 30.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    92.145,
+    29.745,
+    94.055,
+    30.755
+   ]
+  },
+  {
+   "ref": "C28",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 91.05,
+   "y": 30.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    90.095,
+    29.745,
+    92.005,
+    30.755
+   ]
+  },
+  {
+   "ref": "C29",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "10u",
+   "x": 92.3,
+   "y": 32.6,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    91.275,
+    30.855,
+    93.325,
+    34.345
+   ]
+  },
+  {
+   "ref": "C3",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "22u",
+   "x": 52.9,
+   "y": 66.25,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    51.875,
+    64.505,
+    53.925,
+    67.995
+   ]
+  },
+  {
+   "ref": "C30",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 70.1,
+   "y": 29.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    69.145,
+    28.995,
+    71.055,
+    30.005
+   ]
+  },
+  {
+   "ref": "C31",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 72.65,
+   "y": 29.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    71.695,
+    28.995,
+    73.605,
+    30.005
+   ]
+  },
+  {
+   "ref": "C32",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 69.55,
+   "y": 42.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    69.045,
+    41.045,
+    70.055,
+    42.955
+   ]
+  },
+  {
+   "ref": "C33",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 72.1,
+   "y": 42.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    71.595,
+    41.045,
+    72.605,
+    42.955
+   ]
+  },
+  {
+   "ref": "C34",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 57.95,
+   "y": 56.8,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    57.445,
+    55.845,
+    58.455,
+    57.755
+   ]
+  },
+  {
+   "ref": "C35",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "100n",
+   "x": 78.4,
+   "y": 51.9,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    77.445,
+    51.395,
+    79.355,
+    52.405
+   ]
+  },
+  {
+   "ref": "C36",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 77.9,
+   "y": 53.7,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    77.395,
+    52.745,
+    78.405,
+    54.655
+   ]
+  },
+  {
+   "ref": "C37",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 79.05,
+   "y": 53.55,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    78.545,
+    52.595,
+    79.555,
+    54.505
+   ]
+  },
+  {
+   "ref": "C4",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "10u",
+   "x": 34.15,
+   "y": 62.6,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    33.125,
+    60.855,
+    35.175,
+    64.345
+   ]
+  },
+  {
+   "ref": "C5",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 74.85,
+   "y": 8.7,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    74.345,
+    7.745,
+    75.355,
+    9.655
+   ]
+  },
+  {
+   "ref": "C6",
+   "footprint": "usb-power-hub:C_0402_1005Metric",
+   "value": "1u",
+   "x": 87.55,
+   "y": 8.7,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    87.045,
+    7.745,
+    88.055,
+    9.655
+   ]
+  },
+  {
+   "ref": "C7",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "22u",
+   "x": 86.45,
+   "y": 11.6,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    85.425,
+    9.855,
+    87.475,
+    13.345
+   ]
+  },
+  {
+   "ref": "C8",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "22u",
+   "x": 83.55,
+   "y": 9.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    81.805,
+    8.575,
+    85.295,
+    10.625
+   ]
+  },
+  {
+   "ref": "C9",
+   "footprint": "usb-power-hub:C_0805_2012Metric",
+   "value": "10u",
+   "x": 83.4,
+   "y": 47.05,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    82.375,
+    45.305,
+    84.425,
+    48.795
+   ]
+  },
+  {
+   "ref": "D1",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "PSM712-LF-T7",
+   "x": 72.4,
+   "y": 61.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    70.425,
+    59.855,
+    74.375,
+    63.345
+   ]
+  },
+  {
+   "ref": "D10",
+   "footprint": "usb-power-hub:LED_0805_2012Metric",
+   "value": "KT-0805G",
+   "x": 29.75,
+   "y": 10.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    28.025,
+    9.505,
+    31.475,
+    11.495
+   ]
+  },
+  {
+   "ref": "D11",
+   "footprint": "usb-power-hub:LED_0805_2012Metric",
+   "value": "NCD0805R1",
+   "x": 29.75,
+   "y": 13.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    28.025,
+    12.005,
+    31.475,
+    13.995
+   ]
+  },
+  {
+   "ref": "D12",
+   "footprint": "usb-power-hub:LED_0805_2012Metric",
+   "value": "KT-0805G",
+   "x": 63.55,
+   "y": 10.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    61.825,
+    9.505,
+    65.275,
+    11.495
+   ]
+  },
+  {
+   "ref": "D13",
+   "footprint": "usb-power-hub:LED_0805_2012Metric",
+   "value": "NCD0805R1",
+   "x": 63.55,
+   "y": 13.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    61.825,
+    12.005,
+    65.275,
+    13.995
+   ]
+  },
+  {
+   "ref": "D2",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "PSM712-LF-T7",
+   "x": 14.1,
+   "y": 11.3,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    12.125,
+    9.555,
+    16.075,
+    13.045
+   ]
+  },
+  {
+   "ref": "D3",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "PSM712-LF-T7",
+   "x": 47.9,
+   "y": 11.3,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    45.925,
+    9.555,
+    49.875,
+    13.045
+   ]
+  },
+  {
+   "ref": "D4",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "PSM712-LF-T7",
+   "x": 17.25,
+   "y": 62.3,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    15.505,
+    60.325,
+    18.995,
+    64.275
+   ]
+  },
+  {
+   "ref": "D5",
+   "footprint": "usb-power-hub:D_SMB",
+   "value": "SMBJ6.5CA",
+   "x": 84.2,
+   "y": 62.45,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    80.505,
+    60.155,
+    87.895,
+    64.745
+   ]
+  },
+  {
+   "ref": "D6",
+   "footprint": "usb-power-hub:D_SMB",
+   "value": "SMBJ6.5CA",
+   "x": 18.8,
+   "y": 53.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    15.105,
+    51.005,
+    22.495,
+    55.595
+   ]
+  },
+  {
+   "ref": "F1",
+   "footprint": "usb-power-hub:Fuse_Bourns_MF-R300_Style2_P5.10mm",
+   "value": "MF-R300",
+   "x": 5.0,
+   "y": 52.55,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.005,
+    50.505,
+    14.095,
+    54.595
+   ]
+  },
+  {
+   "ref": "FB1",
+   "footprint": "usb-power-hub:L_0603_1608Metric",
+   "value": "BLM18PG121SN1D",
+   "x": 82.3,
+   "y": 44.4,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    80.775,
+    43.625,
+    83.825,
+    45.175
+   ]
+  },
+  {
+   "ref": "FID1",
+   "footprint": "usb-power-hub:Fiducial_1mm_Mask2mm",
+   "value": "Fiducial",
+   "x": 2.5,
+   "y": 10.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.2025,
+    8.7038,
+    3.795,
+    11.2963
+   ]
+  },
+  {
+   "ref": "FID2",
+   "footprint": "usb-power-hub:Fiducial_1mm_Mask2mm",
+   "value": "Fiducial",
+   "x": 97.5,
+   "y": 10.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    96.2025,
+    8.7038,
+    98.795,
+    11.2963
+   ]
+  },
+  {
+   "ref": "FID3",
+   "footprint": "usb-power-hub:Fiducial_1mm_Mask2mm",
+   "value": "Fiducial",
+   "x": 2.5,
+   "y": 62.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.2025,
+    61.2038,
+    3.795,
+    63.7963
+   ]
+  },
+  {
+   "ref": "H1",
+   "footprint": "usb-power-hub:MountingHole_2.2mm_M2_ISO7380",
+   "value": "MountingHole",
+   "x": 3.5,
+   "y": 3.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.4575,
+    1.4575,
+    5.545,
+    5.5425
+   ]
+  },
+  {
+   "ref": "H2",
+   "footprint": "usb-power-hub:MountingHole_2.2mm_M2_ISO7380",
+   "value": "MountingHole",
+   "x": 96.5,
+   "y": 3.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    94.4575,
+    1.4575,
+    98.545,
+    5.5425
+   ]
+  },
+  {
+   "ref": "H3",
+   "footprint": "usb-power-hub:MountingHole_2.2mm_M2_ISO7380",
+   "value": "MountingHole",
+   "x": 3.5,
+   "y": 68.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.4575,
+    66.4575,
+    5.545,
+    70.5425
+   ]
+  },
+  {
+   "ref": "H4",
+   "footprint": "usb-power-hub:MountingHole_2.2mm_M2_ISO7380",
+   "value": "MountingHole",
+   "x": 96.5,
+   "y": 68.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    94.4575,
+    66.4575,
+    98.545,
+    70.5425
+   ]
+  },
+  {
+   "ref": "J1",
+   "footprint": "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073",
+   "value": "TYPE-C-16PIN-2MD-073",
+   "x": 76.0,
+   "y": 69.385,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    70.885,
+    64.845,
+    81.115,
+    73.355
+   ]
+  },
+  {
+   "ref": "J2",
+   "footprint": "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073",
+   "value": "TYPE-C-16PIN-2MD-073",
+   "x": 17.5,
+   "y": 2.615,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    12.385,
+    -1.355,
+    22.615,
+    7.155
+   ]
+  },
+  {
+   "ref": "J3",
+   "footprint": "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073",
+   "value": "TYPE-C-16PIN-2MD-073",
+   "x": 51.3,
+   "y": 2.615,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    46.185,
+    -1.355,
+    56.415,
+    7.155
+   ]
+  },
+  {
+   "ref": "J4",
+   "footprint": "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073",
+   "value": "TYPE-C-16PIN-2MD-073",
+   "x": 17.5,
+   "y": 69.385,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    12.385,
+    64.845,
+    22.615,
+    73.355
+   ]
+  },
+  {
+   "ref": "J5",
+   "footprint": "usb-power-hub:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical",
+   "value": "TC2030-NL (DNL)",
+   "x": 44.5,
+   "y": 69.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    40.955,
+    67.155,
+    48.045,
+    71.245
+   ]
+  },
+  {
+   "ref": "Q10",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 2.5,
+   "y": 47.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    0.525,
+    45.755,
+    4.475,
+    49.245
+   ]
+  },
+  {
+   "ref": "Q11",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 2.25,
+   "y": 40.55,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    0.505,
+    38.575,
+    3.995,
+    42.525
+   ]
+  },
+  {
+   "ref": "Q12",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 16.0,
+   "y": 42.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    14.025,
+    40.505,
+    17.975,
+    43.995
+   ]
+  },
+  {
+   "ref": "Q13",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3400A",
+   "x": 25.0,
+   "y": 11.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    23.025,
+    10.155,
+    26.975,
+    13.645
+   ]
+  },
+  {
+   "ref": "Q14",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 16.25,
+   "y": 36.95,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    14.505,
+    34.975,
+    17.995,
+    38.925
+   ]
+  },
+  {
+   "ref": "Q15",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 11.0,
+   "y": 35.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    9.255,
+    33.025,
+    12.745,
+    36.975
+   ]
+  },
+  {
+   "ref": "Q16",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "S9012",
+   "x": 5.85,
+   "y": 41.6,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    4.105,
+    39.625,
+    7.595,
+    43.575
+   ]
+  },
+  {
+   "ref": "Q17",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 29.865,
+   "y": 21.0,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    28.12,
+    19.025,
+    31.61,
+    22.975
+   ]
+  },
+  {
+   "ref": "Q18",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 26.325,
+   "y": 21.0,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    24.58,
+    19.025,
+    28.07,
+    22.975
+   ]
+  },
+  {
+   "ref": "Q19",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 26.5,
+   "y": 44.55,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    24.755,
+    42.575,
+    28.245,
+    46.525
+   ]
+  },
+  {
+   "ref": "Q20",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 21.85,
+   "y": 37.6,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    20.105,
+    35.625,
+    23.595,
+    39.575
+   ]
+  },
+  {
+   "ref": "Q21",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 2.26,
+   "y": 26.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    0.515,
+    24.325,
+    4.005,
+    28.275
+   ]
+  },
+  {
+   "ref": "Q22",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 13.26,
+   "y": 26.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    11.515,
+    24.325,
+    15.005,
+    28.275
+   ]
+  },
+  {
+   "ref": "Q23",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 24.26,
+   "y": 26.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    22.515,
+    24.325,
+    26.005,
+    28.275
+   ]
+  },
+  {
+   "ref": "Q24",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 22.55,
+   "y": 47.7,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    20.575,
+    45.955,
+    24.525,
+    49.445
+   ]
+  },
+  {
+   "ref": "Q25",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 20.8,
+   "y": 43.8,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    19.055,
+    41.825,
+    22.545,
+    45.775
+   ]
+  },
+  {
+   "ref": "Q30",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 36.3,
+   "y": 47.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    34.325,
+    45.755,
+    38.275,
+    49.245
+   ]
+  },
+  {
+   "ref": "Q31",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 36.05,
+   "y": 40.55,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    34.305,
+    38.575,
+    37.795,
+    42.525
+   ]
+  },
+  {
+   "ref": "Q32",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 49.8,
+   "y": 42.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    47.825,
+    40.505,
+    51.775,
+    43.995
+   ]
+  },
+  {
+   "ref": "Q33",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3400A",
+   "x": 58.8,
+   "y": 11.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    56.825,
+    10.155,
+    60.775,
+    13.645
+   ]
+  },
+  {
+   "ref": "Q34",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 50.05,
+   "y": 36.95,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    48.305,
+    34.975,
+    51.795,
+    38.925
+   ]
+  },
+  {
+   "ref": "Q35",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 44.8,
+   "y": 35.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    43.055,
+    33.025,
+    46.545,
+    36.975
+   ]
+  },
+  {
+   "ref": "Q36",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "S9012",
+   "x": 39.65,
+   "y": 41.6,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    37.905,
+    39.625,
+    41.395,
+    43.575
+   ]
+  },
+  {
+   "ref": "Q37",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 63.665,
+   "y": 21.0,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    61.92,
+    19.025,
+    65.41,
+    22.975
+   ]
+  },
+  {
+   "ref": "Q38",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 60.125,
+   "y": 21.0,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    58.38,
+    19.025,
+    61.87,
+    22.975
+   ]
+  },
+  {
+   "ref": "Q39",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 60.3,
+   "y": 44.55,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    58.555,
+    42.575,
+    62.045,
+    46.525
+   ]
+  },
+  {
+   "ref": "Q40",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 55.65,
+   "y": 37.6,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    53.905,
+    35.625,
+    57.395,
+    39.575
+   ]
+  },
+  {
+   "ref": "Q41",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 36.06,
+   "y": 26.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    34.315,
+    24.325,
+    37.805,
+    28.275
+   ]
+  },
+  {
+   "ref": "Q42",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 47.06,
+   "y": 26.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    45.315,
+    24.325,
+    48.805,
+    28.275
+   ]
+  },
+  {
+   "ref": "Q43",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 58.06,
+   "y": 26.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    56.315,
+    24.325,
+    59.805,
+    28.275
+   ]
+  },
+  {
+   "ref": "Q44",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 56.35,
+   "y": 47.7,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    54.375,
+    45.955,
+    58.325,
+    49.445
+   ]
+  },
+  {
+   "ref": "Q45",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 54.6,
+   "y": 43.8,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    52.855,
+    41.825,
+    56.345,
+    45.775
+   ]
+  },
+  {
+   "ref": "Q50",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 72.05,
+   "y": 44.8,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    70.075,
+    43.055,
+    74.025,
+    46.545
+   ]
+  },
+  {
+   "ref": "Q51",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 76.4,
+   "y": 42.75,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    74.425,
+    41.005,
+    78.375,
+    44.495
+   ]
+  },
+  {
+   "ref": "Q52",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "2N7002",
+   "x": 76.15,
+   "y": 46.4,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    74.175,
+    44.655,
+    78.125,
+    48.145
+   ]
+  },
+  {
+   "ref": "Q53",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "AO3401A",
+   "x": 75.55,
+   "y": 53.0,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    73.805,
+    51.025,
+    77.295,
+    54.975
+   ]
+  },
+  {
+   "ref": "R1",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "5.1k",
+   "x": 69.3,
+   "y": 60.4,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    68.325,
+    59.885,
+    70.275,
+    60.915
+   ]
+  },
+  {
+   "ref": "R10",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10",
+   "x": 86.4,
+   "y": 8.7,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    85.885,
+    7.725,
+    86.915,
+    9.675
+   ]
+  },
+  {
+   "ref": "R101",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 3.0,
+   "y": 43.15,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    2.025,
+    42.635,
+    3.975,
+    43.665
+   ]
+  },
+  {
+   "ref": "R102",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 8.85,
+   "y": 41.15,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    7.875,
+    40.635,
+    9.825,
+    41.665
+   ]
+  },
+  {
+   "ref": "R103",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "33k",
+   "x": 12.4,
+   "y": 8.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    11.425,
+    8.385,
+    13.375,
+    9.415
+   ]
+  },
+  {
+   "ref": "R104",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "33k",
+   "x": 12.4,
+   "y": 14.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    11.425,
+    13.685,
+    13.375,
+    14.715
+   ]
+  },
+  {
+   "ref": "R105",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 10.0,
+   "y": 48.0,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    9.485,
+    47.025,
+    10.515,
+    48.975
+   ]
+  },
+  {
+   "ref": "R106",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 16.35,
+   "y": 44.65,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    15.375,
+    44.135,
+    17.325,
+    45.165
+   ]
+  },
+  {
+   "ref": "R107",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 16.3,
+   "y": 46.25,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    15.785,
+    45.275,
+    16.815,
+    47.225
+   ]
+  },
+  {
+   "ref": "R108",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 17.45,
+   "y": 46.85,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    16.935,
+    45.875,
+    17.965,
+    47.825
+   ]
+  },
+  {
+   "ref": "R109",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 22.0,
+   "y": 13.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    21.025,
+    12.685,
+    22.975,
+    13.715
+   ]
+  },
+  {
+   "ref": "R11",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 39.35,
+   "y": 10.85,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    38.375,
+    10.335,
+    40.325,
+    11.365
+   ]
+  },
+  {
+   "ref": "R110",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 24.4,
+   "y": 8.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    23.425,
+    8.385,
+    25.375,
+    9.415
+   ]
+  },
+  {
+   "ref": "R111",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "5.1k",
+   "x": 7.75,
+   "y": 44.2,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    6.775,
+    43.685,
+    8.725,
+    44.715
+   ]
+  },
+  {
+   "ref": "R112",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 5.7,
+   "y": 44.2,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    4.725,
+    43.685,
+    6.675,
+    44.715
+   ]
+  },
+  {
+   "ref": "R113",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 30.4,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    29.425,
+    23.085,
+    31.375,
+    24.115
+   ]
+  },
+  {
+   "ref": "R114",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 28.3,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    27.325,
+    23.085,
+    29.275,
+    24.115
+   ]
+  },
+  {
+   "ref": "R115",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 28.9,
+   "y": 44.8,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    28.385,
+    43.825,
+    29.415,
+    45.775
+   ]
+  },
+  {
+   "ref": "R116",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 21.9,
+   "y": 40.65,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    21.385,
+    39.675,
+    22.415,
+    41.625
+   ]
+  },
+  {
+   "ref": "R117",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 23.65,
+   "y": 42.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    22.675,
+    41.735,
+    24.625,
+    42.765
+   ]
+  },
+  {
+   "ref": "R118",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 21.5,
+   "y": 35.0,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    20.525,
+    34.485,
+    22.475,
+    35.515
+   ]
+  },
+  {
+   "ref": "R119",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100",
+   "x": 2.6,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.625,
+    23.085,
+    3.575,
+    24.115
+   ]
+  },
+  {
+   "ref": "R12",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "33k",
+   "x": 37.75,
+   "y": 10.4,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    37.235,
+    9.425,
+    38.265,
+    11.375
+   ]
+  },
+  {
+   "ref": "R120",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 4.6,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    3.625,
+    23.085,
+    5.575,
+    24.115
+   ]
+  },
+  {
+   "ref": "R121",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 7.6,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    6.625,
+    23.085,
+    8.575,
+    24.115
+   ]
+  },
+  {
+   "ref": "R122",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 7.6,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    6.625,
+    31.785,
+    8.575,
+    32.815
+   ]
+  },
+  {
+   "ref": "R123",
+   "footprint": "usb-power-hub:R_0603_1608Metric",
+   "value": "2.4k",
+   "x": 2.26,
+   "y": 29.1,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    0.735,
+    28.325,
+    3.785,
+    29.875
+   ]
+  },
+  {
+   "ref": "R124",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 2.26,
+   "y": 31.55,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.285,
+    31.035,
+    3.235,
+    32.065
+   ]
+  },
+  {
+   "ref": "R125",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100",
+   "x": 10.3,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    9.325,
+    23.085,
+    11.275,
+    24.115
+   ]
+  },
+  {
+   "ref": "R126",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 12.6,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    11.625,
+    23.085,
+    13.575,
+    24.115
+   ]
+  },
+  {
+   "ref": "R127",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 19.45,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    18.475,
+    23.085,
+    20.425,
+    24.115
+   ]
+  },
+  {
+   "ref": "R128",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 18.6,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    17.625,
+    31.785,
+    19.575,
+    32.815
+   ]
+  },
+  {
+   "ref": "R129",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 13.26,
+   "y": 28.85,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    12.285,
+    28.335,
+    14.235,
+    29.365
+   ]
+  },
+  {
+   "ref": "R13",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 36.6,
+   "y": 10.15,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    36.085,
+    9.175,
+    37.115,
+    11.125
+   ]
+  },
+  {
+   "ref": "R130",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 13.26,
+   "y": 31.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    12.285,
+    31.185,
+    14.235,
+    32.215
+   ]
+  },
+  {
+   "ref": "R131",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100",
+   "x": 21.5,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    20.525,
+    23.085,
+    22.475,
+    24.115
+   ]
+  },
+  {
+   "ref": "R132",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 26.3,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    25.325,
+    23.085,
+    27.275,
+    24.115
+   ]
+  },
+  {
+   "ref": "R133",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 23.85,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    22.875,
+    23.085,
+    24.825,
+    24.115
+   ]
+  },
+  {
+   "ref": "R134",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 29.6,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    28.625,
+    31.785,
+    30.575,
+    32.815
+   ]
+  },
+  {
+   "ref": "R135",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 24.26,
+   "y": 28.85,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    23.285,
+    28.335,
+    25.235,
+    29.365
+   ]
+  },
+  {
+   "ref": "R136",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 24.26,
+   "y": 31.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    23.285,
+    31.185,
+    25.235,
+    32.215
+   ]
+  },
+  {
+   "ref": "R137",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 30.35,
+   "y": 35.1,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    29.375,
+    34.585,
+    31.325,
+    35.615
+   ]
+  },
+  {
+   "ref": "R138",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 29.9,
+   "y": 39.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    29.385,
+    38.325,
+    30.415,
+    40.275
+   ]
+  },
+  {
+   "ref": "R139",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 53.85,
+   "y": 56.4,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    52.875,
+    55.885,
+    54.825,
+    56.915
+   ]
+  },
+  {
+   "ref": "R14",
+   "footprint": "usb-power-hub:R_0805_2012Metric",
+   "value": "510",
+   "x": 81.35,
+   "y": 42.5,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    79.625,
+    41.505,
+    83.075,
+    43.495
+   ]
+  },
+  {
+   "ref": "R140",
+   "footprint": "usb-power-hub:R_0805_2012Metric",
+   "value": "510",
+   "x": 33.25,
+   "y": 10.5,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    31.525,
+    9.505,
+    34.975,
+    11.495
+   ]
+  },
+  {
+   "ref": "R141",
+   "footprint": "usb-power-hub:R_0805_2012Metric",
+   "value": "510",
+   "x": 33.25,
+   "y": 13.0,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    31.525,
+    12.005,
+    34.975,
+    13.995
+   ]
+  },
+  {
+   "ref": "R15",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 79.0,
+   "y": 42.15,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    78.485,
+    41.175,
+    79.515,
+    43.125
+   ]
+  },
+  {
+   "ref": "R16",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10",
+   "x": 72.35,
+   "y": 47.65,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    71.835,
+    46.675,
+    72.865,
+    48.625
+   ]
+  },
+  {
+   "ref": "R17",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 61.5,
+   "y": 52.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    60.525,
+    51.735,
+    62.475,
+    52.765
+   ]
+  },
+  {
+   "ref": "R18",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "5.1k",
+   "x": 61.05,
+   "y": 53.9,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    60.535,
+    52.925,
+    61.565,
+    54.875
+   ]
+  },
+  {
+   "ref": "R19",
+   "footprint": "usb-power-hub:R_0805_2012Metric",
+   "value": "510",
+   "x": 63.45,
+   "y": 54.4,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    61.725,
+    53.405,
+    65.175,
+    55.395
+   ]
+  },
+  {
+   "ref": "R2",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "5.1k",
+   "x": 69.3,
+   "y": 62.8,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    68.325,
+    62.285,
+    70.275,
+    63.315
+   ]
+  },
+  {
+   "ref": "R20",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "22",
+   "x": 34.2,
+   "y": 59.0,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    33.225,
+    58.485,
+    35.175,
+    59.515
+   ]
+  },
+  {
+   "ref": "R201",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 36.8,
+   "y": 43.15,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    35.825,
+    42.635,
+    37.775,
+    43.665
+   ]
+  },
+  {
+   "ref": "R202",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 42.65,
+   "y": 41.15,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    41.675,
+    40.635,
+    43.625,
+    41.665
+   ]
+  },
+  {
+   "ref": "R203",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "33k",
+   "x": 46.2,
+   "y": 8.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    45.225,
+    8.385,
+    47.175,
+    9.415
+   ]
+  },
+  {
+   "ref": "R204",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "33k",
+   "x": 46.2,
+   "y": 14.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    45.225,
+    13.685,
+    47.175,
+    14.715
+   ]
+  },
+  {
+   "ref": "R205",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 43.8,
+   "y": 48.0,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    43.285,
+    47.025,
+    44.315,
+    48.975
+   ]
+  },
+  {
+   "ref": "R206",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 50.15,
+   "y": 44.65,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    49.175,
+    44.135,
+    51.125,
+    45.165
+   ]
+  },
+  {
+   "ref": "R207",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 50.1,
+   "y": 46.25,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    49.585,
+    45.275,
+    50.615,
+    47.225
+   ]
+  },
+  {
+   "ref": "R208",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 51.25,
+   "y": 46.85,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    50.735,
+    45.875,
+    51.765,
+    47.825
+   ]
+  },
+  {
+   "ref": "R209",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 55.8,
+   "y": 13.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    54.825,
+    12.685,
+    56.775,
+    13.715
+   ]
+  },
+  {
+   "ref": "R21",
+   "footprint": "usb-power-hub:R_0603_1608Metric",
+   "value": "5.1",
+   "x": 41.7,
+   "y": 65.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    40.175,
+    64.825,
+    43.225,
+    66.375
+   ]
+  },
+  {
+   "ref": "R210",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 58.2,
+   "y": 8.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    57.225,
+    8.385,
+    59.175,
+    9.415
+   ]
+  },
+  {
+   "ref": "R211",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "5.1k",
+   "x": 41.55,
+   "y": 44.2,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    40.575,
+    43.685,
+    42.525,
+    44.715
+   ]
+  },
+  {
+   "ref": "R212",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 39.5,
+   "y": 44.2,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    38.525,
+    43.685,
+    40.475,
+    44.715
+   ]
+  },
+  {
+   "ref": "R213",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 64.2,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    63.225,
+    23.085,
+    65.175,
+    24.115
+   ]
+  },
+  {
+   "ref": "R214",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 62.1,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    61.125,
+    23.085,
+    63.075,
+    24.115
+   ]
+  },
+  {
+   "ref": "R215",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 62.7,
+   "y": 44.8,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    62.185,
+    43.825,
+    63.215,
+    45.775
+   ]
+  },
+  {
+   "ref": "R216",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 55.7,
+   "y": 40.65,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    55.185,
+    39.675,
+    56.215,
+    41.625
+   ]
+  },
+  {
+   "ref": "R217",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 57.45,
+   "y": 42.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    56.475,
+    41.735,
+    58.425,
+    42.765
+   ]
+  },
+  {
+   "ref": "R218",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100k",
+   "x": 55.3,
+   "y": 35.0,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    54.325,
+    34.485,
+    56.275,
+    35.515
+   ]
+  },
+  {
+   "ref": "R219",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100",
+   "x": 36.4,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    35.425,
+    23.085,
+    37.375,
+    24.115
+   ]
+  },
+  {
+   "ref": "R22",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "22",
+   "x": 34.2,
+   "y": 60.13,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    33.225,
+    59.615,
+    35.175,
+    60.645
+   ]
+  },
+  {
+   "ref": "R220",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 38.4,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    37.425,
+    23.085,
+    39.375,
+    24.115
+   ]
+  },
+  {
+   "ref": "R221",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 41.4,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    40.425,
+    23.085,
+    42.375,
+    24.115
+   ]
+  },
+  {
+   "ref": "R222",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 41.4,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    40.425,
+    31.785,
+    42.375,
+    32.815
+   ]
+  },
+  {
+   "ref": "R223",
+   "footprint": "usb-power-hub:R_0603_1608Metric",
+   "value": "2.4k",
+   "x": 36.06,
+   "y": 29.1,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    34.535,
+    28.325,
+    37.585,
+    29.875
+   ]
+  },
+  {
+   "ref": "R224",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 36.06,
+   "y": 31.55,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    35.085,
+    31.035,
+    37.035,
+    32.065
+   ]
+  },
+  {
+   "ref": "R225",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100",
+   "x": 44.1,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    43.125,
+    23.085,
+    45.075,
+    24.115
+   ]
+  },
+  {
+   "ref": "R226",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 46.4,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    45.425,
+    23.085,
+    47.375,
+    24.115
+   ]
+  },
+  {
+   "ref": "R227",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 53.25,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    52.275,
+    23.085,
+    54.225,
+    24.115
+   ]
+  },
+  {
+   "ref": "R228",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 52.4,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    51.425,
+    31.785,
+    53.375,
+    32.815
+   ]
+  },
+  {
+   "ref": "R229",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 47.06,
+   "y": 28.85,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    46.085,
+    28.335,
+    48.035,
+    29.365
+   ]
+  },
+  {
+   "ref": "R23",
+   "footprint": "usb-power-hub:R_0603_1608Metric",
+   "value": "5.1",
+   "x": 38.5,
+   "y": 65.36,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    36.975,
+    64.585,
+    40.025,
+    66.135
+   ]
+  },
+  {
+   "ref": "R230",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 47.06,
+   "y": 31.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    46.085,
+    31.185,
+    48.035,
+    32.215
+   ]
+  },
+  {
+   "ref": "R231",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "100",
+   "x": 55.3,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    54.325,
+    23.085,
+    56.275,
+    24.115
+   ]
+  },
+  {
+   "ref": "R232",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1M",
+   "x": 60.1,
+   "y": 23.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    59.125,
+    23.085,
+    61.075,
+    24.115
+   ]
+  },
+  {
+   "ref": "R233",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 57.65,
+   "y": 23.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    56.675,
+    23.085,
+    58.625,
+    24.115
+   ]
+  },
+  {
+   "ref": "R234",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 63.4,
+   "y": 32.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    62.425,
+    31.785,
+    64.375,
+    32.815
+   ]
+  },
+  {
+   "ref": "R235",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 58.06,
+   "y": 28.85,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    57.085,
+    28.335,
+    59.035,
+    29.365
+   ]
+  },
+  {
+   "ref": "R236",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 58.06,
+   "y": 31.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    57.085,
+    31.185,
+    59.035,
+    32.215
+   ]
+  },
+  {
+   "ref": "R237",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 64.15,
+   "y": 35.1,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    63.175,
+    34.585,
+    65.125,
+    35.615
+   ]
+  },
+  {
+   "ref": "R238",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 63.7,
+   "y": 39.3,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    63.185,
+    38.325,
+    64.215,
+    40.275
+   ]
+  },
+  {
+   "ref": "R239",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 59.9,
+   "y": 51.9,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    59.385,
+    50.925,
+    60.415,
+    52.875
+   ]
+  },
+  {
+   "ref": "R24",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 47.85,
+   "y": 61.85,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    46.875,
+    61.335,
+    48.825,
+    62.365
+   ]
+  },
+  {
+   "ref": "R240",
+   "footprint": "usb-power-hub:R_0805_2012Metric",
+   "value": "510",
+   "x": 67.05,
+   "y": 10.5,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    65.325,
+    9.505,
+    68.775,
+    11.495
+   ]
+  },
+  {
+   "ref": "R241",
+   "footprint": "usb-power-hub:R_0805_2012Metric",
+   "value": "510",
+   "x": 67.05,
+   "y": 13.0,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    65.325,
+    12.005,
+    68.775,
+    13.995
+   ]
+  },
+  {
+   "ref": "R25",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 29.5,
+   "y": 57.1,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    28.985,
+    56.125,
+    30.015,
+    58.075
+   ]
+  },
+  {
+   "ref": "R26",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 45.35,
+   "y": 64.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    44.375,
+    63.485,
+    46.325,
+    64.515
+   ]
+  },
+  {
+   "ref": "R27",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 73.55,
+   "y": 47.65,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    73.035,
+    46.675,
+    74.065,
+    48.625
+   ]
+  },
+  {
+   "ref": "R28",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 79.0,
+   "y": 44.5,
+   "rot": -90.0,
+   "side": "top",
+   "courtyard": [
+    78.485,
+    43.525,
+    79.515,
+    45.475
+   ]
+  },
+  {
+   "ref": "R29",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1.5k",
+   "x": 80.15,
+   "y": 44.6,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    79.635,
+    43.625,
+    80.665,
+    45.575
+   ]
+  },
+  {
+   "ref": "R3",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "5.1k",
+   "x": 20.9,
+   "y": 61.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    19.925,
+    60.485,
+    21.875,
+    61.515
+   ]
+  },
+  {
+   "ref": "R30",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 69.0,
+   "y": 43.6,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    68.025,
+    43.085,
+    69.975,
+    44.115
+   ]
+  },
+  {
+   "ref": "R31",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 68.6,
+   "y": 46.85,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    68.085,
+    45.875,
+    69.115,
+    47.825
+   ]
+  },
+  {
+   "ref": "R32",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "10k",
+   "x": 69.0,
+   "y": 48.5,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    68.025,
+    47.985,
+    69.975,
+    49.015
+   ]
+  },
+  {
+   "ref": "R33",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 70.2,
+   "y": 47.35,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    69.225,
+    46.835,
+    71.175,
+    47.865
+   ]
+  },
+  {
+   "ref": "R34",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "33k",
+   "x": 78.45,
+   "y": 55.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    77.475,
+    54.785,
+    79.425,
+    55.815
+   ]
+  },
+  {
+   "ref": "R35",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 92.1,
+   "y": 19.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    91.125,
+    18.785,
+    93.075,
+    19.815
+   ]
+  },
+  {
+   "ref": "R36",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 89.9,
+   "y": 19.3,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    88.925,
+    18.785,
+    90.875,
+    19.815
+   ]
+  },
+  {
+   "ref": "R37",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 98.1,
+   "y": 19.3,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    97.125,
+    18.785,
+    99.075,
+    19.815
+   ]
+  },
+  {
+   "ref": "R38",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 95.9,
+   "y": 19.3,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    94.925,
+    18.785,
+    96.875,
+    19.815
+   ]
+  },
+  {
+   "ref": "R4",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "5.1k",
+   "x": 13.6,
+   "y": 61.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    12.625,
+    60.485,
+    14.575,
+    61.515
+   ]
+  },
+  {
+   "ref": "R5",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 20.9,
+   "y": 62.4,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    19.925,
+    61.885,
+    21.875,
+    62.915
+   ]
+  },
+  {
+   "ref": "R6",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 13.6,
+   "y": 62.4,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    12.625,
+    61.885,
+    14.575,
+    62.915
+   ]
+  },
+  {
+   "ref": "R7",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "33k",
+   "x": 16.15,
+   "y": 56.25,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    15.175,
+    55.735,
+    17.125,
+    56.765
+   ]
+  },
+  {
+   "ref": "R8",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "15k",
+   "x": 18.25,
+   "y": 56.25,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    17.275,
+    55.735,
+    19.225,
+    56.765
+   ]
+  },
+  {
+   "ref": "R9",
+   "footprint": "usb-power-hub:R_0402_1005Metric",
+   "value": "1k",
+   "x": 25.95,
+   "y": 51.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    24.975,
+    51.185,
+    26.925,
+    52.215
+   ]
+  },
+  {
+   "ref": "RS10",
+   "footprint": "usb-power-hub:R_Shunt_KOA_TSL1_6332Metric_Kelvin",
+   "value": "TSL1TTER100D 0.1R",
+   "x": 4.595,
+   "y": 21.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    0.55,
+    19.155,
+    8.64,
+    22.845
+   ]
+  },
+  {
+   "ref": "RS11",
+   "footprint": "usb-power-hub:R_Shunt_Axial_MFU_L6.0mm_D2.3mm_P10.16mm_Kelvin",
+   "value": "MFU100F10RB 10R",
+   "x": 9.785,
+   "y": 21.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    8.69,
+    19.295,
+    21.04,
+    22.995
+   ]
+  },
+  {
+   "ref": "RS12",
+   "footprint": "usb-power-hub:R_Shunt_0805_2012Metric_Kelvin",
+   "value": "510R 1% 100ppm 0805",
+   "x": 22.81,
+   "y": 20.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    21.09,
+    19.505,
+    24.53,
+    22.245
+   ]
+  },
+  {
+   "ref": "RS20",
+   "footprint": "usb-power-hub:R_Shunt_KOA_TSL1_6332Metric_Kelvin",
+   "value": "TSL1TTER100D 0.1R",
+   "x": 38.395,
+   "y": 21.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    34.35,
+    19.155,
+    42.44,
+    22.845
+   ]
+  },
+  {
+   "ref": "RS21",
+   "footprint": "usb-power-hub:R_Shunt_Axial_MFU_L6.0mm_D2.3mm_P10.16mm_Kelvin",
+   "value": "MFU100F10RB 10R",
+   "x": 43.585,
+   "y": 21.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    42.49,
+    19.295,
+    54.84,
+    22.995
+   ]
+  },
+  {
+   "ref": "RS22",
+   "footprint": "usb-power-hub:R_Shunt_0805_2012Metric_Kelvin",
+   "value": "510R 1% 100ppm 0805",
+   "x": 56.61,
+   "y": 20.5,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    54.89,
+    19.505,
+    58.33,
+    22.245
+   ]
+  },
+  {
+   "ref": "SW1",
+   "footprint": "usb-power-hub:SW_Push_1P1T_XKB_TS-1187A",
+   "value": "TS-1187A-B-A-B",
+   "x": 31.5,
+   "y": 4.5,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    28.655,
+    0.705,
+    34.345,
+    8.295
+   ]
+  },
+  {
+   "ref": "SW2",
+   "footprint": "usb-power-hub:SW_Push_1P1T_XKB_TS-1187A",
+   "value": "TS-1187A-B-A-B",
+   "x": 65.3,
+   "y": 4.5,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    62.455,
+    0.705,
+    68.145,
+    8.295
+   ]
+  },
+  {
+   "ref": "SW3",
+   "footprint": "usb-power-hub:SW_Push_1P1T_XKB_TS-1187A",
+   "value": "TS-1187A-B-A-B",
+   "x": 31.85,
+   "y": 68.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    28.055,
+    65.755,
+    35.645,
+    71.445
+   ]
+  },
+  {
+   "ref": "TP1",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "V5L",
+   "x": 64.45,
+   "y": 52.05,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    63.4024,
+    51.0037,
+    65.495,
+    53.0963
+   ]
+  },
+  {
+   "ref": "TP10",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "DVDD",
+   "x": 48.0,
+   "y": 63.55,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    46.9524,
+    62.5037,
+    49.045,
+    64.5963
+   ]
+  },
+  {
+   "ref": "TP101",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "OUT_H",
+   "x": 6.8,
+   "y": 34.05,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    5.7524,
+    33.0037,
+    7.845,
+    35.0963
+   ]
+  },
+  {
+   "ref": "TP102",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "GATE_H",
+   "x": 3.7,
+   "y": 34.05,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    2.6524,
+    33.0037,
+    4.745,
+    35.0963
+   ]
+  },
+  {
+   "ref": "TP103",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "HOLD_M",
+   "x": 27.5,
+   "y": 47.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    26.4524,
+    46.6537,
+    28.545,
+    48.7463
+   ]
+  },
+  {
+   "ref": "TP104",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "HOLD_L",
+   "x": 19.3,
+   "y": 34.45,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    18.2524,
+    33.4037,
+    20.345,
+    35.4963
+   ]
+  },
+  {
+   "ref": "TP105",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VSUP",
+   "x": 2.95,
+   "y": 37.35,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    1.9024,
+    36.3037,
+    3.995,
+    38.3963
+   ]
+  },
+  {
+   "ref": "TP106",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VBUS",
+   "x": 31.75,
+   "y": 32.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    30.7024,
+    31.8537,
+    32.795,
+    33.9463
+   ]
+  },
+  {
+   "ref": "TP11",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "RUN",
+   "x": 45.75,
+   "y": 65.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    44.7024,
+    64.6537,
+    46.795,
+    66.7463
+   ]
+  },
+  {
+   "ref": "TP12",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "CLKOUT",
+   "x": 48.0,
+   "y": 65.75,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    46.9524,
+    64.7037,
+    49.045,
+    66.7963
+   ]
+  },
+  {
+   "ref": "TP13",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VDD33_HUB",
+   "x": 95.25,
+   "y": 30.8,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    94.2024,
+    29.7537,
+    96.295,
+    31.8463
+   ]
+  },
+  {
+   "ref": "TP14",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VBUS_J1",
+   "x": 80.75,
+   "y": 53.15,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    79.7024,
+    52.1037,
+    81.795,
+    54.1963
+   ]
+  },
+  {
+   "ref": "TP2",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "V5A",
+   "x": 87.25,
+   "y": 44.95,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    86.2024,
+    43.9037,
+    88.295,
+    45.9963
+   ]
+  },
+  {
+   "ref": "TP201",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "OUT_H",
+   "x": 40.6,
+   "y": 34.05,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    39.5524,
+    33.0037,
+    41.645,
+    35.0963
+   ]
+  },
+  {
+   "ref": "TP202",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "GATE_H",
+   "x": 37.5,
+   "y": 34.05,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    36.4524,
+    33.0037,
+    38.545,
+    35.0963
+   ]
+  },
+  {
+   "ref": "TP203",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "HOLD_M",
+   "x": 61.3,
+   "y": 47.7,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    60.2524,
+    46.6537,
+    62.345,
+    48.7463
+   ]
+  },
+  {
+   "ref": "TP204",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "HOLD_L",
+   "x": 53.1,
+   "y": 34.45,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    52.0524,
+    33.4037,
+    54.145,
+    35.4963
+   ]
+  },
+  {
+   "ref": "TP205",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VSUP",
+   "x": 36.75,
+   "y": 37.35,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    35.7024,
+    36.3037,
+    37.795,
+    38.3963
+   ]
+  },
+  {
+   "ref": "TP206",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VBUS",
+   "x": 65.55,
+   "y": 32.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    64.5024,
+    31.8537,
+    66.595,
+    33.9463
+   ]
+  },
+  {
+   "ref": "TP3",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "V12F",
+   "x": 88.65,
+   "y": 10.9,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    87.6024,
+    9.8537,
+    89.695,
+    11.9463
+   ]
+  },
+  {
+   "ref": "TP4",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "V_INJ",
+   "x": 38.3,
+   "y": 8.25,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    37.2524,
+    7.2037,
+    39.345,
+    9.2963
+   ]
+  },
+  {
+   "ref": "TP5",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "V3V3",
+   "x": 54.5,
+   "y": 59.2,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    53.4524,
+    58.1537,
+    55.545,
+    60.2463
+   ]
+  },
+  {
+   "ref": "TP6",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VDDA",
+   "x": 85.0,
+   "y": 44.15,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    83.9524,
+    43.1037,
+    86.045,
+    45.1963
+   ]
+  },
+  {
+   "ref": "TP7",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "GND",
+   "x": 8.05,
+   "y": 55.8,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    7.0024,
+    54.7537,
+    9.095,
+    56.8463
+   ]
+  },
+  {
+   "ref": "TP8",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "VBUS_IN",
+   "x": 10.3,
+   "y": 55.8,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    9.2524,
+    54.7537,
+    11.345,
+    56.8463
+   ]
+  },
+  {
+   "ref": "TP9",
+   "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
+   "value": "V_J4",
+   "x": 23.8,
+   "y": 51.85,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    22.7524,
+    50.8037,
+    24.845,
+    52.8963
+   ]
+  },
+  {
+   "ref": "U1",
+   "footprint": "usb-power-hub:RP2040_QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm",
+   "value": "RP2040",
+   "x": 42.2,
+   "y": 58.4,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    38.03,
+    54.23,
+    46.37,
+    62.57
+   ]
+  },
+  {
+   "ref": "U10",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "OP07CDR",
+   "x": 6.8,
+   "y": 28.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    4.055,
+    24.255,
+    9.545,
+    31.745
+   ]
+  },
+  {
+   "ref": "U11",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "OP07CDR",
+   "x": 17.8,
+   "y": 28.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    15.055,
+    24.255,
+    20.545,
+    31.745
+   ]
+  },
+  {
+   "ref": "U12",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "OP07CDR",
+   "x": 28.8,
+   "y": 28.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    26.055,
+    24.255,
+    31.545,
+    31.745
+   ]
+  },
+  {
+   "ref": "U13",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "LM393DR2G",
+   "x": 26.5,
+   "y": 37.6,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    23.755,
+    33.855,
+    29.245,
+    41.345
+   ]
+  },
+  {
+   "ref": "U17",
+   "footprint": "usb-power-hub:DIP-16_W7.62mm",
+   "value": "MCP3208-CI/P",
+   "x": 69.6,
+   "y": 32.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    68.035,
+    30.895,
+    88.945,
+    40.715
+   ]
+  },
+  {
+   "ref": "U2",
+   "footprint": "usb-power-hub:SOT-223-3_TabPin2",
+   "value": "AMS1117-3.3",
+   "x": 58.5,
+   "y": 64.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    54.055,
+    60.355,
+    62.945,
+    67.645
+   ]
+  },
+  {
+   "ref": "U20",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "OP07CDR",
+   "x": 40.6,
+   "y": 28.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    37.855,
+    24.255,
+    43.345,
+    31.745
+   ]
+  },
+  {
+   "ref": "U21",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "OP07CDR",
+   "x": 51.6,
+   "y": 28.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    48.855,
+    24.255,
+    54.345,
+    31.745
+   ]
+  },
+  {
+   "ref": "U22",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "OP07CDR",
+   "x": 62.6,
+   "y": 28.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    59.855,
+    24.255,
+    65.345,
+    31.745
+   ]
+  },
+  {
+   "ref": "U23",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "LM393DR2G",
+   "x": 60.3,
+   "y": 37.6,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    57.555,
+    33.855,
+    63.045,
+    41.345
+   ]
+  },
+  {
+   "ref": "U3",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "CJ431",
+   "x": 80.25,
+   "y": 47.45,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    78.275,
+    45.705,
+    82.225,
+    49.195
+   ]
+  },
+  {
+   "ref": "U30",
+   "footprint": "usb-power-hub:SOIC-8_3.9x4.9mm_P1.27mm",
+   "value": "LM393DR2G",
+   "x": 55.5,
+   "y": 53.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    51.755,
+    50.255,
+    59.245,
+    55.745
+   ]
+  },
+  {
+   "ref": "U4",
+   "footprint": "usb-power-hub:SOT-23",
+   "value": "CJ431",
+   "x": 37.8,
+   "y": 13.25,
+   "rot": 180.0,
+   "side": "top",
+   "courtyard": [
+    35.825,
+    11.505,
+    39.775,
+    14.995
+   ]
+  },
+  {
+   "ref": "U5",
+   "footprint": "usb-power-hub:Converter_DCDC_Minmax_MAU104_SIP",
+   "value": "MAU104",
+   "x": 74.8,
+   "y": 5.6,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    72.405,
+    0.505,
+    92.495,
+    7.195
+   ]
+  },
+  {
+   "ref": "U6",
+   "footprint": "usb-power-hub:CH335F_QFN-28-1EP_4x4mm_P0.4mm_EP2.7x2.7mm",
+   "value": "CH335F",
+   "x": 94.0,
+   "y": 27.0,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    91.355,
+    24.355,
+    96.645,
+    29.645
+   ]
+  },
+  {
+   "ref": "U7",
+   "footprint": "usb-power-hub:DIP-16_W7.62mm",
+   "value": "MCP3208-CI/P",
+   "x": 69.6,
+   "y": 20.15,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    68.035,
+    19.045,
+    88.945,
+    28.865
+   ]
+  },
+  {
+   "ref": "U8",
+   "footprint": "usb-power-hub:SOIC-8_5.3x5.3mm_P1.27mm",
+   "value": "W25Q128JVSIQ",
+   "x": 33.0,
+   "y": 53.05,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    28.305,
+    50.105,
+    37.695,
+    55.995
+   ]
+  },
+  {
+   "ref": "Y1",
+   "footprint": "usb-power-hub:Crystal_SMD_3225-4Pin_3.2x2.5mm",
+   "value": "X322512MSB4SI",
+   "x": 49.1,
+   "y": 57.0,
+   "rot": 90.0,
+   "side": "top",
+   "courtyard": [
+    47.305,
+    54.855,
+    50.895,
+    59.145
+   ]
+  },
+  {
+   "ref": "Y2",
+   "footprint": "usb-power-hub:Crystal_SMD_3225-4Pin_3.2x2.5mm",
+   "value": "X322512MSB4SI",
+   "x": 94.0,
+   "y": 21.8,
+   "rot": 0.0,
+   "side": "top",
+   "courtyard": [
+    91.855,
+    20.005,
+    96.145,
+    23.595
+   ]
+  }
+ ],
+ "holes": [
+  {
+   "ref": "F1",
+   "pad": "1",
+   "x": 5.0,
+   "y": 52.55,
+   "drill": [
+    1.1,
+    1.1
+   ],
+   "plated": true
+  },
+  {
+   "ref": "F1",
+   "pad": "2",
+   "x": 10.1,
+   "y": 52.55,
+   "drill": [
+    1.1,
+    1.1
+   ],
+   "plated": true
+  },
+  {
+   "ref": "H1",
+   "pad": "",
+   "x": 3.5,
+   "y": 3.5,
+   "drill": [
+    2.2,
+    2.2
+   ],
+   "plated": false
+  },
+  {
+   "ref": "H2",
+   "pad": "",
+   "x": 96.5,
+   "y": 3.5,
+   "drill": [
+    2.2,
+    2.2
+   ],
+   "plated": false
+  },
+  {
+   "ref": "H3",
+   "pad": "",
+   "x": 3.5,
+   "y": 68.5,
+   "drill": [
+    2.2,
+    2.2
+   ],
+   "plated": false
+  },
+  {
+   "ref": "H4",
+   "pad": "",
+   "x": 96.5,
+   "y": 68.5,
+   "drill": [
+    2.2,
+    2.2
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J1",
+   "pad": "",
+   "x": 73.11,
+   "y": 66.78,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J1",
+   "pad": "",
+   "x": 78.89,
+   "y": 66.78,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J1",
+   "pad": "S1",
+   "x": 71.68,
+   "y": 66.28,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J1",
+   "pad": "S1",
+   "x": 71.68,
+   "y": 70.46,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J1",
+   "pad": "S1",
+   "x": 80.32,
+   "y": 66.28,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J1",
+   "pad": "S1",
+   "x": 80.32,
+   "y": 70.46,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J2",
+   "pad": "",
+   "x": 14.61,
+   "y": 5.22,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J2",
+   "pad": "",
+   "x": 20.39,
+   "y": 5.22,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J2",
+   "pad": "S1",
+   "x": 13.18,
+   "y": 1.54,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J2",
+   "pad": "S1",
+   "x": 13.18,
+   "y": 5.72,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J2",
+   "pad": "S1",
+   "x": 21.82,
+   "y": 1.54,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J2",
+   "pad": "S1",
+   "x": 21.82,
+   "y": 5.72,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J3",
+   "pad": "",
+   "x": 48.41,
+   "y": 5.22,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J3",
+   "pad": "",
+   "x": 54.19,
+   "y": 5.22,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J3",
+   "pad": "S1",
+   "x": 46.98,
+   "y": 1.54,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J3",
+   "pad": "S1",
+   "x": 46.98,
+   "y": 5.72,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J3",
+   "pad": "S1",
+   "x": 55.62,
+   "y": 1.54,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J3",
+   "pad": "S1",
+   "x": 55.62,
+   "y": 5.72,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J4",
+   "pad": "",
+   "x": 14.61,
+   "y": 66.78,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J4",
+   "pad": "",
+   "x": 20.39,
+   "y": 66.78,
+   "drill": [
+    0.65,
+    0.65
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J4",
+   "pad": "S1",
+   "x": 13.18,
+   "y": 66.28,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J4",
+   "pad": "S1",
+   "x": 13.18,
+   "y": 70.46,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J4",
+   "pad": "S1",
+   "x": 21.82,
+   "y": 66.28,
+   "drill": [
+    0.6,
+    1.7
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J4",
+   "pad": "S1",
+   "x": 21.82,
+   "y": 70.46,
+   "drill": [
+    0.6,
+    1.4
+   ],
+   "plated": true
+  },
+  {
+   "ref": "J5",
+   "pad": "",
+   "x": 41.96,
+   "y": 69.2,
+   "drill": [
+    0.9906,
+    0.9906
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J5",
+   "pad": "",
+   "x": 47.04,
+   "y": 68.184,
+   "drill": [
+    0.9906,
+    0.9906
+   ],
+   "plated": false
+  },
+  {
+   "ref": "J5",
+   "pad": "",
+   "x": 47.04,
+   "y": 70.216,
+   "drill": [
+    0.9906,
+    0.9906
+   ],
+   "plated": false
+  },
+  {
+   "ref": "RS11",
+   "pad": "1",
+   "x": 9.785,
+   "y": 21.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "RS11",
+   "pad": "4",
+   "x": 19.945,
+   "y": 21.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "RS21",
+   "pad": "1",
+   "x": 43.585,
+   "y": 21.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "RS21",
+   "pad": "4",
+   "x": 53.745,
+   "y": 21.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "1",
+   "x": 69.6,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "10",
+   "x": 84.84,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "11",
+   "x": 82.3,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "12",
+   "x": 79.76,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "13",
+   "x": 77.22,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "14",
+   "x": 74.68,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "15",
+   "x": 72.14,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "16",
+   "x": 69.6,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "2",
+   "x": 72.14,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "3",
+   "x": 74.68,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "4",
+   "x": 77.22,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "5",
+   "x": 79.76,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "6",
+   "x": 82.3,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "7",
+   "x": 84.84,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "8",
+   "x": 87.38,
+   "y": 32.0,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U17",
+   "pad": "9",
+   "x": 87.38,
+   "y": 39.62,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U5",
+   "pad": "1",
+   "x": 74.8,
+   "y": 5.6,
+   "drill": [
+    1.0,
+    1.0
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U5",
+   "pad": "2",
+   "x": 77.34,
+   "y": 5.6,
+   "drill": [
+    1.0,
+    1.0
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U5",
+   "pad": "4",
+   "x": 82.42,
+   "y": 5.6,
+   "drill": [
+    1.0,
+    1.0
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U5",
+   "pad": "6",
+   "x": 87.5,
+   "y": 5.6,
+   "drill": [
+    1.0,
+    1.0
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "1",
+   "x": 69.6,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "10",
+   "x": 84.84,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "11",
+   "x": 82.3,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "12",
+   "x": 79.76,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "13",
+   "x": 77.22,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "14",
+   "x": 74.68,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "15",
+   "x": 72.14,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "16",
+   "x": 69.6,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "2",
+   "x": 72.14,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "3",
+   "x": 74.68,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "4",
+   "x": 77.22,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "5",
+   "x": 79.76,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "6",
+   "x": 82.3,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "7",
+   "x": 84.84,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "8",
+   "x": 87.38,
+   "y": 20.15,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  },
+  {
+   "ref": "U7",
+   "pad": "9",
+   "x": 87.38,
+   "y": 27.77,
+   "drill": [
+    0.8,
+    0.8
+   ],
+   "plated": true
+  }
+ ]
+}
