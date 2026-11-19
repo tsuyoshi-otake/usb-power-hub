@@ -115,7 +115,7 @@ as a plain interpreter), and they are not a pipeline step: run them on a release
 | `independent_check_positions.py` | the Gerber zip, the CPL, the BOM, the hand-solder list, the board, `jlcpcb_model_frame.json`, the previous release's Gerber zip and CPL | 13: the parts and their codes in the three lists, every CPL point and rotation, every Top paste flash, every hit of the two drill files | 16, three of them the previous release's files in the place of this set's |
 
 ```sh
-R=manufacturing/releases/rev0.6/r01/UsbPowerHub_Main_Rev0.6
+R=manufacturing/releases/rev0.6/r02/UsbPowerHub_Main_Rev0.6
 P=manufacturing/releases/rev0.5/r02/UsbPowerHub_Main_Rev0.5
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/independent_check_sets.py \
     ${R}_Gerber.zip ${R}_CPL_JLCPCB.csv ${R}_BOM_JLCPCB.csv ${R}_HandSolder.csv \
@@ -131,7 +131,10 @@ only when every check passed and every corruption was caught (1 otherwise, 2 for
 arguments). The corruptions are made on in-memory copies in the same run, so a result always comes
 with the proof that the checker can fail; neither script writes a file, and neither has a `test_`
 script. On Rev0.6 r01 (2026-11-19): 30 checks, 0 failed, 8 corruptions, 0 missed, and 13 checks,
-0 failed, 16 corruptions, 0 missed, in 0.3 s and 0.6 s on this machine.
+0 failed, 16 corruptions, 0 missed, in 0.3 s and 0.6 s on this machine. Rev0.6 r02 gives the same
+figures. The second script's last argument must be a set of another PCB revision: r01 beside r02
+shares its CPL, paste and drill files, so three of the corruptions made from it change nothing and
+are reported `MISSED`.
 
 The first script reads no position but the fiducials': with Rev0.5 r02's CPL beside the Rev0.6
 board it passes all 30 checks, and the second then fails on 28 CPL rows. The second is therefore

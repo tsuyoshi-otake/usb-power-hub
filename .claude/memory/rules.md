@@ -643,6 +643,18 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   50 mm / 122 mm off the copper in the placement viewer. After the change the Edge.Cuts spans
   (0, 0)–(100, 72) (`check_outputs.py`), and every Gerber and drill coordinate differs from the old
   set by one constant (checked line by line, 51,444 coordinates, within 1 µm).
+- **Two KiCad versions are installed; this project is 9.0.8.** `…/KiCad/10.0/bin` stands beside
+  `…/KiCad/9.0/bin`, and 10.0's Python lacks calls the scripts use (`FOOTPRINT.GetFieldByName`,
+  seen 2026-11-19). Run every generator and checker with 9.0's `python.exe` and `kicad-cli.exe`;
+  a script that fails on a missing pcbnew attribute is first a wrong-interpreter question.
+- **A legend-only release is proven by members, not by intent** (#13, Rev0.6 r02): compare the
+  two Gerber zips member by member (one of 15 differed, `F_Silkscreen.gto`) and the two boards
+  with `gr_text` nodes and every `uuid` taken out (equal; the UUIDs are numbered in build order, so
+  a raw diff shows thousands of lines). Then the earlier gate's reading of BOM and CPL carries, and
+  its DFM and quote do not.
+- **To look at a board region:** `kicad-cli pcb render` to PNG, crop with `wx.Image.GetSubImage`
+  under KiCad's Python, view with Read. The built-in browser opens no `file://` SVG and KiCad's
+  Python has no `wx.svg`.
 - **`kicad-cli pcb render` writes a little under the size asked** (1568 × 1120 for
   1600 × 1152). Check a render's width floor and aspect, not its exact size.
 - **Fix creation dates to make an output set deterministic.** kicad-cli stamps Gerbers,

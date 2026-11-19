@@ -2247,3 +2247,31 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Learning.** In `rules.md`, the coupon rule's cart part, extended in place.
 - **Record.** Outside the repository, `~/tmp/usb-power-hub/rev06-gate/evidence/jlcpcb-cart-2026-11-19.txt`.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-r02-silkscreen (#13)
+
+- **What.** The user's 「全体的にシルクは適切?」 and then 「直して r02」: Rev0.6's top legend changed and release
+  candidate `manufacturing/releases/rev0.6/r02/` written (state `WIP`; nothing ordered, nothing paid).
+- **Symptom.** In a render of r01's board three label pairs read as one word (`DVDD`/`CLKOUT` 0.30 mm apart,
+  `V_J4`/`HOLD_M_A` 0.33 mm, `V5L`/`HOLD_M_B` 0.27 mm); SW3 and J5 carried no name and J5's pads no signal names,
+  which CLAUDE.md 6 asks for; the eight hand-soldered parts showed no reference.
+- **Root cause.** `check_silk.py` measured each label against pads, other ink and the edge with 0.1–0.15 mm
+  limits and had no rule for two texts on one line, none for the programming parts, none for hand-soldered parts.
+  It passed r01 honestly: it did not look.
+- **Fix.** `PLACEMENT_Rev0.6.md`, *Silkscreen*: 44 rows for 32 (three moved; `BOOT`, `SWD`, two legend rows for J5,
+  eight references). `check_silk.py`: a 1.0 mm word gap, a label for every `Hand` part, `BOOT`/`SWD` beside their
+  own part and nearer to it than to the other, the J5 legend's text against the pads' nets and its row order.
+- **Verification.** The extended checker failed 15 times on r01's board and passes the new one (3366 checks); 9 new
+  negative tests, 37 in all, pass; `check_pcb.py`, `check_routing.py`, `check_outputs.py` pass. r02 against r01: 8
+  of 10 files byte-identical (BOM, CPL, hand-solder list among them), one of the zip's 15 members differs, the
+  boards are equal without `gr_text` and `uuid`. Independent checks on r02: 30/0 with 8/0, 13/0 with 16/0. The
+  four quadrants were read in a render by me.
+- **Not verified.** JLCPCB has not seen r02's Gerber: no JLCDFM, no quote. The cart still holds r01's files. No
+  print of the legend exists (OI-6). Whether a reader takes the legend's rows for J5's pad rows.
+- **Also asked.** 「このボードへの書き込みってどこ?2.54ピッチで4x2?」: answered, USB (BOOT + HOST, UF2) for
+  programming, J5 (TC2030-NL, 1.27 mm, 3 × 2 pads) for debug; no 2.54 mm header exists. A header would be a copper
+  change; the user has not asked for one.
+- **Learning.** In `rules.md`: KiCad 9.0, not the 10.0 beside it; a legend-only release is proven by members;
+  how to look at a board region. `design/ecad/README.md`: the position check needs a foreign set of another
+  revision.
+- **Commits.** `850e817` (legend, checker, tests, board) and this entry's (r02, documents). Not pushed.

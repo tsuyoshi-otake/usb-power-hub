@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schemas.kicad.org/erc.v1.json",
+  "coordinate_units": "mm",
+  "date": "1980-01-01T00:00:00+0000",
+  "included_severities": [
+    "error",
+    "warning",
+    "exclusion"
+  ],
+  "kicad_version": "9.0.8",
+  "sheets": [
+    {
+      "path": "/",
+      "uuid_path": "/d22f7430-a824-5395-8835-5937190d797a",
+      "violations": []
+    },
+    {
+      "path": "/power/",
+      "uuid_path": "/d22f7430-a824-5395-8835-5937190d797a/c851ceab-814d-5d4d-8d23-794d238c23b0",
+      "violations": []
+    },
+    {
+      "path": "/mcu/",
+      "uuid_path": "/d22f7430-a824-5395-8835-5937190d797a/7baea723-c0a4-5753-bfa2-ae4348369015",
+      "violations": []
+    },
+    {
+      "path": "/hub/",
+      "uuid_path": "/d22f7430-a824-5395-8835-5937190d797a/e7940347-d1d6-5ce9-91f9-9fb941cf7c86",
+      "violations": []
+    },
+    {
+      "path": "/adc/",
+      "uuid_path": "/d22f7430-a824-5395-8835-5937190d797a/b2dfb8b0-31c8-50e6-983c-83fea074c0e4",
+      "violations": []
+    },
+    {
+      "path": "/channel_a/",
+      "uuid_path": "/d22f7430-a824-5395-8835-5937190d797a/c2b9fae9-1009-5df3-8f6f-e9cae9b9d4e6",
+      "violations": []
+    },
+    {
+      "path": "/channel_b/",
+      "uuid_path": "/d22f7430-a824-5395-8835-5937190d797a/32b21641-74c6-5f56-9bff-3b1d2432e5ae",
+      "violations": []
+    }
+  ],
+  "source": "usb-power-hub.kicad_sch"
+}
