@@ -147,7 +147,9 @@ The KiCad project, its libraries, its schematic and its board are generated, not
 
 `make_project.py` writes a bare board, so `make_pcb.py` runs after it. `autoroute.py` needs
 Freerouting 2.5.0 and a Java runtime, which are not in the repository
-(`design/ecad/README.md`).
+(`design/ecad/README.md`). A release candidate is also read against the board by two scripts that
+share nothing with the generators, `independent_check_sets.py` and
+`independent_check_positions.py` (`design/ecad/README.md`, *Independent check of a candidate set*).
 
 ## Repository
 

@@ -660,10 +660,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   checker.
 - **An independent check that reads no position cannot tell one revision's set from the
   next: when a revision moves parts, put the previous release's files in the place of the new
-  ones as negative tests.** (#13, 2026-11-19) `c2_check.py` (30 checks) passed with Rev0.5
-  r02's CPL beside the Rev0.6 board, where 28 CPL rows had moved. `c2_ext_rev06.py` (a scratch
-  script outside the repository, in `~/tmp/usb-power-hub/rev06-gate/evidence/scripts/`,
-  stdlib only) reads the board's text by
+  ones as negative tests.** (#13, 2026-11-19) `independent_check_sets.py` (30 checks; the scratch
+  script `c2_check.py` until that day) passed with Rev0.5 r02's CPL beside the Rev0.6 board, where
+  28 CPL rows had moved. `independent_check_positions.py` (`design/ecad/scripts/`, stdlib only; the
+  scratch script `c2_ext_rev06.py` at its first run) reads the board's text by
   regex and compares: CPL point = footprint origin + the model shift turned with the
   footprint, CPL rotation = footprint angle + the model turn, one Top paste flash per pad
   with `F.Paste`, one drill hit per via and pad hole (a G85 slot at its midpoint, tool = the
@@ -671,7 +671,18 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   pad at footprint-local (lx, ly) of a footprint at angle a stands at (fx + lx cos a +
   ly sin a, fy - lx sin a + ly cos a). A BOM line of a part on two footprints carries the
   first designator's footprint name (C17734: `R_0805_2012Metric` and the Kelvin land), so ask
-  the line's first designator, not every designator, for the name.
+  the line's first designator, not every designator, for the name. The substituted release
+  must stand elsewhere: with r01 given as its own predecessor the three substitutions are
+  `MISSED` and the exit status is 1.
+- **A scratch check that a release's gate rests on goes into the repository in the same unit
+  of work, and its move is proven by its output, not by reading.** (#13, 2026-11-19) The
+  manifest's gate "Independent check of the set" pointed at `~/tmp` until the user's 「入れる」.
+  Run from `design/ecad/scripts/` on the same files, `independent_check_sets.py` printed the
+  scratch script's saved output byte for byte (two unused names removed, a usage check added),
+  and `independent_check_positions.py` differed in exactly the five label lines that were
+  renamed (`previous` for `old`, `the previous release's` for `Rev0.5 r02's`). A walk over
+  `ast.Name` nodes does not find a write-only container: `bom_fp[t] = ...` loads the name, so
+  the dead `bom_fp` was found by reading. The saved outputs have CRLF: diff through `tr -d '\r'`.
 - **`check_outputs.py` is the working set's checker: check a release directory with
   `sha256sum -c` and `cmp`.** (#13, 2026-11-19) Run with `--out manufacturing/releases/rev0.6/r01`
   it ends `2949 checks, 14 failed`: `malformed line` for each of the 11 lines of

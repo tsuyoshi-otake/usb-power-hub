@@ -830,12 +830,14 @@ and every moved part that is not symmetrical, one instance of each other class) 
 $52.85 without shipping. JLCDFM ran and is **not accepted**: on 2026-11-19 the user accepted the
 GND via 0.059 mm from D1 pad 3 as it is (「受け入れる」) and kept the receptacles' plated slots at
 0.60 mm (「このまま」), and still decides on the non-plated holes that JLCDFM lists as plated. The
-independent check of the set ran on r01's files on 2026-11-19 and passed, by two scratch scripts
-outside the repository (`~/tmp/usb-power-hub/rev06-gate/evidence/scripts/`): Rev0.5 r02's
-`c2_check.py`, unchanged (30 checks, 0 failed; 8 corruptions, 0 missed), which reads no position,
-and `c2_ext_rev06.py` (13 checks, 0 failed; 16 corruptions, 0 missed), which compares the BOM, the
-CPL, the hand-solder list, the Top paste Gerber and the two drill files with the tracked board. It
-takes the board as right and reads no copper, mask or silkscreen layer. Not done on Rev0.6's
+independent check of the set ran on r01's files on 2026-11-19 and passed, by two scripts that are
+in the repository since that day (`design/ecad/scripts/`; `design/ecad/README.md`, *Independent
+check of a candidate set*): `independent_check_sets.py`, the check Rev0.5 r02 had as the scratch
+script `c2_check.py` (30 checks, 0 failed; 8 corruptions, 0 missed), which reads no position, and
+`independent_check_positions.py`, at the first run the scratch script `c2_ext_rev06.py` (13 checks,
+0 failed; 16 corruptions, 0 missed), which compares the BOM, the CPL, the hand-solder list, the Top
+paste Gerber and the two drill files with the tracked board. It takes the board as right and reads
+no copper, mask or silkscreen layer. Not done on Rev0.6's
 files: the Akizuki stock, the assembled parcel's shipping and a quote with impedance control.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
@@ -857,9 +859,10 @@ files: the Akizuki stock, the assembled parcel's shipping and a quote with imped
       (Claude).*
 - [x] Machine-placed components on Top only. Bottom paste apertures: 0. Hand-soldered
       parts are listed separately and appear in neither BOM nor CPL (V-MFG-01). *`check_outputs.py`, and
-      the independent check, `c2_check.py` (a scratch script outside the repository, in
-      `~/tmp/usb-power-hub/pre-order/local/`: 30 checks, 0 failed; 8 corruptions, 0 missed; run on
-      r02's files on 2026-11-13).*
+      the independent check, `c2_check.py` (a scratch script outside the repository then, in
+      `~/tmp/usb-power-hub/pre-order/local/`, and `design/ecad/scripts/independent_check_sets.py`
+      since 2026-11-19: 30 checks, 0 failed; 8 corruptions, 0 missed; run on r02's files on
+      2026-11-13).*
 - [x] Every BOM line Basic except C2040, C5137013 and C2765186, the three Extended parts D29, D31
       and D37 allow; no Preferred Extended (D22, D29, D31, D37); every hand-soldered part in
       stock at Akizuki (V-MFG-02). *`r01/SOURCING_CHECK.md` (r02's BOM is the same file), PASS on

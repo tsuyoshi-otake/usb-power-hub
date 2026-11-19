@@ -16,7 +16,7 @@ not to edit.
 | `PLACEMENT_Rev0.6.md` | Where every part sits on the board, and why (P3), and its silkscreen labels: text, position, size, stroke and leader (P5). |
 | `ROUTING_Rev0.6.md` | The plane, the hand-drawn tracks (USB pairs, Kelvin taps, power trunks), the zones, the router's classes, keepouts, layer preferences and costs, the patch drawn after the router, and why (P4). |
 | `routing/` | `carried.json`, the tracks and vias of Rev0.5's routing that still stand on this board (written by `carry.py`); the router's session `usb-power-hub.ses` and `autoroute.json`, which records the router input, the jar, the Java runtime and the arguments that produced it. |
-| `scripts/` | The generators, their checkers and the checkers' negative tests. |
+| `scripts/` | The generators, their checkers and the checkers' negative tests; the two independent checks of a candidate set. |
 
 ## Pipeline
 
@@ -100,6 +100,50 @@ Rev0.5's routing patch (since Rev0.6 the GND fanout draws those stubs itself).
 
 The negative tests corrupt copies of the files in a temporary directory and expect the
 checker to name each fault; they never write to `source/`, `libraries/` or `manufacturing/`.
+
+## Independent check of a candidate set
+
+`check_outputs.py` reads the board with `pcbnew`, as `make_outputs.py` does.
+Two more scripts read the files JLCPCB receives against the board's text, by regular
+expressions. They import nothing from this directory and no KiCad module (KiCad's Python serves
+as a plain interpreter), and they are not a pipeline step: run them on a release candidate, after
+`sha256sum -c` (CLAUDE.md §12, the manifest's gate "Independent check of the set").
+
+| Script | Reads | Checks | Corruptions |
+|---|---|---|---|
+| `independent_check_sets.py` | the Gerber zip, the CPL, the BOM, the hand-solder list, the silkscreen table of `PLACEMENT_Rev0.6.md`, the board | 30 with three fiducials: no Bottom paste, the outline, each fiducial in copper and mask, the CPL's side and bounds, the hand-solder list apart from BOM and CPL, BOM against CPL, the 16 test pads of REQ-MFG-04 | 8 |
+| `independent_check_positions.py` | the Gerber zip, the CPL, the BOM, the hand-solder list, the board, `jlcpcb_model_frame.json`, the previous release's Gerber zip and CPL | 13: the parts and their codes in the three lists, every CPL point and rotation, every Top paste flash, every hit of the two drill files | 16, three of them the previous release's files in the place of this set's |
+
+```sh
+R=manufacturing/releases/rev0.6/r01/UsbPowerHub_Main_Rev0.6
+P=manufacturing/releases/rev0.5/r02/UsbPowerHub_Main_Rev0.5
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/independent_check_sets.py \
+    ${R}_Gerber.zip ${R}_CPL_JLCPCB.csv ${R}_BOM_JLCPCB.csv ${R}_HandSolder.csv \
+    design/ecad/PLACEMENT_Rev0.6.md design/ecad/source/usb-power-hub.kicad_pcb
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/independent_check_positions.py \
+    ${R}_Gerber.zip ${R}_CPL_JLCPCB.csv ${R}_BOM_JLCPCB.csv ${R}_HandSolder.csv \
+    design/ecad/source/usb-power-hub.kicad_pcb design/ecad/jlcpcb_model_frame.json \
+    ${P}_Gerber.zip ${P}_CPL_JLCPCB.csv
+```
+
+Each prints `PASS` or `FAIL` per check, then `CAUGHT` or `MISSED` per corruption, and exits 0
+only when every check passed and every corruption was caught (1 otherwise, 2 for a wrong number of
+arguments). The corruptions are made on in-memory copies in the same run, so a result always comes
+with the proof that the checker can fail; neither script writes a file, and neither has a `test_`
+script. On Rev0.6 r01 (2026-11-19): 30 checks, 0 failed, 8 corruptions, 0 missed, and 13 checks,
+0 failed, 16 corruptions, 0 missed, in 0.3 s and 0.6 s on this machine.
+
+The first script reads no position but the fiducials': with Rev0.5 r02's CPL beside the Rev0.6
+board it passes all 30 checks, and the second then fails on 28 CPL rows. The second is therefore
+the one that tells a layout revision's set from the one before, and its last two arguments must
+name a release whose parts and holes stand elsewhere: with a release given as its own predecessor
+the three substitutions are no corruption, they are reported `MISSED`, and the exit status is 1.
+
+Both take the board as right. They show that the BOM, the CPL, the hand-solder list, the Top
+paste Gerber and the two drill files are this board's; they read no copper, mask or silkscreen
+layer and no pad shape (each docstring's "What it CANNOT see"). Until 2026-11-19 they were scratch
+scripts outside the repository, `c2_check.py` (issues #6 and #8) and `c2_ext_rev06.py` (issue #13),
+and records written before that day name them so.
 
 ## Where a change starts
 

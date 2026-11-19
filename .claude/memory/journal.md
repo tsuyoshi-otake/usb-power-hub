@@ -2044,3 +2044,46 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   the next (with the pad transform, the slot reading and the BOM line's footprint name); "every document" in an
   Expect is one grep per document; a verifier's report of a file it wrote.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-independent-check-in-repo (#13)
+
+- **Symptom.** The gate "Independent check of the set" of Rev0.6 r01's manifest rested on two scratch scripts in
+  `~/tmp/usb-power-hub/rev06-gate/evidence/scripts/`: its evidence could not be reproduced from the repository.
+  Asked whether to put them in, the user chose 「入れる」.
+- **What was done.** Two files of `design/ecad/scripts/`, stdlib only, importing nothing from that directory and no
+  KiCad module, writing no file: `independent_check_sets.py` (the scratch `c2_check.py` of issues #6 and #8) and
+  `independent_check_positions.py` (the scratch `c2_ext_rev06.py`). Changed on the way in: a docstring each (what
+  it reads, usage, exit statuses, what it cannot see, its history), a usage line with exit 2 for a wrong number of
+  arguments, three names that were never read removed (`io` and `names` in the first, `bom_fp` in the second), and
+  in the second the labels made general (`the previous release's` for `Rev0.5 r02's`, `previous` for `old`). No
+  check, tolerance or corruption changed. They keep their corruptions in the same run, so there is no `test_`
+  script. `design/ecad/README.md` has a new section, *Independent check of a candidate set*.
+- **Verification.** Run from the repository on r01's files: 30 checks, 0 failed, 8 corruptions, 0 missed (output
+  equal to the scratch script's saved output, byte for byte), and 13 checks, 0 failed, 16 corruptions, 0 missed
+  (output differing in the five renamed label lines only). With Rev0.5 r02's CPL in r01's place the first still
+  passes and the second fails X2 on 28 rows; with Rev0.5 r02's zip the second fails X4b, X6a and X6b. With r01
+  given as its own previous release the three substitutions are `MISSED` and the exit status is 1: the docstring
+  and the README say so. A wrong number of arguments exits with 2. 0.3 s and 0.6 s on this machine.
+- **Grading (rubric C1-C8, `.claude/goal-loop/rev06-independent-check-in-repo/`, not tracked).** One pass by an
+  independent rubric-verifier: **all eight pass.** It ran both scripts from the repository, the five stand-in and
+  usage cases, the README's commands as written, both output diffs and both source diffs, and read the six
+  documents. Before it ran, every command of the rubric was pre-run and each "every document" phrase grepped per
+  document (the rule the previous unit had missed); the pre-run corrected two clauses of the rubric itself (the
+  review's bullet is not section 7's last one; X4a does appear after `failed:`).
+- **What changed in the repository.** The two scripts; `design/ecad/README.md` and `README.md`; the manifest's
+  gate row and one residual risk (the clause "its scripts are outside the repository" is gone), section 7 of the
+  review, `CLAUDE.md` Section 12 (the Rev0.6 paragraph and Rev0.5's checklist item, which now names the script's
+  place since 2026-11-19), `rules.md`, r01's `SHA256SUMS.txt`. No generated file of r01 changed. The state stays
+  `WIP`.
+- **Not verified.** What the check never read stays unread: it takes the board as right and reads no copper, mask
+  or silkscreen Gerber and no pad shape. The scripts were run on Rev0.6 r01 only from the repository, not on
+  Rev0.5 r02's or Rev0.4's sets. No lint tool is installed for KiCad's Python (no `pyflakes`, no `ruff`); unused
+  names were looked for with a scratch `ast` walk and by reading. JLCDFM is still not accepted (finding 2), the
+  Akizuki stock, the assembled parcel's shipping and a quote with impedance control are not read, and r01 is not
+  approved. The scratch scripts and their saved outputs stay in `~/tmp/usb-power-hub/rev06-gate/evidence/` as the
+  record of the first run.
+- **Learning.** In `rules.md`: a scratch check that a release's gate rests on goes into the repository in the same
+  unit of work, and its move is proven by its output (byte-equal, or differing in exactly the renamed lines); the
+  substituted release must stand elsewhere, or the substitution is `MISSED`; a walk over `ast.Name` nodes does not
+  find a write-only container.
+- **Commits.** This entry's. Not pushed.
