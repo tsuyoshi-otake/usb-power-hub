@@ -19,11 +19,19 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 
 ## 0. Current State
 
-> **WIP — MANUFACTURING PROHIBITED.**
+> **Rev0.7 r01 is ORDERED (2026-11-20). Every other release stays WIP, and no further order is
+> placed without the user's approval.**
 >
-> **The tracked board is Rev0.7 (issue #14, D40, 2026-11-19); its release candidate is
-> `manufacturing/releases/rev0.7/r01/` (state `WIP`, made on the user's 「r01 を作る」; nothing ordered,
-> nothing paid, no approval, and JLCPCB has seen none of its files).** After the
+> **The tracked board is Rev0.7 (issue #14, D40, 2026-11-19); its release
+> `manufacturing/releases/rev0.7/r01/` is in the state `ORDERED`: the user ordered it from JLCPCB and
+> paid for it on 2026-11-20, about 00:40 (JST), from JLCONE on another PC (5 boards, 2 assembled;
+> `JLCPCB_REVIEW.md` there; approval 「支払いまでやったよ」). Its ten manufacturing files are never
+> overwritten: any change is a new release number or a new revision (Section 2). The order went out
+> with gates open: JLCDFM never ran on Rev0.7, the stackup JLC04161H-7628 was not named on the order
+> ("Specify Stackup" stayed No), the stock was not read on the day, and the open issues of Section 11
+> stand. "Confirm Production file" is Yes, without the box that stops automatic confirmation: the
+> production file is approved by itself 48 hours after JLCPCB prepares it, and the 12 non-plated holes,
+> the slots, J5 and the stackup are read in it. Nothing has been built or measured.** After the
 > user's 「2.54で端にしてねこんなので挟むから。SWD経由で君にデバッグまで自動化して開発したいからさ。」
 > (with a picture of two spring-pin clamps), J5, the SWD land, is eight bare pads, 1.7 mm at
 > 2.54 mm pitch, 1.6 mm inside the back edge: 1 SWDIO, 3 and 5 GND, 7 SWCLK in the edge row, 2 V3V3,
@@ -31,8 +39,8 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > part changes: the BOM, the CPL and the hand-solder list are Rev0.6 r02's byte for byte. Rev0.6's
 > copper is carried (`carry.py`, now from a revision that carried one itself), the tracks at J5 are
 > drawn in `ROUTING_Rev0.7.md`, and `check_pcb.py`, `check_routing.py` and `check_silk.py` pass on
-> the tracked board. **Not done for Rev0.7:** the JLCPCB gate (JLCPCB has seen
-> none of its files, and the user's cart holds Rev0.6 r01's), the enclosure and the lid (both drawn
+> the tracked board. **Not done for Rev0.7:** JLCDFM (never run), the production file's reading, the
+> hand-soldered parts' purchase at Akizuki, the enclosure and the lid (both drawn
 > for the Rev0.6 board; `design/mechanical/` still reads `board_interface_Rev0.6.json`), and the
 > clamp itself: it has two rows and eight pins (user, 2026-11-19: 「2 列 8 ピン」; the variant
 > "2.54mm Double row 4P" of an AliExpress listing, D40), but its
@@ -169,7 +177,7 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > The repository is under Git since 2026-11-03 (commit `4dd10fb` is the design
 > as it was paused on 2026-08-16). Its one remote, `origin`, is the **private**
 > GitHub repository `tsuyoshi-otake/usb-power-hub`, created on 2026-11-03 at the
-> user's request 「一旦コミットプッシュしちゃいなよ」. It stays private (Section 2).
+> user's request 「一旦コミットプッシュしちゃいなよ」. Section 2 asks that it stay private. **On 2026-11-20 `gh repo view` reports it PUBLIC** (it was PRIVATE at the push of that day, about 00:35 JST); the user set it and decides whether it returns to private. It has no LICENSE file, and its history carries the committer's e-mail address.
 
 The mockup is a **mechanical and layout intent reference only**. Per easy-stick
 14.15/14.19: an artifact kept as a reference is evidence for the thing it is
@@ -875,17 +883,20 @@ on 2026-11-19 (the manifest's *Akizuki stock*): all in stock for 2 boards, at th
 2026-11-13; MCP3208-CI/P (g100238) is marked 在庫僅少 at 41 packs, 72 on 2026-11-13. Not done on
 Rev0.6's files: the assembled parcel's shipping and a quote with impedance control.
 
-**Rev0.7 (issue #14, 2026-11-19) has the release candidate `manufacturing/releases/rev0.7/r01/`
-(state `WIP`; nothing ordered, nothing paid), and no `[x]` below is Rev0.7's.** Its
+**Rev0.7 (issue #14) has the release `manufacturing/releases/rev0.7/r01/`, state `ORDERED`: the user
+ordered and paid on 2026-11-20 (`JLCPCB_REVIEW.md` there), with this checklist's open items standing.
+No `[x]` below is Rev0.7's.** Its
 copper differs from Rev0.6's at J5 and its top mask, top legend and Gerber zip are new; its BOM, its
 CPL and its hand-solder list are Rev0.6 r02's byte for byte. On the tracked board and r01's files
 (byte-identical to the untracked `manufacturing/working/rev0.7/`) the generators' checkers pass (`check_schematic.py`,
 `check_libraries.py`, `check_pcb.py`, `check_routing.py`, `check_silk.py`, `check_outputs.py`) and so
 do the two independent checks (`independent_check_sets.py`, `independent_check_positions.py`, with
 Rev0.5 r02 as the foreign set: Rev0.6's CPL is this one's byte for byte and would prove nothing). Not
-done on Rev0.7: JLCDFM, the placement preview, a
-quote, the stock reads, the enclosure and the lid for the new land, and the clamp on a board
-(`manufacturing/releases/rev0.7/r01/RELEASE_MANIFEST.md`, *Open gates*).
+done on Rev0.7: JLCDFM, the stock reads on the day of the order, the stackup's name on the order, the
+enclosure and the lid for the new land, and the clamp on a board
+(`manufacturing/releases/rev0.7/r01/RELEASE_MANIFEST.md`, *Open gates*). Read at the order, as the
+user reported: the part mapping (41 parts, 0 substituted), the placement preview (J2 and J3 not in
+detail) and a quote of $53.89 without shipping.
 
 **r02 (2026-11-19) supersedes r01 by its top silkscreen alone**
 (`manufacturing/releases/rev0.6/r02/RELEASE_MANIFEST.md`, *What changed against r01*). The paragraph

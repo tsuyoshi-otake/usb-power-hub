@@ -2348,3 +2348,15 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   and no quote exists for Rev0.7 r01. Learning: computer use sees a VMware guest on the second display but its
   clicks, scroll and keys do not reach the guest; use the browser on the host instead. The work continues on
   another PC (issue #14 holds the hand-over).
+- **Follow-up 6 (2026-11-20): Rev0.7 r01 is ordered.** The user ordered and paid from JLCONE on another PC
+  (about 00:40 JST; 「支払いまでやったよ」) and reported the session's readings. Checked here: the three reported
+  SHA-256 equal `SHA256SUMS.txt`; the quote's lines add up to $53.89. Written: `JLCPCB_REVIEW.md` in r01 (a
+  record of the report, not a gate), the manifest's state ORDERED with the candidate's text kept, CLAUDE.md
+  sections 0 and 12. The ten manufacturing files are untouched (`git diff --stat` shows documents only).
+  Corrected from the report: Rev0.7 has 12 non-plated holes (8 pegs, H1-H4), J5 has none. Open: JLCDFM never ran
+  on Rev0.7; the stackup was not named on the order; the production file confirms itself after 48 hours; the
+  amount paid and the coupons used are not given yet. Learning: a hand-over prompt must say which gates are
+  mandatory before payment, or the next session orders past them; the one of 2026-11-20 listed JLCDFM as a step
+  and did not say "do not order before it".
+  The repository was found PUBLIC (`gh repo view`), with no LICENSE and the committer's address in history; the
+  user decides.

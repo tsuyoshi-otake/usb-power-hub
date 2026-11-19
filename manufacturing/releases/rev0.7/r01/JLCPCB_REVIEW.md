@@ -1,0 +1,146 @@
+# JLCPCB order of release r01 (issue #14)
+
+**The user ordered this release and paid for it** on 2026-11-20, about 00:40 (JST), from JLCONE, JLCPCB's
+desktop application, on another PC. The approval is the user's 「支払いまでやったよ」 of 2026-11-20. Claude
+placed no order and made no payment.
+
+**What this file is.** It is not a gate that ran before the order, as `../../rev0.6/r01/JLCPCB_REVIEW.md` is.
+The upload, the form, the part mapping, the placement preview and the quote below were read in a session on
+that other PC, which had no Git and worked from a ZIP of `main`; the user reported them on 2026-11-20, and this
+file records that report. The session that wrote this file saw none of those pages. It checked what can be
+checked here: the three SHA-256 against this directory (section 1) and the report's figures against the board
+and the earlier reviews (sections 2 to 6). **JLCDFM was never run on Rev0.7** (section 4).
+
+| Item | Value |
+|---|---|
+| What was ordered | `UsbPowerHub_Main_Rev0.7_Gerber.zip`, `_BOM_JLCPCB.csv`, `_CPL_JLCPCB.csv` of this directory |
+| Ordered and paid | 2026-11-20, about 00:40 (JST), by the user, from JLCONE |
+| Quantities | 5 boards, 2 assembled (Economic PCBA, Top side) |
+| Amount paid, coupons used | **not recorded: the user has not given them yet** (section 6) |
+| Account data | the order number, the file number, the SMT number and the address are not recorded anywhere in this repository |
+
+Evidence: no screenshot and no page text was saved; the other PC kept nothing that this repository can name.
+
+## 1. The files
+
+| Uploaded file | SHA-256 as reported | Against `SHA256SUMS.txt` here |
+|---|---|---|
+| `UsbPowerHub_Main_Rev0.7_Gerber.zip` | `17882e76666e0e85624400e737cf372c1b14d4d7d15ea101049042b9cd96cd0f` | equal |
+| `UsbPowerHub_Main_Rev0.7_BOM_JLCPCB.csv` | `c2a5455389db1466c1e59f17ba812988152e44c914a6735a808e96efce9d7b06` | equal; also Rev0.6 r01's BOM, byte for byte |
+| `UsbPowerHub_Main_Rev0.7_CPL_JLCPCB.csv` | `a2f278e692157fd10aef00a79a9378a5643413b0a36f0c0f5293c9bc2fc7e7ac` | equal; also Rev0.6 r01's CPL, byte for byte |
+
+On the other PC the eleven lines of `SHA256SUMS.txt` were checked with `Get-FileHash` (11 of 11 equal, as
+reported). Here `sha256sum -c SHA256SUMS.txt` passed on 2026-11-20 before this file was added.
+
+## 2. Options JLCPCB's form took, against the manifest
+
+As reported from JLCONE's form with this Gerber.
+
+| Option | JLCPCB form | Manifest / decision | Verdict |
+|---|---|---|---|
+| Base material, layers, size, quantity | FR-4, "Detected 4 layer board of 72x100mm", 5 boards | D10, D24 | match |
+| Thickness | 1.6 mm | 1.6 mm | match |
+| Stackup | "Specify Stackup": **No**; JLC04161H-7628 was not named | D27, "named on the order" | **differs from D27**: the order takes JLCPCB's default stackup for a 1.6 mm 4-layer board, which this repository has not read. D27's pair geometry (W 0.31 / S 0.15 mm) was computed for JLC04161H-7628 |
+| Impedance control | none | D27 (not ordered for the prototype) | match |
+| Surface finish | HASL (with lead) | D30 | match |
+| Copper | outer 1 oz, inner 0.5 oz | outer 0.035 mm, inner 0.0152 mm | match |
+| Via size class | 0.3mm/(0.4/0.45mm) | every via 0.30 mm hole | match |
+| Via covering | Plugged | the board tents its vias; the form offers Plugged | as on Rev0.5 and Rev0.6 |
+| Material type | FR4 TG135 | not in the manifest | recorded |
+| Colour, silkscreen | green, white | no decision recorded them before the order | the order decides them |
+| Outline tolerance | ±0.2 mm | none | recorded |
+| Confirm Production file | **Yes** (+$1.05) | the user's choice of 2026-11-19 on Rev0.6 r01 | match. The box "do not confirm automatically" was **not** ticked: the file is approved by itself 48 hours after JLCPCB has prepared it |
+| Assembly | Economic PCBA, Top side, 2 boards, tooling holes added by JLCPCB, parts selected by the customer | D13, REQ-MFG-01 | match |
+| Confirm Parts Placement | **No** | CLAUDE.md 4.2 asks for placement checking | JLCPCB's engineers do not send the placement back for a check |
+| Build time | PCB 3 days, assembly 3-4 days | none | recorded |
+| Product description | Research\Education\DIY > Development Board (HS 847330), chosen by the user | none | recorded |
+| Weight | 585.90 g | none | recorded |
+
+## 3. Part mapping
+
+- "41 detected". Extended: C2040 (U1), C5137013 (U6), C2765186 (J1-J4), the three that D29, D31 and D37 allow;
+  every other part Basic; **0 substituted**.
+- The merged 510 Ω row (C17734, quantity 16) stood unselected with quantity 0 and was ticked by hand, as on
+  Rev0.4, Rev0.5 and Rev0.6 (Rev0.6's finding 5).
+- The counter read "42 Parts confirmed" on the first pass and "41 Parts confirmed" after *Edit Order*. The "42"
+  was not explained on Rev0.6 either.
+- **Stock was not read on the day of the order**: `tools/jlc_stock.py` was not run. The last read is of
+  2026-11-19 (`../../rev0.6/r01/JLCPCB_REVIEW.md` section 3: every code above 500). The order was accepted with
+  the 41 rows selected.
+
+## 4. DFM
+
+**JLCDFM was not run on this Gerber, or on any Rev0.7 file.** The order went out without it.
+
+What is known instead:
+
+- The board passes KiCad's DRC with JLCPCB's hole figures as custom rules, and `check_pcb.py`,
+  `check_routing.py` and `check_silk.py` (the manifest).
+- Rev0.6 r01's JLCDFM run (`../../rev0.6/r01/JLCPCB_REVIEW.md` section 4) judged copper that this board carries
+  everywhere except at J5. Its findings on carried copper stand: the GND via 0.059 mm from D1 pad 3 (accepted by
+  the user), the 0.60 mm slots (kept by the user), the vias in the pads of U1, U6, Q18 and Q38.
+- New at J5, and read by no JLCPCB tool: eight 1.7 mm pads with 0.84 mm between them, and two GND vias 0.104 mm
+  from pads 3 and 5 (one net).
+- **The non-plated holes.** Rev0.6's finding 2 stands: JLCDFM's viewer listed the non-plated drill file as a
+  plated layer. This board has **12** non-plated holes, not Rev0.6's 15: the 8 receptacle pegs of 0.65 mm and
+  H1-H4 of 2.2 mm. J5 has no hole on Rev0.7 (the Tag-Connect land's three 0.991 mm holes are gone). The
+  production file is the place to see how JLCPCB's CAM reads them.
+
+## 5. Placement preview
+
+As reported (2-D view, Top):
+
+- No part stands on J5's eight pads. SW3 is beside them and does not overlap.
+- J1 and J4 are on the back edge, J2 and J3 on the front edge. The view was cut off at the bottom, so J2 and J3
+  were **not read in detail**.
+- The CPL is Rev0.6 r01's file, so that review's readings of 2026-11-19 are of these very rows (its section 5).
+  They were read with Rev0.6's Gerber behind them; no part moved between the two boards.
+
+A viewer's drawing of JLCPCB's models, not its pick-and-place; and "Confirm Parts Placement" is No.
+
+## 6. Quote and payment
+
+As reported, in USD, without shipping:
+
+| Line | Amount |
+|---|---:|
+| PCB, 5 boards | 8.00 |
+| Confirm Production file | 1.05 |
+| **PCB total** | **9.05** |
+| PCBA: setup | 8.24 |
+| PCBA: stencil | 1.55 |
+| PCBA: components (41) | 22.20 |
+| PCBA: Extended fee | 9.27 |
+| PCBA: SMT | 2.72 |
+| PCBA: nitrogen reflow | 0.86 |
+| **PCBA total** | **44.84** |
+| **Total without shipping** | **53.89** |
+
+The lines add up (9.05 + 44.84 = 53.89). Rev0.6 r01's quote of 2026-11-19 was $52.85, and $53.90 with "Confirm
+Production file"; its PCBA lines were not read one by one, so the $0.01 is not located.
+
+- Shipping seen before checkout: OCS Express $8.66, 4 to 6 business days.
+- Coupons: in the cart the coupon "$30 Off $50" was seen applied. **The amount actually paid and the coupons
+  actually used are not recorded: the user gives them.**
+- The cart item of Rev0.6 r01 was removed from the cart by the user before the payment.
+
+## 7. Not done before the order
+
+| Not done | Consequence |
+|---|---|
+| JLCDFM on Rev0.7's Gerber | section 4; JLCPCB's own review after the order is the only DFM this Gerber gets |
+| JLCPCB stock read on the day (`tools/jlc_stock.py`) | section 3 |
+| Akizuki stock read on the day | last read 2026-11-19 (`../../rev0.6/r01/RELEASE_MANIFEST.md`); the hand-soldered parts are bought separately |
+| Stackup named on the order | section 2 |
+| The placement of J2 and J3 read in this order's preview | section 5 |
+| The state `MANUFACTURING APPROVED` and the pre-order checklist of CLAUDE.md 12 | the user ordered with the open items of that checklist standing; the manifest lists them |
+| The clamp tried on J5 | D40: the first board is the check |
+
+## 8. What comes next
+
+1. **The production file** (JLCPCB prepares it; 48 hours after that it is approved by itself). Read in it: the
+   12 non-plated holes not plated; the 16 slots of J1-J4 plated and 0.60 mm wide; J5's eight pads open in the
+   mask with no paste; the legend at J5; the stackup JLCPCB names.
+2. The user gives the amount paid and the coupons used; they are added to section 6.
+3. The hand-soldered parts from Akizuki (`UsbPowerHub_Main_Rev0.7_HandSolder.csv`).
+4. The enclosure and the lid for the Rev0.7 board.

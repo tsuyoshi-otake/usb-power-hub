@@ -1,42 +1,50 @@
-# USB Power-Control Hub Rev0.7, release candidate r01
+# USB Power-Control Hub Rev0.7, release r01
 
-> **State: WIP. Not approved, not ordered, MANUFACTURING PROHIBITED.** The first release candidate of Rev0.7
+> **State: ORDERED.** The user ordered this release from JLCPCB and paid for it on 2026-11-20, about 00:40
+> (JST), from JLCONE on another PC (`JLCPCB_REVIEW.md`; approval: the user's 「支払いまでやったよ」). The ten
+> `UsbPowerHub_Main_Rev0.7_*` files are the ordered ones and are never overwritten (CLAUDE.md 2); this manifest
+> was amended after the order to record it, and `SHA256SUMS.txt` was written again for the manifest's own line
+> and the review's. **The order was placed with gates open**: JLCDFM never ran on Rev0.7, the stackup was not
+> named on the order, and the checklist of CLAUDE.md 12 has open items (see "Open gates" and
+> `JLCPCB_REVIEW.md` section 7). The text between this block and "Open gates" is the candidate's of 2026-11-19,
+> except the rows marked *(order)*.
+>
+> *The candidate's header, kept:* The first release candidate of Rev0.7
 > (issue #14, D40), made on the user's 「r01 を作る」 of 2026-11-19: the Rev0.6 board with J5, the SWD land,
 > changed to eight bare pads at 2.54 mm at the back edge for a spring-pin clamp. No mounted part changed: the
 > BOM, the CPL and the hand-solder list are Rev0.6 r02's byte for byte.
-> **JLCPCB has seen none of these files.** No JLCDFM run, no placement preview and no quote was read for
-> them. **Nothing was ordered or paid; the JLCPCB cart of 2026-11-19 holds Rev0.6 r01's files**, not these.
-> The set becomes orderable only after the gates in "Open gates" and the user's approval (CLAUDE.md 3, 8, 12).
+> On 2026-11-19 JLCPCB had seen none of these files, and the cart held Rev0.6 r01's; the user removed that
+> item from the cart before paying for this release.
 
 | Item | Value |
 |---|---|
 | PCB revision, release number | Rev0.7, r01 |
-| State | WIP |
+| State | ORDERED *(order)* |
 | ECAD | KiCad 9.0.8, project `design/ecad/source/usb-power-hub.kicad_pro`, with the custom rules `usb-power-hub.kicad_dru` |
 | Source revision | Git commit `474dea4` (2026-11-19T22:22:23+09:00) holds the sources whose SHA-256 is below, with the scripts that wrote them (`make_project.py`, `make_libraries.py`, `carry.py`, `route.py`, `make_pcb.py`, `make_outputs.py`), the carried record and the router session in `design/ecad/routing/` |
 | Set written | 2026-11-19 (JST) by `make_outputs.py` from the tracked board; the ten `UsbPowerHub_Main_Rev0.7_*` files are byte-identical to `manufacturing/working/rev0.7/`, written twice with the same SHA-256, which `check_outputs.py` passed (2970 checks) |
 | Dimensions | 100 × 72 mm (D24), 1.6 mm thick |
 | Layers | 4 (D10) |
-| Stackup | JLC04161H-7628 (D27), named on the order |
+| Stackup | designed for JLC04161H-7628 (D27). *(order)* **Not named on the order**: "Specify Stackup" stayed No, so JLCPCB's default stackup is made |
 | Copper | outer 0.035 mm (1 oz), inner 0.0152 mm (0.5 oz) |
 | Impedance control | not ordered for the prototype (D27); the user decides at the JLCPCB step with a fresh quote (CIRCUIT_DESIGN_Rev0.7.md §9) |
 | Finish | leaded HASL (D30; board setting `HAL SnPb`) |
 | Via class | **415 vias, every hole 0.30 mm:** 383 of 0.45 mm pad (ring 0.075 mm) and 32 of 0.60 mm pad (ring 0.150 mm). JLCPCB's standard class "0.3mm/(0.4/0.45mm)". Rev0.6 r02 had 413 |
-| Solder mask, silkscreen colour | not decided |
+| Solder mask, silkscreen colour | *(order)* green, white |
 | Assembly side | Top only (REQ-MFG-01); Economic PCBA |
-| Quantities | not decided; Rev0.6's quote was read for 5 boards, 2 assembled |
+| Quantities | *(order)* 5 boards, 2 assembled |
 | Machine-placed parts | 262 footprints, 41 LCSC parts; Extended: C2040, C2765186, C5137013 (D29, D31, D37) |
 | Hand-soldered parts | 8 (`UsbPowerHub_Main_Rev0.7_HandSolder.csv`), in neither BOM nor CPL |
 | Not populated (DNP, BOM-excluded) | 34: FID1 FID2 FID3 H1 H2 H3 H4 J5 TP1 TP2 TP3 TP4 TP5 TP6 TP7 TP8 TP9 TP10 TP11 TP12 TP13 TP14 TP101 TP102 TP103 TP104 TP105 TP106 TP201 TP202 TP203 TP204 TP205 TP206 |
 | ERC | 0 violations (`UsbPowerHub_Main_Rev0.7_ERC.json`) |
 | DRC | 0 violations, 0 unconnected items, 0 schematic-parity items (`UsbPowerHub_Main_Rev0.7_DRC.json`), including JLCPCB's hole figures as custom rules; the slots as capsules are measured by rule 10 of `check_routing.py`, which KiCad's DRC does not do |
 | JLCPCB DFM, part mapping, placement preview | **none on these files.** Rev0.6 r01's review (`../../rev0.6/r01/JLCPCB_REVIEW.md`, 2026-11-19) records three SHA-256: this BOM's and this CPL's, which are unchanged, and Rev0.6 r01's Gerber zip's. What it read of the BOM and the CPL (part mapping 41 of 41 with 0 substituted; the placement preview) was read with another Gerber behind it. Its JLCDFM run does not carry over: the copper, the top mask, the legend and both drill files differ here |
-| Quote | none on these files. Rev0.6 r01's: $52.85 without shipping on 2026-11-19 (PCB $8.00, Economic PCBA $44.85; 5 boards, 2 assembled) |
+| Quote | *(order)* $53.89 without shipping (PCB $9.05 with "Confirm Production file", Economic PCBA $44.84; `JLCPCB_REVIEW.md` section 6). The amount paid and the coupons used are not recorded yet. Rev0.6 r01's quote: $52.85 on 2026-11-19 |
 | Sourcing | the BOM is the file Rev0.5's check read (`../../rev0.5/r01/SOURCING_CHECK.md`, PASS on 2026-11-13). JLCPCB's assembly stock was read again on 2026-11-19 for the 41 codes (all above 500; `../../rev0.6/r01/JLCPCB_REVIEW.md` section 3), and the Akizuki stock of the five hand-soldered part types on the same day (`../../rev0.6/r01/RELEASE_MANIFEST.md`). The stock moves, and the check is repeated before payment |
 | EasyEDA import (D32) | `../../rev0.4/r01/EASYEDA_IMPORT.md`: blocked at the user's sign-in; not run on Rev0.7 |
 | Firmware | none |
-| JLCPCB order number | **none: nothing was ordered or paid** |
-| Approver, approval time | **none** |
+| JLCPCB order number | *(order)* ordered and paid on 2026-11-20; the number is account data and is not written in this repository |
+| Approver, approval time | *(order)* the user, 2026-11-20: 「支払いまでやったよ」. The state `MANUFACTURING APPROVED` was never recorded before the order |
 
 ## What changed against Rev0.6 r02
 
@@ -81,6 +89,7 @@ The board (`design/ecad/PLACEMENT_Rev0.7.md`, `design/ecad/ROUTING_Rev0.7.md`, C
 | `UsbPowerHub_Main_Rev0.7_Preview_Bottom.png` | 3D render, bottom |
 | `UsbPowerHub_Main_Rev0.7_Preview_Top.png` | 3D render, top |
 | `UsbPowerHub_Main_Rev0.7_Schematic.pdf` | the schematic, every sheet |
+| `JLCPCB_REVIEW.md` | the record of the order of 2026-11-20, as the user reported it |
 | `SHA256SUMS.txt` | SHA-256 of every file above and of this manifest; `sha256sum -c SHA256SUMS.txt` |
 
 The ECAD source is not copied here: it is tracked in `design/ecad/source/` and identified by the hashes below;
@@ -102,6 +111,17 @@ copy it in at approval.
 | `design/ecad/source/usb-power-hub.kicad_sch` | `f500133eba9545d412906d0d57a0291252a978345b4eff93171fca09267fbb26` |
 
 ## Open gates (CLAUDE.md 8 and 12), with owners
+
+**After the order (2026-11-20).** The rows below are the candidate's. What the order changed:
+
+| Gate | State after the order |
+|---|---|
+| JLCDFM | **never run on Rev0.7**; the order went out without it |
+| Part mapping, placement preview | read in JLCONE at the order, as the user reported: 41 parts, 0 substituted, Extended only C2040, C5137013, C2765186; J5's pads free of parts; J2 and J3 not read in detail. "Confirm Parts Placement" is No |
+| Quote and cart | ordered and paid by the user; Rev0.6 r01's cart item was removed by the user |
+| Sourcing | not read on the day of the order |
+| Production file | **open**: "Confirm Production file" is Yes without the "do not confirm automatically" box, so the file is approved by itself 48 hours after JLCPCB prepares it. To read in it: the 12 non-plated holes, the slots, J5, the stackup (`JLCPCB_REVIEW.md` section 8) |
+| Everything else below | unchanged |
 
 | Gate | State | Owner |
 |---|---|---|
@@ -128,7 +148,8 @@ copy it in at approval.
 - What the clamp's lower jaw meets was not checked. The bottom face under J5 carries tracks and vias under
   mask (B.Cu rows of the routing document run there), and a jaw that presses on it, or one with pins of its
   own, presses on that mask.
-- **No JLCPCB tool has read this set.** Every JLCDFM judgement on record is of another Gerber zip.
+- **JLCDFM has not read this set.** Every JLCDFM judgement on record is of another Gerber zip; at the order,
+  JLCONE's form, part mapping and placement preview read it (`JLCPCB_REVIEW.md`).
 - The risks of Rev0.6 r02's manifest that concern carried copper and unchanged parts stand
   (`../../rev0.6/r02/RELEASE_MANIFEST.md`, *Residual risks*): the GND via 0.059 mm from D1 pad 3, the 0.60 mm
   slots, the 13 vias in pads, the non-plated drill file read as plated, the CPL's frame, port B's copper at
@@ -138,5 +159,8 @@ copy it in at approval.
 - The independent check takes the board file as its reference. It shows that the BOM, the CPL, the hand-solder
   list, the Top paste Gerber and the two drill files are this board's, not that the board is right.
 - The legend was judged in KiCad's render, not on a printed board (OI-6).
-- Nothing has been built or measured. The open issues of CLAUDE.md 11 stand; the set is not orderable until each
-  is closed.
+- Nothing has been built or measured. The open issues of CLAUDE.md 11 stand, and the set was ordered with them
+  open (2026-11-20).
+- *(order)* The order names no stackup. If JLCPCB's default for this board is not JLC04161H-7628, the USB pairs'
+  impedance is not D27's model value; Full Speed is the fallback (OI-26).
+- *(order)* The production file confirms itself 48 hours after JLCPCB prepares it, if nobody reads it first.
