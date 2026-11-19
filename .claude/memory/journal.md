@@ -2339,3 +2339,12 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   nothing about geometry (13 of 15 members differ after the revision text is made equal, the Top paste among
   them, whose flashes the position check proves unchanged in place); compare drill hits and the board instead.
   Not done: any JLCPCB tool on these files, the cart (Rev0.6 r01's), the enclosure and the lid for Rev0.7.
+- **Follow-up 5 (2026-11-20): coupons read, hand-over.** The user asked to make the most of JLCPCB's coupons.
+  Read only, in the user's Chrome (the account's unused-coupon page, 27 rows); nothing was claimed or used. On
+  the Rev0.6 r01 quote ($52.85 without shipping: PCB $8.00, PCBA $44.85) four apply: "$30 Off $50" (all
+  products, over $50, until 2026-12-04), "PCBA Special Offer" $9 (until 2026-11-30), "JLCONE PCB $5" (orders
+  from JLCONE, until 2026-12-14), "BF Shipping $5 - JLCONE" (shipping over $20, until 2026-11-29). Whether they
+  combine is shown only at checkout; alone, the $30 one gives $22.85, with $2.85 of margin over its threshold,
+  and no quote exists for Rev0.7 r01. Learning: computer use sees a VMware guest on the second display but its
+  clicks, scroll and keys do not reach the guest; use the browser on the host instead. The work continues on
+  another PC (issue #14 holds the hand-over).
