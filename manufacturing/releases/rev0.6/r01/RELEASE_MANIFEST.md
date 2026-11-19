@@ -31,7 +31,7 @@
 | DRC | 0 violations, 0 unconnected items, 0 schematic-parity items (`UsbPowerHub_Main_Rev0.6_DRC.json`), including JLCPCB's hole figures as custom rules; the slots as capsules are measured by rule 10 of `check_routing.py`, which KiCad's DRC does not do |
 | JLCPCB DFM, part mapping, placement preview | run on these files on 2026-11-19, **not accepted** (`JLCPCB_REVIEW.md`). Part mapping 41 of 41, 0 substituted. Placement preview: the four receptacles and every moved part that is not symmetrical read, one instance of each other class. JLCDFM: every Danger item judged against measurements; of its three findings the user decided two on 2026-11-19 (a GND via 0.059 mm from D1 pad 3 is accepted, 「受け入れる」; the receptacles' plated slots stay 0.60 mm wide, 「このまま」) and one waits for the user (the non-plated holes that JLCDFM lists as plated). The review holds only for the three SHA-256 it records |
 | Quote | $52.85 without shipping on 2026-11-19 (PCB $8.00, Economic PCBA $44.85; 5 boards, 2 assembled), `JLCPCB_REVIEW.md` section 6. Rev0.5 r02's was $51.94 |
-| Sourcing | the BOM is the file Rev0.5's check read (`../../rev0.5/r01/SOURCING_CHECK.md`, PASS on 2026-11-13, SHA-256 below). JLCPCB's assembly stock was read again on 2026-11-19 for the 41 codes (all above 500; `JLCPCB_REVIEW.md` section 3); the Akizuki stock was not. The stock moves, and the check is repeated before payment |
+| Sourcing | the BOM is the file Rev0.5's check read (`../../rev0.5/r01/SOURCING_CHECK.md`, PASS on 2026-11-13, SHA-256 below). JLCPCB's assembly stock was read again on 2026-11-19 for the 41 codes (all above 500; `JLCPCB_REVIEW.md` section 3), and the Akizuki stock of the five hand-soldered part types on the same day (all in stock for 2 boards; *Akizuki stock* below). The stock moves, and the check is repeated before payment |
 | EasyEDA import (D32) | `../../rev0.4/r01/EASYEDA_IMPORT.md`: blocked at the user's sign-in; not run on Rev0.6 |
 | Firmware | none |
 | JLCPCB order number | **none: nothing was ordered or paid** |
@@ -86,6 +86,33 @@ copy it in at approval.
 | `design/ecad/source/usb-power-hub.kicad_pro` | `18855e6bcff3b380e29a02d015d9cefb415c34bdfc1f93b9b75d02a17d05725a` |
 | `design/ecad/source/usb-power-hub.kicad_sch` | `d8aaca5061a6f72b1d719d4b35e3a59ddce04d5db1349dcb3b746956ee07a343` |
 
+## Akizuki stock (V-MFG-02, the hand-soldered parts)
+
+Read on 2026-11-19 between 18:38 and 18:40 JST, after the JLCPCB gate: the 通販購入可能数 field and the stock label
+of each product page, for the five Akizuki codes of `UsbPowerHub_Main_Rev0.6_HandSolder.csv` (the file Rev0.5 r02
+had, byte for byte). The need is for 2 assembled boards, the quantity of Rev0.5's check and of the quote.
+
+| Akizuki | Part | Used by | Pack, price (tax incl.) | Label | 通販購入可能数 | On 2026-11-13 | Need | OK |
+|---|---|---|---|---|---:|---:|---:|---|
+| g100238 | 12bit 8ch ADコンバーター MCP3208-CI/P | U7, U17 | 1パック, ￥500 | 在庫僅少 | 41 | 72 | 4 | yes |
+| g104132 | 1W級絶縁型DCDCコンバーター(12V84mA)MAU104 | U5 | 1個, ￥520 | 在庫あり | 126 | 133 | 2 | yes |
+| g108805 | 超小型 金属皮膜抵抗 1W10Ω | RS11, RS21 | 1袋100本入, ￥600 | 在庫あり | 169 | 170 | 4 resistors, 1 bag | yes |
+| g109588 | 電流検出用チップ抵抗器 1W0.1Ω ±0.5% | RS10, RS20 | 1個, ￥130 | 在庫あり | 343 | 351 | 4 | yes |
+| g112630 | リセッタブルヒューズ 3A トリップ電流:6A 耐圧:30V MF-R300 | F1 | 1個, ￥40 | 在庫あり | 2,731 | 2,756 | 2 | yes |
+
+- Result: every hand-soldered part is in stock at Akizuki for the quantity, and every price is the one of
+  2026-11-13 (`../../rev0.5/r01/SOURCING_CHECK.md`).
+- MCP3208-CI/P is the one to watch: its page says 在庫僅少, and its stock fell from 72 to 41 packs in six days
+  (`requirements/parts.md` recorded 733 on 2026-11-03). Whether the label was already there on 2026-11-13 is not
+  recorded.
+- Method: the pages were opened in a browser. A scripted fetch (curl, its default User-Agent) of the same pages
+  was answered with a redirect to Akizuki's error-403 page on this day, and no browser-like User-Agent was set to
+  get around it. The record of what the pages returned is outside the repository
+  (`~/tmp/usb-power-hub/rev06-gate/evidence/akizuki-stock-2026-11-19.txt`).
+- Not covered: how many ICs one pack of g100238 holds (the page says "1パック"; the need is counted as 4 packs, the
+  larger reading), the shop stock, Akizuki's shipping, the parts' electrical suitability (`requirements/parts.md`),
+  and the stock at the minute of payment. Nothing was put in a basket and nothing was ordered.
+
 ## Open gates (CLAUDE.md 8 and 12), with owners
 
 | Gate | State | Owner |
@@ -93,7 +120,7 @@ copy it in at approval.
 | JLCDFM on this Gerber | run on 2026-11-19, **not accepted**: on 2026-11-19 the user accepted the GND via beside D1 pad 3 (「受け入れる」) and kept the plated slots at 0.60 mm (「このまま」), and still decides on "Confirm Production file" for the non-plated holes (`JLCPCB_REVIEW.md` sections 1 and 8). Six "Pad spacing", 22 "pad to line spacing" and 3 mask-exposure Danger rows were judged by measurement and not identified one by one | user |
 | Part mapping and placement preview on this BOM and CPL | run on 2026-11-19: 41 of 41, 0 substituted; J1-J4 and the 7 other moved parts that are not symmetrical read in the preview, one instance of each other class. A viewer reading, not JLCPCB's pick-and-place; "Confirm Parts Placement" is the user's choice | user |
 | Quote | read on 2026-11-19: $52.85 without shipping. Not read: the assembled parcel's shipping, a quote with impedance control | user, in the cart |
-| Sourcing | Rev0.5's check of 2026-11-13 read the same BOM file; JLCPCB's stock was read again on 2026-11-19, the Akizuki stock was not; to be repeated before payment | Claude, before payment |
+| Sourcing | Rev0.5's check of 2026-11-13 read the same BOM file; JLCPCB's stock was read again on 2026-11-19, and so was the Akizuki stock (*Akizuki stock* below: all five part types in stock for 2 boards; MCP3208-CI/P is marked 在庫僅少 at 41 packs); to be repeated before payment | Claude, before payment |
 | Independent check of the set | **run on 2026-11-19, passed**, on these files against the tracked board, by two scripts of `design/ecad/scripts/` (how to run them: `design/ecad/README.md`, *Independent check of a candidate set*). They were scratch scripts outside the repository, `c2_check.py` and `c2_ext_rev06.py`, when the check first ran; they are in the repository since that day, and the run was repeated from there with the same result. `independent_check_sets.py`, the check Rev0.5 r02 had, with the same checks and corruptions: 30 checks, 0 failed; 8 corruptions, 0 missed. It reads no position: it passes as well with Rev0.5 r02's CPL beside this board. `independent_check_positions.py`, written for Rev0.6: 13 checks, 0 failed; 16 corruptions, 0 missed, three of them Rev0.5 r02's files in the place of these. It compares the BOM, the CPL and the hand-solder list (262 machine-placed and 8 hand-soldered parts, with their codes), the 262 CPL points and rotations (with the model frame of `design/ecad/jlcpcb_model_frame.json`), the 766 flashes of the Top paste Gerber and the 471 plated and 15 non-plated hits of the two drill files with the board's text. It reads no copper, mask or silkscreen layer, and it takes the board as right | Claude |
 | Mechanical overlay | the enclosure and the lid PCB are drawn for this board on paper (Enclosure Rev0.2 and Lid Rev0.2, issue #13 step 7; `design/mechanical/`); nothing is printed and no cable was tried | user (print, cables) |
 | EasyEDA import (D32) | blocked at the user's sign-in | user |
@@ -118,6 +145,9 @@ copy it in at approval.
 - The independent check of 2026-11-19 takes the board file as its reference. It shows that the BOM, the CPL, the
   hand-solder list, the Top paste Gerber and the two drill files are this board's, not that the board is right.
   It does not read the copper, mask or silkscreen Gerbers or a pad's shape.
+- The ADC's stock at Akizuki is falling: MCP3208-CI/P (g100238) stood at 72 packs on 2026-11-13 and at 41 on
+  2026-11-19, marked 在庫僅少; two boards need 4. If it is sold out when the order is placed, U7 and U17 have no
+  second source recorded (`requirements/parts.md`), and the choice of one is the user's (D13).
 - 13 via holes stand in a pad, as on Rev0.5: 5 in U1's exposed pad, 6 in U6's, and a 0.60 mm via in pad 3 of
   Q18 and of Q38. Solder can wick into them (V-MFG-03).
 - JLCDFM's viewer lists the non-plated drill file as a plated layer, although the file declares itself

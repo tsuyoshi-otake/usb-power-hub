@@ -2087,3 +2087,40 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   substituted release must stand elsewhere, or the substitution is `MISSED`; a walk over `ast.Name` nodes does not
   find a write-only container.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-akizuki-stock (#13)
+
+- **Symptom.** The Akizuki half of V-MFG-02 had not been read on Rev0.6's files: the manifest, the review and
+  `CLAUDE.md` Section 12 said so. Asked whether to read it now, the user chose 「読み直す」.
+- **What was read.** The five product pages of the codes of `UsbPowerHub_Main_Rev0.6_HandSolder.csv` (byte-identical
+  to Rev0.5 r02's list), between 18:38 and 18:40 JST, each twice: the fields, then the lines of the pane that holds
+  the stock field. For 2 assembled boards every part is in stock, at the prices of 2026-11-13: g100238 MCP3208-CI/P
+  41 packs (72 on 2026-11-13), g104132 MAU104 126 (133), g108805 169 bags (170), g109588 343 (351), g112630 2,731
+  (2,756). g100238 is marked 在庫僅少, the other four 在庫あり.
+- **Finding.** The ADC's stock is falling: 733 on 2026-11-03 (`requirements/parts.md`), 72, 41. Two boards need 4.
+  `requirements/parts.md` names no second source. Recorded as a residual risk of r01; whether the label was shown
+  on 2026-11-13 is not recorded, so the documents do not call it new.
+- **Fail, investigate, verify (the method).** curl with its default User-Agent got `302` to
+  `/CustomError/error403.html` on each of the five pages (143-byte "Object moved" body), and on a sixth request.
+  Cause: Akizuki refuses the scripted fetch now; the downloads of 2026-11-03 and 2026-11-04 had returned the pages.
+  It was not worked around with a browser-like User-Agent. The pages were opened in the user's Chrome (one tab of
+  this session's own group, closed afterwards) and read with `document.querySelectorAll` on the field classes of
+  `rules.md`; the read of g100238 was repeated 30 s later with the same 41.
+- **Grading (rubric C1-C5, `.claude/goal-loop/rev06-akizuki-stock/`, not tracked).** One pass by an
+  independent rubric-verifier: **all five pass.** It matched the table with the saved record string by string, with
+  the hand-solder list and with Rev0.5's check, read the passages of the three documents, and made the one curl
+  request the rubric allowed, which printed `302` and the error-403 URL. Before it ran, every command was pre-run;
+  the pre-run narrowed one clause of the rubric (which passages must keep "repeated before payment").
+- **What changed in the repository.** The manifest (a new section *Akizuki stock*, the two "Sourcing" entries, one
+  residual risk), sections 3 and 7 of the review, `CLAUDE.md` Section 12, `rules.md` (one new rule), r01's
+  `SHA256SUMS.txt`. No generated file of r01 changed. The state stays `WIP`.
+- **Not verified.** The stock figures were read once, in the browser, by the main session; a verifier with Read,
+  Grep and Bash cannot repeat that read, so it graded the documents against the saved record
+  (`~/tmp/usb-power-hub/rev06-gate/evidence/akizuki-stock-2026-11-19.txt`) and repeated only the refused curl
+  request. How many ICs one pack of g100238 holds was not read (counted as 4 packs, the larger reading); nor the
+  shop stock, Akizuki's shipping, or the stock at payment. `requirements/parts.md` keeps its figures of 2026-11-03.
+  JLCDFM is still not accepted (finding 2), the assembled parcel's shipping and a quote with impedance control are
+  not read, and r01 is not approved.
+- **Learning.** In `rules.md`: since 2026-11-19 a scripted fetch of an Akizuki product page is refused, and the page
+  is read in the browser; where the stock label stands on the page; a `rubric-verifier` cannot repeat a browser read.
+- **Commits.** This entry's. Not pushed.

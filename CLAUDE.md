@@ -837,8 +837,10 @@ script `c2_check.py` (30 checks, 0 failed; 8 corruptions, 0 missed), which reads
 `independent_check_positions.py`, at the first run the scratch script `c2_ext_rev06.py` (13 checks,
 0 failed; 16 corruptions, 0 missed), which compares the BOM, the CPL, the hand-solder list, the Top
 paste Gerber and the two drill files with the tracked board. It takes the board as right and reads
-no copper, mask or silkscreen layer. Not done on Rev0.6's
-files: the Akizuki stock, the assembled parcel's shipping and a quote with impedance control.
+no copper, mask or silkscreen layer. The Akizuki stock of the five hand-soldered part types was read
+on 2026-11-19 (the manifest's *Akizuki stock*): all in stock for 2 boards, at the prices of
+2026-11-13; MCP3208-CI/P (g100238) is marked 在庫僅少 at 41 packs, 72 on 2026-11-13. Not done on
+Rev0.6's files: the assembled parcel's shipping and a quote with impedance control.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
       `WIP`; the user approves.*

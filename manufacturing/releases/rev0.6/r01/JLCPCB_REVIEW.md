@@ -80,8 +80,9 @@ further; confirm it in the cart.
 - Stock on the day of the upload, `tools/jlc_stock.py` on the 41 codes at 15:24 (`stock-2026-11-19.txt`, exit 0:
   every code matched exactly): 38 Basic and 3 Extended; the lowest are C5137013 (CH335F) 4,378, C97521
   (W25Q128JVSIQ) 72,478 and C2040 (RP2040) 75,345, every one above the 500 of CLAUDE.md 4.1. The Akizuki stock of
-  the hand-soldered parts was **not** read again (`../../rev0.5/r01/SOURCING_CHECK.md`, 2026-11-13). Repeat both
-  before payment.
+  the hand-soldered parts was **not** read at the gate (`../../rev0.5/r01/SOURCING_CHECK.md`, 2026-11-13); it was
+  read afterwards, on 2026-11-19 about 18:39: all five part types in stock for 2 boards, MCP3208-CI/P marked
+  在庫僅少 at 41 packs (`RELEASE_MANIFEST.md`, *Akizuki stock*). Repeat both before payment.
 
 ## 4. DFM (JLCDFM, PCB DFM check)
 
@@ -194,7 +195,8 @@ Read on 2026-11-19 at about 15:04 (USD, the account's currency; `quote.txt`).
 - JLCDFM keeps the upload of about 15:06 in its history; whether the attempt of 15:05:41, which only reloaded the
   page, left a second record is not known.
 - Not run: a control of Rev0.5 r02's Gerber on today's JLCDFM (finding 4), JLCDFM's SMT DFM tab, a quote with
-  impedance control, the OCS price, the Akizuki stock. The independent check of the set that Rev0.5 r02 had
+  impedance control, the OCS price. The Akizuki stock was not read at the gate either; it was read afterwards, on
+  2026-11-19 (section 3). The independent check of the set that Rev0.5 r02 had
   (CLAUDE.md 12) was not run at the gate; it ran afterwards, on 2026-11-19, and passed: two scripts, scratch
   scripts outside the repository at the first run and `design/ecad/scripts/independent_check_sets.py` and
   `independent_check_positions.py` since that day, read the three files above and the hand-solder list against

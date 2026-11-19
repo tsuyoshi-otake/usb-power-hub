@@ -63,6 +63,16 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   Space requests >= 2 s apart and back off on errors. Verified 2026-11-03 on the five
   Akizuki rows of `requirements/parts.md`. No committed tool reads Akizuki yet, so stock is
   rechecked by hand at order time (V-MFG-02).
+- **Since 2026-11-19 a scripted fetch of a product page is refused: read it in the browser.**
+  (#13) curl with its default User-Agent got `302` to `/CustomError/error403.html` (a 143-byte
+  "Object moved" body) on six of six requests, 3 s apart; the scripted downloads of 2026-11-03
+  and 2026-11-04 had returned the pages, and how they were read on 2026-11-13 is not recorded.
+  Do not set a browser-like User-Agent to get around it. In the user's
+  Chrome the page loads, and `document.querySelectorAll` on the field classes below returns
+  the fields; wait 2.5 s in the script before reading, which also spaces the requests. The
+  stock label (在庫あり, 在庫僅少) is the line between 税抜 and 購入数量 of the pane
+  `pane-goods-right-side`, which holds the stock field. A `rubric-verifier` (Read, Grep, Bash)
+  cannot repeat such a read: it grades the documents against the saved record, not the stock.
 - **Pages are UTF-8, and a search keyword is UTF-8 percent-encoded.** Decoding a page as cp932
   gives mojibake, and a cp932-encoded keyword returns no hits (`金属皮膜抵抗 470Ω` found
   g108532 only when UTF-8-encoded).
