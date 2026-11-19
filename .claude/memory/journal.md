@@ -2318,3 +2318,10 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   「2 列 8 ピン」. Recorded in D40 and CLAUDE.md §0. The land already has 2 × 4 pads; nothing on the board changed.
   Still unknown: the distance between the clamp's rows, its jaw reach (the inner row is 4.14 mm from the edge),
   its pin diameter. No check was run: documents only.
+- **Follow-up 2 (2026-11-19).** The user named the clamp: 「これの2.54mm Double row 4P」, AliExpress item
+  1005004869027755. Read: the variant list (it exists) and the listing's two description photographs. They show a
+  peg-type clamp with a pin board at the tip of each jaw; no drawing, no dimension. So the three unknowns stand
+  (row distance, which way the rows lie against the jaw, reach), and a new one is visible: the clamp needs the
+  board's bottom face free under J5, which the enclosure's tray covers. Nothing on the board changed; D40 names
+  the listing. Chrome's screenshots timed out on that tab after the first; the two images were read from the
+  fetch tool's saved files instead.
