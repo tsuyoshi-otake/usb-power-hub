@@ -1808,3 +1808,90 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   names a part's place by number).
 - **Commits.** `7d09fcf` (pure rename), `4c4b201` (re-point), `010695e` (D39, placement, carry, routing,
   silkscreen, tests and documents in one commit). Not pushed.
+
+## 2026-11-19 rev06-r01-mechanical (#13): Rev0.6 release candidate r01 (WIP, not uploaded); Enclosure Rev0.2 and Lid Rev0.2 drawn for the Rev0.6 board
+
+- **Request.** Issue #13, steps 6 to 8, under the user's 「C2 で進める」 and 「コミットして進める (推奨)」 (commit step
+  by step, no push). Uploading to JLCPCB was not asked for and was not done.
+- **Result.**
+  - `manufacturing/releases/rev0.6/r01/` (state `WIP`): the ten files of `manufacturing/working/rev0.6/`, byte for
+    byte, with a manifest and `SHA256SUMS.txt`. JLCPCB has read none of them. BOM and hand-solder list are Rev0.5
+    r02's bytes; 28 of the CPL's 262 rows differ; 13 of the Gerber zip's 15 members differ beyond header lines.
+  - Enclosure Rev0.2 and Lid Rev0.2 are built from the Rev0.6 board's interface. `check_enclosure.py` 100 checks,
+    0 failed (96 before: four new wall probes); `test_check_enclosure.py` 75 tests; `check_lid.py` 44 checks, 59
+    with the candidate set (`manufacturing/working/lid-rev0.2/`, not tracked); `test_check_lid.py` 110 tests.
+    Nothing is printed, nothing is ordered.
+- **What did not fit.** Enclosure Rev0.1's geometry on the Rev0.6 interface: `FAIL E05 U5: 13.60 mm3 of the Frame
+  inside its envelope (height 10.2 mm + 0.3 mm)`. SW2 moved to x 68.5, 2.955 mm from the courtyard of the MAU104;
+  the button's column reached 3.2 mm to each side from 2.2 mm up, so it stood 0.245 mm inside. Found by a dry run
+  of the mechanical pipeline in a scratch copy, before any file of the repository was renamed.
+- **Design decisions (Claude, delegated; recorded as E8's amendment in `ENCLOSURE_Rev0.2.md`).**
+  - A button's column starts 11.0 mm above the board (`btn_bottom`), above the converter, for both buttons. The
+    light wells and the BOOT tube keep `ui_bottom` 2.2 mm.
+  - `btn_wall` 1.5 to 1.9 mm, and a new demand `btn_wall_min` 0.8 mm with two probes per button (bore,
+    counterbore). Rev0.1 left 0.4 mm of plastic round the counterbore, which no check measured; it was seen only
+    because the column's width had to be thought about again.
+  - Rejected: a column narrowed beside the converter (0.35 mm from the body of a hand-soldered part; the first
+    prototype, a stepped column, passed the checker and was dropped for this reason), a 2.0 mm plunger, moving U5
+    or SW2.
+  - The cost, in the document's section 10: the bore guides the shaft over 4.7 mm instead of 13.5 mm; from the
+    nominal clearances the foot can stand about 0.7 mm off the switch's axis (0.2 mm in Rev0.1). A hand
+    computation; the checker moves a plunger and does not tilt it.
+  - The lid needed no parameter and no legend row changed but the revision's text.
+- **Delegation.** One Devin run (SWE-2 Max): 62 replacements of three literal strings in ten scripts and two
+  documents under `design/mechanical/` (Rev0.5 to Rev0.6 x 11, Rev0.1 to Rev0.2 x 47, rev0.1 to rev0.2 x 4). It
+  worked on copies; a review script derived the expected bytes from the untouched copies (0 files differ; on an
+  unchanged copy the same script reports 12). `test_check_lid.py` and the README were not given to it: their
+  revision names carry meaning (a test swaps the revision to the next one).
+- **Failures, causes and fixes.**
+  - `test_check_enclosure.py`, first run on the new board: 1 of 72 failed, `test_receptacle_moved_on_the_board`,
+    which expected `port_to_screw_max 45.21 (built: 45.81)`. The figure is the board's (now 14.03, built 14.63).
+  - `test_tower_on_a_switch` (`ui_bottom=1.0`) still passed, for another reason than its name gave: with the
+    column raised, what enters SW1's envelope is the light well's corner (1.80 mm3), and the tube enters SW3's
+    (12.99 mm3). Renamed, and it now asserts SW3's line.
+  - `test_check_lid.py`, first run: 5 of 110 failed. Four named Rev0.5's places (`(at 126 56.5 0)`, `X65.3Y4.5`,
+    `x = 75.`); the fifth moved SW2's hole 6 mm to the right, which on Rev0.6 puts its ring under `OUT B`
+    (`FAIL L10`, and KiCad's DRC `silk_overlap`). It now moves the hole towards the middle.
+  - A document claim corrected before the grading: I had written that the pinhole over SW3 moved with the lid's
+    other features. The interface's diff shows SW3 where it stood; only J1, J3, SW2's hole and OUT B's window
+    moved.
+  - One Bash command did not return within 120 s and was stopped (it ended with `python - <<'EOF'` and an empty
+    body, then a `grep`). Run again part by part under `timeout 10`, every part returned. Cause not established.
+    No runner process was left.
+  - r01 was committed (`7c5eec9`) on the main session's checks alone, though the issue asks for an independent
+    grading of every step. Noticed while writing this entry; graded afterwards (below). Before the grading one
+    row of its manifest had gone stale with the mechanical commit ("are being redrawn") and was corrected with
+    the manifest's checksum line (`7d5ad3e`); the ten files of the set were not touched.
+  - `check_outputs.py --out manufacturing/releases/rev0.6/r01` ends `2949 checks, 14 failed`: `malformed line`
+    for each of the 11 lines of `SHA256SUMS.txt`, `lists []`, and two lines on the manifest. The checker is the
+    working set's; every release in the repository writes `<hash> *<file>` (`sha256sum -b`) and a manifest of
+    its own form. Not a defect of r01; the rubric checks it with `sha256sum -c` and `cmp`.
+- **Verification.**
+  - Main session: the four runs above; two enclosure builds byte-identical (three STL files, lid interface,
+    manifest); the Frame inside U5's courtyard prism: 0.000 mm3 up to 10.5 and 10.9 mm, 2.158 mm3 up to
+    11.5 mm; r01 against a fresh `make_outputs.py --no-check` run (10 files the same), against Rev0.5 r02
+    (BOM and hand-solder list the same bytes, 28 CPL rows, 13 Gerber members) and against the tracked sources
+    (10 hashes).
+  - Independent verifier, mechanical step (`rubric-verifier`, sonnet, fresh context;
+    `.claude/goal-loop/rev06-mechanical/rubric.md`, C1 to C8): 8 pass, first iteration. It exported the
+    interface and rebuilt the three STL files and the lid interface (byte-identical), built the two faulty
+    variants (`btn_bottom=2.2`: `FAIL E05 U5: 35.81 mm3`; `btn_wall=1.5`: `87.7 %` of the ring), measured
+    0.00000 and 2.15752 mm3 with its own script, ran both suites (75 tests in 77.9 s, 110 in 111.7 s) and read
+    the lid's seven holes and four port labels with its own pcbnew script.
+  - Independent verifier, r01 (`.claude/goal-loop/rev06-r01/rubric.md`, R1 to R7): 7 pass, first iteration. It
+    regenerated the set from the tracked board (ten files byte-identical), compared the ten source hashes with
+    the manifest's, reproduced the 28 CPL rows and the 13 Gerber members against Rev0.5 r02 with its own
+    script, and counted 413 vias (381 with a 0.45 mm pad, 32 with 0.60 mm) with pcbnew.
+- **Not verified.** Nothing is printed and no cable was tried (OI-1, OI-5). 20 of the 24 part heights are assumed.
+  The plunger's tilt is computed by hand. The MAU104 is soldered by hand and may lean: 0.8 mm under the column.
+  The user saw Lid Rev0.1's legend as a picture and has not accepted this one; nobody has seen it on a board
+  (OI-6). JLCPCB has seen neither r01 nor the lid's set: no JLCDFM, part mapping, placement preview or quote
+  for Rev0.6. The interface's courtyards and drilled holes were compared with nothing; its 304 positions and
+  rotations were compared once with the placement document by a scratch script (0 differ).
+- **Learning.** In `rules.md`: the rule on negative tests that name a place by number now carries the lid's five
+  tests and the enclosure's one; three rules added under "Printed parts" (a negative test that keeps passing for
+  another reason; a dry run of the downstream generators before any rename; a wall probe for every hole); two
+  under the manufacturing outputs (a release directory is checked with `sha256sum -c`, not `check_outputs.py`;
+  a step that only copies files is still graded before its commit).
+- **Commits.** `7c5eec9` (r01), `f074c52` (Enclosure Rev0.2 and Lid Rev0.2), `7d5ad3e` (r01's manifest row), and
+  this entry's. Not pushed.

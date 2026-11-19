@@ -536,8 +536,12 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **A negative test that names a part's place by number breaks for the wrong reason when a
   revision moves the part.** (#13) Two hole-rule tests of `test_check_routing.py` put a via
   beside J1's rear slot at its Rev0.5 place (sheet x 130.32); on Rev0.6 the slot is at
-  136.82 and the tests failed because nothing stood there. After a placement change run
-  every suite and read why each failure fails before changing the checker.
+  136.82 and the tests failed because nothing stood there. The mechanical suites did the
+  same on the Rev0.6 interface: 5 of 110 tests of `test_check_lid.py` (`(at 126 56.5 0)`,
+  `X65.3Y4.5`, `x = 75.`, and a hole moved 6 mm to the right, which now lands under `OUT B`
+  and fails L10 instead of the hole's own check) and 1 of 72 of `test_check_enclosure.py`
+  (`port_to_screw_max 45.21`, the board's figure). After a placement change run every suite
+  and read why each failure fails before changing the checker.
 
 ## KiCad 9 hole rules (#8, 2026-11-12)
 
@@ -647,6 +651,21 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   and the checker was right. Take the corrupted item from the data (the first designator of
   the hand-solder list), and read a MISSED as "is it still a fault?" before touching the
   checker.
+- **`check_outputs.py` is the working set's checker: check a release directory with
+  `sha256sum -c` and `cmp`.** (#13, 2026-11-19) Run with `--out manufacturing/releases/rev0.6/r01`
+  it ends `2949 checks, 14 failed`: `malformed line` for each of the 11 lines of
+  `SHA256SUMS.txt`, `lists [], want every other file`, and two lines on `RELEASE_MANIFEST.md`
+  (`revision differs from the title block`, the creation date). Every release in the
+  repository writes `<hash> *<file>` (`sha256sum -b`) and a manifest of its own form, while
+  `make_outputs.py` writes the working set's sums with two spaces (the checker's pattern is
+  `([0-9a-f]{64})  (\S+)`) and its own WIP manifest. A release is checked by `sha256sum -c`
+  in its directory and by `cmp` of its ten files with a fresh `make_outputs.py --no-check`
+  run (7.7 s on the Rev0.6 board).
+- **A step that only copies files and writes a manifest is still a step to grade before its
+  commit.** (#13, 2026-11-19) r01 was committed on the main session's checks; the missing
+  grading was noticed only when the journal entry was written, and a row of the manifest had
+  gone stale by then ("are being redrawn"). Reading the manifest to write the rubric found
+  the row; the rubric (R1 to R7) then passed.
 
 ## JLCPCB quote, placement preview and the account (#6 P6, 2026-11-11/12)
 
@@ -750,6 +769,25 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   an older build fails the checker. The manifest is byte-reproducible, so an unchanged
   rebuild keeps the pictures byte-identical too (13 files; checked by the main session and
   again by the verifier).
+- **A negative test can keep passing for another reason after a design change: assert the
+  part the fault is about.** (#13, 2026-11-19) `test_tower_on_a_switch` (`ui_bottom=1.0`)
+  expected a `FAIL E05` line for SW1 from the button's column. With the column raised to
+  11.0 mm the line still came, from the light well's corner (1.80 mm3), while the BOOT tube
+  stood in SW3's envelope (12.99 mm3). The test now names SW3, and the column has its own
+  test (`btn_bottom=2.2` gives `FAIL E05 U5: 35.81 mm3`, with no `FAIL E05 SW` line). After
+  a geometry change read every negative test's FAIL line again, not only its result.
+- **Run the downstream generators on a new interface in a scratch copy before renaming or
+  re-pointing anything.** (#13, 2026-11-19) Enclosure Rev0.1's geometry on the Rev0.6 board's
+  interface gave `FAIL E05 U5: 13.60 mm3 of the Frame inside its envelope`: SW2 had moved to
+  2.955 mm from the MAU104's courtyard and the button's column reached 3.2 mm. Seen before
+  any file of the repository changed, it made the step a design change with its own decision
+  (E8 amended) instead of a rename that fails at its last command.
+- **When a check probes one hole's wall, probe every other hole of the piece or say why
+  not.** (#13, 2026-11-19) E09 measured the ring round each insert; nothing measured the
+  plastic round a plunger's counterbore, and Rev0.1 left 0.4 mm there (`btn_wall` 1.5 less
+  the counterbore's 1.1 mm step). Rev0.2 demands `btn_wall_min` 0.8 mm with two E10 probes
+  per button; `btn_wall=1.5` now fails with `87.7 % of the 0.8 mm ring around the plunger's
+  counterbore is plastic`.
 
 ## Delegated verifiers
 
