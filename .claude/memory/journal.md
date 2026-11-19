@@ -1997,3 +1997,50 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Still the user's.** "Confirm Production file" for the 15 non-plated holes (finding 2, an order-time choice),
   the rest of the review's section 8, and the approval of r01.
 - **Commits.** `2399e77` (the via decision) and this entry's. Not pushed.
+
+## 2026-11-19 rev06-independent-check (#13): the independent check of r01's set, with positions
+
+- **Request (user).** 「実行する」, the answer to 「Rev0.6 r01 一式の独立チェックを今ここで実行しますか？」. The
+  manifest's open gate "Independent check of the set" said "not run".
+- **What ran.** Two scratch scripts outside the repository, in `~/tmp/usb-power-hub/rev06-gate/evidence/scripts/`,
+  with KiCad's Python as a plain interpreter (stdlib only). (1) `c2_check.py`, Rev0.5 r02's check of 2026-11-13,
+  byte-identical: 30 checks, 0 failed; 8 corruptions, 0 missed (`c2_check_rev06.out`). (2) `c2_ext_rev06.py`, new:
+  13 checks, 0 failed; 16 corruptions, 0 missed (`c2_ext_rev06.out`). SHA-256 of the scripts: `b9b2dc34...` and
+  `1340d44b...`.
+- **Why a second script.** The first reads no position. Run with Rev0.5 r02's CPL beside the Rev0.6 board it still
+  prints `30 checks, 0 failed`, although 28 CPL rows moved (D39). A check that cannot tell the previous revision's
+  file from this one's says little about a layout revision. The second script takes the board's text as the
+  reference and compares: the BOM, CPL and hand-solder list with the footprints' LCSC and Akizuki codes (262 and
+  8; 34 footprints without a part), every CPL point and rotation with the footprint's origin and angle plus the
+  model frame of `jlcpcb_model_frame.json`, the 766 Top paste flashes with the pads, the 471 plated (413 vias, 16
+  slots) and 15 non-plated drill hits with the holes. Three corruptions put Rev0.5 r02's CPL, zip and drill files
+  in the place of r01's; each fails the check it aims at, and so do the same substitutions made on the command
+  line (exit 1: X2 with 28 rows; X4b, X6a, X6b).
+- **Fail, investigate, verify (the script).** The first run failed its own X1c, "every BOM designator carries its
+  footprint's name", on RS12 and RS22. Cause: a BOM line is one LCSC part, and C17734 sits on `R_0805_2012Metric`
+  and on the Kelvin land; `make_outputs.py` writes the first designator's footprint name since Rev0.4 (JLCPCB's
+  part mapping does not select two lines of one code). The check was wrong, not the BOM: it now asks the line's
+  first designator and prints the lines whose part sits on two footprints. X1e had no corruption aimed at it; one
+  was added, so every one of the 13 ids has been seen failing.
+- **Grading (rubric C1-C8, `.claude/goal-loop/rev06-independent-check/`, not tracked).** First pass by an
+  independent rubric-verifier: **7 of 8, C7 failed.** Section 7 of `JLCPCB_REVIEW.md` did not say that the scripts
+  are outside the repository and said "the same three files" although the hand-solder list was read too;
+  `rules.md` said "scratch" without "outside the repository". Cause: the rubric's commands had been pre-run, but
+  the phrase of C7's "every document" clause had not been grepped per document (a rule of `rules.md`, not
+  applied). Fixed in both documents, the phrase grepped in all four. Second pass by a fresh verifier: **all eight
+  pass.** It ran both scripts, the three substitutions, and took the counts itself with grep and unzip (413 vias,
+  58 + 15 pad holes, 766 paste pads, 262 and 8 codes; eight footprints' places against the CPL by hand).
+- **What changed in the repository.** The manifest (the open gate now reads "run on 2026-11-19, passed", a new
+  residual risk), section 7 of the review, `CLAUDE.md` Section 12, `rules.md` (one new rule, two extended),
+  `SHA256SUMS.txt`. No generated file of r01 changed. The state stays `WIP`.
+- **Not verified.** The check takes the board as right and reads no copper, mask or silkscreen Gerber and no
+  pad shape. The scripts and their outputs live only in `~/tmp` (the outputs have CRLF line endings: diff them
+  through a pipe, not through `$(...)`). JLCDFM is still not accepted (finding 2), the Akizuki stock, the
+  assembled parcel's shipping and a quote with impedance control are not read, and r01 is not approved.
+- **Process.** The first verifier wrote a 2,705-byte file into the system temp by a mistyped redirection, left it
+  as told and reported it; the main session looked at it and deleted it. The second rubric names the only
+  redirections allowed.
+- **Learning.** In `rules.md`: an independent check that reads no position cannot tell one revision's set from
+  the next (with the pad transform, the slot reading and the BOM line's footprint name); "every document" in an
+  Expect is one grep per document; a verifier's report of a file it wrote.
+- **Commits.** This entry's. Not pushed.

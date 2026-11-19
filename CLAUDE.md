@@ -829,9 +829,14 @@ Extended), JLCPCB's assembly stock on that day (every code above 500), the place
 and every moved part that is not symmetrical, one instance of each other class) and a quote of
 $52.85 without shipping. JLCDFM ran and is **not accepted**: on 2026-11-19 the user accepted the
 GND via 0.059 mm from D1 pad 3 as it is (「受け入れる」) and kept the receptacles' plated slots at
-0.60 mm (「このまま」), and still decides on the non-plated holes that JLCDFM lists as plated. Not
-done on Rev0.6's files: the independent check of the set, the Akizuki stock, the assembled parcel's
-shipping and a quote with impedance control.
+0.60 mm (「このまま」), and still decides on the non-plated holes that JLCDFM lists as plated. The
+independent check of the set ran on r01's files on 2026-11-19 and passed, by two scratch scripts
+outside the repository (`~/tmp/usb-power-hub/rev06-gate/evidence/scripts/`): Rev0.5 r02's
+`c2_check.py`, unchanged (30 checks, 0 failed; 8 corruptions, 0 missed), which reads no position,
+and `c2_ext_rev06.py` (13 checks, 0 failed; 16 corruptions, 0 missed), which compares the BOM, the
+CPL, the hand-solder list, the Top paste Gerber and the two drill files with the tracked board. It
+takes the board as right and reads no copper, mask or silkscreen layer. Not done on Rev0.6's
+files: the Akizuki stock, the assembled parcel's shipping and a quote with impedance control.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
       `WIP`; the user approves.*

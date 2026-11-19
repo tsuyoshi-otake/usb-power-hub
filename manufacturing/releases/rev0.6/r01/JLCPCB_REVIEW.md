@@ -194,8 +194,10 @@ Read on 2026-11-19 at about 15:04 (USD, the account's currency; `quote.txt`).
 - JLCDFM keeps the upload of about 15:06 in its history; whether the attempt of 15:05:41, which only reloaded the
   page, left a second record is not known.
 - Not run: a control of Rev0.5 r02's Gerber on today's JLCDFM (finding 4), JLCDFM's SMT DFM tab, a quote with
-  impedance control, the OCS price, the independent check of the set that Rev0.5 r02 had (CLAUDE.md 12), the
-  Akizuki stock.
+  impedance control, the OCS price, the Akizuki stock. The independent check of the set that Rev0.5 r02 had
+  (CLAUDE.md 12) was not run at the gate; it ran afterwards, on 2026-11-19, and passed: two scratch scripts
+  outside the repository (`~/tmp/usb-power-hub/rev06-gate/evidence/scripts/`) read the three files above and the
+  hand-solder list against the tracked board (`RELEASE_MANIFEST.md`, Open gates).
 - The EasyEDA import (D32) was not done: `../../rev0.4/r01/EASYEDA_IMPORT.md`.
 
 ## 8. Decisions for the user
