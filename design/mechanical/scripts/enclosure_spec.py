@@ -1,7 +1,7 @@
 """Read the enclosure document's tables and the board interface.
 
 Shared by make_enclosure.py, check_enclosure.py and render_enclosure.py, so that
-a parameter has one home: design/mechanical/ENCLOSURE_Rev0.2.md. Pure Python.
+a parameter has one home: design/mechanical/ENCLOSURE_Rev0.3.md. Pure Python.
 """
 import hashlib
 import json
@@ -10,11 +10,11 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 MECH = ROOT / "design" / "mechanical"
-DOC = MECH / "ENCLOSURE_Rev0.2.md"
-INTERFACE = MECH / "reference" / "board_interface_Rev0.6.json"
+DOC = MECH / "ENCLOSURE_Rev0.3.md"
+INTERFACE = MECH / "reference" / "board_interface_Rev0.7.json"
 ASSEMBLY = MECH / "assembly"
 REPORTS = MECH / "reports"
-PREFIX = "UsbPowerHub_Enclosure_Rev0.2_"
+PREFIX = "UsbPowerHub_Enclosure_Rev0.3_"
 MANIFEST = f"{PREFIX}Manifest.json"
 
 
@@ -114,3 +114,11 @@ def switches(board):
         near = sorted(l for l in leds if abs(l[1] - x) < 10 and abs(l[2] - y) < 10)
         (ports if len(near) == 2 else others).append({"ref": ref, "x": x, "y": y, "leds": near})
     return ports, others
+
+
+def swd_land(board):
+    """The SWD land (J5): bare pads at the back edge that a spring-pin clamp grips."""
+    lands = [f for f in board["footprints"] if footprint_name(f).startswith("SWD_Pads")]
+    if len(lands) != 1:
+        raise ValueError(f"{len(lands)} SWD lands on the board, want 1")
+    return lands[0]

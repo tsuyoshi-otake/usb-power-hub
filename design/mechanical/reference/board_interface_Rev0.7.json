@@ -1,11 +1,11 @@
 {
  "schema": 1,
- "about": "Mechanical interface of the Rev0.6 board, written by design/mechanical/scripts/export_board_interface.py. Do not edit.",
+ "about": "Mechanical interface of the Rev0.7 board, written by design/mechanical/scripts/export_board_interface.py. Do not edit.",
  "source": {
   "path": "design/ecad/source/usb-power-hub.kicad_pcb",
-  "sha256": "0ea3ec5bf9f6309e2f45f6bc3d2a7329b86e0dcf87b728ef13e65c1bcbbbdff3"
+  "sha256": "35294b5d44efbd1b792cdf4bea1a6537804437c6528ec7ec480ee579fdb0d213"
  },
- "frame": "origin at the board's lower-left corner, x right, y up, mm (PLACEMENT_Rev0.6.md); KiCad sheet (xk, yk) = (x + 50, 122 - y)",
+ "frame": "origin at the board's lower-left corner, x right, y up, mm (PLACEMENT_Rev0.7.md); KiCad sheet (xk, yk) = (x + 50, 122 - y)",
  "thickness": 1.6,
  "outline": {
   "x0": 0.0,
@@ -1396,17 +1396,17 @@
   },
   {
    "ref": "J5",
-   "footprint": "usb-power-hub:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical",
-   "value": "TC2030-NL (DNL)",
+   "footprint": "usb-power-hub:SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp",
+   "value": "SWD pads 2x4 P2.54 (DNL)",
    "x": 44.5,
-   "y": 69.2,
+   "y": 69.13,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    40.955,
-    67.155,
-    48.045,
-    71.245
+    39.195,
+    66.715,
+    49.455,
+    71.545
    ]
   },
   {
@@ -4905,39 +4905,6 @@
     1.4
    ],
    "plated": true
-  },
-  {
-   "ref": "J5",
-   "pad": "",
-   "x": 41.96,
-   "y": 69.2,
-   "drill": [
-    0.9906,
-    0.9906
-   ],
-   "plated": false
-  },
-  {
-   "ref": "J5",
-   "pad": "",
-   "x": 47.04,
-   "y": 68.184,
-   "drill": [
-    0.9906,
-    0.9906
-   ],
-   "plated": false
-  },
-  {
-   "ref": "J5",
-   "pad": "",
-   "x": 47.04,
-   "y": 70.216,
-   "drill": [
-    0.9906,
-    0.9906
-   ],
-   "plated": false
   },
   {
    "ref": "RS11",

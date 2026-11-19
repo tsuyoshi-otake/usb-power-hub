@@ -2364,3 +2364,20 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   licence (「LICENSEはMITでいいよ」). `LICENSE` added (MIT, 2026, the GitHub account's name); CLAUDE.md section 2's
   "no public remote" rule is replaced by the decision. Checked before: no e-mail address or token in tracked
   files, one local path in rules.md, no tags or releases; the history's committer address is public.
+- **Follow-up 8 (2026-11-20): Enclosure Rev0.3 for the Rev0.7 board.** The user asked whether the enclosure
+  needs a change after the order (「今回基板発注したけど外装って修正しなくていいの。」) and gave the clamp's
+  width (「なる程、16.5mm がクランプの横幅」). Symptom: Enclosure Rev0.2 was drawn for the Rev0.6 board; its back
+  wall, the tray's floor and its heights table (the Tag-Connect footprint) stood in the way of D40's clamp.
+  Fix: the board interface exported again (`board_interface_Rev0.7.json`: differs at J5 alone);
+  `ENCLOSURE_Rev0.3.md` with decision E10 and four parameters (`clamp_w` 16.5 world, `clamp_clear` 0.75,
+  `clamp_reach` 8.0, `clamp_up` 12.0): one box cut from tray and frame, 18.0 mm wide and centred on J5, through
+  the back walls and the tray's floor; check E17 (the clamp's box holds no plastic, 1.0 mm of wall at each
+  side, 3.0 mm above) with eight negative tests, E14's exemption widened to the opening and tested, the derived
+  figures `clamp_opening_w` and `clamp_bridge_h` in place of `swd_wall_clearance`. The lid stays Lid Rev0.2,
+  built again from the new interface: its board differs in two title-block comments. Verification:
+  `check_enclosure.py` 107 checks, `test_check_enclosure.py` 82 tests, `check_lid.py` 44 checks. Found on the
+  way, a matter of the ordered board: at 16.5 mm the clamp covers x 36.25 to 52.75 mm and C3's courtyard starts
+  at x 51.88 mm, 4.0 mm inside the edge (0.87 mm under the clamp's width); whether the jaw meets it depends on
+  the jaw's shape, which is not known. Learning: when a tool's size becomes known, read it against the board's
+  courtyards too, not only against the enclosure; the width arrived a day after the order. Not done: any
+  print, the clamp on anything.

@@ -1,11 +1,21 @@
-# Enclosure Rev0.2 — printed tray and frame under a PCB lid (issues #11 and #13)
+# Enclosure Rev0.3 — printed tray and frame under a PCB lid (issues #11, #13 and #14)
 
-> **WIP — NOT PRINTED, NOT ORDERED.** This is a first design on paper for the Rev0.6 board
-> (100 × 72 mm). Nothing has been printed and no cable has been tried in an opening. The lid
-> PCB is drawn from this document's interface (`LID_Rev0.2.md`, 2026-11-19) and is not
+> **WIP — NOT PRINTED, NOT ORDERED.** This is a first design on paper for the Rev0.7 board
+> (100 × 72 mm), which is ordered since 2026-11-20 and not yet delivered. Nothing has been
+> printed and no cable has been tried in an opening. The lid
+> PCB is drawn from this document's interface (`LID_Rev0.2.md`) and is not
 > ordered. Every dimension here is a parameter that the first print may change.
 > The print process is FDM (the user's choice, 2026-11-18; E2). Its material and the printer
 > are not chosen, and the values stay provisional until the first print.
+>
+> **Rev0.3 against Rev0.2 (2026-11-20, issue #14).** The Rev0.7 board has its SWD land, J5,
+> as eight bare pads at the back edge, for a spring-pin clamp (D40). No part moved, so every
+> opening, rib, tower and well of Rev0.2 stands where it stood. One thing is new: an opening
+> for the clamp through the back wall of tray and frame and through the tray's floor (E10),
+> 18.0 mm wide, after the user gave the clamp's width (「なる程、16.5mm がクランプの横幅」,
+> 2026-11-20). The clamp's drawing is not known: its jaws' thickness and reach are
+> estimates (§10). Enclosure Rev0.2 was never printed; its files are in Git history, at
+> commit `a97c54f`.
 >
 > **Rev0.2 against Rev0.1 (2026-11-19, issue #13).** The Rev0.6 board has its connectors
 > mirror-symmetric (D39). The openings, ribs, button towers and light wells follow the board's
@@ -39,7 +49,7 @@ orientation (checked: E04).
   board is z −1.6 … 0. The front edge (y = 0) carries OUT A and OUT B; the back edge
   (y = 72) carries 5V IN and HOST.
 - **One dimension source (CLAUDE.md §7).** The board's outline, thickness, hole and footprint
-  positions and courtyards come from `reference/board_interface_Rev0.6.json`, which
+  positions and courtyards come from `reference/board_interface_Rev0.7.json`, which
   `scripts/export_board_interface.py` writes from the tracked KiCad board. Nothing about the
   board is typed into this document or the scripts.
 - **This document** holds what the board file cannot: the enclosure's parameters (§4) and the
@@ -66,7 +76,8 @@ All made by Claude under the 2026-11-03 delegation while answering the user's re
 | E7 | A rib under each receptacle, 0.1 mm below the board, and a shell hole that follows the shell at 0.3 mm. | REQ-MECH-03: the plug's force should not rest on the solder joints alone, and OI-33 leaves the shell legs' reach through a 1.6 mm board unproven. The rib takes a cable pushed down; the hole's edge takes one pulled up or sideways. On the Rev0.6 board every receptacle stands 14.0 mm from its nearest screw (§6); on Rev0.5, OUT B stood 45.2 mm from one. | Relying on the four corner screws alone. |
 | E8 | Buttons by loose printed plungers, captive under the lid; LEDs through one light well per port to a window of bare FR-4 in the lid; SW3 through a 2.0 mm pinhole and a guide tube. | SW1, SW2 and SW3 are 1.5 mm tall and the lid is 19 mm above the board. A plunger needs no part to buy; bare FR-4 passes an LED's light and needs no light pipe; REQ-BOOT-02 names the pinhole. | Flexures in the lid (the lid is a PCB). Bought light pipes (D13: few part types). |
 | E8, amended in Rev0.2 | A button's column starts 11.0 mm above the board (`btn_bottom`) instead of 2.2 mm, in 1.9 mm of wall (`btn_wall`; 1.5 mm in Rev0.1). The light wells and the tube still come down to 2.2 mm (`ui_bottom`). | On the Rev0.6 board SW2 stands 2.955 mm from the courtyard of the MAU104 (U5, 10.2 mm tall). Rev0.1's column reached 3.2 mm to each side of its button from 2.2 mm up, so it stood 0.245 mm inside that courtyard: E05 failed with 13.60 mm³ of the frame in U5's envelope. A column that starts above the converter clears it whatever its width. That let the wall grow to leave 0.8 mm round the counterbore, two perimeters of the nozzle; Rev0.1 left 0.4 mm there and no check measured it. Both towers are built alike. The cost: the bore guides a plunger over 4.7 mm instead of 13.5 mm (§10). | A column narrowed beside the converter (1.2 mm of wall, 0.35 mm from the body of a hand-soldered part). A thinner plunger (a 2.0 mm shaft, printed 20 mm long). Moving U5 or SW2 (a change of the board that D39 has just placed). |
-| E9 | No vents. | About 1 W in a 104.8 × 76.8 mm box. Not calculated: an estimate from the board's supply current, and the first unit is measured. | Slots in the tray's floor or the walls (dust, and light from the LEDs). |
+| E9 | No vents. | About 1 W in a 104.8 × 76.8 mm box. Not calculated: an estimate from the board's supply current, and the first unit is measured. | Slots in the tray's floor or the walls (dust, and light from the LEDs). E10's opening is not a vent; it is the one place where dust enters and light leaves. |
+| E10 (Rev0.3, Claude, 2026-11-20) | An opening for the SWD clamp, centred on J5: 18.0 mm wide (`clamp_w` + 2 × `clamp_clear`), through the back wall of the tray and of the frame up to 12.0 mm above the board (`clamp_up`), and through the tray's floor from 8.0 mm inside the board's back edge (`clamp_reach`). 7.0 mm of the frame's wall stays above it, under the lid's edge. | D40: the user debugs through SWD with a spring-pin clamp that grips the board's edge from above and below (「SWD経由で君にデバッグまで自動化して開発したいからさ。」), so the clamp must reach J5 with the unit closed. The clamp is 16.5 mm wide (user, 2026-11-20); its drawing is not known, so the opening does not depend on the jaws' thickness: below the board it is open down to the desk, 5.5 mm, and the unit can be lifted. Both cuts are open towards the seam or the bed, so no piece gains an overhang (E04). | SWD only with the frame and tray off (the unit could not be debugged as it is used). A window in the frame alone (the tray's wall and floor stand in the lower jaw's way). A door or plug for the opening (a fifth printed piece; the first print shows whether dust or light matters). |
 
 ## 4. Parameters
 
@@ -143,6 +154,10 @@ soldered part, or a demand the checker makes on the design. All in mm.
 | `boot_wall` | 1.0 | Wall of that tube. | design |
 | `lid_boot_d` | 2.0 | Pinhole in the lid over SW3. | design |
 | `clip_d` | 0.9 | Paperclip wire the checker passes through the pinhole. | world |
+| `clamp_w` | 16.5 | Width of the SWD clamp (user, 2026-11-20; AliExpress listing of D40, "2.54mm Double row 4P"). Not measured here. | world |
+| `clamp_clear` | 0.75 | Free width at each side of the clamp in its opening. | design |
+| `clamp_reach` | 8.0 | The tray's floor is open this far inside the board's back edge. An estimate: J5's inner row is 4.14 mm inside. | design |
+| `clamp_up` | 12.0 | Top of the opening in the frame's wall, above the board. An estimate of the upper jaw's height at the wall. | design |
 | `part_margin` | 0.3 | Free height the checker demands above every part. | world |
 | `tht_stub` | 2.5 | Lead length below the board the tray must clear. Leads are trimmed to it. | world |
 <!-- params:end -->
@@ -184,7 +199,7 @@ A footprint with height 0 carries no body (pads, holes).
 | `TestPoint_Pad_D1.0mm` | 0 | a pad. |
 | `Fiducial_1mm_Mask2mm` | 0 | a pad. |
 | `MountingHole_2.2mm_M2_ISO7380` | 0 | a hole. |
-| `Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical` | 0 | pads and holes; the cable is fitted with the lid off. |
+| `SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp` | 0 | pads; a clamp grips them through the opening of E10. |
 <!-- heights:end -->
 
 ## 6. Derived figures
@@ -205,13 +220,14 @@ Written by `make_enclosure.py --derived` and compared with the built files by
 | `web_t` | 0.56 | mm | Web between an overmould pocket and the cavity. |
 | `face_inset` | 1.34 | mm | A receptacle's face inside the wall's outer face. |
 | `port_to_screw_max` | 14.03 | mm | The receptacle farthest from a screw (J4) to its nearest mounting hole. |
-| `swd_wall_clearance` | 1.16 | mm | The SWD footprint's courtyard (J5) to the nearest wall. |
+| `clamp_opening_w` | 18.00 | mm | Width of the clamp's opening in the back wall, centred on the SWD land (J5). |
+| `clamp_bridge_h` | 7.00 | mm | Height of the frame's wall that is left above the clamp's opening. |
 | `lid_clearance_min` | 0.70 | mm | Tallest part (F1, 18.3 mm) to the lid's underside. |
 | `bottom_engagement` | 3.10 | mm | Bottom screw's thread above the board's top face, in the post's insert. |
 | `lid_engagement` | 3.40 | mm | Lid screw's thread below the lid, in the post's insert. |
 | `plunger_len` | 20.10 | mm | Plunger length. |
-| `tray_volume` | 20.50 | cm3 | Solid volume of the tray. |
-| `frame_volume` | 18.12 | cm3 | Solid volume of the frame. |
+| `tray_volume` | 19.94 | cm3 | Solid volume of the tray. |
+| `frame_volume` | 17.71 | cm3 | Solid volume of the frame. |
 | `plunger_volume` | 0.17 | cm3 | Solid volume of one plunger. |
 <!-- derived:end -->
 
@@ -236,9 +252,10 @@ from the board interface and §4–§5:
 | E11 | Each LED has a free path to a window in the lid, inside a closed well. | — |
 | E12 | A paperclip wire reaches SW3 through the lid, inside a tube no wider than the actuator allows. | REQ-BOOT-02 (design input only) |
 | E13 | The lid has the board's outline and lies on the frame's top face without entering it; its outer 0.5 mm lies on the frame all round, and it lies on every post. | E3 |
-| E14 | Tray and frame do not touch: the smallest gap is `seam_gap`. The outer 0.3 mm of both walls is whole all round the seam, outside the port pockets. | E5 |
+| E14 | Tray and frame do not touch: the smallest gap is `seam_gap`. The outer 0.3 mm of both walls is whole all round the seam, outside the port pockets and the clamp's opening. | E5 |
 | E15 | §6's figures are the built files' figures. | — |
 | E16 | Every picture in `reports/` names the build it was drawn from, and it is this one. | — |
+| E17 | The SWD land is at the back edge, inside the opening's width. A box `clamp_w` wide with `clamp_clear` at each side, from `clamp_reach` inside the board's edge outwards and from below the tray up to `clamp_up`, holds no plastic of tray or frame. 1.0 mm of whole wall stands at each side of the opening in both pieces, and 3.0 mm of whole wall above it in the frame. | E10, D40 (design input only) |
 
 It cannot see:
 
@@ -254,6 +271,9 @@ It cannot see:
   two LEDs of one well (one well serves green and red by design).
 - **A plunger's tilt.** E10 moves a plunger down, up and sideways. It does not tilt it, and
   the bore that guides it is 4.7 mm long (§10).
+- **The clamp.** E17's box is this document's guess at a clamp of which only the width is
+  known. It takes the footprint's origin as the middle of the land, and it does not look at
+  the parts on the board under the upper jaw (§10).
 - **Heat** (E9), **feel** (a loose plunger rattles), and **the legend** (the lid's own
   document and checker, `LID_Rev0.2.md` §6).
 - **V-MECH-01 and V-BOOT-01.** Both need the built unit and real cables. This check is a
@@ -287,17 +307,29 @@ Assembly:
 5. Drop a plunger, shaft first, into each tower.
 6. Lay the lid on the frame, caps through their holes, and drive the four lid screws.
 
-SWD (J5) is reached with the lid off. The TC2030 footprint's courtyard stands 1.16 mm from
-the back wall (§6); whether the cable's head fits beside the wall is not checked.
+SWD (J5) is reached with the unit closed: the clamp enters the opening in the back wall
+(E10) and grips the board's edge, its pins on J5's eight pads. Not tried (§10).
 
 ## 10. Not verified
 
 - Nothing is printed. No fit, no cable, no screw has been tried.
 - E2 fixes the process (FDM) only. The material and the printer are not chosen.
 - The lid PCB (its own revision, Gerber set and release, CLAUDE.md §7) is drawn as Lid Rev0.2
-  (`LID_Rev0.2.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.2_LidInterface.json`, which this
+  (`LID_Rev0.2.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.3_LidInterface.json`, which this
   document fixes. It is not ordered and has no release; what is not verified of it is in its
   own §8. A change here that moves a hole, a window or a port needs the lid built again.
+- **The clamp's opening (E10) is drawn for a clamp nobody here has seen.** Its width,
+  16.5 mm, is the user's figure; the jaws' thickness, their reach over the board and the
+  height of the upper jaw at the wall are not known. `clamp_reach` 8.0 mm and `clamp_up`
+  12.0 mm are estimates, and the user does not measure the clamp before the board arrives
+  (D40). The first print, or the clamp on the bare board, is the check.
+- **A capacitor stands under the clamp's width.** The clamp, 16.5 mm wide and centred on J5,
+  covers x 36.25 … 52.75 mm. C3 (0805, 1.5 mm assumed) has its courtyard at x 51.88 … 53.92
+  and y 64.5 … 68.0, 4.0 mm inside the back edge; J5's inner row is 4.14 mm inside. If the
+  upper jaw's body is as wide as the clamp and reaches more than 4.0 mm over the board at
+  less than 1.5 mm above it, it meets C3 by up to 0.87 mm in x. That is a matter of the
+  board, which is ordered, not of the enclosure; it was found here because the width became
+  known after the order. Not settled on paper.
 - A plunger's guide is short since Rev0.2. The bore holds the shaft between 11.0 and 15.7 mm
   above the board (4.7 mm; 13.5 mm in Rev0.1), and the foot stands 9.5 mm below it. From the
   nominal clearances (a 3.0 mm shaft in a 3.4 mm bore, a 4.0 mm cap in the lid's 4.6 mm hole)

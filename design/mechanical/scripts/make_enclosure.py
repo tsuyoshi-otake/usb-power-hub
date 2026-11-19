@@ -4,9 +4,9 @@ Run with the CAD venv's Python (manifold3d, numpy), from the repository root:
 
     ~/tmp/cadvenv/Scripts/python.exe -I -B design/mechanical/scripts/make_enclosure.py
 
-It reads   design/mechanical/ENCLOSURE_Rev0.2.md   (the params and heights tables)
-           design/mechanical/reference/board_interface_Rev0.6.json
-and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.2_Tray.stl, _Frame.stl,
+It reads   design/mechanical/ENCLOSURE_Rev0.3.md   (the params and heights tables)
+           design/mechanical/reference/board_interface_Rev0.7.json
+and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.3_Tray.stl, _Frame.stl,
            _Plunger.stl (each in its print orientation), _LidInterface.json, _Manifest.json
 then draws the pictures (render_enclosure.py, about 20 s) and runs check_enclosure.py.
 Exit status 0 means written, drawn and checked.
@@ -111,6 +111,15 @@ def geometry(p, heights, board):
             block = (b["x"] - half, g.yi0, b["x"] + half, b["y"] + half)
         g.pinholes.append(SimpleNamespace(ref=b["ref"], x=b["x"], y=b["y"], h=sw_h, block=block))
 
+    # the clamp's opening at the SWD land (E10): through the back wall of tray and frame and
+    # through the tray's floor, so that a jaw passes above and below the board's edge
+    land = spec.swd_land(board)
+    half = p.clamp_w / 2 + p.clamp_clear
+    g.clamp = SimpleNamespace(ref=land["ref"], x0=land["x"] - half, x1=land["x"] + half,
+                              y_in=g.by1 - p.clamp_reach)
+    if g.by1 - land["courtyard"][3] > 1.0:
+        raise ValueError(f"{land['ref']}: the SWD land is not at the back edge")
+
     # the plunger, at rest on its switch
     g.cone_h = (p.plunger_collar_d - p.plunger_cap_d) / 2
     g.z_cap = g.z_lid + p.plunger_proud              # the cap's top
@@ -158,6 +167,12 @@ def port_cutters(p, g):
     return S.union(cuts)
 
 
+def clamp_cutter(p, g):
+    """The clamp's opening: from clamp_reach inside the back edge outwards, below clamp_up."""
+    c = g.clamp
+    return S.box(c.x0, c.y_in, g.z_bottom - 1.0, c.x1, g.yo1 + 1.0, p.clamp_up)
+
+
 def build_tray(p, g):
     body = shell(p, g, g.z_bottom, 0.0, "bottom")
     grow = p.lip_h + p.lip_top
@@ -178,7 +193,7 @@ def build_tray(p, g):
         tray = tray - S.cyl(hx, hy, g.z_bottom - 1.0, g.z_pcb + 1.0, p.screw_clear_d / 2)
         tray = tray - S.cyl(hx, hy, g.z_bottom - 0.5, g.z_bottom + sink,
                             p.csk_d / 2 + 0.5, p.screw_clear_d / 2)
-    return tray - port_cutters(p, g)
+    return tray - port_cutters(p, g) - clamp_cutter(p, g)
 
 
 def build_frame(p, g):
@@ -233,7 +248,7 @@ def build_frame(p, g):
         z_blind = g.z_top - p.insert_hole_depth                                  # the top:
         cuts.append(S.cyl(hx, hy, z_blind, g.z_top + 1.0, r))                    # its blind end
         cuts.append(S.cyl(hx, hy, z_blind - r, z_blind, 0.0, r))                 # is a 45 degree cone
-    return frame - S.union(cuts) - port_cutters(p, g)
+    return frame - S.union(cuts) - port_cutters(p, g) - clamp_cutter(p, g)
 
 
 def build_plunger(p, g, b):
@@ -267,7 +282,7 @@ def lid_interface(p, g, board):
         "schema": 1,
         "about": "Interface of the enclosure's lid PCB, written by "
                  "design/mechanical/scripts/make_enclosure.py. Do not edit.",
-        "frame": "the board frame of board_interface_Rev0.6.json; the lid's outline is the "
+        "frame": "the board frame of board_interface_Rev0.7.json; the lid's outline is the "
                  "main board's, seen from above",
         "outline": {"x0": g.bx0, "y0": g.by0, "x1": g.bx1, "y1": g.by1},
         "thickness": p.lid_t,
@@ -290,9 +305,6 @@ def derived(p, g, heights, board, volumes):
     far, far_ref = max((min(math.hypot(board["by_ref"][q.ref]["x"] - hx,
                                        board["by_ref"][q.ref]["y"] - hy) for _r, hx, hy in g.holes),
                         q.ref) for q in g.ports)
-    swd = min((min(c[0] - g.xi0, c[1] - g.yi0, g.xi1 - c[2], g.yi1 - c[3]), f["ref"])
-              for f in board["footprints"] if spec.footprint_name(f).startswith("Tag-Connect")
-              for c in [f["courtyard"]])
     return [
         ("outer_x", g.xo1 - g.xo0, "mm", "Outer width (along the port edges)."),
         ("outer_y", g.yo1 - g.yo0, "mm", "Outer depth (front to back)."),
@@ -306,8 +318,10 @@ def derived(p, g, heights, board, volumes):
          "A receptacle's face inside the wall's outer face."),
         ("port_to_screw_max", far, "mm",
          f"The receptacle farthest from a screw ({far_ref}) to its nearest mounting hole."),
-        ("swd_wall_clearance", swd[0], "mm",
-         f"The SWD footprint's courtyard ({swd[1]}) to the nearest wall."),
+        ("clamp_opening_w", g.clamp.x1 - g.clamp.x0, "mm",
+         f"Width of the clamp's opening in the back wall, centred on the SWD land ({g.clamp.ref})."),
+        ("clamp_bridge_h", g.z_top - p.clamp_up, "mm",
+         "Height of the frame's wall that is left above the clamp's opening."),
         ("lid_clearance_min", p.cavity_h - tall_h, "mm",
          f"Tallest part ({tall_ref}, {tall_h:g} mm) to the lid's underside."),
         ("bottom_engagement", head_top + p.bottom_screw_len, "mm",
@@ -377,7 +391,7 @@ def main():
             return 1
         volumes[name] = man.volume()
         tri = S.apply(S.triangles(man), S.inverse(back[name][0]))
-        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.2 {name}")
+        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.3 {name}")
         file = f"{spec.PREFIX}{name}.stl"
         (args.out / file).write_bytes(data)
         lo, hi = tri.reshape(-1, 3).min(axis=0), tri.reshape(-1, 3).max(axis=0)
@@ -398,14 +412,14 @@ def main():
     rows = derived(p, g, heights, board, volumes)
     manifest = {
         "schema": 1,
-        "about": "Enclosure Rev0.2, written by design/mechanical/scripts/make_enclosure.py. "
+        "about": "Enclosure Rev0.3, written by design/mechanical/scripts/make_enclosure.py. "
                  "Do not edit.",
         "state": "WIP",
-        "revision": "Rev0.2",
-        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.2.md", "inputs_sha256": digest},
+        "revision": "Rev0.3",
+        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.3.md", "inputs_sha256": digest},
         "overrides": overrides,
         "board_interface": {
-            "path": "design/mechanical/reference/board_interface_Rev0.6.json",
+            "path": "design/mechanical/reference/board_interface_Rev0.7.json",
             "sha256": sha256(spec.INTERFACE.read_bytes()),
             "board_sha256": board["source"]["sha256"],
         },

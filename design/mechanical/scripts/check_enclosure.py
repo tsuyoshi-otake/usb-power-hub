@@ -6,8 +6,8 @@ Run with the CAD venv's Python (manifold3d, numpy, trimesh), from the repository
 
 It reads the STL files as written, puts each back into the assembly frame with the
 manifest's matrix, and tests them with probes built here from the board interface and the
-document's tables: it does not import make_enclosure.py. Checks E01 to E16 are listed in
-ENCLOSURE_Rev0.2.md, section 7, with what they prove. Exit status 0 means no FAIL line.
+document's tables: it does not import make_enclosure.py. Checks E01 to E17 are listed in
+ENCLOSURE_Rev0.3.md, section 7, with what they prove. Exit status 0 means no FAIL line.
 
 What it cannot see (the document, section 7): whether a `world` value in the tables is
 right (a cable's overmould, the insert, an assumed part height), the print itself
@@ -51,6 +51,9 @@ TOL = 0.02      # mm3: what two touching faces overlap by after float32 round-of
 SLAB = 0.05     # mm: thickness of the slabs that measure a contact area
 OVERHANG = -0.72  # a face's downward normal beyond 45 degrees (cos 45 = 0.707)
 EDGE = 0.5      # mm: the width of the lid's edge that must lie on the frame all round
+SIDE = 1.0      # mm: whole wall demanded at each side of the clamp's opening
+BRIDGE = 3.0    # mm: whole wall demanded above the clamp's opening, under the lid's edge
+PROBE = 30.0    # mm: the length of back wall, centred on the SWD land, that E15 measures
 
 
 class Report:
@@ -512,13 +515,53 @@ def main():
                              z_bottom, r["cx"] + p.pocket_w / 2 + 0.5,
                              (yi0 if r["edge"] == "front" else yo1) + 1, z_top)
                        for r in usb.values()])
+    # the clamp's opening (E17), as the document sizes it: the seam is open there by design
+    land = spec.swd_land(board)
+    half = p.clamp_w / 2 + p.clamp_clear
+    cx0, cx1 = land["x"] - half, land["x"] + half
+    opening = S.box(cx0 - 0.5, yi1 - 1, z_bottom, cx1 + 0.5, yo1 + 1, z_top)
     for sname, solid, za in (("Tray", tray, -0.15), ("Frame", frame, p.seam_gap + 0.05)):
-        skin = outline(0.0, za, za + 0.1) - outline(0.3, za - 1, za + 2) - pockets
+        skin = outline(0.0, za, za + 0.1) - outline(0.3, za - 1, za + 2) - pockets - opening
         whole = vol(skin, solid) / skin.volume()
         R.check(whole >= 0.995, "E14",
-                f"{sname}: its outer 0.3 mm is whole all round the seam, outside the pockets",
+                f"{sname}: its outer 0.3 mm is whole all round the seam, outside the pockets "
+                "and the clamp's opening",
                 f"{sname}: {100 * whole:.1f} % of its outer 0.3 mm at the seam is plastic, "
-                "want 100 outside the pockets")
+                "want 100 outside the pockets and the clamp's opening")
+
+    # ---- E17 the clamp's opening at the SWD land ----------------------------------------------
+    c = land["courtyard"]
+    R.check(by1 - c[3] <= 1.0 and cx0 <= c[0] and c[2] <= cx1, "E17",
+            f"{land['ref']}: the SWD land is at the back edge, inside the opening's "
+            f"{cx1 - cx0:g} mm",
+            f"{land['ref']}: its courtyard x {c[0]:g} .. {c[2]:g} ends {by1 - c[3]:.2f} mm from the "
+            f"back edge; the opening is x {cx0:g} .. {cx1:g} at that edge")
+    k = p.clamp_clear - 0.02
+    jaw = S.box(land["x"] - p.clamp_w / 2 - k, by1 - p.clamp_reach + 0.02, z_bottom - 1.0,
+                land["x"] + p.clamp_w / 2 + k, yo1 + 5.0, p.clamp_up - 0.02)
+    vt, vf = vol(jaw, tray), vol(jaw, frame)
+    R.check(vt + vf <= TOL, "E17",
+            f"{land['ref']}: a clamp {p.clamp_w:g} mm wide reaches {p.clamp_reach:g} mm over the "
+            f"board's edge, from the desk to {p.clamp_up:g} mm above the board, with "
+            f"{p.clamp_clear:g} mm at each side",
+            f"{land['ref']}: {vt:.2f} mm3 of the tray and {vf:.2f} mm3 of the frame within "
+            f"{p.clamp_clear:g} mm of a clamp {p.clamp_w:g} mm wide that reaches "
+            f"{p.clamp_reach:g} mm over the board's edge below {p.clamp_up:g} mm")
+    for sname, solid, za, zb in (("Tray", tray, z_bottom + p.floor + 0.3, -0.3),
+                                 ("Frame", frame, 2.0, p.clamp_up - 0.3)):
+        for side, xa, xb in (("left", cx0 - SIDE, cx0 - 0.02), ("right", cx1 + 0.02, cx1 + SIDE)):
+            post = S.box(xa, yi1 + 0.02, za, xb, yo1 - 0.02, zb)
+            solid_part = vol(post, solid) / post.volume()
+            R.check(solid_part >= 0.995, "E17",
+                    f"{sname}: {SIDE:g} mm of whole wall at the opening's {side} side",
+                    f"{sname}: {100 * solid_part:.1f} % of the {SIDE:g} mm of wall at the opening's "
+                    f"{side} side is plastic, want 100")
+    bridge = S.box(cx0, yi1 + 0.02, z_top - BRIDGE, cx1, yo1 - p.edge_chamfer - 0.02, z_top - 0.02)
+    whole = vol(bridge, frame) / bridge.volume()
+    R.check(whole >= 0.995, "E17",
+            f"Frame: {BRIDGE:g} mm of whole wall above the opening, under the lid's edge",
+            f"Frame: {100 * whole:.1f} % of the {BRIDGE:g} mm of wall above the opening is "
+            "plastic, want 100")
 
     # ---- E15 the document's derived figures ---------------------------------------------------
     tb, fb, pb = S.bbox(tray), S.bbox(frame), S.bbox(plungers[0])
@@ -533,8 +576,18 @@ def main():
         fp = board["by_ref"][ref]
         return min(math.hypot(fp["x"] - hx, fp["y"] - hy) for _r, hx, hy in holes)
 
-    swd = [f["courtyard"] for f in board["footprints"]
-           if spec.footprint_name(f).startswith("Tag-Connect")]
+    def free_along_back_wall(za, zb):
+        """Length of the frame's back wall that is missing in a sliver along x, PROBE mm wide."""
+        ym = (yi1 + yo1) / 2
+        xa, xb = land["x"] - PROBE / 2, land["x"] + PROBE / 2
+        return PROBE - vol(frame, S.box(xa, ym - 0.1, za, xb, ym + 0.1, zb)) / (0.2 * (zb - za))
+
+    def wall_above_opening():
+        """Height of the frame's back wall in a sliver up the middle of the opening."""
+        ym = (yi1 + yo1) / 2
+        return vol(frame, S.box(land["x"] - 0.1, ym - 0.1, 0.0, land["x"] + 0.1, ym + 0.1,
+                                z_top)) / 0.04
+
     measured = {
         "outer_x": max(tb[3], fb[3]) - min(tb[0], fb[0]),
         "outer_y": max(tb[4], fb[4]) - min(tb[1], fb[1]),
@@ -546,9 +599,8 @@ def main():
         "web_t": min(r["web"] for r in usb.values()),
         "face_inset": min(face_inset(ref, r) for ref, r in usb.items()),
         "port_to_screw_max": max(to_screw(ref) for ref in usb),
-        # the frame's nearest face beside the footprint, above the seam's chamfer and below the lid
-        "swd_wall_clearance": min((frame.min_gap(S.box(c[0], c[1], 3.0, c[2], c[3], 10.0), 20.0)
-                                   for c in swd), default=-1.0),
+        "clamp_opening_w": free_along_back_wall(3.0, 3.2),
+        "clamp_bridge_h": wall_above_opening(),
         "lid_clearance_min": fb[5] - tallest[0],
         "bottom_engagement": e_bottom,
         "lid_engagement": e_lid,

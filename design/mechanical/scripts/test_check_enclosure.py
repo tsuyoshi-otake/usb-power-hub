@@ -198,7 +198,7 @@ class CheckEnclosure(unittest.TestCase):
     # E01 -------------------------------------------------------------------------------------
     def test_no_manifest(self):
         self.assertFailsWith(variant(edit=lambda out: (out / spec.MANIFEST).unlink()),
-                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.2_Manifest.json")
+                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.3_Manifest.json")
 
     def test_piece_not_in_the_manifest(self):
         def edit(out):
@@ -216,11 +216,11 @@ class CheckEnclosure(unittest.TestCase):
             raw[200] ^= 1
             f.write_bytes(bytes(raw))
         self.assertFailsWith(variant(edit=edit),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.2_Tray.stl: SHA-256 differs")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.3_Tray.stl: SHA-256 differs")
 
     def test_piece_missing(self):
         self.assertFailsWith(variant(edit=lambda out: (out / f"{spec.PREFIX}Plunger.stl").unlink()),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.2_Plunger.stl: missing")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.3_Plunger.stl: missing")
 
     def test_document_value_changed_after_the_build(self):
         self.assertFailsWith(variant(doc=table_value("params", "gap", "0.5")),
@@ -499,6 +499,46 @@ class CheckEnclosure(unittest.TestCase):
         self.assertFailsWith(variant("corner_r=6"), "FAIL E14 Tray: ", "FAIL E14 Frame: ",
                              "of its outer 0.3 mm at the seam is plastic")
 
+    # E17 -------------------------------------------------------------------------------------
+    def test_opening_narrower_than_the_clamp_needs(self):
+        rc, out = variant("clamp_clear=0.2")
+        self.assertFailsWith((rc, out), "FAIL E17 J5: ", "within 0.75 mm of a clamp 16.5 mm wide",
+                             "clamp_opening_w 18.0 (built: 16.90)")
+        self.assertIn("PASS E17 J5: the SWD land is at the back edge", out)
+
+    def test_floor_under_the_lower_jaw(self):
+        rc, out = variant("clamp_reach=3")
+        self.assertFailsWith((rc, out), "FAIL E17 J5: ", "mm3 of the tray and 0.00 mm3 of the frame")
+
+    def test_window_lower_than_the_upper_jaw(self):
+        rc, out = variant("clamp_up=4")
+        self.assertFailsWith((rc, out), "FAIL E17 J5: 0.00 mm3 of the tray and ",
+                             "clamp_bridge_h 7.0 (built: 15.00)")
+
+    def test_no_wall_left_above_the_opening(self):
+        rc, out = variant("clamp_up=17")
+        self.assertFailsWith((rc, out), "FAIL E17 Frame: ",
+                             "of the 3 mm of wall above the opening is plastic, want 100")
+        self.assertIn("PASS E17 J5: a clamp 16.5 mm wide reaches", out)
+
+    def test_opening_runs_into_a_port_pocket(self):
+        rc, out = variant("clamp_w=36")
+        self.assertFailsWith((rc, out), "FAIL E17 Tray: ", "FAIL E17 Frame: ",
+                             "of the 1 mm of wall at the opening's left side is plastic, want 100")
+
+    def test_swd_land_moved_along_the_edge(self):
+        rc, out = variant(interface=moved("J5", dx=2.0))
+        self.assertFailsWith((rc, out), "FAIL E17 J5: ", "mm3 of the frame within 0.75 mm of a clamp")
+
+    def test_swd_land_not_at_the_edge(self):
+        self.assertFailsWith(variant(interface=moved("J5", dy=-3.0)),
+                             "FAIL E17 J5: its courtyard x 39.195 .. 49.455 ends 3.45 mm from the "
+                             "back edge")
+
+    def test_seam_open_beside_the_opening(self):
+        # the seam's exemption is the document's opening and no wider
+        self.assertFailsWith(variant("clamp_clear=2.5"), "FAIL E14 Tray: ", "FAIL E14 Frame: ")
+
     # E15 -------------------------------------------------------------------------------------
     def test_derived_figure_edited(self):
         rc, out = variant(doc=table_value("derived", "outer_z", "27.00"))
@@ -516,16 +556,11 @@ class CheckEnclosure(unittest.TestCase):
         rc, out = variant("gap=0.6")
         self.assertFailsWith((rc, out), "FAIL E15 derived figures differ: ",
                              "face_inset 1.34 (built: 1.54)")
-        self.assertRegex(out, r"swd_wall_clearance 1\.16 \(built: 1\.3[56]\)")      # 1.355 exactly
 
     def test_receptacle_moved_on_the_board(self):
         self.assertFailsWith(variant(interface=moved("J3", dx=-0.6)),
                              "FAIL E15 derived figures differ: ",
                              "port_to_screw_max 14.03 (built: 14.63)")
-
-    def test_swd_footprint_nearer_the_wall(self):
-        self.assertFailsWith(variant(interface=moved("J5", dy=0.455)),
-                             "FAIL E15 derived figures differ: swd_wall_clearance 1.16 (built: 0.70)")
 
     def test_no_derived_table(self):
         self.assertFailsWith(variant(doc=lambda t: t.replace("<!-- derived:begin -->", "")),
@@ -536,7 +571,7 @@ class CheckEnclosure(unittest.TestCase):
         here = spec.source_tag(spec.ASSEMBLY / spec.MANIFEST)      # the repository's build
         self.assertFailsWith(variant("plunger_proud=1.2", pictures=lambda out, pic: picture(pic, here)),
                              "FAIL E16 1 of 1 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.2_Assembled.png): run render_enclosure.py")
+                             "(UsbPowerHub_Enclosure_Rev0.3_Assembled.png): run render_enclosure.py")
 
     def test_picture_that_names_no_build(self):
         def pictures(out, pic):
@@ -544,7 +579,7 @@ class CheckEnclosure(unittest.TestCase):
             picture(pic, spec.source_tag(out / spec.MANIFEST))
         self.assertFailsWith(variant(pictures=pictures),
                              "FAIL E16 1 of 2 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.2_Open.png)")
+                             "(UsbPowerHub_Enclosure_Rev0.3_Open.png)")
 
     def test_no_pictures(self):
         self.assertFailsWith(variant(pictures=lambda out, pic: None),

@@ -40,14 +40,17 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > copper is carried (`carry.py`, now from a revision that carried one itself), the tracks at J5 are
 > drawn in `ROUTING_Rev0.7.md`, and `check_pcb.py`, `check_routing.py` and `check_silk.py` pass on
 > the tracked board. **Not done for Rev0.7:** JLCDFM (never run), the production file's reading, the
-> hand-soldered parts' purchase at Akizuki, the enclosure and the lid (both drawn
-> for the Rev0.6 board; `design/mechanical/` still reads `board_interface_Rev0.6.json`), and the
+> hand-soldered parts' purchase at Akizuki, and the
 > clamp itself: it has two rows and eight pins (user, 2026-11-19: 「2 列 8 ピン」; the variant
-> "2.54mm Double row 4P" of an AliExpress listing, D40), but its
+> "2.54mm Double row 4P" of an AliExpress listing, D40) and is 16.5 mm wide (user, 2026-11-20:
+> 「なる程、16.5mm がクランプの横幅」), but its
 > drawing is not known, so the pad size, the distance from the edge and the row
 > order are estimates until the real clamp is tried on a board; the user does not measure it before
-> manufacture (「図らなくていいよ」). Below, every statement about a
-> release, a JLCPCB gate, the enclosure or the lid is Rev0.6's or older; "Rev0.6" in a sentence
+> manufacture (「図らなくていいよ」). At that width the clamp covers C3's courtyard by 0.87 mm
+> (D40; `design/mechanical/ENCLOSURE_Rev0.3.md` §10): not settled on paper. The enclosure is drawn
+> for this board since 2026-11-20 (Enclosure Rev0.3, with an opening for the clamp), and the lid
+> (Lid Rev0.2) is built again from its interface; neither is printed or ordered. Below, every statement about a
+> release or a JLCPCB gate is Rev0.6's or older; "Rev0.6" in a sentence
 > about placement or routing still describes this board except at J5.
 >
 > The circuit design exists as a document —
@@ -151,12 +154,15 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > outline and layer count. Section 11 lists the blocking issues.
 >
 > The enclosure is a first design on paper (issue #11, 2026-11-13; Rev0.2 for the Rev0.6
-> board, issue #13, 2026-11-19):
-> `design/mechanical/ENCLOSURE_Rev0.2.md`, a printed tray and frame under a PCB lid,
-> 104.8 × 76.8 × 27.7 mm, with its decisions E1–E9 (Claude, delegated). Rev0.2 follows the
+> board, issue #13, 2026-11-19; Rev0.3 for the Rev0.7 board, issue #14, 2026-11-20):
+> `design/mechanical/ENCLOSURE_Rev0.3.md`, a printed tray and frame under a PCB lid,
+> 104.8 × 76.8 × 27.7 mm, with its decisions E1–E10 (Claude, delegated). Rev0.2 followed the
 > mirror-symmetric connectors (D39) and starts each button's column 11.0 mm above the board,
 > over the MAU104 that now stands beside SW2 (E8 as amended); Rev0.1's tower stood inside that
-> part's courtyard. Its STL files, the
+> part's courtyard. Rev0.3 adds an opening for the SWD clamp (E10), 18.0 mm wide and centred on
+> J5, through the back wall of tray and frame up to 12.0 mm above the board and through the
+> tray's floor 8.0 mm inside the edge; of the clamp only the width is known, so its reach and
+> height there are estimates. Its STL files, the
 > lid PCB's interface and seven pictures are generated from that document and from the
 > board's interface (`design/mechanical/reference/`, exported from the tracked KiCad board) by
 > `make_enclosure.py`, and checked by `check_enclosure.py` (`design/mechanical/README.md`).
@@ -164,7 +170,8 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > 20 of the 24 part heights it clears are assumed. The print process is FDM (user,
 > 2026-11-18; Section 7); its material is not chosen. OI-1 and OI-5 stay open.
 >
-> The lid PCB is drawn (issue #11, 2026-11-18, after the user's 「作図する」; Lid Rev0.2 for
+> The lid PCB is drawn (issue #11, 2026-11-18, after the user's 「作図する」; built again on
+> 2026-11-20 from Enclosure Rev0.3's interface, the same board but for its title block; Lid Rev0.2 for
 > the Rev0.6 board, issue #13, 2026-11-19: its holes, window and port labels follow the
 > enclosure's interface to the mirrored places, and no parameter of its own changed):
 > `design/mechanical/LID_Rev0.2.md`, a bare 2-layer board with the main board's outline, no
@@ -574,9 +581,9 @@ The enclosure is part of the release, not an afterthought.
 - The board outline, mounting holes, connector positions, and every case
   opening MUST come from **one** dimension source. Record which file is
   authoritative; the three.js mockup is not it. It is
-  `design/mechanical/reference/board_interface_Rev0.6.json`, written from the tracked
+  `design/mechanical/reference/board_interface_Rev0.7.json`, written from the tracked
   KiCad board by `design/mechanical/scripts/export_board_interface.py` (issue #11; exported
-  again from the Rev0.6 board, issue #13).
+  again from the Rev0.6 board, issue #13, and from the Rev0.7 board, issue #14).
 - Connector openings MUST clear the **mating plug's overmold**, not just the
   receptacle shell. Verify against a real cable, not a datasheet outline.
 - Fastener bosses MUST give at least 2 × D thread engagement (≥ 4 mm for M2),
@@ -585,7 +592,7 @@ The enclosure is part of the release, not an afterthought.
   end. Repeated insertion force must not be carried by the solder joints.
 - Print process (FDM / MJF) MUST be chosen before wall and clearance values are
   frozen; they differ. **Chosen: FDM** (user, 2026-11-18: the choice 「FDM」;
-  `design/mechanical/ENCLOSURE_Rev0.2.md` E2). The enclosure's values were drawn for it and
+  `design/mechanical/ENCLOSURE_Rev0.3.md` E2). The enclosure's values were drawn for it and
   stay provisional until the first print.
 - The lid PCB is a manufactured board and follows every rule in this file:
   own revision, own Gerber set, own release entry. It is Lid Rev0.2
@@ -812,14 +819,14 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 
 | ID | Issue | Evidence |
 |---|---|---|
-| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). *Rev0.5 (D37):* J2 and J3 are 8.94 mm receptacles, 33.8 mm apart. *Rev0.6 (D39):* 65.0 mm apart. *Enclosure Rev0.1 (issue #11) and Rev0.2 (issue #13, for the Rev0.6 board):* each opening has a 15.0 × 8.0 mm pocket for the plug's overmould, on paper. Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.7 §10 D21, D37, D39; `design/mechanical/ENCLOSURE_Rev0.2.md` E6 |
+| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). *Rev0.5 (D37):* J2 and J3 are 8.94 mm receptacles, 33.8 mm apart. *Rev0.6 (D39):* 65.0 mm apart. *Enclosure Rev0.1 (issue #11), Rev0.2 (issue #13) and Rev0.3 (issue #14, for the Rev0.7 board):* each opening has a 15.0 × 8.0 mm pocket for the plug's overmould, on paper. Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.7 §10 D21, D37, D39; `design/mechanical/ENCLOSURE_Rev0.3.md` E6 |
 | OI-2 | ~~No crystal for the USB hub.~~ **Closed by decision** (D19, Claude delegated, 2026-11-03): a 12 MHz Basic crystal (C9002), Y2 → CH335F. D23 removed Y1 (→ STM32 HSE) because the MCU module carried its own crystal; D29 restored Y1, the same C9002, → RP2040 XOSC, checked on the first board (V-MEAS-06). The history: D6's shared oscillator was superseded by D11; the USB2514B (24 MHz) was itself superseded by D13. Y2 against CH335F's built-in load capacitors is checked at bring-up (G9). | Rev0.7 §6.3 |
 | OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D9/D17): ranges 0.1 Ω / 10 Ω / 510 Ω in a nested bypass ladder, LM393 up-ranging ≤ 3 µs per stage, firmware hold ≤ 100 µs, bypass default ON. Bring-up proves the budget (V-MEAS-02). | Rev0.7 §3.2, §4 |
 | OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D14): D1's PD sink is superseded; port power comes from J4, a power-only 5 V input. Its USB-C advertisement drives the advertisement and budget rules (REQ-PWR-04/05). | Rev0.7 §3.1, §7.2 |
-| OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *Rev0.3:* heat-set M2 inserts at 4 corners adopted (D21). *Rev0.5 (D37):* the plug's force enters the PCB through each receptacle's four shell slots, read in V-MECH-01 with OI-33. *Enclosure Rev0.1 (issue #11) and Rev0.2 (issue #13, for the Rev0.6 board):* on paper, four bosses and posts clamp the board at H1–H4, the screws go into heat-set inserts (3.10 mm and 3.40 mm of thread), and a rib stands under each receptacle; on Rev0.6 every receptacle stands 14.0 mm from a screw (OUT B stood 45.2 mm from one). Open until built and checked (V-MECH-01). | boss height = `GAP` = 1.6; `design/mechanical/ENCLOSURE_Rev0.2.md` E4, E7 |
+| OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *Rev0.3:* heat-set M2 inserts at 4 corners adopted (D21). *Rev0.5 (D37):* the plug's force enters the PCB through each receptacle's four shell slots, read in V-MECH-01 with OI-33. *Enclosure Rev0.1 (issue #11), Rev0.2 (issue #13) and Rev0.3 (issue #14, for the Rev0.7 board):* on paper, four bosses and posts clamp the board at H1–H4, the screws go into heat-set inserts (3.10 mm and 3.40 mm of thread), and a rib stands under each receptacle; on Rev0.6 every receptacle stands 14.0 mm from a screw (OUT B stood 45.2 mm from one). Open until built and checked (V-MECH-01). | boss height = `GAP` = 1.6; `design/mechanical/ENCLOSURE_Rev0.3.md` E4, E7 |
 | OI-6 | **Silkscreen below fab minimum.** Reference designators 0.80 mm; user-facing kanji 0.81 mm. *Lid Rev0.1 (issue #11) and Rev0.2 (issue #13):* the user-facing panel is the lid PCB, and its legend is Latin, 1.0–3.0 mm high, on paper (`check_lid.py` L07, L09, L10). Open until a legend is seen on a manufactured board. | canvas px/mm scale; `design/mechanical/LID_Rev0.2.md` §5 |
 | OI-7 | ~~Protection incomplete.~~ **Closed by decision** (D18), with two residuals moved to their own issues. ESD: PSM712 on the CC pins of J1–J4; D+/D− of J1–J3 are unprotected since D22 removed SRV05-4 (product.md §9). TVS: SMBJ6.5CA on the J1 and J4 VBUS. Reverse blocking: back-to-back AO3401A. No TVS on VBUS_A/B, by design: its leakage would be measured, and the port capacitor absorbs ESD. No common-mode choke: not needed for USB 2.0, and none is Basic. Residual: the J4 fuse (OI-29, closed by D25). SRV05-4's class (OI-30) ended with its removal (D22). | Rev0.7 §3.1, §3.4, G10 |
-| OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. *Rev0.3:* TC2030-NL SWD footprint and test pads adopted (D21, REQ-MFG-03/04). *Rev0.7 (D40, issue #14):* the SWD land is eight bare pads at 2.54 mm, 1.6 mm inside the back edge, for a spring-pin clamp whose jaw takes the board edge as its datum; the clamp's drawing is not known and its fit is not tried. Panelization still undefined. | Rev0.7 §10 D40; `design/ecad/libraries/library.json` (SWD-PADS-2x4) |
+| OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. *Rev0.3:* TC2030-NL SWD footprint and test pads adopted (D21, REQ-MFG-03/04). *Rev0.7 (D40, issue #14):* the SWD land is eight bare pads at 2.54 mm, 1.6 mm inside the back edge, for a spring-pin clamp whose jaw takes the board edge as its datum; the clamp's drawing is not known and its fit is not tried; it is 16.5 mm wide (user, 2026-11-20), and Enclosure Rev0.3 has an opening for it (E10). Panelization still undefined. | Rev0.7 §10 D40; `design/ecad/libraries/library.json` (SWD-PADS-2x4) |
 | OI-9 | ~~BOOTSEL unreachable with the lid fitted.~~ **Closed by decision** (D21 as amended by D23 and D29): the RP2040 ROM USB bootloader (UF2 drive), entered by `BOOT` or by SW3 through a lid pinhole (SW3 pulls QSPI_SS low through 1 kΩ, D29). It is in mask ROM, so no firmware state removes it; SWD is for debug only. Reopen if V-BOOT-01 fails. | REQ-BOOT-02 |
 | OI-10 | ~~6 layers may be unjustified.~~ **Closed by decision** (D10, user, 2026-11-03): 4 layers. Reopen if signal-integrity or EMC review of the routed board disagrees. | Rev0.7 §10 |
 | OI-11 | ~~Shunts are 2-terminal.~~ **Closed by decision** (D17, topology C): each shunt has its own amplifier and Kelvin connection. R_H is a 2-terminal chip on a 4-pad land; R_M has its sense taken at each lead pad; R_L is 0805. No FET R<sub>DS(on)</sub> is inside a sensed span. | Rev0.7 §3.2, §5, G2 |
@@ -893,8 +900,8 @@ CPL and its hand-solder list are Rev0.6 r02's byte for byte. On the tracked boar
 `check_libraries.py`, `check_pcb.py`, `check_routing.py`, `check_silk.py`, `check_outputs.py`) and so
 do the two independent checks (`independent_check_sets.py`, `independent_check_positions.py`, with
 Rev0.5 r02 as the foreign set: Rev0.6's CPL is this one's byte for byte and would prove nothing). Not
-done on Rev0.7: JLCDFM, the stock reads on the day of the order, the stackup's name on the order, the
-enclosure and the lid for the new land, and the clamp on a board
+done on Rev0.7: JLCDFM, the stock reads on the day of the order, the stackup's name on the order, a print of the
+enclosure (Rev0.3, drawn for the new land on 2026-11-20), and the clamp on a board
 (`manufacturing/releases/rev0.7/r01/RELEASE_MANIFEST.md`, *Open gates*). Read at the order, as the
 user reported: the part mapping (41 parts, 0 substituted), the placement preview (J2 and J3 not in
 detail) and a quote of $53.89 without shipping.
@@ -917,7 +924,7 @@ files.
 - [x] ERC critical errors: 0. DRC critical errors: 0. Unrouted nets: 0. *`check_schematic.py`,
       `check_pcb.py`, `check_routing.py` exit 0; `r02/UsbPowerHub_Main_Rev0.5_ERC.json`, `_DRC.json`.*
 - [ ] Board dimensions and mechanical overlay accepted against the authoritative
-      mechanical source. *Not done: `design/mechanical/` holds a first enclosure on paper (Rev0.2,
+      mechanical source. *Not done: `design/mechanical/` holds a first enclosure on paper (Rev0.3 since 2026-11-20; Rev0.2,
       drawn for the Rev0.6 board, issues #11 and #13; `check_enclosure.py` passes on its files) and
       nothing is printed. The print process is FDM (user, 2026-11-18); the user accepts the overlay.
       The lid PCB is a board of its own (Lid Rev0.2, `WIP`, `check_lid.py` passes on its files); this

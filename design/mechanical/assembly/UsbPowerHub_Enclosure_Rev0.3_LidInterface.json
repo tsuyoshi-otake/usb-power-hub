@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "about": "Interface of the enclosure's lid PCB, written by design/mechanical/scripts/make_enclosure.py. Do not edit.",
- "frame": "the board frame of board_interface_Rev0.6.json; the lid's outline is the main board's, seen from above",
+ "frame": "the board frame of board_interface_Rev0.7.json; the lid's outline is the main board's, seen from above",
  "outline": {
   "x0": 0.0,
   "y0": 0.0,
