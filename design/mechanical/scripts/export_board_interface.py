@@ -5,13 +5,13 @@ Run with KiCad 9.0's own Python, from the repository root:
     "<KiCad 9.0>/bin/python.exe" -I -B design/mechanical/scripts/export_board_interface.py
 
 It reads   design/ecad/source/usb-power-hub.kicad_pcb
-and writes design/mechanical/reference/board_interface_Rev0.5.json
+and writes design/mechanical/reference/board_interface_Rev0.6.json
 
 The enclosure never copies a board dimension by hand: the outline, the mounting
 holes, every footprint's position and courtyard and every drilled hole come from
 this file (CLAUDE.md section 7, "one dimension source").
 
-Frame of the output: the placement document's board frame (PLACEMENT_Rev0.5.md),
+Frame of the output: the placement document's board frame (PLACEMENT_Rev0.6.md),
 origin at the board's lower-left corner, x to the right, y up, in mm. A KiCad
 sheet point (xk, yk) is (xk - 50, 122 - yk). A courtyard is given as its bounding
 box in that frame.
@@ -28,7 +28,7 @@ import pcbnew
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 BOARD = ROOT / "design" / "ecad" / "source" / "usb-power-hub.kicad_pcb"
-OUT = ROOT / "design" / "mechanical" / "reference" / "board_interface_Rev0.5.json"
+OUT = ROOT / "design" / "mechanical" / "reference" / "board_interface_Rev0.6.json"
 ORIGIN_X, ORIGIN_Y = 50.0, 122.0  # make_project.py's board origin on the sheet
 
 
@@ -98,14 +98,14 @@ def main():
 
     data = {
         "schema": 1,
-        "about": "Mechanical interface of the Rev0.5 board, written by "
+        "about": "Mechanical interface of the Rev0.6 board, written by "
                  "design/mechanical/scripts/export_board_interface.py. Do not edit.",
         "source": {
             "path": "design/ecad/source/usb-power-hub.kicad_pcb",
             "sha256": hashlib.sha256(raw).hexdigest(),
         },
         "frame": "origin at the board's lower-left corner, x right, y up, mm "
-                 "(PLACEMENT_Rev0.5.md); KiCad sheet (xk, yk) = (x + 50, 122 - y)",
+                 "(PLACEMENT_Rev0.6.md); KiCad sheet (xk, yk) = (x + 50, 122 - y)",
         "thickness": round(pcbnew.ToMM(board.GetDesignSettings().GetBoardThickness()), 4),
         "outline": outline,
         "footprints": footprints,

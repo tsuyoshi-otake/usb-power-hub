@@ -1,11 +1,11 @@
 {
  "schema": 1,
- "about": "Mechanical interface of the Rev0.5 board, written by design/mechanical/scripts/export_board_interface.py. Do not edit.",
+ "about": "Mechanical interface of the Rev0.6 board, written by design/mechanical/scripts/export_board_interface.py. Do not edit.",
  "source": {
   "path": "design/ecad/source/usb-power-hub.kicad_pcb",
-  "sha256": "3205d4c42fe63b5acdec07c3e2959914dbbca246025d93fb2a04ccfc96125530"
+  "sha256": "0ea3ec5bf9f6309e2f45f6bc3d2a7329b86e0dcf87b728ef13e65c1bcbbbdff3"
  },
- "frame": "origin at the board's lower-left corner, x right, y up, mm (PLACEMENT_Rev0.5.md); KiCad sheet (xk, yk) = (x + 50, 122 - y)",
+ "frame": "origin at the board's lower-left corner, x right, y up, mm (PLACEMENT_Rev0.6.md); KiCad sheet (xk, yk) = (x + 50, 122 - y)",
  "thickness": 1.6,
  "outline": {
   "x0": 0.0,
@@ -693,14 +693,14 @@
    "ref": "C216",
    "footprint": "usb-power-hub:C_0805_2012Metric",
    "value": "10u",
-   "x": 55.1,
+   "x": 86.3,
    "y": 9.2,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    53.355,
+    84.555,
     8.175,
-    56.845,
+    88.045,
     10.225
    ]
   },
@@ -918,14 +918,14 @@
    "ref": "C35",
    "footprint": "usb-power-hub:C_0402_1005Metric",
    "value": "100n",
-   "x": 78.4,
+   "x": 84.9,
    "y": 51.9,
    "rot": 180.0,
    "side": "top",
    "courtyard": [
-    77.445,
+    83.945,
     51.395,
-    79.355,
+    85.855,
     52.405
    ]
   },
@@ -933,14 +933,14 @@
    "ref": "C36",
    "footprint": "usb-power-hub:C_0402_1005Metric",
    "value": "1u",
-   "x": 77.9,
+   "x": 84.4,
    "y": 53.7,
    "rot": 90.0,
    "side": "top",
    "courtyard": [
-    77.395,
+    83.895,
     52.745,
-    78.405,
+    84.905,
     54.655
    ]
   },
@@ -948,14 +948,14 @@
    "ref": "C37",
    "footprint": "usb-power-hub:C_0402_1005Metric",
    "value": "1u",
-   "x": 79.05,
+   "x": 85.55,
    "y": 53.55,
    "rot": 90.0,
    "side": "top",
    "courtyard": [
-    78.545,
+    85.045,
     52.595,
-    79.555,
+    86.055,
     54.505
    ]
   },
@@ -978,14 +978,14 @@
    "ref": "C5",
    "footprint": "usb-power-hub:C_0402_1005Metric",
    "value": "1u",
-   "x": 74.85,
+   "x": 47.9,
    "y": 8.7,
    "rot": 90.0,
    "side": "top",
    "courtyard": [
-    74.345,
+    47.395,
     7.745,
-    75.355,
+    48.405,
     9.655
    ]
   },
@@ -993,14 +993,14 @@
    "ref": "C6",
    "footprint": "usb-power-hub:C_0402_1005Metric",
    "value": "1u",
-   "x": 87.55,
+   "x": 60.6,
    "y": 8.7,
    "rot": 90.0,
    "side": "top",
    "courtyard": [
-    87.045,
+    60.095,
     7.745,
-    88.055,
+    61.105,
     9.655
    ]
   },
@@ -1008,14 +1008,14 @@
    "ref": "C7",
    "footprint": "usb-power-hub:C_0805_2012Metric",
    "value": "22u",
-   "x": 86.45,
+   "x": 59.5,
    "y": 11.6,
    "rot": 90.0,
    "side": "top",
    "courtyard": [
-    85.425,
+    58.475,
     9.855,
-    87.475,
+    60.525,
     13.345
    ]
   },
@@ -1023,14 +1023,14 @@
    "ref": "C8",
    "footprint": "usb-power-hub:C_0805_2012Metric",
    "value": "22u",
-   "x": 83.55,
+   "x": 56.6,
    "y": 9.6,
    "rot": 180.0,
    "side": "top",
    "courtyard": [
-    81.805,
+    54.855,
     8.575,
-    85.295,
+    58.345,
     10.625
    ]
   },
@@ -1053,14 +1053,14 @@
    "ref": "D1",
    "footprint": "usb-power-hub:SOT-23",
    "value": "PSM712-LF-T7",
-   "x": 72.4,
+   "x": 78.9,
    "y": 61.6,
    "rot": 180.0,
    "side": "top",
    "courtyard": [
-    70.425,
+    76.925,
     59.855,
-    74.375,
+    80.875,
     63.345
    ]
   },
@@ -1098,14 +1098,14 @@
    "ref": "D12",
    "footprint": "usb-power-hub:LED_0805_2012Metric",
    "value": "KT-0805G",
-   "x": 63.55,
+   "x": 70.25,
    "y": 10.5,
-   "rot": 0.0,
+   "rot": 180.0,
    "side": "top",
    "courtyard": [
-    61.825,
+    68.525,
     9.505,
-    65.275,
+    71.975,
     11.495
    ]
   },
@@ -1113,14 +1113,14 @@
    "ref": "D13",
    "footprint": "usb-power-hub:LED_0805_2012Metric",
    "value": "NCD0805R1",
-   "x": 63.55,
+   "x": 70.25,
    "y": 13.0,
-   "rot": 0.0,
+   "rot": 180.0,
    "side": "top",
    "courtyard": [
-    61.825,
+    68.525,
     12.005,
-    65.275,
+    71.975,
     13.995
    ]
   },
@@ -1143,14 +1143,14 @@
    "ref": "D3",
    "footprint": "usb-power-hub:SOT-23",
    "value": "PSM712-LF-T7",
-   "x": 47.9,
+   "x": 79.1,
    "y": 11.3,
    "rot": 180.0,
    "side": "top",
    "courtyard": [
-    45.925,
+    77.125,
     9.555,
-    49.875,
+    81.075,
     13.045
    ]
   },
@@ -1173,15 +1173,15 @@
    "ref": "D5",
    "footprint": "usb-power-hub:D_SMB",
    "value": "SMBJ6.5CA",
-   "x": 84.2,
-   "y": 62.45,
+   "x": 89.35,
+   "y": 61.8,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    80.505,
-    60.155,
-    87.895,
-    64.745
+    85.655,
+    59.505,
+    93.045,
+    64.095
    ]
   },
   {
@@ -1338,14 +1338,14 @@
    "ref": "J1",
    "footprint": "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073",
    "value": "TYPE-C-16PIN-2MD-073",
-   "x": 76.0,
+   "x": 82.5,
    "y": 69.385,
    "rot": 180.0,
    "side": "top",
    "courtyard": [
-    70.885,
+    77.385,
     64.845,
-    81.115,
+    87.615,
     73.355
    ]
   },
@@ -1368,14 +1368,14 @@
    "ref": "J3",
    "footprint": "usb-power-hub:USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073",
    "value": "TYPE-C-16PIN-2MD-073",
-   "x": 51.3,
+   "x": 82.5,
    "y": 2.615,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    46.185,
+    77.385,
     -1.355,
-    56.415,
+    87.615,
     7.155
    ]
   },
@@ -1698,14 +1698,14 @@
    "ref": "Q33",
    "footprint": "usb-power-hub:SOT-23",
    "value": "AO3400A",
-   "x": 58.8,
+   "x": 90.0,
    "y": 11.9,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    56.825,
+    88.025,
     10.155,
-    60.775,
+    91.975,
     13.645
    ]
   },
@@ -1938,14 +1938,14 @@
    "ref": "Q53",
    "footprint": "usb-power-hub:SOT-23",
    "value": "AO3401A",
-   "x": 75.55,
+   "x": 82.05,
    "y": 53.0,
    "rot": -90.0,
    "side": "top",
    "courtyard": [
-    73.805,
+    80.305,
     51.025,
-    77.295,
+    83.795,
     54.975
    ]
   },
@@ -1953,14 +1953,14 @@
    "ref": "R1",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "5.1k",
-   "x": 69.3,
+   "x": 75.8,
    "y": 60.4,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    68.325,
+    74.825,
     59.885,
-    70.275,
+    76.775,
     60.915
    ]
   },
@@ -1968,14 +1968,14 @@
    "ref": "R10",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "10",
-   "x": 86.4,
+   "x": 59.45,
    "y": 8.7,
    "rot": 90.0,
    "side": "top",
    "courtyard": [
-    85.885,
+    58.935,
     7.725,
-    86.915,
+    59.965,
     9.675
    ]
   },
@@ -2733,14 +2733,14 @@
    "ref": "R2",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "5.1k",
-   "x": 69.3,
+   "x": 75.8,
    "y": 62.8,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    68.325,
+    74.825,
     62.285,
-    70.275,
+    76.775,
     63.315
    ]
   },
@@ -2793,14 +2793,14 @@
    "ref": "R203",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "33k",
-   "x": 46.2,
+   "x": 77.4,
    "y": 8.9,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    45.225,
+    76.425,
     8.385,
-    47.175,
+    78.375,
     9.415
    ]
   },
@@ -2808,14 +2808,14 @@
    "ref": "R204",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "33k",
-   "x": 46.2,
+   "x": 77.4,
    "y": 14.2,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    45.225,
+    76.425,
     13.685,
-    47.175,
+    78.375,
     14.715
    ]
   },
@@ -2883,14 +2883,14 @@
    "ref": "R209",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "100k",
-   "x": 55.8,
+   "x": 87.0,
    "y": 13.2,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    54.825,
+    86.025,
     12.685,
-    56.775,
+    87.975,
     13.715
    ]
   },
@@ -2913,14 +2913,14 @@
    "ref": "R210",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "1k",
-   "x": 58.2,
+   "x": 89.4,
    "y": 8.9,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    57.225,
+    88.425,
     8.385,
-    59.175,
+    90.375,
     9.415
    ]
   },
@@ -3408,14 +3408,14 @@
    "ref": "R240",
    "footprint": "usb-power-hub:R_0805_2012Metric",
    "value": "510",
-   "x": 67.05,
+   "x": 66.75,
    "y": 10.5,
-   "rot": 180.0,
+   "rot": 0.0,
    "side": "top",
    "courtyard": [
-    65.325,
+    65.025,
     9.505,
-    68.775,
+    68.475,
     11.495
    ]
   },
@@ -3423,14 +3423,14 @@
    "ref": "R241",
    "footprint": "usb-power-hub:R_0805_2012Metric",
    "value": "510",
-   "x": 67.05,
+   "x": 66.75,
    "y": 13.0,
-   "rot": 180.0,
+   "rot": 0.0,
    "side": "top",
    "courtyard": [
-    65.325,
+    65.025,
     12.005,
-    68.775,
+    68.475,
     13.995
    ]
   },
@@ -3588,14 +3588,14 @@
    "ref": "R34",
    "footprint": "usb-power-hub:R_0402_1005Metric",
    "value": "33k",
-   "x": 78.45,
+   "x": 84.95,
    "y": 55.3,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    77.475,
+    83.975,
     54.785,
-    79.425,
+    85.925,
     55.815
    ]
   },
@@ -3858,14 +3858,14 @@
    "ref": "SW2",
    "footprint": "usb-power-hub:SW_Push_1P1T_XKB_TS-1187A",
    "value": "TS-1187A-B-A-B",
-   "x": 65.3,
+   "x": 68.5,
    "y": 4.5,
    "rot": 90.0,
    "side": "top",
    "courtyard": [
-    62.455,
+    65.655,
     0.705,
-    68.145,
+    71.345,
     8.295
    ]
   },
@@ -4053,14 +4053,14 @@
    "ref": "TP14",
    "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
    "value": "VBUS_J1",
-   "x": 80.75,
+   "x": 87.25,
    "y": 53.15,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    79.7024,
+    86.2024,
     52.1037,
-    81.795,
+    88.295,
     54.1963
    ]
   },
@@ -4173,14 +4173,14 @@
    "ref": "TP3",
    "footprint": "usb-power-hub:TestPoint_Pad_D1.0mm",
    "value": "V12F",
-   "x": 88.65,
+   "x": 61.7,
    "y": 10.9,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    87.6024,
+    60.6524,
     9.8537,
-    89.695,
+    62.745,
     11.9463
    ]
   },
@@ -4488,14 +4488,14 @@
    "ref": "U5",
    "footprint": "usb-power-hub:Converter_DCDC_Minmax_MAU104_SIP",
    "value": "MAU104",
-   "x": 74.8,
+   "x": 47.85,
    "y": 5.6,
    "rot": 0.0,
    "side": "top",
    "courtyard": [
-    72.405,
+    45.455,
     0.505,
-    92.495,
+    65.545,
     7.195
    ]
   },
@@ -4645,7 +4645,7 @@
   {
    "ref": "J1",
    "pad": "",
-   "x": 73.11,
+   "x": 79.61,
    "y": 66.78,
    "drill": [
     0.65,
@@ -4656,7 +4656,7 @@
   {
    "ref": "J1",
    "pad": "",
-   "x": 78.89,
+   "x": 85.39,
    "y": 66.78,
    "drill": [
     0.65,
@@ -4667,7 +4667,7 @@
   {
    "ref": "J1",
    "pad": "S1",
-   "x": 71.68,
+   "x": 78.18,
    "y": 66.28,
    "drill": [
     0.6,
@@ -4678,7 +4678,7 @@
   {
    "ref": "J1",
    "pad": "S1",
-   "x": 71.68,
+   "x": 78.18,
    "y": 70.46,
    "drill": [
     0.6,
@@ -4689,7 +4689,7 @@
   {
    "ref": "J1",
    "pad": "S1",
-   "x": 80.32,
+   "x": 86.82,
    "y": 66.28,
    "drill": [
     0.6,
@@ -4700,7 +4700,7 @@
   {
    "ref": "J1",
    "pad": "S1",
-   "x": 80.32,
+   "x": 86.82,
    "y": 70.46,
    "drill": [
     0.6,
@@ -4777,7 +4777,7 @@
   {
    "ref": "J3",
    "pad": "",
-   "x": 48.41,
+   "x": 79.61,
    "y": 5.22,
    "drill": [
     0.65,
@@ -4788,7 +4788,7 @@
   {
    "ref": "J3",
    "pad": "",
-   "x": 54.19,
+   "x": 85.39,
    "y": 5.22,
    "drill": [
     0.65,
@@ -4799,7 +4799,7 @@
   {
    "ref": "J3",
    "pad": "S1",
-   "x": 46.98,
+   "x": 78.18,
    "y": 1.54,
    "drill": [
     0.6,
@@ -4810,7 +4810,7 @@
   {
    "ref": "J3",
    "pad": "S1",
-   "x": 46.98,
+   "x": 78.18,
    "y": 5.72,
    "drill": [
     0.6,
@@ -4821,7 +4821,7 @@
   {
    "ref": "J3",
    "pad": "S1",
-   "x": 55.62,
+   "x": 86.82,
    "y": 1.54,
    "drill": [
     0.6,
@@ -4832,7 +4832,7 @@
   {
    "ref": "J3",
    "pad": "S1",
-   "x": 55.62,
+   "x": 86.82,
    "y": 5.72,
    "drill": [
     0.6,
@@ -5162,7 +5162,7 @@
   {
    "ref": "U5",
    "pad": "1",
-   "x": 74.8,
+   "x": 47.85,
    "y": 5.6,
    "drill": [
     1.0,
@@ -5173,7 +5173,7 @@
   {
    "ref": "U5",
    "pad": "2",
-   "x": 77.34,
+   "x": 50.39,
    "y": 5.6,
    "drill": [
     1.0,
@@ -5184,7 +5184,7 @@
   {
    "ref": "U5",
    "pad": "4",
-   "x": 82.42,
+   "x": 55.47,
    "y": 5.6,
    "drill": [
     1.0,
@@ -5195,7 +5195,7 @@
   {
    "ref": "U5",
    "pad": "6",
-   "x": 87.5,
+   "x": 60.55,
    "y": 5.6,
    "drill": [
     1.0,

@@ -383,7 +383,7 @@ class Unchanged(LidTest):
         def move(data):
             port(data, "J1")["x"] = 60.0
             hole(data, "SW3")["x"] += 10.0
-            hole(data, "SW2")["x"] += 6.0
+            hole(data, "SW2")["x"] -= 6.0       # towards the middle: 6 mm the other way is under OUT B
         self.passes(variant(iface=interface(move), drc=True), "L03", "L08", "L09", "L10", "L11")
 
 
@@ -397,7 +397,7 @@ class L01Identity(LidTest):
         self.fails(variant(check="reference", check_iface=interface(edit)), "L01", "rebuild with make_lid.py", alone=True)
 
     def test_another_revision_in_the_title_block(self):
-        self.fails(variant(edit=swap('(rev "Rev0.1")', '(rev "Rev0.2")')), "L01", "title block revision is 'Rev0.2'")
+        self.fails(variant(edit=swap('(rev "Rev0.2")', '(rev "Rev0.3")')), "L01", "title block revision is 'Rev0.3'")
 
     def test_no_wip_in_the_title_block(self):
         self.fails(variant(edit=swap("WIP - MANUFACTURING PROHIBITED", "APPROVED")), "L01", "does not state WIP", alone=True)
@@ -576,8 +576,8 @@ class L07LegendRules(LidTest):
 
 class L08LegendDrawn(LidTest):
     def test_a_text_moved_on_the_board(self):
-        self.fails(variant(edit=resub(r'(\(gr_text "HOST"\s+\(at )126 ', r"\g<1>127 ")), "L08",
-                   "row J1: no text 'HOST' on the top at (76, 65.5)", "a text 'HOST' at (77, 65.5) that is no row of the table")
+        self.fails(variant(edit=resub(r'(\(gr_text "HOST"\s+\(at )132\.5 ', r"\g<1>133.5 ")), "L08",
+                   "row J1: no text 'HOST' on the top at (82.5, 65.5)", "a text 'HOST' at (83.5, 65.5) that is no row of the table")
 
     def test_a_text_of_another_size(self):
         self.fails(variant(doc=row("revision", height=2.0, stroke=0.4), check="reference", restamp=True), "L08",
@@ -587,7 +587,7 @@ class L08LegendDrawn(LidTest):
         self.fails(variant(edit=swap("\t\t\t(justify mirror)\n", "")), "L08", "row order: not mirrored on the bottom", alone=True)
 
     def test_a_text_turned(self):
-        self.fails(variant(edit=swap("(at 126 56.5 0)", "(at 126 56.5 90)")), "L08", "row J1: turned, hidden, italic or bold")
+        self.fails(variant(edit=swap("(at 132.5 56.5 0)", "(at 132.5 56.5 90)")), "L08", "row J1: turned, hidden, italic or bold")
 
     def test_a_text_that_is_no_row(self):
         self.fails(variant(edit=append(TEXT)), "L08", "a text 'X' at (50, 22) that is no row of the table", alone=True)
@@ -616,7 +616,7 @@ class L08LegendDrawn(LidTest):
 class L09LegendContent(LidTest):
     def test_two_port_names_swapped(self):
         self.fails(variant(doc=both(row("J1", text="5V IN"), row("J4", text="HOST"))), "L09",
-                   "port J1: the ink of 'HOST' is centred at x = 17.", "port J4: the ink of '5V IN' is centred at x = 75.", alone=True)
+                   "port J1: the ink of 'HOST' is centred at x = 17.", "port J4: the ink of '5V IN' is centred at x = 82.", alone=True)
 
     def test_a_port_name_misspelt(self):
         self.fails(variant(doc=row("J3", text="OUT 2")), "L09", "port J3: 0 texts 'OUT B' on the top, want 1", alone=True)
@@ -631,7 +631,7 @@ class L09LegendContent(LidTest):
         self.fails(variant(doc=row("title", text="Power Hub")), "L09", "no text 'USB Power-Control Hub' on the top", alone=True)
 
     def test_another_revision_on_the_top(self):
-        self.fails(variant(doc=row("revision", text="Lid Rev0.2")), "L09", "no text on the top carries the title block's revision 'Rev0.1'",
+        self.fails(variant(doc=row("revision", text="Lid Rev0.3")), "L09", "no text on the top carries the title block's revision 'Rev0.2'",
                    alone=True)
 
     def test_boot_far_from_its_pinhole(self):
@@ -664,23 +664,23 @@ class L10SilkClear(LidTest):
         self.fails(variant(doc=row("J4", dx=-12)), "L10", 'top silkscreen: "5V IN" is within 0.5 mm of the outline')
 
     def test_a_label_over_a_screw_head(self):
-        self.fails(variant(doc=row("revision", anchor="H1", dx=0, dy=0)), "L10", '"Lid Rev0.1" is within 0.3 mm of the screw head of H1')
+        self.fails(variant(doc=row("revision", anchor="H1", dx=0, dy=0)), "L10", '"Lid Rev0.2" is within 0.3 mm of the screw head of H1')
 
     def test_a_label_over_the_pinhole(self):
         self.fails(variant(doc=row("SW3", dx=3.8)), "L10", '"BOOT" is within 0.3 mm of hole SW3', alone=True)
 
     def test_a_label_over_a_window(self):
-        self.fails(variant(doc=row("revision", anchor="SW1", dx=-1.75, dy=7.25)), "L10", '"Lid Rev0.1" is within 0.3 mm of window D10/D11',
+        self.fails(variant(doc=row("revision", anchor="SW1", dx=-1.75, dy=7.25)), "L10", '"Lid Rev0.2" is within 0.3 mm of window D10/D11',
                    alone=True)
 
     def test_two_texts_too_close(self):
-        self.fails(variant(doc=row("revision", dy=1.6)), "L10", '"Lid Rev0.1" is within 0.2 mm of "USB Power-Control Hub"', alone=True)
+        self.fails(variant(doc=row("revision", dy=1.6)), "L10", '"Lid Rev0.2" is within 0.2 mm of "USB Power-Control Hub"', alone=True)
 
     def test_a_ring_too_near_its_hole(self):
         self.fails(variant(doc=param("ring_d", 5.2)), "L10", "circle at (31.5, 4.5) is within 0.3 mm of hole SW1", alone=True)
 
     def test_a_text_too_close_on_the_bottom(self):
-        self.fails(variant(doc=row("order", dy=2.5)), "L10", "bottom silkscreen:", '"JLCJLCJLCJLC" is within 0.2 mm of "USB Power-Control Hub Lid Rev0.1"', alone=True)
+        self.fails(variant(doc=row("order", dy=2.5)), "L10", "bottom silkscreen:", '"JLCJLCJLCJLC" is within 0.2 mm of "USB Power-Control Hub Lid Rev0.2"', alone=True)
 
 
 class L11Drc(LidTest):
@@ -790,7 +790,7 @@ class L14Drill(LidTest):
                    with_plot=True)
 
     def test_a_hole_missing(self):
-        self.fails(set_variant(member("NPTH.drl", bytes_swap(b"X65.3Y4.5\r\n", b""))), "L14", "the unplated drill file holds",
+        self.fails(set_variant(member("NPTH.drl", bytes_swap(b"X68.5Y4.5\r\n", b""))), "L14", "the unplated drill file holds",
                    with_plot=True)
 
     def test_a_plated_hole(self):

@@ -4,9 +4,9 @@ Run with the CAD venv's Python (manifold3d, numpy), from the repository root:
 
     ~/tmp/cadvenv/Scripts/python.exe -I -B design/mechanical/scripts/make_enclosure.py
 
-It reads   design/mechanical/ENCLOSURE_Rev0.1.md   (the params and heights tables)
-           design/mechanical/reference/board_interface_Rev0.5.json
-and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.1_Tray.stl, _Frame.stl,
+It reads   design/mechanical/ENCLOSURE_Rev0.2.md   (the params and heights tables)
+           design/mechanical/reference/board_interface_Rev0.6.json
+and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.2_Tray.stl, _Frame.stl,
            _Plunger.stl (each in its print orientation), _LidInterface.json, _Manifest.json
 then draws the pictures (render_enclosure.py, about 20 s) and runs check_enclosure.py.
 Exit status 0 means written, drawn and checked.
@@ -200,7 +200,9 @@ def build_frame(p, g):
         c, k = list(b.col), list(b.block)
         c[1 if front else 3] += -JOIN if front else JOIN     # the column, into the wall
         k[1 if front else 3] += -JOIN if front else JOIN     # the light well, into the column
-        frame = frame + S.box(c[0], c[1], p.ui_bottom, c[2], c[3], g.z_top)
+        # the column starts above the tallest part beside a button (btn_bottom); the light
+        # well beside it comes down to the LEDs (ui_bottom)
+        frame = frame + S.box(c[0], c[1], p.btn_bottom, c[2], c[3], g.z_top)
         frame = frame + S.box(k[0], k[1], p.ui_bottom, k[2], k[3], g.z_top)
         cuts.append(S.cyl(b.x, b.y, p.ui_bottom - 1.0, g.z_top + 1.0, p.btn_bore_d / 2))
         z_cb = g.z_top - p.btn_cbore_depth
@@ -265,7 +267,7 @@ def lid_interface(p, g, board):
         "schema": 1,
         "about": "Interface of the enclosure's lid PCB, written by "
                  "design/mechanical/scripts/make_enclosure.py. Do not edit.",
-        "frame": "the board frame of board_interface_Rev0.5.json; the lid's outline is the "
+        "frame": "the board frame of board_interface_Rev0.6.json; the lid's outline is the "
                  "main board's, seen from above",
         "outline": {"x0": g.bx0, "y0": g.by0, "x1": g.bx1, "y1": g.by1},
         "thickness": p.lid_t,
@@ -375,7 +377,7 @@ def main():
             return 1
         volumes[name] = man.volume()
         tri = S.apply(S.triangles(man), S.inverse(back[name][0]))
-        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.1 {name}")
+        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.2 {name}")
         file = f"{spec.PREFIX}{name}.stl"
         (args.out / file).write_bytes(data)
         lo, hi = tri.reshape(-1, 3).min(axis=0), tri.reshape(-1, 3).max(axis=0)
@@ -396,14 +398,14 @@ def main():
     rows = derived(p, g, heights, board, volumes)
     manifest = {
         "schema": 1,
-        "about": "Enclosure Rev0.1, written by design/mechanical/scripts/make_enclosure.py. "
+        "about": "Enclosure Rev0.2, written by design/mechanical/scripts/make_enclosure.py. "
                  "Do not edit.",
         "state": "WIP",
-        "revision": "Rev0.1",
-        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.1.md", "inputs_sha256": digest},
+        "revision": "Rev0.2",
+        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.2.md", "inputs_sha256": digest},
         "overrides": overrides,
         "board_interface": {
-            "path": "design/mechanical/reference/board_interface_Rev0.5.json",
+            "path": "design/mechanical/reference/board_interface_Rev0.6.json",
             "sha256": sha256(spec.INTERFACE.read_bytes()),
             "board_sha256": board["source"]["sha256"],
         },

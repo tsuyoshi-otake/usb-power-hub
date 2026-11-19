@@ -1,11 +1,20 @@
-# Enclosure Rev0.1 — printed tray and frame under a PCB lid (issue #11)
+# Enclosure Rev0.2 — printed tray and frame under a PCB lid (issues #11 and #13)
 
-> **WIP — NOT PRINTED, NOT ORDERED.** This is a first design on paper for the Rev0.5 board
+> **WIP — NOT PRINTED, NOT ORDERED.** This is a first design on paper for the Rev0.6 board
 > (100 × 72 mm). Nothing has been printed and no cable has been tried in an opening. The lid
-> PCB is drawn from this document's interface (`LID_Rev0.1.md`, 2026-11-18) and is not
+> PCB is drawn from this document's interface (`LID_Rev0.2.md`, 2026-11-19) and is not
 > ordered. Every dimension here is a parameter that the first print may change.
 > The print process is FDM (the user's choice, 2026-11-18; E2). Its material and the printer
 > are not chosen, and the values stay provisional until the first print.
+>
+> **Rev0.2 against Rev0.1 (2026-11-19, issue #13).** The Rev0.6 board has its connectors
+> mirror-symmetric (D39). The openings, ribs, button towers and light wells follow the board's
+> interface to their new places with no parameter changed. One thing did not fit: OUT B's
+> button now stands beside the MAU104, and Rev0.1's tower stood inside that part's courtyard.
+> A button's column now starts above the converter (`btn_bottom`, E8 as amended), its wall is
+> 1.9 mm instead of 1.5 mm (`btn_wall`), and the checker measures the plastic round a
+> plunger's bore and counterbore (`btn_wall_min`, E10). Enclosure Rev0.1 was never printed;
+> its files are in Git history, at commit `de432d1`.
 
 ## 1. What it is
 
@@ -14,9 +23,9 @@ Four printed pieces, one PCB and sixteen pieces of hardware:
 | Piece | Made by | What it does |
 |---|---|---|
 | Tray | printed, floor on the bed | Floor and the walls up to the board's top face. Four corner bosses carry the board; a rib under each receptacle carries the board's edge. |
-| Frame | printed, upside down (its top face on the bed) | The walls above the board. Four corner posts clamp the board onto the bosses and carry the lid. Two towers guide the button plungers and hold a light well over each port's two LEDs; a tube guides a paperclip to SW3. |
+| Frame | printed, upside down (its top face on the bed) | The walls above the board. Four corner posts clamp the board onto the bosses and carry the lid. Two towers guide the button plungers and hold a light well over each port's two LEDs; a tube guides a paperclip to SW3. A tower's column, which holds the plunger, starts 11.0 mm above the board; its light well and the tube come down to 2.2 mm. |
 | Plunger × 2 | printed, cap on the bed | Carries a finger's push through the lid to SW1 and SW2. |
-| Lid | PCB, 100 × 72 × 1.6 mm, the main board's outline and hole positions | The top panel and its legend. Lies on the frame. This document writes its interface (outline, holes, windows, port positions); the board itself is `LID_Rev0.1.md`, drawn from that interface and not ordered. |
+| Lid | PCB, 100 × 72 × 1.6 mm, the main board's outline and hole positions | The top panel and its legend. Lies on the frame. This document writes its interface (outline, holes, windows, port positions); the board itself is `LID_Rev0.2.md`, drawn from that interface and not ordered. |
 | Hardware | bought | 8 heat-set M2 inserts, 4 countersunk M2 × 10 screws (bottom), 4 pan-head M2 × 5 screws (lid). |
 
 The seam between tray and frame is at the board's top face. That puts every port opening in
@@ -30,7 +39,7 @@ orientation (checked: E04).
   board is z −1.6 … 0. The front edge (y = 0) carries OUT A and OUT B; the back edge
   (y = 72) carries 5V IN and HOST.
 - **One dimension source (CLAUDE.md §7).** The board's outline, thickness, hole and footprint
-  positions and courtyards come from `reference/board_interface_Rev0.5.json`, which
+  positions and courtyards come from `reference/board_interface_Rev0.6.json`, which
   `scripts/export_board_interface.py` writes from the tracked KiCad board. Nothing about the
   board is typed into this document or the scripts.
 - **This document** holds what the board file cannot: the enclosure's parameters (§4) and the
@@ -43,7 +52,8 @@ orientation (checked: E04).
 
 All made by Claude under the 2026-11-03 delegation while answering the user's request
 「筐体もデザインして」 (2026-11-13), except the print process in E2, which the user chose on
-2026-11-18. Each is provisional and the user may revert any one.
+2026-11-18. E8's amendment is Claude's too, made on 2026-11-19 for the Rev0.6 board
+(issue #13). Each is provisional and the user may revert any one.
 
 | ID | Decision | Why | Rejected |
 |---|---|---|---|
@@ -53,8 +63,9 @@ All made by Claude under the 2026-11-03 delegation while answering the user's re
 | E4 | Fastening: four countersunk M2 × 10 from below, through the tray's bosses and the board's holes H1–H4 into heat-set inserts in the posts' feet; the lid by four pan-head M2 × 5 into inserts in the posts' tops. | REQ-MECH-04 and D21 call for heat-set M2 inserts at the four corners. Posts and bosses clamp the board itself (OI-5: "the PCB itself is not clamped" in the mockup). A countersink prints without support on the bed side; a counterbore's flat ceiling does not. | One long screw through lid, post and board (M2 × 30 is not a stock length). Self-tapping screws into plastic (thread engagement, REQ-MECH-04). |
 | E5 | A 0.2 mm designed gap at the seam, with a 45° ridge on the tray's wall inside a chamfer on the frame's. | The posts must land on the board before the walls meet, or the board is not clamped. The ridge closes the line of sight through the gap. | A butt seam (a 0.2 mm slit at the board's level all round). |
 | E6 | Each port opening is a hole for the receptacle's shell behind a pocket for the plug's overmould (15.0 × 8.0 mm), whose floor is 0.1 mm behind the receptacle's face. | The receptacle's face is 1.34 mm inside the wall's outer face. Without the pocket an overmould would meet the wall before the plug seats (REQ-MECH-05). The pocket lets any overmould up to 14.0 × 7.0 mm reach the receptacle itself. | Thinning the whole wall to 0.7 mm. Moving the receptacles (a board change). |
-| E7 | A rib under each receptacle, 0.1 mm below the board, and a shell hole that follows the shell at 0.3 mm. | REQ-MECH-03: the plug's force should not rest on the solder joints alone, and OI-33 leaves the shell legs' reach through a 1.6 mm board unproven. The rib takes a cable pushed down; the hole's edge takes one pulled up or sideways. OUT B stands 45.2 mm from the nearest screw (§6). | Relying on the four corner screws alone. |
+| E7 | A rib under each receptacle, 0.1 mm below the board, and a shell hole that follows the shell at 0.3 mm. | REQ-MECH-03: the plug's force should not rest on the solder joints alone, and OI-33 leaves the shell legs' reach through a 1.6 mm board unproven. The rib takes a cable pushed down; the hole's edge takes one pulled up or sideways. On the Rev0.6 board every receptacle stands 14.0 mm from its nearest screw (§6); on Rev0.5, OUT B stood 45.2 mm from one. | Relying on the four corner screws alone. |
 | E8 | Buttons by loose printed plungers, captive under the lid; LEDs through one light well per port to a window of bare FR-4 in the lid; SW3 through a 2.0 mm pinhole and a guide tube. | SW1, SW2 and SW3 are 1.5 mm tall and the lid is 19 mm above the board. A plunger needs no part to buy; bare FR-4 passes an LED's light and needs no light pipe; REQ-BOOT-02 names the pinhole. | Flexures in the lid (the lid is a PCB). Bought light pipes (D13: few part types). |
+| E8, amended in Rev0.2 | A button's column starts 11.0 mm above the board (`btn_bottom`) instead of 2.2 mm, in 1.9 mm of wall (`btn_wall`; 1.5 mm in Rev0.1). The light wells and the tube still come down to 2.2 mm (`ui_bottom`). | On the Rev0.6 board SW2 stands 2.955 mm from the courtyard of the MAU104 (U5, 10.2 mm tall). Rev0.1's column reached 3.2 mm to each side of its button from 2.2 mm up, so it stood 0.245 mm inside that courtyard: E05 failed with 13.60 mm³ of the frame in U5's envelope. A column that starts above the converter clears it whatever its width. That let the wall grow to leave 0.8 mm round the counterbore, two perimeters of the nozzle; Rev0.1 left 0.4 mm there and no check measured it. Both towers are built alike. The cost: the bore guides a plunger over 4.7 mm instead of 13.5 mm (§10). | A column narrowed beside the converter (1.2 mm of wall, 0.35 mm from the body of a hand-soldered part). A thinner plunger (a 2.0 mm shaft, printed 20 mm long). Moving U5 or SW2 (a change of the board that D39 has just placed). |
 | E9 | No vents. | About 1 W in a 104.8 × 76.8 mm box. Not calculated: an estimate from the board's supply current, and the first unit is measured. | Slots in the tray's floor or the walls (dust, and light from the LEDs). |
 
 ## 4. Parameters
@@ -108,9 +119,11 @@ soldered part, or a demand the checker makes on the design. All in mm.
 | `rib_w` | 4.0 | Width of the rib under a receptacle. | design |
 | `rib_len` | 6.0 | Length of that rib from the wall. | design |
 | `rib_gap` | 0.1 | Rib's top to the board's bottom face. | design |
-| `ui_bottom` | 2.2 | Underside of the towers and the tube above the board. | design |
+| `ui_bottom` | 2.2 | Underside of the light wells and the tube above the board. | design |
+| `btn_bottom` | 11.0 | Underside of a button's column above the board: 0.8 mm above the MAU104 (10.2 mm), which stands beside SW2 on the Rev0.6 board (E8). | design |
 | `btn_bore_d` | 3.4 | Bore for a plunger's shaft. | design |
-| `btn_wall` | 1.5 | Wall around that bore. | design |
+| `btn_wall` | 1.9 | Wall around that bore; it leaves `btn_wall_min` around the counterbore. | design |
+| `btn_wall_min` | 0.8 | Plastic the checker demands around a plunger's bore and counterbore: two perimeters of a 0.4 mm nozzle (E2). | world |
 | `btn_cbore_d` | 5.6 | Counterbore for a plunger's collar. | design |
 | `btn_cbore_depth` | 2.2 | Depth of that counterbore below the frame's top. | design |
 | `plunger_d` | 3.0 | Plunger shaft diameter. | design |
@@ -191,14 +204,14 @@ Written by `make_enclosure.py --derived` and compared with the built files by
 | `lid_margin` | 2.40 | mm | Frame's top face left free around the lid. |
 | `web_t` | 0.56 | mm | Web between an overmould pocket and the cavity. |
 | `face_inset` | 1.34 | mm | A receptacle's face inside the wall's outer face. |
-| `port_to_screw_max` | 45.21 | mm | The receptacle farthest from a screw (J3) to its nearest mounting hole. |
+| `port_to_screw_max` | 14.03 | mm | The receptacle farthest from a screw (J4) to its nearest mounting hole. |
 | `swd_wall_clearance` | 1.16 | mm | The SWD footprint's courtyard (J5) to the nearest wall. |
 | `lid_clearance_min` | 0.70 | mm | Tallest part (F1, 18.3 mm) to the lid's underside. |
 | `bottom_engagement` | 3.10 | mm | Bottom screw's thread above the board's top face, in the post's insert. |
 | `lid_engagement` | 3.40 | mm | Lid screw's thread below the lid, in the post's insert. |
 | `plunger_len` | 20.10 | mm | Plunger length. |
 | `tray_volume` | 20.50 | cm3 | Solid volume of the tray. |
-| `frame_volume` | 18.76 | cm3 | Solid volume of the frame. |
+| `frame_volume` | 18.12 | cm3 | Solid volume of the frame. |
 | `plunger_volume` | 0.17 | cm3 | Solid volume of one plunger. |
 <!-- derived:end -->
 
@@ -219,7 +232,7 @@ from the board interface and §4–§5:
 | E07 | The board lies on four bosses, is clamped by four posts, and has a rib under every receptacle; every edge with a receptacle has two mounting points. | REQ-MECH-03 |
 | E08 | Every shell hole clears its shell; an overmould of `plug_w` × `plug_h` reaches every receptacle's face; a web closes each pocket. | REQ-MECH-05 (design input only) |
 | E09 | The screws pass, the heads sink flush, the thread engagement is within limits, and every insert hole has `insert_wall_min` of plastic around it. | REQ-MECH-04 |
-| E10 | Each plunger stands on its switch, moves the switch's travel without touching anything, cannot leave through the lid, and stands proud of it. | — |
+| E10 | Each plunger stands on its switch, moves the switch's travel without touching anything, cannot leave through the lid, and stands proud of it. Its bore, from the column's underside to the cone, and its counterbore each have `btn_wall_min` of plastic all round. | E8 |
 | E11 | Each LED has a free path to a window in the lid, inside a closed well. | — |
 | E12 | A paperclip wire reaches SW3 through the lid, inside a tube no wider than the actuator allows. | REQ-BOOT-02 (design input only) |
 | E13 | The lid has the board's outline and lies on the frame's top face without entering it; its outer 0.5 mm lies on the frame all round, and it lies on every post. | E3 |
@@ -239,8 +252,10 @@ It cannot see:
   the walls bow, whether a rib or a hole's edge really takes a plug's force (OI-33).
 - **Light.** How bright an LED is through 1.6 mm of bare FR-4, and what leaks between the
   two LEDs of one well (one well serves green and red by design).
+- **A plunger's tilt.** E10 moves a plunger down, up and sideways. It does not tilt it, and
+  the bore that guides it is 4.7 mm long (§10).
 - **Heat** (E9), **feel** (a loose plunger rattles), and **the legend** (the lid's own
-  document and checker, `LID_Rev0.1.md` §6).
+  document and checker, `LID_Rev0.2.md` §6).
 - **V-MECH-01 and V-BOOT-01.** Both need the built unit and real cables. This check is a
   desk check ahead of them and closes neither OI-1 nor OI-5.
 
@@ -279,10 +294,19 @@ the back wall (§6); whether the cable's head fits beside the wall is not checke
 
 - Nothing is printed. No fit, no cable, no screw has been tried.
 - E2 fixes the process (FDM) only. The material and the printer are not chosen.
-- The lid PCB (its own revision, Gerber set and release, CLAUDE.md §7) is drawn as Lid Rev0.1
-  (`LID_Rev0.1.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.1_LidInterface.json`, which this
+- The lid PCB (its own revision, Gerber set and release, CLAUDE.md §7) is drawn as Lid Rev0.2
+  (`LID_Rev0.2.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.2_LidInterface.json`, which this
   document fixes. It is not ordered and has no release; what is not verified of it is in its
   own §8. A change here that moves a hole, a window or a port needs the lid built again.
+- A plunger's guide is short since Rev0.2. The bore holds the shaft between 11.0 and 15.7 mm
+  above the board (4.7 mm; 13.5 mm in Rev0.1), and the foot stands 9.5 mm below it. From the
+  nominal clearances (a 3.0 mm shaft in a 3.4 mm bore, a 4.0 mm cap in the lid's 4.6 mm hole)
+  the foot can stand about 0.7 mm off the switch's axis, against about 0.2 mm in Rev0.1; a
+  3.0 mm foot then still covers the middle of the 2.0 mm actuator. Computed by hand, not by
+  the checker, and not tried. If the first print rattles or misses the switch, the next step
+  is a guide below 11.0 mm that is open towards the converter.
+- The MAU104 is soldered by hand and may lean. The column's underside is 0.8 mm above its
+  10.2 mm, and OUT B's light well stands 2.55 mm to the side of its courtyard.
 - Of the 24 part heights in §5 that belong to a body, 20 are assumed. The four that were read
   are F1, the MAU104, the receptacle and the switch.
 - The insert's hole diameter and the screws' head sizes are from memory (§8).

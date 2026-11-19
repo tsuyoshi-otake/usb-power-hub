@@ -7,7 +7,7 @@ Run with the CAD venv's Python (manifold3d, numpy, trimesh), from the repository
 It reads the STL files as written, puts each back into the assembly frame with the
 manifest's matrix, and tests them with probes built here from the board interface and the
 document's tables: it does not import make_enclosure.py. Checks E01 to E16 are listed in
-ENCLOSURE_Rev0.1.md, section 7, with what they prove. Exit status 0 means no FAIL line.
+ENCLOSURE_Rev0.2.md, section 7, with what they prove. Exit status 0 means no FAIL line.
 
 What it cannot see (the document, section 7): whether a `world` value in the tables is
 right (a cable's overmould, the insert, an assumed part height), the print itself
@@ -410,6 +410,19 @@ def main():
                      for dx, dy in ((0.5, 0), (-0.5, 0), (0, 0.5), (0, -0.5)))
         R.check(wander > 0.05, "E10", f"{ref}: the bore keeps the plunger within 0.5 mm",
                 f"{ref}: the plunger can move 0.5 mm sideways without meeting the frame")
+        # the column around the plunger: the bore from the column's underside to the cone,
+        # and the counterbore above it, each in btn_wall_min of plastic (as E09's insert ring)
+        z_cb = z_top - p.btn_cbore_depth
+        z_cone = z_cb - (p.btn_cbore_d - p.btn_bore_d) / 2
+        for what, r0, za, zb in (("bore", p.btn_bore_d / 2, p.btn_bottom + 0.3, z_cone - 0.3),
+                                 ("counterbore", p.btn_cbore_d / 2, z_cb + 0.3, z_top - 0.3)):
+            ring = (S.cyl(b["x"], b["y"], za, zb, r0 + p.btn_wall_min - 0.02)
+                    - S.cyl(b["x"], b["y"], za - 1.0, zb + 1.0, r0 + 0.02))
+            solid = vol(ring, frame) / ring.volume()
+            R.check(solid >= 0.995, "E10",
+                    f"{ref}: {p.btn_wall_min:g} mm of plastic all round the plunger's {what}",
+                    f"{ref}: {100 * solid:.1f} % of the {p.btn_wall_min:g} mm ring around the "
+                    f"plunger's {what} is plastic, want 100")
         up_free = vol(plunger.translate([0, 0, p.plunger_play - 0.05]), lid)
         up_stop = vol(plunger.translate([0, 0, p.plunger_play + 0.6]), lid)
         R.check(up_free <= TOL and up_stop > 0.05, "E10",

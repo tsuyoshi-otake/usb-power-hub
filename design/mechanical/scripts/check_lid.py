@@ -1,4 +1,4 @@
-"""Check the lid PCB Rev0.1 against its document and the enclosure's lid interface (issue #11).
+"""Check the lid PCB Rev0.2 against its document and the enclosure's lid interface (issue #11).
 
 Run with KiCad's own Python, which carries the pcbnew module, from the repository root:
 
@@ -9,14 +9,14 @@ It reads the board as written (a copy, in a temporary directory: nothing in --sr
 and measures it against the lid's interface and the document's tables. It does not import
 make_lid.py: the copper is the fill the board file holds, the silkscreen is the ink pcbnew
 draws, and every keep-clear area is built here from the interface. Checks L01 to L16 are
-listed in LID_Rev0.1.md, section 6, with what each proves. One line per check, `PASS Lnn ...`
+listed in LID_Rev0.2.md, section 6, with what each proves. One line per check, `PASS Lnn ...`
 or `FAIL Lnn ...`; exit status 0 means no FAIL line.
 
-  --doc FILE        the lid document (default design/mechanical/LID_Rev0.1.md)
+  --doc FILE        the lid document (default design/mechanical/LID_Rev0.2.md)
   --interface FILE  the lid's interface (default the enclosure's LidInterface.json)
   --src DIR         the KiCad project (default design/mechanical/lid)
   --outputs DIR     also check a manufacturing candidate set (L12 to L16), as
-                    make_lid_outputs.py writes into manufacturing/working/lid-rev0.1
+                    make_lid_outputs.py writes into manufacturing/working/lid-rev0.2
   --no-drc          skip L11, KiCad's own DRC (the negative tests use it to save time)
 
 What it CANNOT see (the document, section 6): whether a `world` value in the tables is right

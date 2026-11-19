@@ -6,7 +6,7 @@ Run with the CAD venv's Python, from the repository root:
 
 It reads   the manifest, the STL files and the lid interface in design/mechanical/assembly,
            the board interface and the document's tables
-and writes design/mechanical/reports/UsbPowerHub_Enclosure_Rev0.1_<View>.png
+and writes design/mechanical/reports/UsbPowerHub_Enclosure_Rev0.2_<View>.png
 
 The pictures are for looking at and prove nothing. Each carries, in a PNG text chunk, the
 SHA-256 of the manifest it was drawn from; the checker reads that and nothing else of a

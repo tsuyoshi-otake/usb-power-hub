@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "about": "Interface of the enclosure's lid PCB, written by design/mechanical/scripts/make_enclosure.py. Do not edit.",
- "frame": "the board frame of board_interface_Rev0.5.json; the lid's outline is the main board's, seen from above",
+ "frame": "the board frame of board_interface_Rev0.6.json; the lid's outline is the main board's, seen from above",
  "outline": {
   "x0": 0.0,
   "y0": 0.0,
@@ -53,7 +53,7 @@
   {
    "ref": "SW2",
    "kind": "button",
-   "x": 65.3,
+   "x": 68.5,
    "y": 4.5,
    "d": 4.6
   },
@@ -85,9 +85,9 @@
     "D13"
    ],
    "rect": [
-    62.4,
+    69.1,
     9.9,
-    64.7,
+    71.4,
     13.6
    ],
    "note": "no copper and no solder mask on either side: bare FR-4 passes the LEDs' light"
@@ -96,7 +96,7 @@
  "ports": [
   {
    "ref": "J1",
-   "x": 76.0,
+   "x": 82.5,
    "edge": "back"
   },
   {
@@ -106,7 +106,7 @@
   },
   {
    "ref": "J3",
-   "x": 51.3,
+   "x": 82.5,
    "edge": "front"
   },
   {
@@ -157,26 +157,26 @@
    {
     "what": "tower SW1",
     "rect": [
-     28.3,
+     27.9,
      -0.4,
-     34.7,
-     7.7
+     35.1,
+     8.1
     ]
    },
    {
     "what": "tower SW2",
     "rect": [
-     62.1,
+     64.9,
      -0.4,
-     68.5,
-     7.7
+     72.1,
+     8.1
     ]
    },
    {
     "what": "light well SW1",
     "rect": [
      27.6,
-     7.7,
+     8.1,
      31.9,
      14.6
     ]
@@ -184,9 +184,9 @@
    {
     "what": "light well SW2",
     "rect": [
-     61.4,
-     7.7,
-     65.7,
+     68.1,
+     8.1,
+     72.4,
      14.6
     ]
    },

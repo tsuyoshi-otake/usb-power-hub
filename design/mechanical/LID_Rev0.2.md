@@ -1,9 +1,17 @@
-# Lid PCB Rev0.1 — the enclosure's top panel (issue #11)
+# Lid PCB Rev0.2 — the enclosure's top panel (issues #11 and #13)
 
-> **WIP — MANUFACTURING PROHIBITED. NOT ORDERED.** The lid of the enclosure Rev0.1
-> (`ENCLOSURE_Rev0.1.md`, E3 and E8), drawn as a KiCad board. Nothing is ordered, no release
-> exists, and JLCPCB has not seen the files. The legend is a first proposal: the user has not
-> seen it on a board.
+> **WIP — MANUFACTURING PROHIBITED. NOT ORDERED.** The lid of the enclosure Rev0.2
+> (`ENCLOSURE_Rev0.2.md`, E3 and E8), which is drawn for the Rev0.6 main board, as a KiCad
+> board. Nothing is ordered, no release exists, and JLCPCB has not seen the files. The legend
+> is a first proposal: the user has not seen it on a board.
+>
+> **Rev0.2 against Rev0.1 (2026-11-19, issue #13).** The main board's connectors stand
+> mirror-symmetric since Rev0.6 (D39), and the lid follows through the interface: HOST moved
+> from x = 76.0 to 82.5 mm and OUT B from 51.3 to 82.5 mm; OUT B's button hole moved from
+> x = 65.3 to 68.5 mm and its window from the button's left to its right (x = 69.1–71.4 mm).
+> OUT A's and 5V IN's ports, OUT A's button and window, the pinhole over SW3 and the four screw
+> holes stand where they stood. No parameter of §4 changed, and of §5 only the revision's text.
+> Lid Rev0.1 was never ordered; its files are in Git history, at commit `de432d1`.
 
 ## 1. What it is
 
@@ -20,7 +28,7 @@ enclosure's frame, held by four pan-head M2 screws, and does four things:
 
 ## 2. Sources
 
-- **The interface.** `assembly/UsbPowerHub_Enclosure_Rev0.1_LidInterface.json`, which
+- **The interface.** `assembly/UsbPowerHub_Enclosure_Rev0.2_LidInterface.json`, which
   `make_enclosure.py` writes from the enclosure document and the main board: the outline, the
   thickness, the seven holes, the two windows and the four ports' positions. No script holds a
   value of it, and this document names its sizes only to describe the board (§1, §7): the
@@ -46,7 +54,7 @@ Each is provisional and the user may revert any one.
 | K3 | Copper stays `edge_clear` from the outline, `hole_clear` from a button hole and the pinhole, `head_clear` from the circle a screw head covers, and `window_clear` from a window. | No copper at a routed edge or a drilled wall, none under a screw head that could cut through the mask, and none in a mask opening: nothing is left bare, so the finish coats nothing. | Plated holes (a plated wall wears off on a plunger). |
 | K4 | All seven holes are unplated. | They are mechanical. | — |
 | K5 | A window is an opening in the solder mask on both sides, exactly the interface's rectangle, with no copper and no silkscreen in it. | E8: bare FR-4 passes an LED's light. | A drilled window (dust), a light pipe (D13: few part types). |
-| K6 | Legend on the top: the product name, `Lid Rev0.1`, a label and an arrow for each port, a ring round each button hole, `BOOT` at the pinhole. Port labels are 3.0 mm high. | CLAUDE.md §6: product name, revision and port labels, Latin, at least 1.0 mm. HOST and 5V IN are the same receptacle on one edge and can be swapped (the 2026-11-13 answer on the ports' positions), so their labels are large and each has an arrow at its port. A button stands 14 mm to the right of its port's arrow, nearer its own label than the other port's. | Kanji (CLAUDE.md §6). A label for the LEDs (two colours in one window; the manual explains them). |
+| K6 | Legend on the top: the product name, `Lid Rev0.2`, a label and an arrow for each port, a ring round each button hole, `BOOT` at the pinhole. Port labels are 3.0 mm high. | CLAUDE.md §6: product name, revision and port labels, Latin, at least 1.0 mm. HOST and 5V IN are the same receptacle on one edge and can be swapped (the 2026-11-13 answer on the ports' positions), so their labels are large and each has an arrow at its port. A button stands 14 mm from its port's arrow, towards the lid's middle, and 51 mm from the other port's. | Kanji (CLAUDE.md §6). A label for the LEDs (two colours in one window; the manual explains them). |
 | K7 | Finish, solder mask and silkscreen colours are not chosen here. | No copper is bare, so any finish does. The colours are the user's (the main board's are not decided either). | — |
 | K8 | The bottom silkscreen carries the board's name and the text `JLCJLCJLCJLC`. | JLCPCB prints its order number on a board. From memory, not read in this session: with the form's "specify a location" option it prints the number in place of that text. On the bottom it is inside the case. Without the option the text is only a hidden line of letters. | An order number on the top face. |
 
@@ -97,13 +105,13 @@ interface and one ring per button hole, from §4.
 | Label | Side | Text | Anchor | dx | dy | Height | Stroke |
 |---|---|---|---|---:|---:|---:|---:|
 | title | top | USB Power-Control Hub | centre | 0 | 4 | 3.0 | 0.5 |
-| revision | top | Lid Rev0.1 | centre | 0 | -1.5 | 1.5 | 0.25 |
+| revision | top | Lid Rev0.2 | centre | 0 | -1.5 | 1.5 | 0.25 |
 | J1 | top | HOST | J1 | 0 | 6.5 | 3.0 | 0.5 |
 | J2 | top | OUT A | J2 | 0 | 6.5 | 3.0 | 0.5 |
 | J3 | top | OUT B | J3 | 0 | 6.5 | 3.0 | 0.5 |
 | J4 | top | 5V IN | J4 | 0 | 6.5 | 3.0 | 0.5 |
 | SW3 | top | BOOT | SW3 | 5.75 | 0 | 1.5 | 0.25 |
-| ident | bottom | USB Power-Control Hub Lid Rev0.1 | centre | 0 | 4 | 1.5 | 0.25 |
+| ident | bottom | USB Power-Control Hub Lid Rev0.2 | centre | 0 | 4 | 1.5 | 0.25 |
 | order | bottom | JLCJLCJLCJLC | centre | 0 | -6 | 1.0 | 0.17 |
 <!-- lid-legend:end -->
 
@@ -117,7 +125,7 @@ lines, and 59 with `--outputs` (L12–L16).
 
 | Check | Proves | Demand |
 |---|---|---|
-| L01 | The board was built from this document's two tables and from this interface file (the SHA-256 in its title block); the title block carries `Rev0.1` and `WIP`; the board and its project file end their lines with LF, as a checkout does. | CLAUDE.md §3 (state), §7 (one source) |
+| L01 | The board was built from this document's two tables and from this interface file (the SHA-256 in its title block); the title block carries `Rev0.2` and `WIP`; the board and its project file end their lines with LF, as a checkout does. | CLAUDE.md §3 (state), §7 (one source) |
 | L02 | 2 copper layers, the interface's thickness, one rectangle as the outline (the interface's), the plot and drill origin at the lid's lower-left corner, and no track, via, net or drawing on a copper layer. | K1, K2 |
 | L03 | The board drills the interface's seven holes and no other: each one round, unplated, at its place and diameter, without a copper ring. | K4 |
 | L04 | On each side: no copper within `edge_clear` of the outline or in the nine keep-clear areas (K3). And, whatever §4's design values are: none within `copper_edge_min` of the outline or `copper_hole_min` of a drilled wall. | K3, CLAUDE.md §5.3 |
@@ -171,7 +179,7 @@ It cannot see:
 
 ## 7. Manufacturing
 
-`scripts/make_lid_outputs.py` writes a candidate set into `manufacturing/working/lid-rev0.1/`
+`scripts/make_lid_outputs.py` writes a candidate set into `manufacturing/working/lid-rev0.2/`
 (not tracked, not orderable): the Gerber and drill zip, a 1:1 drawing of the top, a picture
 of each side, the DRC report, a `WIP` manifest and the checksums. Two runs write the same
 bytes. No release exists.
@@ -190,7 +198,10 @@ the main board; that figure was not read again for these files.
 
 ## 8. Not verified
 
-- The user has not seen the legend. Its texts, sizes and places are a first proposal (K6).
+- The user saw a picture of Lid Rev0.1's legend on 2026-11-18 and found the ports' places
+  asymmetric (「なんかUSBの位置がアシンメトリーで変だね」), which led to D39 and to this
+  revision. The user has not accepted this legend, and nobody has seen it on a manufactured
+  board (OI-6). Its texts, sizes and places are a first proposal (K6).
 - Nothing is ordered and JLCPCB has not seen the files: no DFM, no quote for this board.
 - K8's order-number option is from memory. Without it the bottom carries a line of letters,
   and JLCPCB puts its number where it chooses, possibly on the top.
@@ -199,5 +210,5 @@ the main board; that figure was not read again for these files.
   change.
 - The LEDs' light through the windows, and what the copper stops (§6).
 - A pan head's real diameter. `keepout_d` is the enclosure's `lid_head_keepout_d`, from
-  memory (`ENCLOSURE_Rev0.1.md` §8).
+  memory (`ENCLOSURE_Rev0.2.md` §8).
 - JLCPCB's thickness tolerance (± 10 %) against the plungers' 0.5 mm of play.

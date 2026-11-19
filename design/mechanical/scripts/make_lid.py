@@ -1,4 +1,4 @@
-"""Write the lid PCB Rev0.1 as a KiCad 9 board (issue #11): design/mechanical/lid/usb-power-hub-lid.*
+"""Write the lid PCB Rev0.2 as a KiCad 9 board (issue #11): design/mechanical/lid/usb-power-hub-lid.*
 
 Run with KiCad's own Python, which carries the pcbnew module, from the repository root, after
 make_enclosure.py (which writes the lid's interface):
@@ -6,8 +6,8 @@ make_enclosure.py (which writes the lid's interface):
     "<KiCad 9.0>/bin/python.exe" -I -B design/mechanical/scripts/make_lid.py
         [--doc FILE] [--interface FILE] [--out DIR] [--no-check]
 
-Inputs: the lid document's parameter and legend tables (design/mechanical/LID_Rev0.1.md) and
-the lid's interface (assembly/UsbPowerHub_Enclosure_Rev0.1_LidInterface.json): outline, holes,
+Inputs: the lid document's parameter and legend tables (design/mechanical/LID_Rev0.2.md) and
+the lid's interface (assembly/UsbPowerHub_Enclosure_Rev0.2_LidInterface.json): outline, holes,
 windows, ports. No position is typed here.
 Output: usb-power-hub-lid.kicad_pcb and .kicad_pro in --out (default design/mechanical/lid),
 rebuilt from nothing on every run:
@@ -226,8 +226,8 @@ def build(pcb_path, params, legend, interface, digest):
     tb.SetRevision(spec.REVISION)
     tb.SetDate(DATE)
     for i, c in enumerate(("WIP - MANUFACTURING PROHIBITED",
-                           "Source: design/mechanical/LID_Rev0.1.md",
-                           "Interface: UsbPowerHub_Enclosure_Rev0.1_LidInterface.json",
+                           "Source: design/mechanical/LID_Rev0.2.md",
+                           "Interface: UsbPowerHub_Enclosure_Rev0.2_LidInterface.json",
                            spec.DIGEST_TAG + digest)):
         tb.SetComment(i, c)
     for hole in interface["holes"]:

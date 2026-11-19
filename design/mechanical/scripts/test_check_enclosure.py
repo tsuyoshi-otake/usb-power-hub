@@ -10,7 +10,7 @@ Each test builds the enclosure into a temporary directory, with one parameter ov
 on it in a new process. The unchanged build must pass; every corruption must fail and be
 named in the output. The repository's files are never modified. A test that edits a built
 file also corrects its SHA-256 in the manifest, so that only the check under test fails.
-The whole run takes about 1 min.
+The whole run takes about 1.5 min.
 """
 import hashlib
 import importlib.util
@@ -198,7 +198,7 @@ class CheckEnclosure(unittest.TestCase):
     # E01 -------------------------------------------------------------------------------------
     def test_no_manifest(self):
         self.assertFailsWith(variant(edit=lambda out: (out / spec.MANIFEST).unlink()),
-                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.1_Manifest.json")
+                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.2_Manifest.json")
 
     def test_piece_not_in_the_manifest(self):
         def edit(out):
@@ -216,11 +216,11 @@ class CheckEnclosure(unittest.TestCase):
             raw[200] ^= 1
             f.write_bytes(bytes(raw))
         self.assertFailsWith(variant(edit=edit),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.1_Tray.stl: SHA-256 differs")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.2_Tray.stl: SHA-256 differs")
 
     def test_piece_missing(self):
         self.assertFailsWith(variant(edit=lambda out: (out / f"{spec.PREFIX}Plunger.stl").unlink()),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.1_Plunger.stl: missing")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.2_Plunger.stl: missing")
 
     def test_document_value_changed_after_the_build(self):
         self.assertFailsWith(variant(doc=table_value("params", "gap", "0.5")),
@@ -276,9 +276,18 @@ class CheckEnclosure(unittest.TestCase):
     def test_cavity_lower_than_the_tallest_part(self):
         self.assertFailsWith(variant("cavity_h=18.0"), "FAIL E05 F1: ", "of the Lid inside its envelope")
 
-    def test_tower_on_a_switch(self):
-        self.assertFailsWith(variant("ui_bottom=1.0"), "FAIL E05 SW1: ",
-                             "of the Frame inside its envelope")
+    def test_tube_on_its_switch(self):
+        rc, out = variant("ui_bottom=1.0")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E05 SW3: \d+\.\d\d mm3 of the Frame inside its envelope")
+
+    def test_column_beside_the_converter(self):
+        # Rev0.1's column, from ui_bottom up, on the Rev0.6 board: SW2 stands beside the MAU104
+        rc, out = variant("btn_bottom=2.2")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E05 U5: \d+\.\d\d mm3 of the Frame inside its envelope "
+                              r"\(height 10\.2 mm \+ 0\.3 mm\)")
+        self.assertNotIn("FAIL E05 SW", out)
 
     def test_part_without_a_height(self):
         name = "Fuse_Bourns_MF-R300_Style2_P5.10mm"
@@ -381,6 +390,20 @@ class CheckEnclosure(unittest.TestCase):
     def test_bore_too_loose(self):
         self.assertFailsWith(variant("btn_bore_d=5.0", "btn_cbore_d=6.4"),
                              "FAIL E10 SW1: the plunger can move 0.5 mm sideways")
+
+    def test_counterbore_in_a_thin_wall(self):
+        # Rev0.1's wall: 1.5 mm round the bore leaves 0.4 mm round the counterbore
+        rc, out = variant("btn_wall=1.5")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E10 SW1: \d\d\.\d % of the 0\.8 mm ring around the plunger's "
+                              r"counterbore is plastic, want 100")
+        self.assertIn("PASS E10 SW1: 0.8 mm of plastic all round the plunger's bore", out)
+
+    def test_bore_in_a_thin_wall(self):
+        rc, out = variant("btn_wall=0.5")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E10 SW2: \d\d\.\d % of the 0\.8 mm ring around the plunger's "
+                              r"bore is plastic, want 100")
 
     def test_plunger_leaves_through_the_lid(self):
         self.assertFailsWith(variant("lid_btn_d=5.4"), "FAIL E10 SW1: lifted", "it must not leave")
@@ -498,7 +521,7 @@ class CheckEnclosure(unittest.TestCase):
     def test_receptacle_moved_on_the_board(self):
         self.assertFailsWith(variant(interface=moved("J3", dx=-0.6)),
                              "FAIL E15 derived figures differ: ",
-                             "port_to_screw_max 45.21 (built: 45.81)")
+                             "port_to_screw_max 14.03 (built: 14.63)")
 
     def test_swd_footprint_nearer_the_wall(self):
         self.assertFailsWith(variant(interface=moved("J5", dy=0.455)),
@@ -513,7 +536,7 @@ class CheckEnclosure(unittest.TestCase):
         here = spec.source_tag(spec.ASSEMBLY / spec.MANIFEST)      # the repository's build
         self.assertFailsWith(variant("plunger_proud=1.2", pictures=lambda out, pic: picture(pic, here)),
                              "FAIL E16 1 of 1 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.1_Assembled.png): run render_enclosure.py")
+                             "(UsbPowerHub_Enclosure_Rev0.2_Assembled.png): run render_enclosure.py")
 
     def test_picture_that_names_no_build(self):
         def pictures(out, pic):
@@ -521,7 +544,7 @@ class CheckEnclosure(unittest.TestCase):
             picture(pic, spec.source_tag(out / spec.MANIFEST))
         self.assertFailsWith(variant(pictures=pictures),
                              "FAIL E16 1 of 2 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.1_Open.png)")
+                             "(UsbPowerHub_Enclosure_Rev0.2_Open.png)")
 
     def test_no_pictures(self):
         self.assertFailsWith(variant(pictures=lambda out, pic: None),

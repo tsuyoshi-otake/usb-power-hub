@@ -5,7 +5,7 @@ Run with KiCad's own Python from the repository root, after make_lid.py:
     "<KiCad 9.0>/bin/python.exe" -I -B design/mechanical/scripts/make_lid_outputs.py
         [--src DIR] [--out DIR] [--no-check]
 
-Output: manufacturing/working/lid-rev0.1/ (--out), rebuilt on every run. It is a WIP
+Output: manufacturing/working/lid-rev0.2/ (--out), rebuilt on every run. It is a WIP
 candidate: never orderable (CLAUDE.md 2, manufacturing/working/), not a release, and not
 tracked (.gitignore). Every file is named <Product>_<Board>_<Revision>_<Artifact>:
 - _Gerber.zip: the Gerbers of the 2 copper layers, both silkscreens, both masks and Edge.Cuts
@@ -140,7 +140,7 @@ def manifest(board, files, drc, sources):
         "- Light: how much of an LED's light the bare FR-4 window passes, and how much shows through",
         "  the solder mask beside the copper, is seen only on a built lid.",
         "- JLCPCB has not seen the files: no JLCDFM run, no quote, colours and finish not chosen.",
-        "- The enclosure the lid closes is not printed (ENCLOSURE_Rev0.1.md): the holes' positions",
+        "- The enclosure the lid closes is not printed (ENCLOSURE_Rev0.2.md): the holes' positions",
         "  are the enclosure's drawing, not a measured part.",
         "",
     ]

@@ -1,7 +1,7 @@
 """Read the enclosure document's tables and the board interface.
 
 Shared by make_enclosure.py, check_enclosure.py and render_enclosure.py, so that
-a parameter has one home: design/mechanical/ENCLOSURE_Rev0.1.md. Pure Python.
+a parameter has one home: design/mechanical/ENCLOSURE_Rev0.2.md. Pure Python.
 """
 import hashlib
 import json
@@ -10,11 +10,11 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 MECH = ROOT / "design" / "mechanical"
-DOC = MECH / "ENCLOSURE_Rev0.1.md"
-INTERFACE = MECH / "reference" / "board_interface_Rev0.5.json"
+DOC = MECH / "ENCLOSURE_Rev0.2.md"
+INTERFACE = MECH / "reference" / "board_interface_Rev0.6.json"
 ASSEMBLY = MECH / "assembly"
 REPORTS = MECH / "reports"
-PREFIX = "UsbPowerHub_Enclosure_Rev0.1_"
+PREFIX = "UsbPowerHub_Enclosure_Rev0.2_"
 MANIFEST = f"{PREFIX}Manifest.json"
 
 
