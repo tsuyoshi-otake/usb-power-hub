@@ -732,7 +732,8 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **JLCDFM's limits are its own and can contradict JLCPCB's capabilities page.** Plated slot width:
   JLCDFM Danger below 0.61 mm, Warning 0.61-0.81, Good above 0.81; JLCPCB's page (read 2026-11-13) gives
   0.35 mm minimum for multi-layer boards with a length of at least twice the width. 16 Danger rows for the
-  receptacles' 0.60 mm slots were left to the user. Its plated-hole spacing: Danger below 0.18 mm,
+  receptacles' 0.60 mm slots were left to the user, who kept the slots at 0.60 mm on 2026-11-19 (Rev0.6's
+  gate): the maker's land stays and JLCPCB's own DFM judges after an order. Its plated-hole spacing: Danger below 0.18 mm,
   Warning 0.18-0.2 mm.
 - **Browser tool facts (Claude in Chrome, 2026-11-13).** `browser_batch` takes `{"actions": [{"name": ...,
   "input": {...}}]}` (`calls` is rejected); `computer` has `hover`, not `mouse_move`; a JavaScript result is cut

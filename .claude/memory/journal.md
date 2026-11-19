@@ -1974,3 +1974,26 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Not verified.** Whether D1's joint wets onto the via is seen only on the first boards. Still the user's:
   "Confirm Production file" for the non-plated holes, the 0.60 mm slots, and the rest of the review's section 8.
 - **Commits.** `88de49c` (the gate's record) and this entry's. Not pushed.
+
+## 2026-11-19 rev06-slot-decision (#13): the user keeps the receptacles' plated slots at 0.60 mm
+
+- **Decision (user).** 「このまま」, the answer to 「コネクタのめっきスロット幅 0.60 mm はこのままにしますか？」 (the
+  choices were 「このまま」 and 「広げる」; Claude had recommended keeping them). Finding 3 of
+  `manufacturing/releases/rev0.6/r01/JLCPCB_REVIEW.md` is closed as kept. No copper changes, r01 stays the
+  candidate, and its review stays valid for the same three SHA-256.
+- **Why keeping was recommended.** 0.60 mm is the maker's land for C2765186 (D37). JLCDFM's Danger limit is
+  0.61 mm, its own; JLCPCB's capabilities page gave 0.35 mm as the minimum plated slot width (read 2026-11-13,
+  not read again). A wider slot leaves the maker's land and is a new revision with the whole gate again.
+- **What changed.** The review (header, section 1, finding 3, the section 4 row, section 8 item 3), the manifest
+  (the gate row, the open gate, a new residual risk), `CLAUDE.md` (Section 0 twice, Section 12 twice),
+  `README.md` and `rules.md` say that findings 1 and 3 are decided and that finding 2 waits. `SHA256SUMS.txt`
+  regenerated for the two changed documents.
+- **Verification.** `sha256sum -c` (12 OK, 13 files); only `JLCPCB_REVIEW.md`, `RELEASE_MANIFEST.md` and
+  `SHA256SUMS.txt` differ from `2399e77` in the release directory; 0 CR bytes; the state reads `WIP`; no account
+  data in the diff. No independent verifier for this change: it records one decision in five documents.
+- **Not verified.** JLCPCB's own DFM runs only after an order and may still object to the slots. Whether the
+  shell legs reach through them on a 1.6 mm board is OI-33. Rev0.5 r02's documents still call the slot width a
+  decision for the user: they are that release's record and were not changed.
+- **Still the user's.** "Confirm Production file" for the 15 non-plated holes (finding 2, an order-time choice),
+  the rest of the review's section 8, and the approval of r01.
+- **Commits.** `2399e77` (the via decision) and this entry's. Not pushed.

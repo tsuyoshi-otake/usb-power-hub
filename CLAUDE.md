@@ -78,8 +78,9 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > with each Danger item judged against measurements on the board, and a quote of $52.85 without
 > shipping. It changed no file and left three findings to the user: a GND via carried from
 > Rev0.5's routing stands 0.059 mm from pad 3 of D1 (one net), JLCDFM lists the non-plated drill
-> file as plated, and the receptacles' slots are 0.60 mm wide. The user accepted the first as it
-> is on 2026-11-19 (「受け入れる」); the other two wait. The review holds only for the files whose
+> file as plated, and the receptacles' slots are 0.60 mm wide. On 2026-11-19 the user accepted the
+> first as it is (「受け入れる」) and kept the slots at 0.60 mm (「このまま」); the drill-file
+> finding waits for the order. The review holds only for the files whose
 > SHA-256 it records. The candidate before it is Rev0.5's,
 > `manufacturing/releases/rev0.5/r02/` (state `WIP`,
 > **nothing ordered, nothing paid**, no approval), with its manifest, checksums and the gate's
@@ -90,7 +91,8 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > held rotations only as `jlcpcb_model_rotation.json`), and eight vias stood 0.046 mm from the
 > receptacles' plated slots (fixed in r02). It read part mapping (41 of 41, 0 substituted),
 > the placement preview per part class, JLCDFM (each Danger item judged; the receptacles' 0.60
-> mm slot width is the user's decision) and a quote of $51.94 without shipping, and it holds
+> mm slot width was left to the user, who kept it on 2026-11-19, at Rev0.6's gate) and a quote of
+> $51.94 without shipping, and it holds
 > only for the files whose SHA-256 the review records. The gate ran on
 > Rev0.4 (issue #6, 2026-11-11/12): JLCDFM, part mapping (40 of 40, 0 substituted), the
 > placement preview read per part class, a quote of $81.85 without shipping, and, with every
@@ -825,10 +827,11 @@ fiducials, BOM against CPL). The JLCPCB gate ran on r01's files on 2026-11-19
 SHA-256 it records stand: the part mapping (41 of 41, 0 substituted, 38 Basic and the three allowed
 Extended), JLCPCB's assembly stock on that day (every code above 500), the placement preview (J1-J4
 and every moved part that is not symmetrical, one instance of each other class) and a quote of
-$52.85 without shipping. JLCDFM ran and is **not accepted**: the user accepted the GND via
-0.059 mm from D1 pad 3 as it is on 2026-11-19 (「受け入れる」) and still decides on the non-plated
-holes that JLCDFM lists as plated and on the 0.60 mm slots. Not done on Rev0.6's files: the independent check of the set, the Akizuki stock, the
-assembled parcel's shipping and a quote with impedance control.
+$52.85 without shipping. JLCDFM ran and is **not accepted**: on 2026-11-19 the user accepted the
+GND via 0.059 mm from D1 pad 3 as it is (「受け入れる」) and kept the receptacles' plated slots at
+0.60 mm (「このまま」), and still decides on the non-plated holes that JLCDFM lists as plated. Not
+done on Rev0.6's files: the independent check of the set, the Akizuki stock, the assembled parcel's
+shipping and a quote with impedance control.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
       `WIP`; the user approves.*
@@ -885,8 +888,8 @@ assembled parcel's shipping and a quote with impedance control.
       (`r02/JLCPCB_REVIEW.md`). Part mapping 41 of 41, 0 substituted; JLCDFM's 6 Danger items judged
       against measurements, except 6 pad-spacing and 3 mask-exposure rows that were not identified one by
       one, and the silkscreen-to-pad rows, which were not read. The receptacles' 0.60 mm plated slots are
-      JLCDFM Danger (below 0.61 mm) though JLCPCB's capabilities page allows 0.35 mm: the user decides
-      (user).*
+      JLCDFM Danger (below 0.61 mm) though JLCPCB's capabilities page allows 0.35 mm: left to the user
+      then, who kept them at 0.60 mm on 2026-11-19, at Rev0.6's gate (「このまま」) (user).*
 - [ ] Prototype or first-article evidence attached. *Nothing is built.*
 - [ ] Final landed cost, shipping, and lead time reviewed. *Half: the quote of 2026-11-13 is $51.94
       without shipping (PCB $8.00; read with r01's Gerber and r02's BOM and CPL; r02's own total and the

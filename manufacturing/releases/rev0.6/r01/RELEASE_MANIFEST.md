@@ -29,7 +29,7 @@
 | Not populated (DNP, BOM-excluded) | 34: FID1 FID2 FID3 H1 H2 H3 H4 J5 TP1 TP2 TP3 TP4 TP5 TP6 TP7 TP8 TP9 TP10 TP11 TP12 TP13 TP14 TP101 TP102 TP103 TP104 TP105 TP106 TP201 TP202 TP203 TP204 TP205 TP206 |
 | ERC | 0 violations (`UsbPowerHub_Main_Rev0.6_ERC.json`) |
 | DRC | 0 violations, 0 unconnected items, 0 schematic-parity items (`UsbPowerHub_Main_Rev0.6_DRC.json`), including JLCPCB's hole figures as custom rules; the slots as capsules are measured by rule 10 of `check_routing.py`, which KiCad's DRC does not do |
-| JLCPCB DFM, part mapping, placement preview | run on these files on 2026-11-19, **not accepted** (`JLCPCB_REVIEW.md`). Part mapping 41 of 41, 0 substituted. Placement preview: the four receptacles and every moved part that is not symmetrical read, one instance of each other class. JLCDFM: every Danger item judged against measurements; of its three findings the user accepted one on 2026-11-19 (a GND via 0.059 mm from D1 pad 3, 「受け入れる」) and two wait for the user (the non-plated holes that JLCDFM lists as plated, the 0.60 mm plated slots). The review holds only for the three SHA-256 it records |
+| JLCPCB DFM, part mapping, placement preview | run on these files on 2026-11-19, **not accepted** (`JLCPCB_REVIEW.md`). Part mapping 41 of 41, 0 substituted. Placement preview: the four receptacles and every moved part that is not symmetrical read, one instance of each other class. JLCDFM: every Danger item judged against measurements; of its three findings the user decided two on 2026-11-19 (a GND via 0.059 mm from D1 pad 3 is accepted, 「受け入れる」; the receptacles' plated slots stay 0.60 mm wide, 「このまま」) and one waits for the user (the non-plated holes that JLCDFM lists as plated). The review holds only for the three SHA-256 it records |
 | Quote | $52.85 without shipping on 2026-11-19 (PCB $8.00, Economic PCBA $44.85; 5 boards, 2 assembled), `JLCPCB_REVIEW.md` section 6. Rev0.5 r02's was $51.94 |
 | Sourcing | the BOM is the file Rev0.5's check read (`../../rev0.5/r01/SOURCING_CHECK.md`, PASS on 2026-11-13, SHA-256 below). JLCPCB's assembly stock was read again on 2026-11-19 for the 41 codes (all above 500; `JLCPCB_REVIEW.md` section 3); the Akizuki stock was not. The stock moves, and the check is repeated before payment |
 | EasyEDA import (D32) | `../../rev0.4/r01/EASYEDA_IMPORT.md`: blocked at the user's sign-in; not run on Rev0.6 |
@@ -90,7 +90,7 @@ copy it in at approval.
 
 | Gate | State | Owner |
 |---|---|---|
-| JLCDFM on this Gerber | run on 2026-11-19, **not accepted**: the user accepted the GND via beside D1 pad 3 on 2026-11-19 (「受け入れる」) and still decides on "Confirm Production file" for the non-plated holes and on the 0.60 mm plated slots (`JLCPCB_REVIEW.md` sections 1 and 8). Six "Pad spacing", 22 "pad to line spacing" and 3 mask-exposure Danger rows were judged by measurement and not identified one by one | user |
+| JLCDFM on this Gerber | run on 2026-11-19, **not accepted**: on 2026-11-19 the user accepted the GND via beside D1 pad 3 (「受け入れる」) and kept the plated slots at 0.60 mm (「このまま」), and still decides on "Confirm Production file" for the non-plated holes (`JLCPCB_REVIEW.md` sections 1 and 8). Six "Pad spacing", 22 "pad to line spacing" and 3 mask-exposure Danger rows were judged by measurement and not identified one by one | user |
 | Part mapping and placement preview on this BOM and CPL | run on 2026-11-19: 41 of 41, 0 substituted; J1-J4 and the 7 other moved parts that are not symmetrical read in the preview, one instance of each other class. A viewer reading, not JLCPCB's pick-and-place; "Confirm Parts Placement" is the user's choice | user |
 | Quote | read on 2026-11-19: $52.85 without shipping. Not read: the assembled parcel's shipping, a quote with impedance control | user, in the cart |
 | Sourcing | Rev0.5's check of 2026-11-13 read the same BOM file; JLCPCB's stock was read again on 2026-11-19, the Akizuki stock was not; to be repeated before payment | Claude, before payment |
@@ -111,6 +111,10 @@ copy it in at approval.
   net, so DRC is clean, but the mask between them may not hold. Two older pairs are alike (C27 pad 2 0.090 mm,
   TP13 0.095 mm). No checker of the repository measures a pad against a via of its own net. The user accepted
   the pair as it is on 2026-11-19 (「受け入れる」); the first boards show whether D1's joint wets onto the via.
+- The receptacles' 16 plated slots stay 0.60 mm wide, the maker's land (D37), by the user's decision of
+  2026-11-19 (「このまま」): under JLCDFM's Danger limit of 0.61 mm and above the 0.35 mm that JLCPCB's
+  capabilities page gave on 2026-11-13. JLCPCB's own DFM after an order may still object; a wider slot is a new
+  revision. Whether the shell legs reach through them on a 1.6 mm board is OI-33, another question.
 - 13 via holes stand in a pad, as on Rev0.5: 5 in U1's exposed pad, 6 in U6's, and a 0.60 mm via in pad 3 of
   Q18 and of Q38. Solder can wick into them (V-MFG-03).
 - JLCDFM's viewer lists the non-plated drill file as a plated layer, although the file declares itself
