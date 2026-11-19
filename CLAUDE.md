@@ -103,9 +103,17 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > lid PCB's interface and seven pictures are generated from that document and from the
 > board's interface (`design/mechanical/reference/`, exported from the tracked KiCad board) by
 > `make_enclosure.py`, and checked by `check_enclosure.py` (`design/mechanical/README.md`).
-> **Nothing is printed, no cable has been tried in an opening, and the lid PCB is not drawn**;
-> 20 of the 24 part heights it clears are assumed, and the print process is not chosen
-> (Section 7). OI-1 and OI-5 stay open.
+> **Nothing is printed and no cable has been tried in an opening**;
+> 20 of the 24 part heights it clears are assumed. The print process is FDM (user,
+> 2026-11-18; Section 7); its material is not chosen. OI-1 and OI-5 stay open.
+>
+> The lid PCB is drawn (issue #11, 2026-11-18, after the user's 「作図する」):
+> `design/mechanical/LID_Rev0.1.md`, a bare 2-layer board with the main board's outline, no
+> part and no net, with its decisions K1–K8 (Claude, delegated). `make_lid.py` writes the
+> KiCad board in `design/mechanical/lid/` from that document and the enclosure's lid
+> interface, `check_lid.py` checks it (L01–L16), and `make_lid_outputs.py` writes an untracked
+> candidate set into `manufacturing/working/lid-rev0.1/`. **It is not ordered, it has no
+> release, JLCPCB has not seen its files, and the user has not seen its legend on a board.**
 >
 > The repository is under Git since 2026-11-03 (commit `4dd10fb` is the design
 > as it was paused on 2026-08-16). Its one remote, `origin`, is the **private**
@@ -195,10 +203,13 @@ usb-power-hub/
 │  │  ├─ libraries/             #   project-only symbols and footprints
 │  │  ├─ previews/              #   2D/3D and vendor placement previews
 │  │  └─ reports/               #   ERC, DRC, unrouted-net output
-│  ├─ mechanical/               # ENCLOSURE_Rev<X.Y>.md — the enclosure, as a document
-│  │  ├─ scripts/               #   generators and checks run with the CAD venv's Python
+│  ├─ mechanical/               # ENCLOSURE_Rev<X.Y>.md, LID_Rev<X.Y>.md — the enclosure and
+│  │  │                         #   its lid PCB, as documents
+│  │  ├─ scripts/               #   generators and checks: the enclosure's run with the CAD
+│  │  │                         #   venv's Python, the lid's with KiCad's
 │  │  ├─ reference/             #   authoritative outline and connector geometry
-│  │  ├─ assembly/              #   enclosure CAD, lid PCB, fit studies
+│  │  ├─ assembly/              #   enclosure CAD, the lid PCB's interface, fit studies
+│  │  ├─ lid/                   #   the lid PCB's KiCad project (generated, never edited)
 │  │  └─ reports/               #   pictures of the generated enclosure
 │  └─ experiments/              # non-authoritative trials
 ├─ firmware/                    # RP2040 (bare chip, D29) — src/ include/ tests/ tools/ reports/
@@ -512,9 +523,13 @@ The enclosure is part of the release, not an afterthought.
 - Fit the board on ≥ 3 mounting points, with at least one near each connector
   end. Repeated insertion force must not be carried by the solder joints.
 - Print process (FDM / MJF) MUST be chosen before wall and clearance values are
-  frozen; they differ.
+  frozen; they differ. **Chosen: FDM** (user, 2026-11-18: the choice 「FDM」;
+  `design/mechanical/ENCLOSURE_Rev0.1.md` E2). The enclosure's values were drawn for it and
+  stay provisional until the first print.
 - The lid PCB is a manufactured board and follows every rule in this file:
-  own revision, own Gerber set, own release entry.
+  own revision, own Gerber set, own release entry. It is Lid Rev0.1
+  (`design/mechanical/LID_Rev0.1.md`, state `WIP`, no release), drawn from the enclosure's
+  lid interface and from nothing else.
 
 ---
 
@@ -729,7 +744,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 | OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D9/D17): ranges 0.1 Ω / 10 Ω / 510 Ω in a nested bypass ladder, LM393 up-ranging ≤ 3 µs per stage, firmware hold ≤ 100 µs, bypass default ON. Bring-up proves the budget (V-MEAS-02). | Rev0.5 §3.2, §4 |
 | OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D14): D1's PD sink is superseded; port power comes from J4, a power-only 5 V input. Its USB-C advertisement drives the advertisement and budget rules (REQ-PWR-04/05). | Rev0.5 §3.1, §7.2 |
 | OI-5 | **Fastening will not survive use.** 2 × M2 at one end only, 1.6 mm thread engagement (want ≥ 4 mm), and the PCB itself is not clamped. *Rev0.3:* heat-set M2 inserts at 4 corners adopted (D21). *Rev0.5 (D37):* the plug's force enters the PCB through each receptacle's four shell slots, read in V-MECH-01 with OI-33. *Enclosure Rev0.1 (issue #11):* on paper, four bosses and posts clamp the board at H1–H4, the screws go into heat-set inserts (3.10 mm and 3.40 mm of thread), and a rib stands under each receptacle. Open until built and checked (V-MECH-01). | boss height = `GAP` = 1.6; `design/mechanical/ENCLOSURE_Rev0.1.md` E4, E7 |
-| OI-6 | **Silkscreen below fab minimum.** Reference designators 0.80 mm; user-facing kanji 0.81 mm. | canvas px/mm scale |
+| OI-6 | **Silkscreen below fab minimum.** Reference designators 0.80 mm; user-facing kanji 0.81 mm. *Lid Rev0.1 (issue #11):* the user-facing panel is the lid PCB, and its legend is Latin, 1.0–3.0 mm high, on paper (`check_lid.py` L07, L09, L10). Open until a legend is seen on a manufactured board. | canvas px/mm scale; `design/mechanical/LID_Rev0.1.md` §5 |
 | OI-7 | ~~Protection incomplete.~~ **Closed by decision** (D18), with two residuals moved to their own issues. ESD: PSM712 on the CC pins of J1–J4; D+/D− of J1–J3 are unprotected since D22 removed SRV05-4 (product.md §9). TVS: SMBJ6.5CA on the J1 and J4 VBUS. Reverse blocking: back-to-back AO3401A. No TVS on VBUS_A/B, by design: its leakage would be measured, and the port capacitor absorbs ESD. No common-mode choke: not needed for USB 2.0, and none is Basic. Residual: the J4 fuse (OI-29, closed by D25). SRV05-4's class (OI-30) ended with its removal (D22). | Rev0.5 §3.1, §3.4, G10 |
 | OI-8 | **Not testable.** Zero fiducials for 0201 placement; no panelization defined; SWD pads have no fixture datums. *Rev0.3:* TC2030-NL SWD footprint and test pads adopted (D21, REQ-MFG-03/04). Panelization still undefined. | — |
 | OI-9 | ~~BOOTSEL unreachable with the lid fitted.~~ **Closed by decision** (D21 as amended by D23 and D29): the RP2040 ROM USB bootloader (UF2 drive), entered by `BOOT` or by SW3 through a lid pinhole (SW3 pulls QSPI_SS low through 1 kΩ, D29). It is in mask ROM, so no firmware state removes it; SWD is for debug only. Reopen if V-BOOT-01 fails. | REQ-BOOT-02 |
@@ -778,8 +793,10 @@ evidence does not carry over. The `[x]` items hold for r02 only: any regenerated
       `check_pcb.py`, `check_routing.py` exit 0; `r02/UsbPowerHub_Main_Rev0.5_ERC.json`, `_DRC.json`.*
 - [ ] Board dimensions and mechanical overlay accepted against the authoritative
       mechanical source. *Not done: `design/mechanical/` holds a first enclosure on paper (Rev0.1,
-      issue #11; `check_enclosure.py` passes on its files), nothing is printed, and the user decides
-      the print process and accepts the overlay.*
+      issue #11; `check_enclosure.py` passes on its files) and nothing is printed. The print process
+      is FDM (user, 2026-11-18); the user accepts the overlay. The lid PCB is a board of its own
+      (Lid Rev0.1, `WIP`, `check_lid.py` passes on its files); this checklist is the main board's
+      and does not cover it.*
 - [ ] JLCPCB stackup ID recorded; differential impedance computed against it. *Half: the ID
       (JLC04161H-7628) is recorded; the impedance is D27's model value, JLCPCB's calculator was not rerun
       (Claude).*

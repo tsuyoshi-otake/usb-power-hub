@@ -1,10 +1,11 @@
 # Enclosure Rev0.1 — printed tray and frame under a PCB lid (issue #11)
 
 > **WIP — NOT PRINTED, NOT ORDERED.** This is a first design on paper for the Rev0.5 board
-> (100 × 72 mm). Nothing has been printed, no cable has been tried in an opening, and the lid
-> PCB is not drawn yet. Every dimension here is a parameter that the first print may change.
-> The print process is not chosen (CLAUDE.md §7); the values assume FDM (E2) and stay
-> provisional until the user chooses.
+> (100 × 72 mm). Nothing has been printed and no cable has been tried in an opening. The lid
+> PCB is drawn from this document's interface (`LID_Rev0.1.md`, 2026-11-18) and is not
+> ordered. Every dimension here is a parameter that the first print may change.
+> The print process is FDM (the user's choice, 2026-11-18; E2). Its material and the printer
+> are not chosen, and the values stay provisional until the first print.
 
 ## 1. What it is
 
@@ -15,7 +16,7 @@ Four printed pieces, one PCB and sixteen pieces of hardware:
 | Tray | printed, floor on the bed | Floor and the walls up to the board's top face. Four corner bosses carry the board; a rib under each receptacle carries the board's edge. |
 | Frame | printed, upside down (its top face on the bed) | The walls above the board. Four corner posts clamp the board onto the bosses and carry the lid. Two towers guide the button plungers and hold a light well over each port's two LEDs; a tube guides a paperclip to SW3. |
 | Plunger × 2 | printed, cap on the bed | Carries a finger's push through the lid to SW1 and SW2. |
-| Lid | PCB, 100 × 72 × 1.6 mm, the main board's outline and hole positions | The top panel and its legend. Lies on the frame. **Not drawn yet**: this step writes its interface (holes, windows) only. |
+| Lid | PCB, 100 × 72 × 1.6 mm, the main board's outline and hole positions | The top panel and its legend. Lies on the frame. This document writes its interface (outline, holes, windows, port positions); the board itself is `LID_Rev0.1.md`, drawn from that interface and not ordered. |
 | Hardware | bought | 8 heat-set M2 inserts, 4 countersunk M2 × 10 screws (bottom), 4 pan-head M2 × 5 screws (lid). |
 
 The seam between tray and frame is at the board's top face. That puts every port opening in
@@ -41,12 +42,13 @@ orientation (checked: E04).
 ## 3. Decisions
 
 All made by Claude under the 2026-11-03 delegation while answering the user's request
-「筐体もデザインして」 (2026-11-13). Each is provisional and the user may revert any one.
+「筐体もデザインして」 (2026-11-13), except the print process in E2, which the user chose on
+2026-11-18. Each is provisional and the user may revert any one.
 
 | ID | Decision | Why | Rejected |
 |---|---|---|---|
 | E1 | Tray + frame + PCB lid, seam at the board's top face. | CLAUDE.md §1 fixes "3D-printed tub + a second PCB used as the top panel". The board carries its receptacles on its edges, 1.06 mm past the outline, so it cannot be lowered into a one-piece tub with closed port holes. With the seam at the board's top face the board drops into the tray, and the frame comes down over the receptacles. | A one-piece tub with slots open to the rim (the lid would have to close the slots: a PCB cannot). A tub split at the ports' centre line (the frame would then print with overhangs). |
-| E2 | Designed for FDM, 0.4 mm nozzle, 0.2 mm layers, no support material. | The stricter process: an overhang-free part also prints in MJF or SLA, and 0.3–0.4 mm clearances cover either. The process itself stays the user's choice (CLAUDE.md §7). | Freezing wall and clearance values for one process before the user chooses. |
+| E2 | Printed by FDM (**user**, 2026-11-18: the choice 「FDM」, offered with MJF, FDM recommended). 0.4 mm nozzle, 0.2 mm layers, no support material (Claude). | CLAUDE.md §7 wants the process chosen before wall and clearance values are frozen. The parts were drawn for FDM from the start, as the stricter process (no overhang, 0.3–0.4 mm clearances), so the choice changes no value in §4. The first print is a fit check, and a changed opening or clearance is printed again. | MJF (offered, not chosen): its walls and clearances would have been reviewed before freezing. Freezing the values before the user chose. |
 | E3 | The lid is 100 × 72 mm, the main board's outline, and lies **on** the frame's top face inside a 2.4 mm margin. | It stays in the 100 × 100 mm price tier the main board was sized for (D24), and a seat recessed into the frame would be an overhang in the frame's print orientation. | A lid as large as the frame's outline (104.8 × 76.8 mm, outside the tier). A recessed seat. |
 | E4 | Fastening: four countersunk M2 × 10 from below, through the tray's bosses and the board's holes H1–H4 into heat-set inserts in the posts' feet; the lid by four pan-head M2 × 5 into inserts in the posts' tops. | REQ-MECH-04 and D21 call for heat-set M2 inserts at the four corners. Posts and bosses clamp the board itself (OI-5: "the PCB itself is not clamped" in the mockup). A countersink prints without support on the bed side; a counterbore's flat ceiling does not. | One long screw through lid, post and board (M2 × 30 is not a stock length). Self-tapping screws into plastic (thread engagement, REQ-MECH-04). |
 | E5 | A 0.2 mm designed gap at the seam, with a 45° ridge on the tray's wall inside a chamfer on the frame's. | The posts must land on the board before the walls meet, or the board is not clamped. The ridge closes the line of sight through the gap. | A butt seam (a 0.2 mm slit at the board's level all round). |
@@ -237,7 +239,8 @@ It cannot see:
   the walls bow, whether a rib or a hole's edge really takes a plug's force (OI-33).
 - **Light.** How bright an LED is through 1.6 mm of bare FR-4, and what leaks between the
   two LEDs of one well (one well serves green and red by design).
-- **Heat** (E9), **feel** (a loose plunger rattles), and **the legend** (the lid is not drawn).
+- **Heat** (E9), **feel** (a loose plunger rattles), and **the legend** (the lid's own
+  document and checker, `LID_Rev0.1.md` §6).
 - **V-MECH-01 and V-BOOT-01.** Both need the built unit and real cables. This check is a
   desk check ahead of them and closes neither OI-1 nor OI-5.
 
@@ -254,9 +257,10 @@ from memory; each is set again from the bought part's data sheet before printing
 
 ## 9. Printing and assembly
 
-Printing (E2): tray as modelled, floor on the bed; frame turned over, its top face on the
-bed; plungers cap down. The STL files are already in these orientations. No support
-material, no brim needed by the design; 0.2 mm layers, 3 perimeters.
+Printing (FDM, E2): tray as modelled, floor on the bed; frame turned over, its top face on
+the bed; plungers cap down. The STL files are already in these orientations. No support
+material, no brim needed by the design; 0.2 mm layers, 3 perimeters. The material is not
+chosen (§10).
 
 Assembly:
 
@@ -274,8 +278,11 @@ the back wall (§6); whether the cable's head fits beside the wall is not checke
 ## 10. Not verified
 
 - Nothing is printed. No fit, no cable, no screw has been tried.
-- The lid PCB (its own revision, Gerber set and release, CLAUDE.md §7) is not drawn. This
-  step fixes its outline, holes and windows in `assembly/UsbPowerHub_Enclosure_Rev0.1_LidInterface.json`.
+- E2 fixes the process (FDM) only. The material and the printer are not chosen.
+- The lid PCB (its own revision, Gerber set and release, CLAUDE.md §7) is drawn as Lid Rev0.1
+  (`LID_Rev0.1.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.1_LidInterface.json`, which this
+  document fixes. It is not ordered and has no release; what is not verified of it is in its
+  own §8. A change here that moves a hole, a window or a port needs the lid built again.
 - Of the 24 part heights in §5 that belong to a body, 20 are assumed. The four that were read
   are F1, the MAU104, the receptacle and the switch.
 - The insert's hole diameter and the screws' head sizes are from memory (§8).
