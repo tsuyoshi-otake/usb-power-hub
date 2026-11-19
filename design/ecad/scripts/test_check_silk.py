@@ -243,7 +243,7 @@ class CheckSilkTest(unittest.TestCase):
 
     # ---- 4 association ------------------------------------------------------------------------
     def test_label_far_without_leader(self):
-        self.assertFailsWith(run_check(board=move_text("V_J4", 23.8, 47.5), doc=set_row("TP9", y="47.5")),
+        self.assertFailsWith(run_check(board=move_text("V_J4", 23.8, 47.5), doc=set_row("TP9", x="23.8", y="47.5")),
                              "FAIL silk TP9: not within 1.5 mm of TP9's pad and has no leader")
 
     def test_label_reads_as_neighbour(self):
@@ -269,7 +269,7 @@ class CheckSilkTest(unittest.TestCase):
 
     # ---- 5 clearance --------------------------------------------------------------------------
     def test_label_on_pad(self):
-        self.assertFailsWith(run_check(board=move_text("V_J4", 23.8, 51.5), doc=set_row("TP9", y="51.5")),
+        self.assertFailsWith(run_check(board=move_text("V_J4", 23.8, 51.5), doc=set_row("TP9", x="23.8", y="51.5")),
                              "FAIL silk TP9 label: < 0.15 mm from TP9.1's mask opening")
 
     def test_label_off_edge(self):
@@ -283,6 +283,48 @@ class CheckSilkTest(unittest.TestCase):
     def test_label_touches_label(self):
         self.assertFailsWith(run_check(board=move_text("GND", 5.55, 56.2), doc=set_row("TP7", y="56.2")),
                              "FAIL silk TP7 label: < 0.1 mm from silk TP8 label")
+
+    def test_labels_read_as_one_word(self):
+        """The defect r01 had: DVDD 0.30 mm below CLKOUT on one line."""
+        self.assertFailsWith(run_check(board=move_text("DVDD", 49.7, 63.55), doc=set_row("TP10", y="63.55")),
+                             "FAIL silk TP10 label: 0.30 mm from silk TP12 on one line: reads as one word")
+
+    # ---- 3, 4 the part labels and the legend ---------------------------------------------------
+    def test_hand_part_unlabelled(self):
+        self.assertFailsWith(run_check(doc=drop_row("F1")), "FAIL F1: no silk label")
+
+    def test_hand_label_wrong_text(self):
+        self.assertFailsWith(run_check(board=retext("U7", "U8"), doc=set_row("U7", Text="U8")),
+                             "FAIL silk U7: text 'U8', want 'U7'")
+
+    def test_function_label_wrong(self):
+        self.assertFailsWith(run_check(board=retext("BOOT", "RESET"), doc=set_row("SW3", Text="RESET")),
+                             "FAIL silk SW3: text 'RESET', want 'BOOT'")
+
+    def test_part_label_far(self):
+        self.assertFailsWith(run_check(board=move_text("BOOT", 22.0, 68.6), doc=set_row("SW3", x="22.0")),
+                             "FAIL silk SW3:", "mm from SW3's courtyard, want <= 1.5 mm")
+
+    def test_part_label_reads_as_neighbour(self):
+        """RS11's label moved under the gap between the two shunts: nearer RS10's courtyard."""
+        self.assertFailsWith(run_check(board=move_text("RS11", 10.0, 18.0), doc=set_row("RS11", x="10.0")),
+                             "FAIL silk RS11:", "reads as RS10's")
+
+    def test_legend_wrong_net(self):
+        self.assertFailsWith(run_check(board=retext("1 V3V3 3 RUN 5 GND", "1 GND 3 RUN 5 V3V3"),
+                                       doc=set_row("J5.odd", Text="1 GND 3 RUN 5 V3V3")),
+                             "FAIL silk J5.odd: text '1 GND 3 RUN 5 V3V3', its pads' nets give '1 V3V3 3 RUN 5 GND'")
+
+    def test_legend_rows_swapped(self):
+        self.assertFailsWith(run_check(board=both(move_text("2 SWDIO 4 SWCLK 6 NC", 60.5, 68.9),
+                                                  move_text("1 V3V3 3 RUN 5 GND", 59.73, 70.3)),
+                                       doc=lambda t: set_row("J5.odd", y="70.3")(set_row("J5.even", y="68.9")(t))),
+                             "FAIL silk J5.even: row at y", "not on the side of J5's even pads")
+
+    def test_legend_far(self):
+        self.assertFailsWith(run_check(board=move_text("2 SWDIO 4 SWCLK 6 NC", 70.5, 70.3),
+                                       doc=set_row("J5.even", x="70.5")),
+                             "FAIL silk J5.even:", "mm from J5's courtyard, want <= 6.0 mm")
 
     # ---- 6 footprint silkscreen ---------------------------------------------------------------
     def test_polar_part_without_silk(self):

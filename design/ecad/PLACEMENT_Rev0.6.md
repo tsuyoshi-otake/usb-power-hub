@@ -384,8 +384,10 @@ strip and the MAU104 stand where they fit.
 ## Silkscreen
 
 The labels CLAUDE.md §6 asks of the board (P5): the product name and revision, a port label
-beside each USB-C receptacle, and the net name at every test pad. `make_pcb.py` writes each row as
-a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks them.
+beside each USB-C receptacle, the net name at every test pad, and, since release r02 (issue #13,
+2026-11-19), the names of the SWD pads, `BOOT` at SW3 and the reference of each hand-soldered
+part. `make_pcb.py` writes each row as a text on F.SilkS, with its leader, after the routing;
+`check_silk.py` checks them.
 
 - `x`, `y` are the text's centre in the board frame; `Rot` is 0 (left to right) or 90 (bottom
   to top). `Width` and `Height` are KiCad's glyph size and `Stroke` the line width, in mm.
@@ -403,9 +405,20 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
   visible with the receptacle soldered and are not under the case's port openings, which are
   at the board edge. Each stands on its receptacle's outer side, so the four are mirrored like
   the receptacles (D39).
+- Two labels on one line stand at least 1.0 mm apart, one glyph: `DVDD` and `CLKOUT` stood
+  0.30 mm apart until r02 and read as one word in the render, as did `V_J4` beside `HOLD_M_A`
+  (0.33 mm) and `HOLD_M_B` beside `V5L` (0.27 mm). `DVDD` moved 0.95 mm down its line, `V_J4`
+  above its pad and `V5L` to the right of its pad.
 - Reference designators stay hidden (300 at 1.0 mm do not fit); the assembly drawing carries
-  them. Pin 1 and polarity are the footprints' own marks (check_libraries.py keeps them on
-  every polar part).
+  them. The eight hand-soldered parts are the exception, since r02: the user places them by
+  hand, so each has its reference within 1.5 mm of its courtyard (`F1`, `U5`, `U7`, `U17`,
+  `RS10`, `RS11`, `RS20`, `RS21`). Pin 1 and polarity are the footprints' own marks
+  (check_libraries.py keeps them on every polar part).
+- J5's six pads stand at a 1.27 mm pitch, where a 1.0 mm text does not fit, so their names are
+  a legend 5 mm to the right of J5: one row per pad row, the even pads above the odd ones as on
+  the board, each pad as `<number> <net>` from left to right (`NC`: no net). `SWD` stands left
+  of J5 and `BOOT` left of SW3. SW1 and SW2, the port buttons, have no label on this board:
+  each stands beside its port's receptacle, and the lid carries their legend.
 
 <!-- silk:begin -->
 | Label | Text | x | y | Rot | Width | Height | Stroke | Leader |
@@ -416,7 +429,7 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | J2 | OUT A | 9.6 | 3 | 0 | 1 | 1 | 0.17 | - |
 | J3 | OUT B | 90.4 | 3 | 0 | 1 | 1 | 0.17 | - |
 | J4 | 5V IN | 9.6 | 69.5 | 0 | 0.8 | 1 | 0.17 | - |
-| TP1 | V5L | 67.2 | 50.2 | 0 | 1 | 1 | 0.17 | - |
+| TP1 | V5L | 67 | 52.05 | 0 | 1 | 1 | 0.17 | - |
 | TP2 | V5A | 87.4 | 43.25 | 0 | 1 | 1 | 0.17 | - |
 | TP3 | V12F | 62.3 | 12.5 | 0 | 1 | 1 | 0.17 | - |
 | TP4 | V_INJ | 38.35 | 6.55 | 0 | 1 | 1 | 0.17 | - |
@@ -424,8 +437,8 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | TP6 | VDDA | 85 | 41.75 | 0 | 1 | 1 | 0.17 | - |
 | TP7 | GND | 5.55 | 56.75 | 0 | 1 | 1 | 0.17 | - |
 | TP8 | VBUS_IN | 3.6 | 55.2 | 0 | 1 | 1 | 0.17 | 6.7,54.7 10.3,54.7 10.3,55.0 |
-| TP9 | V_J4 | 23.8 | 50.1 | 0 | 1 | 1 | 0.17 | - |
-| TP10 | DVDD | 49.7 | 63.55 | 90 | 1 | 1 | 0.17 | - |
+| TP9 | V_J4 | 24.5 | 53.6 | 0 | 1 | 1 | 0.17 | - |
+| TP10 | DVDD | 49.7 | 62.6 | 90 | 1 | 1 | 0.17 | - |
 | TP11 | RUN | 39.5 | 67.45 | 0 | 1 | 1 | 0.17 | 41.134,67.027 44.981,65.921 |
 | TP12 | CLKOUT | 49.7 | 68.4 | 90 | 1 | 1 | 0.17 | - |
 | TP13 | VDD33_HUB | 97.25 | 30.85 | 90 | 1 | 1 | 0.17 | - |
@@ -442,6 +455,18 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | TP204 | HOLD_L_B | 55 | 30.9 | 90 | 1 | 1 | 0.17 | - |
 | TP205 | VSUP_B | 33.35 | 37.55 | 0 | 0.8 | 1 | 0.17 | - |
 | TP206 | VBUS_B | 67.25 | 32.95 | 90 | 1 | 1 | 0.17 | - |
+| SW3 | BOOT | 26 | 68.6 | 0 | 1 | 1 | 0.17 | - |
+| J5 | SWD | 38.5 | 70.25 | 0 | 1 | 1 | 0.17 | - |
+| J5.even | 2 SWDIO 4 SWCLK 6 NC | 60.5 | 70.3 | 0 | 0.8 | 1 | 0.17 | - |
+| J5.odd | 1 V3V3 3 RUN 5 GND | 59.73 | 68.9 | 0 | 0.8 | 1 | 0.17 | - |
+| F1 | F1 | 7.5 | 49.5 | 0 | 1 | 1 | 0.17 | - |
+| U5 | U5 | 51.5 | 8.5 | 0 | 1 | 1 | 0.17 | - |
+| U7 | U7 | 90.25 | 23 | 0 | 1 | 1 | 0.17 | - |
+| U17 | U17 | 90.6 | 36 | 0 | 1 | 1 | 0.17 | - |
+| RS10 | RS10 | 4.6 | 18 | 0 | 1 | 1 | 0.17 | - |
+| RS11 | RS11 | 14.9 | 18 | 0 | 1 | 1 | 0.17 | - |
+| RS20 | RS20 | 38.4 | 18 | 0 | 1 | 1 | 0.17 | - |
+| RS21 | RS21 | 48.7 | 18 | 0 | 1 | 1 | 0.17 | - |
 <!-- silk:end -->
 
 ## Deviations from the study

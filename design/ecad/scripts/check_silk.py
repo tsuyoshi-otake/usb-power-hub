@@ -23,17 +23,28 @@ JLCPCB's legend limits (pcb-capabilities, Legend, read 2026-11-06): a 1.0 mm tex
     silkscreen layer (the reference designators stay hidden).
  3. Content (CLAUDE.md 6): the title block's title and revision; a port label beside each
     USB-C receptacle (HOST, OUT A, OUT B, 5V IN); at every test pad exactly one label, its
-    pad's net name.
+    pad's net name; a label with its reference at every hand-soldered part (a footprint whose
+    Class field starts with "Hand"), since the user finds its place by it; the function labels
+    of PART_LABELS (BOOT at SW3, SWD at J5); and the legend of J5's programming pads, one row
+    for the even pads and one for the odd ones, each "<pad> <net>" in pad order, NC for a pad
+    without a net.
  4. Association: a test-pad label without a leader is within BESIDE_MM (1.5 mm) of its pad,
     and its centre is nearer that pad's centre than any other test pad's. A leader starts
     within LEAD_START_MM (0.3 mm) of its label without touching its glyphs (KiCad's DRC
     flags that as silk overlap) and ends within LEAD_END_MM (0.6 mm) of its pad's edge,
     nearer that pad than any other pad on the board. A port label lies outside
-    its receptacle's courtyard and within BESIDE_MM of it.
+    its receptacle's courtyard and within BESIDE_MM of it. A part label (a hand-soldered part's
+    reference, a function label) is within BESIDE_MM of its part's courtyard and nearer it than
+    any other labelled part's. A legend row is within LEGEND_MM (6.0 mm) of J5's courtyard, the
+    even row on the side of J5 where its even pads are, and the pads of a row run left to right
+    in pad order, as its text does.
  5. Clearance of every label and leader: on the board, >= EDGE_MM (0.5 mm) from its edge;
     >= PAD_MM (0.15 mm) from every F.Mask opening; >= SILK_MM (0.1 mm) from every footprint's
     silkscreen and from every other label (a label's own leader excepted); a label enters no
     courtyard; a leader enters no courtyard but a test pad's, which carries no body.
+    Two labels with the same rotation that share a line (their inks overlap across the reading
+    direction) are >= WORD_MM (1.0 mm, one glyph) apart along it: closer, they read as one
+    word (DVDD and CLKOUT did, 0.30 mm apart, until Rev0.6 r02).
  6. Footprint silkscreen on the board: every stroke >= MIN_STROKE, inside the board outline,
     >= PAD_MM from every other footprint's F.Mask opening (check_libraries.py measures it
     against the footprint's own), and every polar part (U, D, Q, Y and the SWD connector J5)
@@ -48,6 +59,9 @@ What it CANNOT see:
   is the evidence for orientation (CLAUDE.md 4.2).
 - legibility after printing, and whether a label is under a case opening (V-MECH-01). A
   part's body above the board is its courtyard.
+- whether a reader takes the legend's rows for J5's pad rows: rule 4 checks their order, not
+  that anyone reads them so. The pads themselves carry no name: 1.0 mm text does not fit their
+  1.27 mm pitch.
 - KiCad's DRC checks silk-to-silk and silk-to-copper overlap too; check_pcb.py runs it.
 """
 import argparse
@@ -71,6 +85,12 @@ EDGE_MM = 0.5
 BESIDE_MM = 1.5
 LEAD_START_MM = 0.3
 LEAD_END_MM = 0.6
+WORD_MM = 1.0
+LEGEND_MM = 6.0
+PART_LABELS = {"SW3": "BOOT", "J5": "SWD"}
+LEGEND_REF = "J5"
+LEGEND_ROWS = {"J5.even": 0, "J5.odd": 1}       # label: pad number modulo 2
+HAND = "Hand"
 TOL = 0.0005
 PORTS = {"J1": "HOST", "J2": "OUT A", "J3": "OUT B", "J4": "5V IN"}
 POLAR = ("U", "D", "Q", "Y")
@@ -229,13 +249,96 @@ def check_content(rep, board, labels, found, fps, receptacles):
             continue
         rep.check(lab["text"] == pad.GetNetname(), f"silk {ref}",
                   f"text {lab['text']!r}, its pad's net {pad.GetNetname()!r}")
+    parts = dict(PART_LABELS)
+    parts.update({ref: ref for ref, fp in fps.items() if fp_class(fp).startswith(HAND)})
+    for ref, want in sorted(parts.items()):
+        lab = labels.get(ref)
+        if not rep.check(lab is not None, ref, "no silk label"):
+            continue
+        rep.check(lab["text"] == want, f"silk {ref}", f"text {lab['text']!r}, want {want!r}")
+    legend = legend_texts(fps.get(LEGEND_REF))
+    for name, want in sorted(legend.items()):
+        lab = labels.get(name)
+        if rep.check(lab is not None, name, "no silk legend row"):
+            rep.check(lab["text"] == want, f"silk {name}", f"text {lab['text']!r}, its pads' nets give {want!r}")
     for name in labels:
-        rep.check(name in pads or name in PORTS or name in ("title", "revision"), f"silk {name}",
-                  "labels no test pad, port or title-block field")
+        rep.check(name in pads or name in PORTS or name in ("title", "revision") or name in parts
+                  or name in LEGEND_ROWS, f"silk {name}",
+                  "labels no test pad, port, title-block field, labelled part or legend row")
+    check_part_labels(rep, parts, found, fps)
+    check_legend(rep, labels, found, fps.get(LEGEND_REF))
     for ref, pad in pads.items():
         if pad is None or ref not in found:
             continue
         check_association(rep, ref, labels[ref], found[ref], pad, pads, fps)
+
+
+def fp_class(fp):
+    f = fp.GetFieldByName("Class")
+    return f.GetText() if f else ""
+
+
+def crt_box(fp):
+    rects = cp.courtyard(fp)
+    return (min(r[0] for r in rects), min(r[1] for r in rects),
+            max(r[2] for r in rects), max(r[3] for r in rects)) if rects else None
+
+
+def numbered(fp):
+    return sorted((int(p.GetNumber()), p) for p in fp.Pads() if p.GetNumber().isdigit())
+
+
+def legend_texts(fp):
+    """{row label: text} of the programming connector's pads: "<pad> <net>" in pad order."""
+    if fp is None:
+        return {}
+    out = {}
+    for name, parity in LEGEND_ROWS.items():
+        cells = []
+        for n, p in numbered(fp):
+            if n % 2 == parity:
+                net = p.GetNetname()
+                cells.append(f"{n} {'NC' if not net or net.startswith('unconnected-') else net}")
+        out[name] = " ".join(cells)
+    return out
+
+
+def check_part_labels(rep, parts, found, fps):
+    boxes = {ref: crt_box(fps[ref]) for ref in parts if ref in fps}
+    for ref in sorted(parts):
+        if ref not in found:
+            continue
+        if not rep.check(boxes.get(ref) is not None, f"silk {ref}", f"{ref} is not on the board or has no courtyard"):
+            continue
+        r = ink(found[ref])
+        own = rect_gap(r, boxes[ref])
+        rep.check(own <= BESIDE_MM, f"silk {ref}",
+                  f"{own:.2f} mm from {ref}'s courtyard, want <= {BESIDE_MM} mm")
+        for other, b in boxes.items():
+            if other != ref and b is not None:
+                d = rect_gap(r, b)
+                rep.check(d > own, f"silk {ref}",
+                          f"{d:.2f} mm from {other}'s courtyard, {own:.2f} mm from {ref}'s: reads as {other}'s")
+
+
+def check_legend(rep, labels, found, fp):
+    if fp is None or crt_box(fp) is None or any(n not in found for n in LEGEND_ROWS):
+        return
+    crt = crt_box(fp)
+    ys = {}
+    for name, parity in LEGEND_ROWS.items():
+        r = ink(found[name])
+        g = rect_gap(r, crt)
+        rep.check(g <= LEGEND_MM, f"silk {name}", f"{g:.2f} mm from {LEGEND_REF}'s courtyard, want <= {LEGEND_MM} mm")
+        rep.check(labels[name]["rot"] == 0, f"silk {name}", "a legend row reads left to right")
+        pads = [frame(p.GetPosition()) for n, p in numbered(fp) if n % 2 == parity]
+        rep.check(all(a[0] < b[0] - 1e-6 and abs(a[1] - b[1]) < 1e-6 for a, b in zip(pads, pads[1:])),
+                  f"silk {name}", f"{LEGEND_REF}'s pads of this row do not run left to right in pad order")
+        ys[name] = (centre(r)[1], pads[0][1] if pads else 0.0)
+    (ye, pe), (yo, po) = ys["J5.even"], ys["J5.odd"]
+    rep.check((ye - yo) * (pe - po) > 0, "silk J5.even",
+              f"row at y {ye:.2f}, the odd row at {yo:.2f}: not on the side of {LEGEND_REF}'s even pads "
+              f"(y {pe:.2f}, odd pads {po:.2f})")
 
 
 def pad_dist(pad, pt):
@@ -342,6 +445,16 @@ def check_clearance(rep, labels, found, fps, openings, fsilk, crts):
             if a == b or rect_gap(ra, rb) > SILK_MM + 0.01:
                 continue
             rep.check(not sa.Collide(sb, mm(SILK_MM) - 1), f"silk {a} {ka}", f"< {SILK_MM} mm from silk {b} {kb}")
+    words = [(n, labels[n]["rot"], r) for n, k, _, r in items if k == "label"]
+    for i, (a, rota, ra) in enumerate(words):
+        for b, rotb, rb in words[i + 1:]:
+            if rota != rotb:
+                continue
+            ax = 0 if rota == 0 else 1       # the reading axis; 1 - ax is across it
+            across = min(ra[3 - ax], rb[3 - ax]) - max(ra[1 - ax], rb[1 - ax])
+            along = max(rb[ax] - ra[ax + 2], ra[ax] - rb[ax + 2])
+            rep.check(across <= 1e-6 or along >= WORD_MM - 1e-6, f"silk {a} label",
+                      f"{along:.2f} mm from silk {b} on one line: reads as one word (want >= {WORD_MM} mm)")
 
 
 # ---- 6 footprint silkscreen ----------------------------------------------------------------------
