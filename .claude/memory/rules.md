@@ -487,6 +487,22 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   of them). It caught a 0.30 mm trunk (80.58 mOhm) and a trunk end run into a shell slot,
   and a verifier's own two faults, before a half-hour router run; every stage but the
   router ran inside the verifier's 4 min 10 s.
+- **With most of the copper fixed, more passes give the same session.** (#13, 2026-11-19)
+  On a Rev0.6 input with Rev0.5's routing carried as fixed copper, sessions of 3, 8 and 16
+  passes were identical. That was measured before VBUS_B's trunk moved to y = 14.0; the
+  committed input was run once, with 8 passes (about 5 min against the half hour of a
+  session from nothing).
+- **The router's own unrouted count is not DRC's, and it redraws stubs on nets that are
+  complete.** (#13) The Rev0.6 session's record says 99 unrouted; DRC on the board with that
+  session counts 9. Of the session's 251 segments, 204 are shorter than 1.0 mm, on 46 nets,
+  and two repeat a carried segment exactly. Read DRC, not the router's count. Why it draws
+  the stubs was not looked into.
+- **A wide trunk under a high-speed pair closes the corridor to every crossing net.** (#13)
+  With VBUS_B's 3.0 mm L4 trunk drawn under pair A, no net crossed the pair's corridor on
+  any layer. Moved south of the pair (y = 14.0), with a strip for vias left between trunk
+  and pair, five crossings could be drawn by hand: on L4 under the pair, one via in the
+  strip, then on L1 or L3 over the trunk. Draw the trunk and its crossings before the
+  router runs, and leave the strip.
 
 ## KiCad 9 routing checks
 
@@ -504,6 +520,24 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   failed once the checker printed `GetClass()` (#6 P4).
 - **Check what a note parser will read as a designator.** check_pcb.py read "at P3" in a
   placement note as part P3, and failed (#6 P4).
+- **KiCad's DRC does not split the same shorts by violation type the same way in every run;
+  the set of items it names is stable.** Verified 2026-11-19 (#13): `carry.py` on an
+  unchanged board gave clearance 8 / shorting_items 23, then 7 / 24, and later
+  solder_mask_bridge 4, then 3, with identical lists of the tracks and vias named. Never
+  record, compare or assert a count per violation type. Count the items (the carried record
+  holds `{"drc": 40, "floating": 75}`) and print the split as one run's.
+- **`board.GetConnectivity().TestTrackEndpointDangling(track, True)` finds the tracks DRC
+  calls `track_dangling`.** The scratch patch tools of #13 listed tails with it before a DRC
+  run; the board on which it listed none gave DRC 0 dangling tracks.
+- **Taking a dangling tail away exposes the next one.** (#13) After the first patch run a
+  3.79 mm GND segment dangled where a removed tail had ended, and after that a 0.002 mm
+  segment: a walk along a tail stops at the junction such a segment forms. Repeat
+  remove-then-DRC until DRC names none; do not write the rows from one listing.
+- **A negative test that names a part's place by number breaks for the wrong reason when a
+  revision moves the part.** (#13) Two hole-rule tests of `test_check_routing.py` put a via
+  beside J1's rear slot at its Rev0.5 place (sheet x 130.32); on Rev0.6 the slot is at
+  136.82 and the tests failed because nothing stood there. After a placement change run
+  every suite and read why each failure fails before changing the checker.
 
 ## KiCad 9 hole rules (#8, 2026-11-12)
 

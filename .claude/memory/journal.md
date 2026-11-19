@@ -1737,3 +1737,74 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Commits.** Not committed when this entry was written: the user had not asked for a commit. The decision is with
   the user: take C2 into a new PCB revision (placement, session, patch, silkscreen, outputs, JLCPCB gate, enclosure,
   lid), or keep Rev0.5 r02.
+
+## 2026-11-19 rev06-layout (#13): Rev0.6 placed mirror-symmetric (D39), routed by carrying Rev0.5's copper, labelled, exported
+
+- **Request.** The user, after trial C2 (#12): 「C2 で進める」. On committing: 「コミットして進める (推奨)」, the option that
+  commits Rev0.6 step by step and does not push. Issue #13, steps 1 to 5.
+- **Result.** The tracked board is Rev0.6. J2 | J3 stand at x 17.5 | 82.5 on the front edge, J4 | J1 at the same x on
+  the back edge; SW1/SW2, D10-D13 and R140/R141/R240/R241 mirror with them; 31 of the 304 parts moved. DRC 0
+  violations and 0 unconnected items; the six checkers pass (4068 / 3609 / 13705 / 3505 / 2499 / 2970 checks) and
+  the eight suites (237 tests). No net and no part changed: the BOM and the hand-solder list are Rev0.5 r02's
+  bytes, and the exported netlist differs in title-block lines alone. No release; JLCPCB has not seen the files.
+- **Figures.** Carried: 2,005 track segments and 205 vias; dropped 115 (40 named by DRC, 75 floating) of 19 nets; 36
+  connections open before the router. VBUS_B's trunk: 35.1 mm on L4, 29.8 mm of it 3.0 mm wide along y = 14.0.
+  Session: 8 passes, 251 segments and 1 via, 207.7 mm on 46 nets (204 segments shorter than 1.0 mm, two exact
+  repeats of carried AMP_L_A segments). Patch: 42 rows, 10 of them `remove`; 24 segments taken away, 33 segments
+  and 12 vias drawn. Board: 2738 tracks, 413 vias. Port A 35.24 mOhm, port B 39.12 mOhm of 40. U1's webs N 1.66,
+  E 1.70, S 1.65, W 1.80 mm (rule 1.60); longest In1 void 2.81 mm (rule 3.0).
+- **Design decisions.**
+  - Carry, do not route again. `carry.py` reads Rev0.5's session and patch table from Git at the commit the carry
+    table names (866ef44), applies them with the pipeline's own functions and drops, in rounds, what KiCad's DRC
+    names and what is left floating. `make_pcb.py` applies the record between the GND fanout and the router input.
+    Trial C2 (#12), routed from nothing, had ended with 15 connections open and 4 DRC errors; carried, 36
+    connections are open before the router and 9 after it.
+  - VBUS_B's trunk runs south of pair A, not under it. Under the pair, the trunk and the pair's keepouts closed
+    every layer of the corridor and nothing crossed it. With a strip for vias between trunk and pair, five
+    crossings are drawn in the route table (LED_FLT_B, BTN_B, LED_ON_B, V12F, ADC_L_A).
+  - The patch rows were written by a scratch exact-obstacle search. The tool is not kept; the rows are the
+    document's, and `check_routing.py` reads the board.
+- **Delegation.** One Devin run (SWE-2 Max) in step 1: the 202 mechanical replacements of the re-pointing
+  (`4c4b201`), reviewed with a script that derives the expected changes from the untouched copy. Placement, the
+  carry, the trunk, the patch and every test are the main session's.
+- **Failures, causes and fixes.**
+  - `test_carry.py`, first run: 7 failures and 1 error. Cause 1: the record held the dropped items by DRC
+    violation type, and KiCad's DRC split the same shorts differently from run to run on an unchanged board
+    (clearance 8 / shorting_items 23, then 7 / 24; later solder_mask_bridge 4, then 3), while the tracks, vias and
+    `remove` lists were identical. Taking the least type name per item did not help: the set of types itself
+    varies. Fix: the record holds `{"drc": 40, "floating": 75}`; the split is printed as "in this run". Cause 2:
+    `CARRIED.parent.relative_to(ROOT)` raised ValueError for a record outside the repository, which is where the
+    tests put it. Fix: `as_posix()`.
+  - `test_check_routing.py`: two hole-rule tests named J1's rear slot at its Rev0.5 place (sheet x 130.32). They
+    failed for the wrong reason: no slot stands there on Rev0.6 (136.82). Fixed to the Rev0.6 slot.
+  - After the first patch run a 3.79 mm GND track dangled: taking a tail away had exposed the next segment of the
+    chain. Then a 0.002 mm segment dangled: a tail's removal stops at the junction such a segment forms. Fix:
+    three more rows; repeated until DRC named no dangling track.
+  - Document statements corrected before the grading: the five GND tails stand at the old places of J3's and J1's
+    parts (I had written the MAU104's); EN_B's 5.3 mm stub is the session's, not carried; TAP_B_P runs 1.2 mm
+    beside Rev0.5's line and under Q53, not C35.
+  - Found by the verifier outside its rubric: the U1-escapes paragraph still said "Five U1 pins are still open
+    after the router", which is Rev0.5's session. Corrected after the grading; `check_routing.py`, `check_pcb.py`
+    and `carry.py --check` were run again on the result.
+- **Verification.** A fresh rubric-verifier (sonnet), first grading: overall pass, 12 of 12, in 13 min 12 s. Its
+  own: a pcbnew read of the seven mirror pairs (sums 100.0000, dy 0.0000); the six checkers; kicad-cli's DRC JSON
+  (violations, unconnected items and schematic parity all empty); the eight suites with their counts and no runner
+  left; `carry.py --check` twice with identical output and the document's 19 nets; `cmp` of the BOM and the
+  hand-solder list with r02's; the netlist diff (34 lines, all rev, comment 2, uri, source or date); the Rev0.5
+  release untouched (12 OK); net lengths by pcbnew (EN_B 88.930, DIS_B 83.452, V_INJ 90.840, BTN_B 80.293,
+  LED_ON_B 84.022, LED_FLT_B 90.758 mm); the 3.0 mm trunk row at 29.782 mm; the stale-text grep, with a control
+  that the pattern finds 142 lines in HEAD's routing document; four corruptions of the record through
+  `carry.differs`, each named.
+- **Not verified.** Nothing is built. JLCPCB has read none of Rev0.6's files (DFM, part mapping, placement
+  preview, quote). The verifier did not count the session's 251 segments or the 9 open connections itself. What
+  the routing document lists under "Not settled": port B's 0.88 mOhm of margin, the L3 tracks beside the trunk and
+  through the corner of the ADC's supply block, the MAU104 nearer the reference block. The board was not built a
+  second time from its sources (`make_pcb.py`'s fill is not byte-reproducible). The enclosure and the lid PCB
+  still describe the Rev0.5 board; a dry run in a scratch copy shows Enclosure Rev0.1 failing E05 on the Rev0.6
+  interface (SW2's column stands 0.245 mm inside U5's courtyard). That is step 7.
+- **Learning.** rules.md: "KiCad 9 routing checks" (DRC's split by violation type varies between runs; the
+  connectivity's dangling test), "Freerouting 2.5.0" (fixed copper and passes; the router's unrouted count; a
+  trunk under a pair), "KiCad 9 (pcbnew ...)" (a tail's removal exposes the next), "Design documents" (a test that
+  names a part's place by number).
+- **Commits.** `7d09fcf` (pure rename), `4c4b201` (re-point), `010695e` (D39, placement, carry, routing,
+  silkscreen, tests and documents in one commit). Not pushed.
