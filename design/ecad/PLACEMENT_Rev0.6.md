@@ -3,7 +3,8 @@
 > **WIP — MANUFACTURING PROHIBITED.** Where every part of Rev0.6 sits on the
 > 100 × 72 mm board (D24), and why, with its silkscreen labels. Issue #6 P3 and P5, reworked
 > for the machine-placed USB-C receptacles of issue #8 (D37) and the data-line taps of issue #10
-> (D38); placement problems that routing (P4) finds are fixed here, in this file.
+> (D38), and for the mirror-symmetric connectors of issue #13 (D39, Rev0.6); placement problems
+> that routing (P4) finds are fixed here, in this file.
 
 `design/ecad/scripts/make_pcb.py` builds `source/usb-power-hub.kicad_pcb` from this file and
 the captured schematic, and `design/ecad/scripts/check_pcb.py` checks the board against this
@@ -26,10 +27,13 @@ here, never in KiCad: the next run of `make_pcb.py` rebuilds the board.
 - `Rot` is KiCad's orientation, counter-clockwise, 0/90/180/270.
 - Every part is on the top side (F.Cu), none mirrored (REQ-MFG-01).
 - In the channel table, channel B is channel A moved by `dx` in x: the same y, the same
-  rotation. `{x}` in a region name is `A` or `B`.
-- Three parts of each channel sheet are in the common table: R139/C114/C115 and R239/C214/C215,
-  the over-current threshold filters at U30's inputs (Rev0.6 §3.4). U30 is shared, so the two
-  sets sit beside it and cannot be 33.8 mm apart.
+  rotation. `{x}` in a region name is `A` or `B`. The table holds the two front ends.
+- Sixteen parts of each channel sheet are in the common table, because they cannot be 33.8 mm
+  from their twin. R139/C114/C115 and R239/C214/C215 are the over-current threshold filters at
+  U30's inputs (Rev0.6 §3.4): U30 is shared, so the two sets sit beside it. The other thirteen
+  are a port's receptacle, its port parts, its button and its LEDs (J2, C116, D2, Q13, R103,
+  R104, R109, R110, SW1, D10, D11, R140, R141, and channel B's): since D39 OUT B stands
+  65.0 mm from OUT A, so that J3 mirrors J2 about the board's centre line (*Mirrored parts*).
 - A note's `at X pin N` (also `pins N/M`, `pad N`; a receptacle's pads are named A1 to B8)
   means the part has a pad on that pin's net
   within 3.0 mm of it, centre to centre; `at X`, `next to X` and `after X` mean the two
@@ -48,10 +52,10 @@ front face is past the edge.
 <!-- regions:begin -->
 | Region | Kind | x | y | w | h | Holds | Why |
 |---|---|---:|---:|---:|---:|---|---|
-| PORT_A | block | 7.0 | 0.0 | 21.0 | 15.5 | J2 and its port parts | OUT A at the front edge; J2–J3 pitch 33.8 mm ≥ 18 mm (REQ-MECH-02) |
-| PORT_B | block | 40.8 | 0.0 | 21.0 | 15.5 | J3 and its port parts | PORT_A + 33.8 mm |
+| PORT_A | block | 7.0 | 0.0 | 21.0 | 15.5 | J2 and its port parts | OUT A at the front left; J2–J3 pitch 65.0 mm ≥ 18 mm (REQ-MECH-02) |
+| PORT_B | block | 72.0 | 0.0 | 21.0 | 15.5 | J3 and its port parts | OUT B at the front right: PORT_A + 65.0 mm, so J3 (x 82.5) mirrors J2 (x 17.5) about the centre line x 50 |
 | PORT_PWR | block | 7.0 | 57.0 | 21.0 | 15.0 | J4 and its port parts | 5 V input at the back edge, above F1 |
-| PORT_HOST | block | 66.0 | 58.5 | 23.0 | 13.5 | J1 and its port parts | HOST at the back edge, next to the hub strip |
+| PORT_HOST | block | 70.0 | 58.5 | 23.0 | 13.5 | J1 and its port parts | HOST at the back right: J1 (x 82.5) mirrors J4 (x 17.5); next to the hub strip |
 | AFE_A | block | 0.5 | 19.0 | 33.1 | 30.5 | channel A front end | shunt ladder, current mirrors, comparators, port switch, hold and event FETs |
 | AFE_B | block | 34.3 | 19.0 | 33.1 | 30.5 | channel B front end | AFE_A + 33.8 mm |
 | ADC | block | 68 | 19 | 20.95 | 21.75 | U7, U17, C30, C31 | the two MCP3208 beside the front ends, inputs facing them; its edge with HUB, x 88.95, lies between U7's courtyard (to 88.895) and R36's (from 88.975) |
@@ -61,11 +65,12 @@ front face is past the edge.
 | MCU | block | 28.0 | 50.0 | 23.0 | 21.5 | U1, U8, Y1, SW3, J5 and their passives | U1's channel GPIOs face the front ends (south) |
 | LDO | block | 51.5 | 50.0 | 14.0 | 21.5 | U2, U30, TH_REF divider, the threshold filters | 3.3 V regulator and the over-current comparator between the channels |
 | J1F | block | 66.0 | 50.0 | 22.95 | 6.0 | D5, Q53, R34, C35–C37, TP14 | J1's TVS and soft start (D35), at J1's VBUS pin |
-| V12 | block | 72.4 | 7.7 | 20.1 | 7.3 | C5–C8, R10, TP3 | the MAU104's capacitors and the V12F filter |
-| MAU | block | 72.4 | 0.5 | 20.1 | 6.7 | U5 | the MAU104 at the front right, ≥ 6 mm from the analog parts |
+| V12 | block | 45.4 | 7.7 | 19.6 | 7.3 | C5–C8, R10, TP3 | the MAU104's capacitors and the V12F filter, moved with U5 |
+| MAU | block | 45.4 | 0.5 | 20.2 | 6.7 | U5 | the MAU104 in the front middle, between REF and OUT B's button, ≥ 6 mm from the analog parts |
 | REF | block | 35.5 | 0.5 | 5.3 | 14.5 | U4, R11–R13, TP4 | V_INJ reference, between the two front ends |
 | UI_A | block | 28.0 | 0.5 | 7.0 | 14.5 | SW1, D10, D11, R140, R141 | OUT A's button and LEDs beside its port |
-| UI_B | block | 61.8 | 0.5 | 7.0 | 14.5 | SW2, D12, D13, R240, R241 | UI_A + 33.8 mm |
+| UI_B | block | 65.0 | 9.0 | 7.0 | 6.0 | D12, D13, R240, R241 | OUT B's LEDs, the mirror of OUT A's about x 50 |
+| UI_B_SW | block | 65.65 | 0.5 | 6.35 | 8.0 | SW2 | OUT B's button, the mirror of SW1; a rectangle of its own, because the MAU104's courtyard reaches x 65.495 below y 7.2 |
 | FID1 | mark | 1.0 | 8.5 | 3.0 | 3.0 | FID1 | global fiducial, front left |
 | FID2 | mark | 96.0 | 8.5 | 3.0 | 3.0 | FID2 | global fiducial, front right |
 | FID3 | mark | 1.0 | 61.0 | 3.0 | 3.0 | FID3 | global fiducial, back left |
@@ -85,10 +90,10 @@ courtyard there would close the lane.
 | Keepout | x | y | w | h | Why |
 |---|---:|---:|---:|---:|---|
 | USB_CORRIDOR | 16 | 15.5 | 73.3 | 3 | the HS pairs from U6 to J2 and J3 (the study's corridor) |
-| USB_UP_LANE | 75.6 | 56.5 | 23.9 | 2 | the HS pair from J1 down the right edge to U6 |
+| USB_UP_LANE | 82.1 | 56.5 | 17.4 | 2 | the HS pair from J1 down the right edge to U6 |
 | USB_LANE_A | 16.1 | 8.5 | 1.8 | 7 | the HS pair from the corridor down to J2's pads |
-| USB_LANE_B | 49.9 | 8.5 | 1.8 | 7 | the HS pair from the corridor down to J3's pads |
-| USB_UP_RISER | 75.6 | 58.5 | 1.8 | 6.1 | the HS pair from the lane keepout above up to J1's pads |
+| USB_LANE_B | 81.1 | 8.5 | 1.8 | 7 | the HS pair from the corridor down to J3's pads |
+| USB_UP_RISER | 82.1 | 58.5 | 1.8 | 6.1 | the HS pair from the lane keepout above up to J1's pads |
 <!-- keepouts:end -->
 
 ## USB-C receptacles
@@ -115,10 +120,10 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | C2 | 52.9 | 62.65 | 90 | LDO | at U2 pin 3 |
 | C3 | 52.9 | 66.25 | 90 | LDO | at U2 pin 2 |
 | C4 | 34.15 | 62.6 | 90 | MCU | V3V3 bulk, next to U1 beside the decoupler column |
-| C5 | 74.85 | 8.7 | 90 | V12 | at U5 pin 1 |
-| C6 | 87.55 | 8.7 | 90 | V12 | at U5 pin 6 |
-| C7 | 86.45 | 11.6 | 90 | V12 | at R10 pin 2 |
-| C8 | 83.55 | 9.6 | 180 | V12 | at R10 pin 2 |
+| C5 | 47.9 | 8.7 | 90 | V12 | at U5 pin 1 |
+| C6 | 60.6 | 8.7 | 90 | V12 | at U5 pin 6 |
+| C7 | 59.5 | 11.6 | 90 | V12 | at R10 pin 2 |
+| C8 | 56.6 | 9.6 | 180 | V12 | at R10 pin 2 |
 | C9 | 83.4 | 47.05 | 90 | ADCSUP | VDDA, next to TP6 |
 | C10 | 86.3 | 47.15 | 0 | ADCSUP | V5A, next to TP2 |
 | C11 | 56.6 | 56.8 | 90 | LDO | TH_REF, next to R139 |
@@ -145,16 +150,16 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | C32 | 69.55 | 42 | 90 | ADCSUP | at U17 pin 16 |
 | C33 | 72.1 | 42 | 90 | ADCSUP | at U17 pin 15 |
 | C34 | 57.95 | 56.8 | 90 | LDO | at U30 pin 8 |
-| C35 | 78.4 | 51.9 | 180 | J1F | GJ1, next to C37 |
-| C36 | 77.9 | 53.7 | 90 | J1F | GJ1, next to R34 |
-| C37 | 79.05 | 53.55 | 90 | J1F | GJ1, next to C36 |
+| C35 | 84.9 | 51.9 | 180 | J1F | GJ1, next to C37 |
+| C36 | 84.4 | 53.7 | 90 | J1F | GJ1, next to R34 |
+| C37 | 85.55 | 53.55 | 90 | J1F | GJ1, next to C36 |
 | C114 | 52.2 | 56.8 | 90 | LDO | THO_A, next to R139 |
 | C115 | 55.45 | 56.85 | 270 | LDO | THO_A, next to R139 |
 | C214 | 61.5 | 51.1 | 0 | LDO | THO_B, next to R239 |
 | C215 | 59.85 | 54.05 | 270 | LDO | EN_G_B, next to U30 |
-| D1 | 72.4 | 61.6 | 180 | PORT_HOST | J1 CC ESD, at J1 |
+| D1 | 78.9 | 61.6 | 180 | PORT_HOST | J1 CC ESD, at J1 |
 | D4 | 17.25 | 62.3 | 270 | PORT_PWR | J4 CC ESD, at J4 |
-| D5 | 84.2 | 62.45 | 0 | PORT_HOST | J1 VBUS TVS, at J1 |
+| D5 | 89.35 | 61.8 | 0 | PORT_HOST | J1 VBUS TVS, at J1 |
 | D6 | 18.8 | 53.3 | 0 | PWR4 | VBUS_IN TVS after F1 (D25) |
 | F1 | 5 | 52.55 | 0 | PWR4 | J4's fuse, pad 1 toward J4's VBUS pads |
 | FB1 | 82.3 | 44.4 | 180 | ADCSUP | V3V3, next to R14 |
@@ -165,15 +170,15 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | H2 | 96.5 | 3.5 | 0 | MH2 | M2 clearance hole, front right; the screw goes into the case's heat-set insert (D21) |
 | H3 | 3.5 | 68.5 | 0 | MH3 | M2 clearance hole, back left; the screw goes into the case's heat-set insert (D21) |
 | H4 | 96.5 | 68.5 | 0 | MH4 | M2 clearance hole, back right; the screw goes into the case's heat-set insert (D21) |
-| J1 | 76 | 69.385 | 180 | PORT_HOST | HOST receptacle; front face 1.06 mm past the back edge |
+| J1 | 82.5 | 69.385 | 180 | PORT_HOST | HOST receptacle; front face 1.06 mm past the back edge |
 | J4 | 17.5 | 69.385 | 180 | PORT_PWR | 5 V input receptacle; front face 1.06 mm past the back edge |
 | J5 | 44.5 | 69.2 | 0 | MCU | SWD (TC2030-NL), north of U1 |
 | Q50 | 72.05 | 44.8 | 0 | ADCSUP | ADC_SCLK, next to R27 |
 | Q51 | 76.4 | 42.75 | 0 | ADCSUP | ADC_CS, next to R28 |
 | Q52 | 76.15 | 46.4 | 0 | ADCSUP | ADC_DIN, next to R29 |
-| Q53 | 75.55 | 53 | 270 | J1F | GJ1, next to C36 |
-| R1 | 69.3 | 60.4 | 0 | PORT_HOST | J1 Rd CC1 |
-| R2 | 69.3 | 62.8 | 0 | PORT_HOST | J1 Rd CC2 |
+| Q53 | 82.05 | 53 | 270 | J1F | GJ1, next to C36 |
+| R1 | 75.8 | 60.4 | 0 | PORT_HOST | J1 Rd CC1 |
+| R2 | 75.8 | 62.8 | 0 | PORT_HOST | J1 Rd CC2 |
 | R3 | 20.9 | 61 | 0 | PORT_PWR | J4 Rd CC1 |
 | R4 | 13.6 | 61 | 0 | PORT_PWR | J4 Rd CC2 |
 | R5 | 20.9 | 62.4 | 0 | PORT_PWR | CC1_J4, next to R3 |
@@ -181,7 +186,7 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | R7 | 16.15 | 56.25 | 0 | PWR4 | V_J4, next to R8 |
 | R8 | 18.25 | 56.25 | 0 | PWR4 | V_J4, next to R7 |
 | R9 | 25.95 | 51.7 | 0 | PWR4 | V_J4, next to TP9 |
-| R10 | 86.4 | 8.7 | 90 | V12 | at U5 pin 6 |
+| R10 | 59.45 | 8.7 | 90 | V12 | at U5 pin 6 |
 | R11 | 39.35 | 10.85 | 180 | REF | V_INJ, next to R12 |
 | R12 | 37.75 | 10.4 | 90 | REF | INJ_REF, next to R13 |
 | R13 | 36.6 | 10.15 | 270 | REF | INJ_REF, next to R12 |
@@ -205,13 +210,13 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | R31 | 68.6 | 46.85 | 90 | ADCSUP | DOUT_A_3V, next to R30 |
 | R32 | 69 | 48.5 | 180 | ADCSUP | DOUT_B_3V, next to R33 |
 | R33 | 70.2 | 47.35 | 0 | ADCSUP | DOUT_B_3V, next to R32 |
-| R34 | 78.45 | 55.3 | 0 | J1F | GJ1, next to C36 |
+| R34 | 84.95 | 55.3 | 0 | J1F | GJ1, next to C36 |
 | R139 | 53.85 | 56.4 | 180 | LDO | THO_A, next to C114 |
 | R239 | 59.9 | 51.9 | 270 | LDO | at U30 pin 5 |
 | SW3 | 31.85 | 68.6 | 0 | MCU | BOOTSEL button, under the lid pinhole |
 | TP1 | 64.45 | 52.05 | 0 | LDO | V5L, toward R16 pin 1 |
 | TP2 | 87.25 | 44.95 | 0 | ADCSUP | V5A, next to C10 |
-| TP3 | 88.65 | 10.9 | 0 | V12 | at R10 pin 2 |
+| TP3 | 61.7 | 10.9 | 0 | V12 | at R10 pin 2 |
 | TP4 | 38.3 | 8.25 | 0 | REF | V_INJ, next to R12 |
 | TP5 | 54.5 | 59.2 | 0 | LDO | V3V3, next to U2 |
 | TP6 | 85 | 44.15 | 0 | ADCSUP | VDDA, next to C9 |
@@ -222,12 +227,12 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | TP11 | 45.75 | 65.7 | 0 | MCU | RUN, next to R26 |
 | TP12 | 48 | 65.75 | 0 | MCU | CLKOUT, next to U1 |
 | TP13 | 95.25 | 30.8 | 0 | HUB | VDD33_HUB, next to U6 |
-| TP14 | 80.75 | 53.15 | 0 | J1F | VBUS_J1, next to C37 |
+| TP14 | 87.25 | 53.15 | 0 | J1F | VBUS_J1, next to C37 |
 | U1 | 42.2 | 58.4 | 90 | MCU | rot 90: channel GPIOs south, SPI and crystal east, USB and QSPI west |
 | U2 | 58.5 | 64 | 0 | LDO | AMS1117 |
 | U3 | 80.25 | 47.45 | 0 | ADCSUP | VREF_CHK, next to R15 |
 | U4 | 37.8 | 13.25 | 180 | REF | INJ_REF, next to R12 |
-| U5 | 74.8 | 5.6 | 0 | MAU | pins north, toward its capacitors in V12 |
+| U5 | 47.85 | 5.6 | 0 | MAU | pins north, toward its capacitors in V12 |
 | U6 | 94 | 27 | 0 | HUB | ports A/B south to the corridor, HOST east, MCU port west |
 | U7 | 69.6 | 20.15 | 90 | ADC | inputs 1-3 on the south-west row, facing the front ends |
 | U8 | 33 | 53.05 | 0 | MCU | QSPI flash south-west of U1, pins 5-8 toward U1 pins 51-56 |
@@ -239,6 +244,32 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | R36 | 89.9 | 19.3 | 180 | HUB | D38 tap, USB_A_N on U6's pair |
 | R37 | 98.1 | 19.3 | 0 | HUB | D38 tap, USB_B_P on U6's pair |
 | R38 | 95.9 | 19.3 | 180 | HUB | D38 tap, USB_B_N on U6's pair |
+| C116 | 21.3 | 9.2 | 0 | PORT_A | port capacitor, at J2 pad B4 |
+| D2 | 14.1 | 11.3 | 180 | PORT_A | CC ESD, next to J2, west of the lane |
+| D10 | 29.75 | 10.5 | 0 | UI_A | OUT A ON LED |
+| D11 | 29.75 | 13 | 0 | UI_A | OUT A FAULT LED |
+| J2 | 17.5 | 2.615 | 0 | PORT_A | OUT A receptacle; front face 1.06 mm past the front edge |
+| Q13 | 25 | 11.9 | 0 | PORT_A | discharge FET |
+| R103 | 12.4 | 8.9 | 0 | PORT_A | Rp CC1 |
+| R104 | 12.4 | 14.2 | 0 | PORT_A | Rp CC2 |
+| R109 | 22 | 13.2 | 0 | PORT_A | Q13 gate resistor |
+| R110 | 24.4 | 8.9 | 0 | PORT_A | discharge resistor, next to C116 |
+| R140 | 33.25 | 10.5 | 180 | UI_A | D10 series |
+| R141 | 33.25 | 13 | 180 | UI_A | D11 series |
+| SW1 | 31.5 | 4.5 | 90 | UI_A | OUT A button |
+| C216 | 86.3 | 9.2 | 0 | PORT_B | port capacitor, at J3 pad B4 |
+| D3 | 79.1 | 11.3 | 180 | PORT_B | CC ESD, next to J3, west of the lane |
+| D12 | 70.25 | 10.5 | 180 | UI_B | OUT B ON LED |
+| D13 | 70.25 | 13 | 180 | UI_B | OUT B FAULT LED |
+| J3 | 82.5 | 2.615 | 0 | PORT_B | OUT B receptacle; front face 1.06 mm past the front edge |
+| Q33 | 90 | 11.9 | 0 | PORT_B | discharge FET |
+| R203 | 77.4 | 8.9 | 0 | PORT_B | Rp CC1 |
+| R204 | 77.4 | 14.2 | 0 | PORT_B | Rp CC2 |
+| R209 | 87 | 13.2 | 0 | PORT_B | Q33 gate resistor |
+| R210 | 89.4 | 8.9 | 0 | PORT_B | discharge resistor, next to C216 |
+| R240 | 66.75 | 10.5 | 0 | UI_B | D12 series |
+| R241 | 66.75 | 13 | 0 | UI_B | D13 series |
+| SW2 | 68.5 | 4.5 | 90 | UI_B_SW | OUT B button |
 <!-- place:end -->
 
 ## Channel parts
@@ -259,15 +290,9 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | C111 | C211 | 23.1 | 34.55 | 270 | AFE_{x} | at U13 pin 1 |
 | C112 | C212 | 30.3 | 40.95 | 0 | AFE_{x} | at U13 pin 5 |
 | C113 | C213 | 26.6 | 41.95 | 0 | AFE_{x} | at U13 pin 7 |
-| C116 | C216 | 21.3 | 9.2 | 0 | PORT_{x} | port capacitor, at J2 pad B4 |
-| D2 | D3 | 14.1 | 11.3 | 180 | PORT_{x} | CC ESD, next to J2, west of the lane |
-| D10 | D12 | 29.75 | 10.5 | 0 | UI_{x} | OUT A ON LED |
-| D11 | D13 | 29.75 | 13 | 0 | UI_{x} | OUT A FAULT LED |
-| J2 | J3 | 17.5 | 2.615 | 0 | PORT_{x} | OUT A receptacle; front face 1.06 mm past the front edge |
 | Q10 | Q30 | 2.5 | 47.5 | 0 | AFE_{x} | SRC_A, next to R101 |
 | Q11 | Q31 | 2.25 | 40.55 | 270 | AFE_{x} | GSW_A, next to R101 |
 | Q12 | Q32 | 16 | 42.25 | 180 | AFE_{x} | EN_G_A, next to R106 |
-| Q13 | Q33 | 25 | 11.9 | 0 | PORT_{x} | discharge FET |
 | Q14 | Q34 | 16.25 | 36.95 | 270 | AFE_{x} | EN_G_A, next to Q12 |
 | Q15 | Q35 | 11 | 35 | 90 | AFE_{x} | DIS_A, next to Q14 |
 | Q16 | Q36 | 5.85 | 41.6 | 270 | AFE_{x} | SRC_A, next to R101 |
@@ -282,14 +307,10 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | Q25 | Q45 | 20.8 | 43.8 | 90 | AFE_{x} | EVTG_L_A, toward R118 pin 2 |
 | R101 | R201 | 3 | 43.15 | 0 | AFE_{x} | SRC_A, next to Q16 |
 | R102 | R202 | 8.85 | 41.15 | 180 | AFE_{x} | GSW_A, next to Q16 |
-| R103 | R203 | 12.4 | 8.9 | 0 | PORT_{x} | Rp CC1 |
-| R104 | R204 | 12.4 | 14.2 | 0 | PORT_{x} | Rp CC2 |
 | R105 | R205 | 10 | 48 | 270 | AFE_{x} | EN_G_A, toward R107 pin 1 |
 | R106 | R206 | 16.35 | 44.65 | 180 | AFE_{x} | EN_G_A, next to R107 |
 | R107 | R207 | 16.3 | 46.25 | 90 | AFE_{x} | EN_G_A, next to R106 |
 | R108 | R208 | 17.45 | 46.85 | 270 | AFE_{x} | V3V3, toward R116 pin 1 |
-| R109 | R209 | 22 | 13.2 | 0 | PORT_{x} | Q13 gate resistor |
-| R110 | R210 | 24.4 | 8.9 | 0 | PORT_{x} | discharge resistor, next to C116 |
 | R111 | R211 | 7.75 | 44.2 | 180 | AFE_{x} | QB_A, next to R112 |
 | R112 | R212 | 5.7 | 44.2 | 180 | AFE_{x} | QB_A, next to R111 |
 | R113 | R213 | 30.4 | 23.6 | 180 | AFE_{x} | Q17 gate to source |
@@ -318,12 +339,9 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | R136 | R236 | 24.26 | 31.7 | 0 | AFE_{x} | AMP_L to the ADC |
 | R137 | R237 | 30.35 | 35.1 | 180 | AFE_{x} | at U13 pin 3 |
 | R138 | R238 | 29.9 | 39.3 | 90 | AFE_{x} | at U13 pin 5 |
-| R140 | R240 | 33.25 | 10.5 | 180 | UI_{x} | D10 series |
-| R141 | R241 | 33.25 | 13 | 180 | UI_{x} | D11 series |
 | RS10 | RS20 | 4.595 | 21 | 0 | AFE_{x} | R_H: VSUP enters at pad 1 (west); sense pads north |
 | RS11 | RS21 | 9.785 | 21 | 0 | AFE_{x} | R_M after R_H; sense pads north |
 | RS12 | RS22 | 22.81 | 20.5 | 0 | AFE_{x} | R_L after R_M; pad 4 toward the port's VBUS pads |
-| SW1 | SW2 | 31.5 | 4.5 | 90 | UI_{x} | OUT A button |
 | TP101 | TP201 | 6.8 | 34.05 | 0 | AFE_{x} | at R122 pin 1 |
 | TP102 | TP202 | 3.7 | 34.05 | 0 | AFE_{x} | GATE_H_A, next to R122 |
 | TP103 | TP203 | 27.5 | 47.7 | 0 | AFE_{x} | at Q19 pin 1 |
@@ -335,6 +353,33 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | U12 | U22 | 28.8 | 28 | 90 | AFE_{x} | L amplifier |
 | U13 | U23 | 26.5 | 37.6 | 90 | AFE_{x} | range comparators between the M/L amplifiers and Q17/Q18 |
 <!-- channel:end -->
+
+## Mirrored parts
+
+D39 (issue #13): the user found the connectors' positions odd (「なんかUSBの位置がアシンメトリーで変だね」)
+and chose the mirrored placement C2 of issue #12 (「C2 で進める」). Each pair below stands mirrored
+about the board's centre line, x = `axis`: the two x add up to 100.0, the y is the same, and the
+rotation is the same or the mirrored one (180 − Rot). `check_pcb.py` holds every row on the
+built board.
+
+<!-- mirror:begin axis=50.0 -->
+| Ref A | Ref B | Why |
+|---|---|---|
+| J2 | J3 | OUT A and OUT B on the front edge, x 17.5 and 82.5 |
+| J4 | J1 | the 5 V input and HOST on the back edge, x 17.5 and 82.5 |
+| SW1 | SW2 | the port buttons, x 31.5 and 68.5 |
+| D10 | D12 | the ON LEDs, x 29.75 and 70.25 |
+| D11 | D13 | the FAULT LEDs |
+| R140 | R240 | the ON LEDs' resistors, on the inner side of each LED |
+| R141 | R241 | the FAULT LEDs' resistors |
+<!-- mirror:end -->
+
+What is mirrored is the origin of each of these parts, which is what the case's openings, the
+buttons' plungers and the light pipes follow. A pair is the same part twice, not a mirror
+image: both receptacles' pad rows run the same way, and each port's own parts (CC network,
+port capacitor, discharge) are OUT A's moved by 65.0 mm, not mirrored. Nothing between the
+connectors is symmetric: the front ends stay 33.8 mm apart at the left, and the ADCs, the hub
+strip and the MAU104 stand where they fit.
 
 ## Silkscreen
 
@@ -356,7 +401,8 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
   its pad, the nearest of seven spots that clear the strip's parts and silk, with a 4.0 mm leader.
 - The port labels sit just outside their receptacle's courtyard, on the board, so they stay
   visible with the receptacle soldered and are not under the case's port openings, which are
-  at the board edge.
+  at the board edge. Each stands on its receptacle's outer side, so the four are mirrored like
+  the receptacles (D39).
 - Reference designators stay hidden (300 at 1.0 mm do not fit); the assembly drawing carries
   them. Pin 1 and polarity are the footprints' own marks (check_libraries.py keeps them on
   every polar part).
@@ -365,14 +411,14 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | Label | Text | x | y | Rot | Width | Height | Stroke | Leader |
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | title | USB Power-Control Hub | 66 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
-| revision | Rev0.6 | 71 | 8.25 | 0 | 1.2 | 1.2 | 0.2 | - |
-| J1 | HOST | 68.6 | 69.5 | 0 | 1 | 1 | 0.17 | - |
+| revision | Rev0.6 | 82.5 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
+| J1 | HOST | 90.4 | 69.5 | 0 | 1 | 1 | 0.17 | - |
 | J2 | OUT A | 9.6 | 3 | 0 | 1 | 1 | 0.17 | - |
-| J3 | OUT B | 43.4 | 3 | 0 | 1 | 1 | 0.17 | - |
+| J3 | OUT B | 90.4 | 3 | 0 | 1 | 1 | 0.17 | - |
 | J4 | 5V IN | 9.6 | 69.5 | 0 | 0.8 | 1 | 0.17 | - |
 | TP1 | V5L | 67.2 | 50.2 | 0 | 1 | 1 | 0.17 | - |
 | TP2 | V5A | 87.4 | 43.25 | 0 | 1 | 1 | 0.17 | - |
-| TP3 | V12F | 89.25 | 12.5 | 0 | 1 | 1 | 0.17 | - |
+| TP3 | V12F | 62.3 | 12.5 | 0 | 1 | 1 | 0.17 | - |
 | TP4 | V_INJ | 38.35 | 6.55 | 0 | 1 | 1 | 0.17 | - |
 | TP5 | V3V3 | 57.35 | 59.15 | 0 | 1 | 1 | 0.17 | - |
 | TP6 | VDDA | 85 | 41.75 | 0 | 1 | 1 | 0.17 | - |
@@ -383,7 +429,7 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | TP11 | RUN | 39.5 | 67.45 | 0 | 1 | 1 | 0.17 | 41.134,67.027 44.981,65.921 |
 | TP12 | CLKOUT | 49.7 | 68.4 | 90 | 1 | 1 | 0.17 | - |
 | TP13 | VDD33_HUB | 97.25 | 30.85 | 90 | 1 | 1 | 0.17 | - |
-| TP14 | VBUS_J1 | 80.8 | 50.7 | 0 | 1 | 1 | 0.17 | - |
+| TP14 | VBUS_J1 | 87.3 | 50.7 | 0 | 1 | 1 | 0.17 | - |
 | TP101 | OUT_H_A | 10.2 | 29.85 | 90 | 0.8 | 1 | 0.17 | 9.569,32.373 7.546,33.761 |
 | TP102 | GATE_H_A | 6.7 | 36.65 | 0 | 0.8 | 1 | 0.17 | 3.986,36.016 3.819,34.841 |
 | TP103 | HOLD_M_A | 29.3 | 49.4 | 0 | 1 | 1 | 0.17 | - |
@@ -403,10 +449,10 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | Study | Here | Why |
 |---|---|---|
 | R_AFEA / R_AFEB 27 × 31 mm | AFE_A / AFE_B 33.1 × 30.5 mm | the library's courtyards are larger than the study's planning ones (an SOT-23 is 13.8 mm², not 10.3); at 27 mm the channel filled 72 % before routing |
-| J2 / J3 as modules at x 18 / 46 | receptacles at x 17.5 / 51.3 (pitch 33.8 mm) | D37: each receptacle stands at its own front end, so the pitch equals the front ends'; the origin is the body centre now, not the module's pin 1 |
-| J1 / J4 as modules at the back edge | receptacles, J1 at x 76.0 and J4 at x 17.5 | D37: J1 beside the hub strip and J4 above F1, 1.06 mm past the back edge |
+| J2 / J3 as modules at x 18 / 46 | receptacles at x 17.5 / 82.5 (pitch 65.0 mm) | D37: a receptacle, its origin the body centre, not the module's pin 1. D39: J3 mirrors J2 about x 50 (until Rev0.5 it stood at its own front end, x 51.3, pitch 33.8 mm), so OUT B's port parts are 31.2 mm east of channel B's front end and VBUS_B crosses that distance on L4 (`ROUTING_Rev0.6.md`) |
+| J1 / J4 as modules at the back edge | receptacles, J1 at x 82.5 and J4 at x 17.5 | D37: 1.06 mm past the back edge, J4 above F1. D39: J1 mirrors J4; it moved 6.5 mm east of Rev0.5's x 76.0, toward the hub strip, and its TVS and soft start (J1F) with it |
 | U7 / U17 at x 55.5 / 65.8, upright | stacked at x 68, rotated 90° | the wider front ends took that space; turned, each ADC's inputs face the front ends |
-| MAU104 at (82, 30), turned | front right, (72.45, 0.55)–(92.45, 7.15) | the ADCs took its region; it stays ≥ 6 mm from every analog region |
+| MAU104 at (82, 30), turned | front middle, courtyard (45.5, 0.55)–(65.5, 7.15) | the ADCs took its region, and since D39 OUT B's port parts the front right, where it stood until Rev0.5. Its courtyard is 6.15 mm from R11's in REF, the nearest analog part (the rule is ≥ 6.0 mm, `check_pcb.py`), and 0.21 mm from SW2's: a window 0.39 mm wide in x. In Rev0.5 the nearest analog part was U7 at 11.95 mm, and REF was 32.34 mm away |
 | R_MCUF (SW3, J5, test pads) at the front | in MCU, beside U1 | REQ-BOOT-02 needs only a lid pinhole, and the lid is a PCB with its own drill; SWD stays at U1 |
 | U30 with R_LDO's OC block | in LDO, with both channels' threshold filters | as the study; the filters are not in the channel template (see the format notes) |
 | parts in a strip under each module | none under a receptacle | D37: the receptacle has no header and no space under it, so those parts stand beside the lane |
@@ -417,6 +463,10 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 - Routing (P4) can move any part; this file then changes, not the board.
 - The receptacle's overhang (1.06 mm), its fit in the case and the insertion force on its shell
   slots are not settled on paper; V-MECH-01 measures the built board.
+- The MAU104 beside the reference (D39). The 6.0 mm rule is a planning distance from the OI-23
+  study, not a noise calculation. At 6.15 mm from R11 the converter (about 100 kHz) is five times
+  closer to V_INJ's parts than in Rev0.5, and nothing on paper says what it puts on the
+  readings; V-MEAS-04 measures the built board.
 - U1's west side is the densest spot. Its QSPI pins 51–56 reach U8 to the south-west, the
   decouplers of pins 43–45 and 48–50 stand in one column at x 36.2, and the USB pair leaves
   pins 46/47 west through R20/R22, then turns north and east past R23 and R21. P4 moved this

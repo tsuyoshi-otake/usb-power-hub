@@ -243,9 +243,9 @@ class CheckOutputsTest(unittest.TestCase):
     # (CPL Y 3.99, 1.375 above the origin's 2.615).
     def test_cpl_model_shift_missing(self):
         """J1 at the footprint's origin, as r01's CPL had it: JLCPCB's model sits 1.375 mm off."""
-        self.assertFails(lambda o, s: edit(o / CPL, b'"J1","76.0000","68.0100"', b'"J1","76.0000","69.3850"'),
-                         "FAIL CPL J1: Mid (76.0, 69.385), footprint origin (76.0000, 69.3850) + "
-                         "JLCPCB model shift (0, -1.375) turned by 180 = (76.0000, 68.0100)")
+        self.assertFails(lambda o, s: edit(o / CPL, b'"J1","82.5000","68.0100"', b'"J1","82.5000","69.3850"'),
+                         "FAIL CPL J1: Mid (82.5, 69.385), footprint origin (82.5000, 69.3850) + "
+                         "JLCPCB model shift (0, -1.375) turned by 180 = (82.5000, 68.0100)")
 
     def test_cpl_model_shift_toward_the_mouth(self):
         """J2's shift the wrong way: 1.375 mm toward the mouth instead of away from it."""
@@ -254,8 +254,8 @@ class CheckOutputsTest(unittest.TestCase):
 
     def test_cpl_model_shift_not_turned(self):
         """J1 (180 degrees) given J2's shift, which is the same vector left unturned."""
-        self.assertFails(lambda o, s: edit(o / CPL, b'"J1","76.0000","68.0100"', b'"J1","76.0000","70.7600"'),
-                         "FAIL CPL J1: Mid (76.0, 70.76)")
+        self.assertFails(lambda o, s: edit(o / CPL, b'"J1","82.5000","68.0100"', b'"J1","82.5000","70.7600"'),
+                         "FAIL CPL J1: Mid (82.5, 70.76)")
 
     def test_model_frame_table_dead_entry(self):
         self.assertFails(lambda o, s: edit(s.parent / FRAMES.name, b'"C6186": {"add": 180,',

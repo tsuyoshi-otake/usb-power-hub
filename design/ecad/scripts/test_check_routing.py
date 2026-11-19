@@ -253,16 +253,16 @@ class CheckTest(unittest.TestCase):
     @staticmethod
     def via_beyond_slot_end(gap):
         """An edit adding a GND via whose hole stands `gap` mm (edge to edge) beyond the lower end
-        of J1's rear plated slot: centre (130.32, 55.72), 0.60 x 1.70 mm, so its capsule's axis
+        of J1's east rear plated slot: centre (136.82, 55.72), 0.60 x 1.70 mm, so its capsule's axis
         ends at y 56.27 with radius 0.30. The slot's centre is gap + 0.15 + 0.30 + 0.55 mm from the
         via's hole: a slot read as a round hole at its centre passes the via, as KiCad's DRC
         did the committed board's 8 vias 0.046 mm from the slots."""
         def edit(tree):
-            add_via(tree, "GND", (130.32, round(56.27 + 0.30 + gap + 0.15, 6)))
+            add_via(tree, "GND", (136.82, round(56.27 + 0.30 + gap + 0.15, 6)))
         return edit
 
     def test_via_beyond_slot_end_too_close(self):
-        self.assertFailsWith(run_check(board=self.via_beyond_slot_end(0.24)), "FAIL holes: J1.S1 at (80.320, 66.280)",
+        self.assertFailsWith(run_check(board=self.via_beyond_slot_end(0.24)), "FAIL holes: J1.S1 at (86.820, 66.280)",
                              "0.240 mm between the holes, want >= 0.25")
 
     def test_via_beyond_slot_end_far_enough(self):

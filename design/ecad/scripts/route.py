@@ -11,11 +11,14 @@ The routed board is built in this order (design/ecad/ROUTING_Rev0.6.md):
    Ref A -> Ref B map and `_A` -> `_B` in the net names.
 3. `gnd_fanout()`: every GND SMD pad gets a short stub and a via to the plane, and each exposed
    pad of the `epad` table a pattern of vias.
-4. `import_session()`: the committed Freerouting session (routing/usb-power-hub.ses): the
-   tracks and vias the router added. `export_dsn()` writes the router's input from the board of
-   steps 1-3 with the document's classes and keepouts; its SHA-256 is recorded next to the
+4. `apply_carried()`: the routing carried from the previous revision (routing/carried.json,
+   written by carry.py from the sources the document's `carry` table names).
+5. `import_session()`: the committed Freerouting session (routing/usb-power-hub.ses): the
+   tracks and vias the router added. `post_dsn()` writes the router's input from the board of
+   steps 1-4 with the document's classes and keepouts; its SHA-256 is recorded next to the
    session, so a session made from another input is refused.
-5. `pours()`: the remaining zones, then every zone is filled.
+6. `apply_patch()`: the document's `patch` table, what was drawn after the session.
+7. `pours()`: the remaining zones, then every zone is filled.
 """
 import hashlib
 import math
@@ -85,7 +88,7 @@ def read(tables, refs, dx):
     """The routing document's tables -> {zones, pairs, rows, classes, keepouts, epads}.
 
     tables: make_pcb.doc_tables of ROUTING_Rev0.6.md; refs: the placement's Ref A -> Ref B
-    (J2 -> J3 among them); dx: the placement's channel offset.
+    (RS10 -> RS20 among them); dx: the placement's channel offset.
     """
     need = ("zones", "pairs", "route", "channel_route", "epad", "classes", "keepouts", "router_layers",
             "router_costs")
@@ -93,7 +96,7 @@ def read(tables, refs, dx):
     if missing:
         raise SystemExit(f"ROUTING: no table {', '.join(missing)}")
     rows = [_row(r, "route") for r in tables["route"][1]]
-    patch = [_row(r, "patch") for r in tables["patch"][1]] if "patch" in tables else []
+    patch = patch_rows(tables)
     chan = [_row(r, "channel_route") for r in tables["channel_route"][1]]
     rows += chan + [channel_b(r, refs, dx) for r in chan]
     zones = []
@@ -138,7 +141,32 @@ def read(tables, refs, dx):
         router_costs.append((x["Setting"], int(x["Value"])))
     return dict(zones=zones, pairs=pairs, rows=rows, classes=classes, keepouts=keepouts, epads=epads,
                 analog=analog, plane_via=plane_via, router_layers=router_layers, router_costs=router_costs,
-                patch=patch)
+                patch=patch, carry=_carry(tables))
+
+
+def patch_rows(tables):
+    """The parsed rows of a routing document's patch table; none without the table."""
+    return [_row(r, "patch") for r in tables["patch"][1]] if "patch" in tables else []
+
+
+def _carry(tables):
+    """The `carry` table: the commit and the two sources the carried routing is made from, each
+    with its SHA-256, and the Why prefixes of the source's patch rows that are not carried.
+    None without the table: nothing is carried."""
+    if "carry" not in tables:
+        return None
+    args, rows = tables["carry"]
+    out = dict(commit=args.get("commit"), skip=[])
+    for r in rows:
+        if r["Item"] == "skip":
+            out["skip"].append(r["Value"])
+        elif r["Item"] in ("session", "patch") and r["Item"] not in out and re.fullmatch(r"[0-9a-f]{64}", r["SHA-256"]):
+            out[r["Item"]], out[r["Item"] + "_sha256"] = r["Value"], r["SHA-256"]
+        else:
+            raise SystemExit(f"carry: {r}: a row is one session, one patch (each with its SHA-256) or a skip")
+    if not (out["commit"] and "session" in out and "patch" in out):
+        raise SystemExit("carry: the table names a commit (commit=...), one session and one patch")
+    return out
 
 
 # ---- board items ---------------------------------------------------------------------------
@@ -163,10 +191,15 @@ def _point(board, token, net):
 
 
 def add_via(board, net, at, d, drill):
+    return _via(board, net, at, mm(d), mm(drill))
+
+
+def _via(board, net, at, d, drill):
+    """A through via; d and drill in the board's own units."""
     v = pcbnew.PCB_VIA(board)
     v.SetPosition(at)
-    v.SetWidth(mm(d))
-    v.SetDrill(mm(drill))
+    v.SetWidth(d)
+    v.SetDrill(drill)
     v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
     v.SetNet(net)
     board.Add(v)
@@ -174,14 +207,72 @@ def add_via(board, net, at, d, drill):
 
 
 def add_track(board, net, a, b, width, layer):
+    return _track(board, net, a, b, mm(width), layer)
+
+
+def _track(board, net, a, b, width, layer):
+    """A track segment; width in the board's own units."""
     t = pcbnew.PCB_TRACK(board)
     t.SetStart(a)
     t.SetEnd(b)
-    t.SetWidth(mm(width))
+    t.SetWidth(width)
     t.SetLayer(layer)
     t.SetNet(net)
     board.Add(t)
     return t
+
+
+# ---- the routing carried from the previous revision -------------------------------------------
+# routing/carried.json names every item in the board's own nanometres on the sheet, not in
+# millimetres: pcbnew.FromMM truncates, so a decimal can name the nanometre before the item's.
+def item_key(board, t):
+    """What names a track or a via: (net, "via", x, y), or (net, layer, x1, y1, x2, y2) with the
+    two ends in ascending order."""
+    if t.GetClass() == "PCB_VIA":
+        return t.GetNetname(), "via", t.GetPosition().x, t.GetPosition().y
+    a, b = sorted(((t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y)))
+    return (t.GetNetname(), board.GetLayerName(t.GetLayer())) + a + b
+
+
+def carried_items(board, tracks):
+    """`tracks` as the record's two lists: ([net, layer, width, x1, y1, x2, y2], ...) and
+    ([net, x, y, diameter, drill], ...), in the order given."""
+    segs, vias = [], []
+    for t in tracks:
+        if t.GetClass() == "PCB_VIA":
+            vias.append([t.GetNetname(), t.GetPosition().x, t.GetPosition().y, t.GetWidth(pcbnew.F_Cu), t.GetDrill()])
+        else:
+            segs.append([t.GetNetname(), board.GetLayerName(t.GetLayer()), t.GetWidth(), t.GetStart().x,
+                         t.GetStart().y, t.GetEnd().x, t.GetEnd().y])
+    return segs, vias
+
+
+def apply_carried(board, record):
+    """routing/carried.json: the drawn items the carried patch had replaced are taken away, then
+    the record's tracks and vias are added as they stand. It fails if an item to take away is not
+    on the board, or a net is not: the record was made for another board.
+    Returns (tracks, vias, taken away)."""
+    have = {}
+    for t in board.GetTracks():
+        have.setdefault(item_key(board, t), []).append(t)
+    for key in map(tuple, record["remove"]):
+        if not have.get(key):
+            raise SystemExit(f"carried: no drawn item {key} to take away: the record was made for another"
+                             f" board; run carry.py")
+        board.Remove(have[key].pop())
+    layers = {board.GetLayerName(i): i for i in LAYERS.values()}
+
+    def net(name):
+        ni = board.FindNet(name)
+        if ni is None:
+            raise SystemExit(f"carried: no net {name} on the board: the record was made for another board;"
+                             f" run carry.py")
+        return ni
+    for name, layer, width, x1, y1, x2, y2 in record["tracks"]:
+        _track(board, net(name), pcbnew.VECTOR2I(x1, y1), pcbnew.VECTOR2I(x2, y2), width, layers[layer])
+    for name, x, y, d, drill in record["vias"]:
+        _via(board, net(name), pcbnew.VECTOR2I(x, y), d, drill)
+    return len(record["tracks"]), len(record["vias"]), len(record["remove"])
 
 
 def apply_patch(board, rows):
@@ -283,31 +374,52 @@ FAN_HS_CLR = 0.50                  # the HS pairs keep 0.5 mm of coplanar cleara
 FAN_GRID = 2.0
 FAN_STEPS = 14                     # candidate rings 0.1 mm apart
 FAN_DIRECTIONS = 16
+FAN_HOLE_REACH = 1.0               # a stub this long at most joins a pad to a plated hole of its part
+FAN_HOLE_INSET = 0.05              # ... and ends this far inside the hole's pad
+FAN_HOLE_STEP = 0.005              # the step of the walk that finds the pad's edge
+
+
+def _pad_hole(pad):
+    """A pad's drilled hole as a capsule (x1, y1, x2, y2, radius) in mm on the sheet, or None for a
+    pad without one: pcbnew's own hole shape, so a plated slot is its two end centres and half its
+    width, and a round hole has a zero-length axis."""
+    if pad.GetDrillSize().x <= 0:
+        return None
+    shape = pad.GetEffectiveHoleShape()
+    seg = shape.GetSeg()
+    return (pcbnew.ToMM(seg.A.x), pcbnew.ToMM(seg.A.y), pcbnew.ToMM(seg.B.x), pcbnew.ToMM(seg.B.y),
+            pcbnew.ToMM(shape.GetWidth()) / 2)
+
+
+def _via_hole(x, y, drill):
+    return (x, y, x, y, drill / 2)
+
+
+def _to_axis(x, y, hole):
+    """The distance in mm from (x, y) to the axis of a capsule hole."""
+    ax, ay, bx, by, _ = hole
+    dx, dy = bx - ax, by - ay
+    l2 = dx * dx + dy * dy
+    t = 0.0 if l2 == 0 else max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / l2))
+    return math.hypot(x - ax - t * dx, y - ay - t * dy)
 
 
 class _Copper:
     """The board's copper items, bucketed on a grid: (net, item, frame box, hole or None). A hole
-    is (x, y, radius): a pad's from its position and the drill's width, so an oblong hole, a
-    plated slot, is read as a round one at its centre. That put the GND fanout via of 8
-    receptacle contact pads 0.046 mm from a slot's hole (issue #8); ROUTING_Rev0.6.md's patch,
-    stage 5, deletes them, because the committed session was routed around them, and
-    check_routing.py rule 10 measures the slot as a capsule. Read it as a capsule here before the
-    next session is routed."""
+    is a capsule (_pad_hole), so the fanout keeps its distance from the whole of a plated slot.
+    Until issue #13 an oblong hole was read as a round one at the pad's centre, which put the GND
+    fanout via of 8 receptacle contact pads 0.046 mm from a slot's hole (issue #8)."""
 
     def __init__(self, board):
         self.items, self.grid = [], {}
         for f in board.GetFootprints():
             for p in f.Pads():
-                hole = None
-                if p.GetDrillSize().x > 0:
-                    hole = (pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y),
-                            pcbnew.ToMM(p.GetDrillSize().x) / 2)
-                self.add(p, hole)
+                self.add(p, _pad_hole(p))
         for t in board.GetTracks():
             hole = None
             if t.GetClass() == "PCB_VIA":
-                hole = (pcbnew.ToMM(t.GetPosition().x), pcbnew.ToMM(t.GetPosition().y),
-                        pcbnew.ToMM(t.GetDrillValue()) / 2)
+                hole = _via_hole(pcbnew.ToMM(t.GetPosition().x), pcbnew.ToMM(t.GetPosition().y),
+                                 pcbnew.ToMM(t.GetDrillValue()))
             self.add(t, hole)
 
     def add(self, item, hole):
@@ -336,12 +448,13 @@ def board_via(board):
 
 
 def _clear(cu, net, shape, box, layers, hs, hole=None, hole_clr=None):
-    """hole_clr: (to a via's hole, to a pad's hole) in mm, for a via at `hole`."""
+    """hole: a new via's round hole (x, y, radius). hole_clr: (to a via's hole, to a pad's hole)
+    in mm, edge to edge, measured to the whole of a slot."""
     for inet, item, ibox, ihole in cu.near(box):
         if ibox[0] > box[2] or ibox[2] < box[0] or ibox[1] > box[3] or ibox[3] < box[1]:
             continue
-        if hole and ihole and math.hypot(ihole[0] - hole[0], ihole[1] - hole[1]) < \
-                ihole[2] + hole[2] + hole_clr[item.GetClass() != "PCB_VIA"] + 0.01:
+        if hole and ihole and _to_axis(hole[0], hole[1], ihole) < \
+                ihole[4] + hole[2] + hole_clr[item.GetClass() != "PCB_VIA"] + 0.01:
             return False
         if inet == net:
             continue
@@ -352,12 +465,55 @@ def _clear(cu, net, shape, box, layers, hs, hole=None, hole_clr=None):
     return True
 
 
+def _hole_stub(pad, cu, hs_nets):
+    """The end (x, y), in mm on the sheet, of a stub that joins the GND surface pad `pad` to a
+    plated GND hole of its own part, or None. The stub leaves the pad's centre square to the
+    hole's axis (toward the centre of a round hole), ends FAN_HOLE_INSET inside the hole's pad,
+    is FAN_HOLE_REACH long at most and keeps the fanout's clearances on F.Cu. The plane joins a
+    plated pad solid, so the pad reaches L2 through the hole's wall and needs no via: beside a
+    receptacle's rear shell slot no via fits (ROUTING_Rev0.6.md, GND fanout)."""
+    cx, cy = pcbnew.ToMM(pad.GetPosition().x), pcbnew.ToMM(pad.GetPosition().y)
+    best = None
+    for q in pad.GetParentFootprint().Pads():
+        hole = _pad_hole(q)
+        if hole is None or q.GetAttribute() != pcbnew.PAD_ATTRIB_PTH or q.GetNetname() != "GND":
+            continue
+        ax, ay, bx, by, _ = hole
+        dx, dy = bx - ax, by - ay
+        l2 = dx * dx + dy * dy
+        t = 0.0 if l2 == 0 else ((cx - ax) * dx + (cy - ay) * dy) / l2
+        fx, fy = ax + t * dx, ay + t * dy
+        dist = math.hypot(fx - cx, fy - cy)
+        if dist == 0:
+            continue
+        ux, uy = (fx - cx) / dist, (fy - cy) / dist
+        copper = q.GetEffectiveShape(pcbnew.F_Cu)
+        for k in range(round((FAN_HOLE_REACH - FAN_HOLE_INSET) / FAN_HOLE_STEP) + 1):
+            s = k * FAN_HOLE_STEP
+            if s > dist:
+                break
+            at = pcbnew.VECTOR2I(mm(cx + ux * s), mm(cy + uy * s))
+            if copper.Collide(pcbnew.SHAPE_CIRCLE(at, 0), 0):
+                s += FAN_HOLE_INSET
+                if best is None or s < best[0]:
+                    best = (s, cx + ux * s, cy + uy * s)
+                break
+    if best is None:
+        return None
+    _, x, y = best
+    seg = pcbnew.SHAPE_SEGMENT(pcbnew.VECTOR2I(mm(cx), mm(cy)), pcbnew.VECTOR2I(mm(x), mm(y)), mm(FAN_STUB))
+    sbox = (min(cx, x) - 1, min(cy, y) - 1, max(cx, x) + 1, max(cy, y) + 1)
+    return (x, y) if _clear(cu, "GND", seg, sbox, [pcbnew.F_Cu], hs_nets) else None
+
+
 def gnd_fanout(board, epads, hs_nets, hole_clr):
-    """GND vias: each exposed pad of `epads` gets a centre via and four at the offset; every
-    other GND surface pad (SMD, or a connector pad without paste such as J5's) gets the board's
-    via (board_via) on the nearest free spot of 16 directions, outward
+    """GND to the plane: each exposed pad of `epads` gets a centre via and four at the offset.
+    Every other GND surface pad (SMD, or a connector pad without paste such as J5's) is joined by
+    a 0.2 mm stub to a plated GND hole of its own part where one is in reach (_hole_stub), and
+    otherwise gets the board's via (board_via) on the nearest free spot of 16 directions, outward
     first, and a 0.2 mm stub to it. hole_clr = (to a via's hole, to a pad's hole) in mm, the
-    hole-to-hole spacing it keeps. Returns (vias, pads left without one)."""
+    hole-to-hole spacing a via keeps. Returns (vias, pads joined to a hole, pads left without
+    either)."""
     fan_via = board_via(board)
     gnd = board.FindNet("GND")
     cu = _Copper(board)
@@ -366,7 +522,7 @@ def gnd_fanout(board, epads, hs_nets, hole_clr):
                                                 board.GetBoardEdgesBoundingBox().GetRight(),
                                                 board.GetBoardEdgesBoundingBox().GetBottom()))
     all_layers = list(LAYERS.values())
-    n, failed = 0, []
+    n, joined, failed = 0, [], []
     pads = []
     for f in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
         for p in sorted(f.Pads(), key=lambda p: p.GetNumber()):
@@ -377,13 +533,20 @@ def gnd_fanout(board, epads, hs_nets, hole_clr):
                 c, off = p.GetPosition(), mm(epads[key])
                 for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
                     v = add_via(board, gnd, pcbnew.VECTOR2I(c.x + dx * off, c.y + dy * off), *fan_via)
-                    cu.add(v, (pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y), fan_via[1] / 2))
+                    cu.add(v, _via_hole(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y),
+                                        fan_via[1]))
                     n += 1
             elif p.GetNetname() == "GND" and p.GetAttribute() in (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN):
                 pads.append((key, p))
     r = fan_via[0] / 2
     for key, p in pads:
         cx, cy = pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y)
+        end = _hole_stub(p, cu, hs_nets)
+        if end:
+            cu.add(add_track(board, gnd, p.GetPosition(), pcbnew.VECTOR2I(mm(end[0]), mm(end[1])),
+                             FAN_STUB, pcbnew.F_Cu), None)
+            joined.append(key)
+            continue
         fp = p.GetParentFootprint()
         fx, fy = pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y)
         bb = p.GetBoundingBox()
@@ -411,7 +574,7 @@ def gnd_fanout(board, epads, hs_nets, hole_clr):
             if not _clear(cu, "GND", seg, sbox, [pcbnew.F_Cu], hs_nets):
                 continue
             v = add_via(board, gnd, pcbnew.VECTOR2I(mm(x), mm(y)), *fan_via)
-            cu.add(v, (x, y, fan_via[1] / 2))
+            cu.add(v, _via_hole(x, y, fan_via[1]))
             t = add_track(board, gnd, pcbnew.VECTOR2I(mm(cx), mm(cy)), pcbnew.VECTOR2I(mm(x), mm(y)),
                           FAN_STUB, pcbnew.F_Cu)
             cu.add(t, None)
@@ -419,7 +582,7 @@ def gnd_fanout(board, epads, hs_nets, hole_clr):
             break
         else:
             failed.append(key)
-    return n, failed
+    return n, joined, failed
 
 
 # ---- Freerouting ---------------------------------------------------------------------------

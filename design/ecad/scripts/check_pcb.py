@@ -24,7 +24,10 @@ each courtyard outline's points.
     netlist's components, each with the netlist's footprint, Value, sheet path, fields
     (hidden), BOM exclusion and, pad by pad, net; a pad with no netlist node has no net.
  3. Position: each footprint at the document's x, y (within 0.0005 mm) and rotation, on
-    F.Cu, not flipped; each channel-B part at its channel-A part + dx, same rotation.
+    F.Cu, not flipped; each channel-B part at its channel-A part + dx, same rotation; each
+    pair of the mirror table mirrored about x = axis (D39): x_a + x_b = 2 axis, the same y,
+    and the same rotation or the mirrored one (180 - rotation). The table names both
+    receptacle pairs, J2|J3 and J1|J4.
  4. Top only (REQ-MFG-01): no pad on B.Paste, no SMD pad on B.Cu, no footprint text or
     graphic and no courtyard on a B.* layer.
  5. Outline: Edge.Cuts spans (0, 0)-(100, 72) (D24); every courtyard lies on the board,
@@ -59,6 +62,11 @@ What it CANNOT see:
   conservative for containment; DRC compares the true outlines with each other.
 - the receptacles' fit: that a 1.6 mm board takes the shell legs of a part drawn for 0.80 mm,
   the mating plug's overmold and the enclosure (V-MFG-03, V-MECH-01, CLAUDE.md 7).
+- whether the board looks symmetric. The mirror rule holds the origins of the parts the
+  table names (D39: the receptacles, the buttons, the port LEDs and their resistors) and
+  nothing between them; a pair it holds is the same part twice, not a mirror image, so the
+  pad rows of J2 and J3 run the same way. Only the two receptacle pairs must be in the
+  table: a button or LED row removed from it is no longer held, and nothing here says so.
 """
 import argparse
 import importlib.util
@@ -198,7 +206,7 @@ def marked_blocks(text):
 
 
 def read_doc(path):
-    regions, keepouts, parts, pairs, dx = {}, {}, {}, {}, None
+    regions, keepouts, parts, pairs, dx, mirrors = {}, {}, {}, {}, None, []
     for kind, arg, rows in marked_blocks(path.read_text(encoding="utf-8")):
         if kind == "regions":
             for r in rows:
@@ -222,7 +230,10 @@ def read_doc(path):
                                       channel=ch)
                 if kind == "channel":
                     pairs[r["Ref A"]] = r["Ref B"]
-    return regions, keepouts, parts, pairs, dx
+        elif kind == "mirror":
+            axis = float(dict(a.split("=", 1) for a in arg.split())["axis"])
+            mirrors += [(r["Ref A"], r["Ref B"], axis) for r in rows]
+    return regions, keepouts, parts, pairs, dx, mirrors
 
 
 def read_capture_notes(path):
@@ -333,6 +344,23 @@ def check_position(rep, fps, parts, pairs, dx):
         same = round(fa.GetOrientationDegrees()) % 360 == round(fb.GetOrientationDegrees()) % 360
         rep.check(abs(xb - xa - dx) <= POS_TOL and abs(yb - ya) <= POS_TOL and same, f"{a}/{b}",
                   f"channel B is at ({xb - xa:+.4f}, {yb - ya:+.4f}) from A, want ({dx:+}, 0), same rotation")
+
+
+def check_mirror(rep, fps, mirrors):
+    """Check 3, the mirror table (D39)."""
+    named = {frozenset((a, b)) for a, b, _ in mirrors}
+    rep.check({frozenset(FRONT), frozenset(BACK)} <= named, "mirror table",
+              f"the receptacle pairs {'|'.join(FRONT)} and {'|'.join(BACK)} are not both in the mirror table (D39)")
+    for a, b, axis in mirrors:
+        if not rep.check(a in fps and b in fps and a != b, f"{a}|{b}",
+                         "the mirror table names a part that is not on the board, or one part twice"):
+            continue
+        (xa, ya), (xb, yb) = frame(fps[a].GetPosition()), frame(fps[b].GetPosition())
+        ra, rb = (round(f.GetOrientationDegrees()) % 360 for f in (fps[a], fps[b]))
+        rep.check(abs(xa + xb - 2 * axis) <= POS_TOL and abs(ya - yb) <= POS_TOL and rb in (ra, (180 - ra) % 360),
+                  f"{a}|{b}", f"({xa:.4f}, {ya:.4f}) rotation {ra} and ({xb:.4f}, {yb:.4f}) rotation {rb} are "
+                  f"not mirrored about x = {axis:g}: want x_a + x_b = {2 * axis:g}, the same y, and the same "
+                  f"or the mirrored rotation")
 
 
 def check_top_only(rep, fps):
@@ -507,7 +535,7 @@ def main(argv):
     register = {p["id"]: p for p in json.loads((a.lib / "library.json").read_text(encoding="utf-8"))["parts"]}
     params = {p["footprint"]["name"]: p["footprint"]["params"] for p in register.values()
               if p.get("footprint", {}).get("make") == "usbc_receptacle"}
-    regions, keepouts, parts, pairs, dx = read_doc(a.doc)
+    regions, keepouts, parts, pairs, dx, mirrors = read_doc(a.doc)
     check_document(rep, regions, keepouts, parts)
     board = pcbnew.LoadBoard(str(pcb)) if pcb.exists() else None
     if board is None:
@@ -534,6 +562,7 @@ def main(argv):
                   f"on the board, not in the document: {sorted(set(fps) - set(parts))}; "
                   f"in the document, not on the board: {sorted(set(parts) - set(fps))}")
         check_position(rep, fps, parts, pairs, dx)
+        check_mirror(rep, fps, mirrors)
         check_top_only(rep, fps)
         check_outline(rep, board, fps, receptacles)
         check_regions(rep, fps, parts, regions)

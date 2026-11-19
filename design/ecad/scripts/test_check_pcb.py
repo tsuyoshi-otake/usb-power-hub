@@ -15,7 +15,9 @@ export, about 3 s.
 
 Not covered here: the board-outline rule (make_project.py --check and test_make_project.py own
 the outline). The J2-J3 pitch rule is covered by test_receptacles_too_close, which moves J3
-alone, so that the checker names other lines as well as the pitch.
+alone, so that the checker names other lines as well as the pitch. The mirror rule (D39) has
+no test for a button or LED row removed from its table: the checker does not see that (its
+own "not checked" list says so).
 The board in design/ecad/source must be the placed one: make_pcb.py writes it.
 """
 import importlib.util
@@ -203,7 +205,7 @@ class CheckTest(unittest.TestCase):
         self.assertFailsWith(run_check(doc=edit), "FAIL C116: courtyard enters keepout USB_LANE_A")
 
     def test_keepout_straddles_a_region(self):
-        edit = sub_once(r"^\| USB_UP_LANE \| 75\.6 \| 56\.5 \|", "| USB_UP_LANE | 75.6 | 55 |")
+        edit = sub_once(r"^\| USB_UP_LANE \| 82\.1 \| 56\.5 \|", "| USB_UP_LANE | 82.1 | 55 |")
         self.assertFailsWith(run_check(doc=edit), "FAIL USB_UP_LANE: keepout lies partly in region(s)")
 
     def test_analog_part_near_mau104(self):
@@ -219,22 +221,62 @@ class CheckTest(unittest.TestCase):
 
     def test_receptacle_past_the_edge(self):
         """J2 and J3 moved 1.0 mm south: the courtyard passes the front edge by 2.3 mm, more
-        than the 1.31 mm a receptacle may (the overhang plus the library's courtyard margin)."""
-        edit = sub_once(r"^\| J2 \| J3 \| 17\.5 \| 2\.615 \|", "| J2 | J3 | 17.5 | 1.615 |")
+        than the 1.31 mm a receptacle may (the overhang plus the library's courtyard margin).
+        Both move, so that the pair stays mirrored."""
+        def edit(text):
+            return row("J3", y=1.615)(row("J2", y=1.615)(text))
 
         def board(tree):
             move(tree, "J2", 17.5, 1.615)
-            move(tree, "J3", 51.3, 1.615)
+            move(tree, "J3", 82.5, 1.615)
         self.assertFailsWith(run_check(board=board, doc=edit),
                              "passes the edge it stands on by more than 1.31 mm",
                              "FAIL J2: front face at y = -2.060, opening -1 along y")
 
     def test_receptacles_too_close(self):
-        """J3 moved 16.8 mm toward J2: the pitch of 17.00 mm is under REQ-MECH-02's 18 mm, so two
-        plugs would not fit side by side. Only J3 moves (channel B's own parts stay behind), so
-        the checker names other lines too; the pitch line is the one under test."""
+        """J3 moved 48.0 mm toward J2: the pitch of 17.00 mm is under REQ-MECH-02's 18 mm, so two
+        plugs would not fit side by side. Only J3 moves (OUT B's own parts stay behind), so
+        the checker names other lines too, the mirror rule's among them; the pitch line is the
+        one under test."""
         self.assertFailsWith(run_check(board=lambda t: move(t, "J3", 34.5, 2.615)),
-                             "FAIL J2/J3: pitch 17.00 mm < 18.0 mm")
+                             "FAIL J2/J3: pitch 17.00 mm < 18.0 mm", "FAIL J2|J3: (17.5000, 2.6150)")
+
+    # ---- the mirror table (D39) ---------------------------------------------------------------
+    def test_mirror_pair_moved_in_x(self):
+        """SW2 0.5 mm east, on the board and in the document: only the mirror rule knows that
+        it belongs opposite SW1."""
+        doc = row("SW2", x=69.0)
+        self.assertFailsWith(run_check(board=lambda t: move(t, "SW2", 69.0, 4.5), doc=doc),
+                             "FAIL SW1|SW2: (31.5000, 4.5000) rotation 90 and (69.0000, 4.5000) rotation 90 "
+                             "are not mirrored about x = 50: want x_a + x_b = 100")
+
+    def test_mirror_pair_moved_in_y(self):
+        doc = row("D12", y=10.8)
+        self.assertFailsWith(run_check(board=lambda t: move(t, "D12", 70.25, 10.8), doc=doc),
+                             "FAIL D10|D12: (29.7500, 10.5000) rotation 0 and (70.2500, 10.8000) rotation 180")
+
+    def test_mirror_pair_turned(self):
+        """D12 at 90: neither D10's rotation (0) nor its mirror image (180)."""
+        edit = sub_once(r"^\| D12 \| 70\.25 \| 10\.5 \| 180 \|", "| D12 | 70.25 | 10.5 | 90 |")
+        self.assertFailsWith(run_check(board=lambda t: move(t, "D12", 70.25, 10.5, 90), doc=edit),
+                             "FAIL D10|D12: (29.7500, 10.5000) rotation 0 and (70.2500, 10.5000) rotation 90")
+
+    def test_mirror_axis_changed(self):
+        edit = sub_once(r"<!-- mirror:begin axis=50\.0 -->", "<!-- mirror:begin axis=49.0 -->")
+        self.assertFailsWith(run_check(doc=edit), "FAIL J2|J3: ", "are not mirrored about x = 49: want x_a + x_b = 98",
+                             "FAIL J4|J1: ", "FAIL SW1|SW2: ")
+
+    def test_mirror_table_names_a_missing_part(self):
+        edit = sub_once(r"^\| SW1 \| SW2 \|", "| SW1 | SW9 |")
+        self.assertFailsWith(run_check(doc=edit), "FAIL SW1|SW9: the mirror table names a part that is not on "
+                             "the board, or one part twice")
+
+    def test_mirror_table_without_a_receptacle_pair(self):
+        """The front pair's row removed: the pair would no longer be held, so the table itself
+        fails."""
+        edit = sub_once(r"^\| J2 \| J3 \| OUT A and OUT B on the front edge[^\n]*\n", "")
+        self.assertFailsWith(run_check(doc=edit), "FAIL mirror table: the receptacle pairs J2|J3 and J1|J4 are "
+                             "not both in the mirror table (D39)")
 
     def test_receptacle_turned_around(self):
         """J4 at rotation 0 opens toward the board's interior, not the back edge."""
@@ -266,8 +308,7 @@ class CheckTest(unittest.TestCase):
         """"at J2 pad B4" is a pad of a receptacle, named with a letter. Read as "at J2" it
         would pass on the courtyards alone, so a wrong pad name must fail on its own."""
         edit = sub_once(r"port capacitor, at J2 pad B4", "port capacitor, at J2 pad A5")
-        self.assertFailsWith(run_check(doc=edit), "FAIL C116 (document): note 'port capacitor, at J2 pad A5'",
-                             "FAIL C216 (document): note 'port capacitor, at J2 pad A5'")
+        self.assertFailsWith(run_check(doc=edit), "FAIL C116 (document): note 'port capacitor, at J2 pad A5'")
 
     def test_capture_pin_note_broken(self):
         edit = sub_once(r"\| at U1 pin 1 \(IOVDD\) \|", "| at U1 pin 30 (IOVDD) |")

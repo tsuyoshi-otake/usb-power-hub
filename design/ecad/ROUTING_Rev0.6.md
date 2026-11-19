@@ -2,13 +2,15 @@
 
 > **WIP — MANUFACTURING PROHIBITED.** How the placed Rev0.6 board (PLACEMENT_Rev0.6.md) is
 > routed, and why. Issue #6 P4, reworked for the machine-placed receptacles and the data-line
-> taps (issues #8 and #10, D37 and D38). Nothing here has been built or measured.
+> taps (issues #8 and #10, D37 and D38) and for the mirror-symmetric connectors (issue #13, D39,
+> Rev0.6: Rev0.5's routing carried where it still stands, a new router session for the rest and
+> a new patch). Nothing here has been built or measured.
 
 `design/ecad/scripts/make_pcb.py` builds `source/usb-power-hub.kicad_pcb` from the placement,
-this file and the committed router session in `routing/`; `scripts/autoroute.py` writes that
-session; `scripts/check_routing.py` checks the board against this file and runs DRC
-(`design/ecad/README.md`). Change a track here, never in KiCad: the next run of `make_pcb.py`
-rebuilds the board.
+this file, the carried record and the committed router session in `routing/`; `scripts/carry.py`
+writes that record and `scripts/autoroute.py` that session; `scripts/check_routing.py` checks
+the board against this file and runs DRC (`design/ecad/README.md`). Change a track here, never
+in KiCad: the next run of `make_pcb.py` rebuilds the board.
 
 ## Frame and format
 
@@ -18,8 +20,10 @@ rebuilds the board.
 - A track row draws one track through its points on one layer, at one width. A `via` row places
   one through via (diameter/drill) at its one point.
 - `channel_route` rows are channel A's. Channel B gets the same rows moved by the placement's
-  `dx` (33.8 mm), each part mapped by the placement's channel table (J2 → J3) and `_A` → `_B`
-  in the net names.
+  `dx` (33.8 mm), each part mapped by the placement's channel table (RS10 → RS20) and `_A` →
+  `_B` in the net names. They are the front ends' rows. A port's own rows, from the lift vias at
+  its bypass FET to its receptacle, are in the `route` table for each port since D39: OUT B's
+  receptacle is not 33.8 mm from OUT A's.
 
 ## Layers
 
@@ -62,7 +66,7 @@ over-current trip (D34), per port, and 2.46 A from J4 with both ports at it.
 | J4's VBUS pads to F1 (VBUS_J4) | 2.46 A | 1.040 mm | 0.6 mm stubs with two vias per pad, then 2.5 mm on B.Cu |
 | the joiner between a receptacle's two VBUS pads (J2, J3) | ≤ 0.61 A, half of a port's current | 0.152 mm | 0.25 mm on F.Cu under the connector body: 0.88 A at 10 °C, 21 °C at the port's full 1.221 A over its 1.2 mm stubs |
 | F1 to each port switch (VBUS_IN) | 1.221 A | 0.396 mm | 1.5 / 1.0 mm (A), 3.0 / 1.0 mm (B) |
-| a port path (SRC, VSUP, LAD1, VBUS) | 1.221 A | 0.396 mm | 0.6 mm at SOT-23 pads, 1.0–2.0 mm between |
+| a port path (SRC, VSUP, LAD1, VBUS) | 1.221 A | 0.396 mm | 0.6 mm at SOT-23 pads, 1.0–2.0 mm between; VBUS_B's trunk to J3 3.0 mm (D39) |
 | LAD2 (MID range only) | ≤ 0.5 A (stuck MID, §4) | 0.396 mm | 0.5–0.6 mm |
 | J1's VBUS, J1 to Q53 | 0.277 A | 0.051 mm (inner: 0.306 mm) | 0.20 mm, on F.Cu and B.Cu only (router class J1_POWER) |
 | V5L, Q53 to the hub, U2, U5 and the dividers | 0.277 A | 0.051 mm (inner: 0.306 mm) | 0.31 mm on any layer (router class V5L_POWER); restricted to L1 and L4 it was left unconnected in every trial |
@@ -108,8 +112,8 @@ on the right of the direction of travel from U6. No pair has a via and none leav
 P from west to east on J2 and J3 (B7, A6, A7, B6), and P, N, P, N on J1, which is turned through
 180° (B6, A7, A6, B7). Tying the two N pads and the two P pads together would take a
 crossing; the pairs take stubs instead, with no via and on L1 only:
-- Each pair ends in a lane on the midline of its pads B7 and A6: x = 17.0 on J2, 50.8 on J3 and
-  76.5 on J1. The 0.31 mm conductors stop 2.14 mm short of the pads' outer ends (y = 9.0, and
+- Each pair ends in a lane on the midline of its pads B7 and A6: x = 17.0 on J2, 82.0 on J3 and
+  83.0 on J1 (D39). The 0.31 mm conductors stop 2.14 mm short of the pads' outer ends (y = 9.0, and
   y = 63.0 on J1), and 0.20 mm lead-ins, 2.5 mm long, take N to B7 and P to A6. Each lead-in
   lands 0.02 mm off the centre line of its pad.
 - A7, the second N pad, joins B7 by a hop of 2.67 mm on the body side of the pad row, 0.16 mm
@@ -154,9 +158,9 @@ P − N = −0.80 mm (UP), −0.07 mm (A) and −0.00 mm (B), with every track o
 <!-- pairs:begin -->
 | Pair | P | N | Centreline | Why |
 |---|---|---|---|---|
-| UP | USB_UP_P | USB_UP_N | 97.3,28.0 97.8,28.5 97.8,57.0 97.3,57.5 77.0,57.5 76.5,58.0 76.5,63.0 | U6's east pins north along the east edge, then west along y = 57.5 to J1's lane |
+| UP | USB_UP_P | USB_UP_N | 97.3,28.0 97.8,28.5 97.8,57.0 97.3,57.5 83.5,57.5 83.0,58.0 83.0,63.0 | U6's east pins north along the east edge, then west along y = 57.5 to J1's lane |
 | A | USB_A_P | USB_A_N | 90.9,24.0 90.4,23.5 90.4,21.9 91.0,21.3 91.0,18.4 90.5,17.9 17.5,17.9 17.0,17.4 17.0,9.0 | U6 south past the taps (x = 91.0), then west along y = 17.9 to J2's lane |
-| B | USB_B_P | USB_B_N | 96.5,24.0 97.0,23.5 97.0,16.45 96.5,15.95 51.3,15.95 50.8,15.45 50.8,9.0 | U6 south past the taps (x = 97.0), then west along y = 15.95, below A, to J3's lane |
+| B | USB_B_P | USB_B_N | 96.5,24.0 97.0,23.5 97.0,16.45 96.5,15.95 82.5,15.95 82.0,15.45 82.0,9.0 | U6 south past the taps (x = 97.0), then west along y = 15.95, below A, to J3's lane |
 <!-- pairs:end -->
 
 ## Hand-drawn tracks
@@ -173,6 +177,29 @@ left open in a trial: drawn here, they are fixed before it starts.
   pairs on L4 and comes up through three vias beside pad B4 of the port's receptacle (D37); a
   0.25 mm joiner under the connector body ties pad A4 to pad B4, and the port capacitor C116
   (C216 on port B) takes its VBUS from the same vias.
+- **VBUS_B's trunk (D39).** J2 stands in front of its front end, so VBUS_A's trunk is 16.8 mm
+  long. J3 stands 31.2 mm east of channel B's front end since D39: VBUS_B leaves the lift vias
+  at Q37 south, crosses under pair A on L4, runs east along y = 14.0, south of the pair, and
+  reaches J3 under pair B's lane, 35.1 mm in all. For 29.8 mm of that it is 3.0 mm wide, which
+  keeps port B's copper at 39.12 mΩ of the 40 mΩ (`port_path`; port A's is 35.24 mΩ).
+  The pairs above it reference L2, which the trunk does not touch.
+- **The corridor crossings (D39).** Pair A runs on L1 along y = 17.9 from U6 to J2's lane, across
+  the board, and VBUS_B's trunk on L4 along y = 14.0. Between them lies a strip, y 15.9–16.8,
+  where a via clears both: PAIR_ANTIPAD keeps its copper 0.5 mm from the pair's conductor, and
+  the trunk's edge is at y = 15.5. A track from the north half of the board to a part south of
+  the pair crosses the pair on L4, with L2 between them, changes layer in that strip, and
+  crosses the trunk on L1 or L3. Five nets do: BTN_B, LED_ON_B and LED_FLT_B to OUT B's button
+  and LED resistors, V12F to the MAU104's filter, and ADC_L_A, which Rev0.5 routed along the
+  south edge, to U7. Each continues the open end of its carried track (*Carried from Rev0.5*)
+  and is drawn here, before the router, so that the router cannot close the strip. In the first
+  trial the trunk ran under the pair (y = 17.0) and the router laid V5L along y = 16.6:
+  LED_ON_B, LED_FLT_B and ADC_L_A then had no path on any layer between x = 58.6 and the
+  trunk's end (L1: the pair; L3: PAIR_COPLANAR keeps wires out from under a pair, and CLAUDE.md
+  5.1 asks for GND on L4 below such a crossing; L4: the trunk). The rows were found by the
+  search of *After the router*, on the board with the carried copper and no session. LED_ON_B's
+  are drawn by hand, on L3 under R241 and up through a via at the end of R240's stub: the search
+  took it on L1 between R241's pads. V12F's rows at R10, C7, C8 and TP3 are drawn with them: the
+  router had left those four pads open.
 - **The VBUS pads of J1 and J4 (D37).** Each of J4's two VBUS pads (A4, B4) has a 0.6 mm stub to a
   pair of vias, and a 1.5 mm trunk on L4 carries both to F1: 2.46 A, the current of both ports at
   their over-current trip. J1's pads B4 and A4 are joined by a 0.25 mm track under the connector
@@ -185,21 +212,21 @@ left open in a trial: drawn here, they are fixed before it starts.
   names a U1 pin draw those pins before the router starts: to their part where it is a few mm
   away, otherwise 0.4 mm to a via on a free spot (a 0.05 mm grid search with the obstacles of
   *After the router*), and the router joins the via. The 22 parts around U1 stand 0.4–0.8 mm
-  further out for it (PLACEMENT_Rev0.6.md, *Deviations*). Five U1 pins are still open after the
-  router (BTN_B, LED_ON_B, LED_FLT_B, EVT_L_A and QSPI_SD3), and the patch joins them
-  (*After the router*).
+  further out for it (PLACEMENT_Rev0.6.md, *Deviations*). Rev0.5's router left five U1 pins
+  open (BTN_B, LED_ON_B, LED_FLT_B, EVT_L_A and QSPI_SD3) and Rev0.5's patch joined them;
+  Rev0.6 carries that copper where it still stands (*Carried from Rev0.5*).
 
 <!-- route:begin -->
 | Net | Layer | Width | Points | Why |
 |---|---|---:|---|---|
 | USB_UP_N | F.Cu | 0.20 | U6.20 96.55,27.8 96.75,27.77 | U6 lead-in |
 | USB_UP_P | F.Cu | 0.20 | U6.21 96.55,28.2 96.75,28.23 | U6 lead-in |
-| USB_UP_N | F.Cu | 0.31 | 96.750,27.770 97.395,27.770 98.030,28.405 98.030,57.095 97.395,57.730 77.095,57.730 76.730,58.095 76.730,63.000 | coupled |
-| USB_UP_P | F.Cu | 0.31 | 96.750,28.230 97.205,28.230 97.570,28.595 97.570,56.905 97.205,57.270 76.905,57.270 76.270,57.905 76.270,63.000 | coupled |
-| USB_UP_N | F.Cu | 0.20 | 76.73,63.0 76.73,65.5 | lead-in to J1 B7 |
-| USB_UP_P | F.Cu | 0.20 | 76.27,63.0 76.27,65.5 | lead-in to J1 A6 |
-| USB_UP_N | F.Cu | 0.20 | J1.A7 75.75,66.55 76.75,66.55 J1.B7 | A7 to B7, on the body side |
-| USB_UP_P | F.Cu | 0.20 | J1.B6 75.25,64.1 76.27,64.1 | B6 to the lead-in of A6, on the lead-in side |
+| USB_UP_N | F.Cu | 0.31 | 96.750,27.770 97.395,27.770 98.030,28.405 98.030,57.095 97.395,57.730 83.595,57.730 83.230,58.095 83.230,63.000 | coupled |
+| USB_UP_P | F.Cu | 0.31 | 96.750,28.230 97.205,28.230 97.570,28.595 97.570,56.905 97.205,57.270 83.405,57.270 82.770,57.905 82.770,63.000 | coupled |
+| USB_UP_N | F.Cu | 0.20 | 83.23,63.0 83.23,65.5 | lead-in to J1 B7 |
+| USB_UP_P | F.Cu | 0.20 | 82.77,63.0 82.77,65.5 | lead-in to J1 A6 |
+| USB_UP_N | F.Cu | 0.20 | J1.A7 82.25,66.55 83.25,66.55 J1.B7 | A7 to B7, on the body side |
+| USB_UP_P | F.Cu | 0.20 | J1.B6 81.75,64.1 82.77,64.1 | B6 to the lead-in of A6, on the lead-in side |
 | USB_A_N | F.Cu | 0.20 | U6.8 92.8,24.45 92.6,24.23 | U6 lead-in |
 | USB_A_P | F.Cu | 0.20 | U6.9 93.2,24.2 92.77,23.77 92.6,23.77 | U6 lead-in |
 | USB_A_N | F.Cu | 0.31 | 92.600,24.230 90.805,24.230 90.170,23.595 90.170,21.805 90.770,21.205 90.770,18.495 90.405,18.130 17.405,18.130 16.770,17.495 16.770,9.000 | coupled |
@@ -210,12 +237,12 @@ left open in a trial: drawn here, they are fixed before it starts.
 | USB_A_P | F.Cu | 0.20 | J2.B6 18.25,7.9 17.23,7.9 | B6 to the lead-in of A6, on the lead-in side |
 | USB_B_N | F.Cu | 0.20 | U6.13 94.8,24.2 95.23,23.77 95.4,23.77 | U6 lead-in |
 | USB_B_P | F.Cu | 0.20 | U6.14 95.2,24.45 95.4,24.23 | U6 lead-in |
-| USB_B_N | F.Cu | 0.31 | 95.400,23.770 96.405,23.770 96.770,23.405 96.770,16.545 96.405,16.180 51.205,16.180 50.570,15.545 50.570,9.000 | coupled |
-| USB_B_P | F.Cu | 0.31 | 95.400,24.230 96.595,24.230 97.230,23.595 97.230,16.355 96.595,15.720 51.395,15.720 51.030,15.355 51.030,9.000 | coupled |
-| USB_B_N | F.Cu | 0.20 | 50.57,9.0 50.57,6.5 | lead-in to J3 B7 |
-| USB_B_P | F.Cu | 0.20 | 51.03,9.0 51.03,6.5 | lead-in to J3 A6 |
-| USB_B_N | F.Cu | 0.20 | J3.A7 51.55,5.45 50.55,5.45 J3.B7 | A7 to B7, on the body side |
-| USB_B_P | F.Cu | 0.20 | J3.B6 52.05,7.9 51.03,7.9 | B6 to the lead-in of A6, on the lead-in side |
+| USB_B_N | F.Cu | 0.31 | 95.400,23.770 96.405,23.770 96.770,23.405 96.770,16.545 96.405,16.180 82.405,16.180 81.770,15.545 81.770,9.000 | coupled |
+| USB_B_P | F.Cu | 0.31 | 95.400,24.230 96.595,24.230 97.230,23.595 97.230,16.355 96.595,15.720 82.595,15.720 82.230,15.355 82.230,9.000 | coupled |
+| USB_B_N | F.Cu | 0.20 | 81.77,9.0 81.77,6.5 | lead-in to J3 B7 |
+| USB_B_P | F.Cu | 0.20 | 82.23,9.0 82.23,6.5 | lead-in to J3 A6 |
+| USB_B_N | F.Cu | 0.20 | J3.A7 82.75,5.45 81.75,5.45 J3.B7 | A7 to B7, on the body side |
+| USB_B_P | F.Cu | 0.20 | J3.B6 83.25,7.9 82.23,7.9 | B6 to the lead-in of A6, on the lead-in side |
 | VBUS_J4 | F.Cu | 0.60 | J4.A4 19.9,63.5 | pad A4 down to its two vias |
 | VBUS_J4 | via | 0.60/0.30 | 19.9,64.3 |  |
 | VBUS_J4 | via | 0.60/0.30 | 19.9,63.5 |  |
@@ -223,7 +250,7 @@ left open in a trial: drawn here, they are fixed before it starts.
 | VBUS_J4 | via | 0.60/0.30 | 15.1,64.3 |  |
 | VBUS_J4 | via | 0.60/0.30 | 15.1,63.5 |  |
 | VBUS_J4 | B.Cu | 2.50 | 19.9,63.9 15.1,63.9 5.0,53.8 F1.1 | both pads to the fuse; F1.1 is through-hole |
-| VBUS_J1 | F.Cu | 0.25 | 73.8,65.5 73.8,67.3 78.2,67.3 78.2,65.5 | pad B4 to pad A4, under the connector body |
+| VBUS_J1 | F.Cu | 0.25 | 80.3,65.5 80.3,67.3 84.7,67.3 84.7,65.5 | pad B4 to pad A4, under the connector body |
 | XI_HUB | F.Cu | 0.20 | U6.11 94,20.95 Y2.1 | the crystal, between Y2's pads |
 | XO_HUB | F.Cu | 0.20 | U6.12 94.4,23.6 94.8,23.2 Y2.3 | the crystal |
 | VDD33_HUB | F.Cu | 0.20 | U6.19 U6.18 96.55,27.0 96.8,26.75 | U6's pins 18 and 19, out past the unused pins 15-17 (the router left them open) |
@@ -284,6 +311,44 @@ left open in a trial: drawn here, they are fixed before it starts.
 | BTN_A | via | 0.45/0.3 | 42.65,62.65 | BTN_A: U1 pin 34 to a via |
 | TAP_A_P | F.Cu | 0.15 | 41.15,61.4 41.15,61.05 | TAP_A_P: U1 pin 38 to a via |
 | TAP_A_P | via | 0.45/0.3 | 41.15,61.05 | TAP_A_P: U1 pin 38 to a via |
+| VBUS_A | B.Cu | 1.80 | 20.9,7.9 26.33,7.9 26.33,19.25 | under the pairs, then to the lift vias at the receptacle |
+| VBUS_A | via | 0.60/0.30 | 20.9,7.9 |  |
+| VBUS_A | via | 0.60/0.30 | 21.7,7.9 |  |
+| VBUS_A | via | 0.60/0.30 | 22.5,7.9 |  |
+| VBUS_A | F.Cu | 0.60 | J2.B4 19.9,7.9 22.5,7.9 | pad B4 to the lift vias |
+| VBUS_A | F.Cu | 0.60 | 19.9,7.9 19.9,9.0 | the port capacitor C116's pad 1 |
+| VBUS_A | F.Cu | 0.25 | 15.3,5.9 15.3,4.7 19.7,4.7 19.7,5.9 | pad A4 to pad B4, under the connector body |
+| VBUS_B | B.Cu | 1.80 | 60.13,19.25 60.13,18.2 | from the lift vias at Q37, south into the corridor (D39) |
+| VBUS_B | B.Cu | 3.00 | 60.13,18.2 60.13,14.0 78.5,14.0 83.6,8.9 | south under pair A, east along y = 14.0, south of the pair, then under pair B's lane to J3 (D39); 3.0 mm wide, because the trunk is 35.1 mm long and port B's path has little to spare (port_path) |
+| VBUS_B | B.Cu | 1.80 | 83.6,8.9 84.6,7.9 87.5,7.9 | to the lift vias at the receptacle |
+| VBUS_B | via | 0.60/0.30 | 85.9,7.9 |  |
+| VBUS_B | via | 0.60/0.30 | 86.7,7.9 |  |
+| VBUS_B | via | 0.60/0.30 | 87.5,7.9 |  |
+| VBUS_B | F.Cu | 0.60 | J3.B4 84.9,7.9 87.5,7.9 | pad B4 to the lift vias |
+| VBUS_B | F.Cu | 0.60 | 84.9,7.9 84.9,9.0 | the port capacitor C216's pad 1 |
+| VBUS_B | F.Cu | 0.25 | 80.3,5.9 80.3,4.7 84.7,4.7 84.7,5.9 | pad A4 to pad B4, under the connector body |
+| LED_FLT_B | B.Cu | 0.2 | 64.55,70.3 64.55,16.75 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to R241 |
+| LED_FLT_B | F.Cu | 0.2 | 64.55,16.75 64.55,13 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to R241 |
+| LED_FLT_B | via | 0.45/0.3 | 64.55,16.75 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to R241 |
+| BTN_B | B.Cu | 0.2 | 64.05,28.75 64.05,16.25 63.7,15.9 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to SW2 |
+| BTN_B | F.Cu | 0.2 | 63.7,15.9 63.7,10.45 66.55,7.6 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to SW2 |
+| BTN_B | via | 0.45/0.3 | 63.7,15.9 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to SW2 |
+| LED_ON_B | B.Cu | 0.2 | 68.45,48.3 68.45,15.9 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, then on L3 over VBUS_B's trunk to R240 |
+| LED_ON_B | via | 0.45/0.3 | 68.45,15.9 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, then on L3 over VBUS_B's trunk to R240 |
+| LED_ON_B | In2.Cu | 0.2 | 68.45,15.9 64.5,11.95 64.5,10.5 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, then on L3 over VBUS_B's trunk to R240 |
+| LED_ON_B | via | 0.45/0.3 | 64.5,10.5 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, then on L3 over VBUS_B's trunk to R240 |
+| V12F | F.Cu | 0.2 | 59.4,9.35 59.4,10.55 | V12F at its moved parts (D39): R10, C7, C8 and TP3 |
+| V12F | F.Cu | 0.2 | 57.65,9.7 58.25,10.3 58.8,10.3 | V12F at its moved parts (D39): R10, C7, C8 and TP3 |
+| V12F | F.Cu | 0.2 | 61.55,10.9 60.2,10.9 | V12F at its moved parts (D39): R10, C7, C8 and TP3 |
+| V12F | F.Cu | 0.2 | 57.6,4 57.6,8.9 | V12F at its moved parts (D39): from the end of the carried track to R11 |
+| V12F | B.Cu | 0.2 | 63.55,28.7 63.55,18.25 62.05,16.75 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to TP3 |
+| V12F | F.Cu | 0.2 | 62.05,16.75 62.05,11.25 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to TP3 |
+| V12F | via | 0.45/0.3 | 62.05,16.75 | corridor crossing (D39): from the end of the carried track, on L4 under pair A, to TP3 |
+| ADC_L_A | B.Cu | 0.2 | 59.7,4.35 59.4,4.65 59.4,6.1 65.25,11.95 | corridor crossing (D39): from the end of the carried track to U7, on L3 over VBUS_B's trunk and on L4 under pair A |
+| ADC_L_A | In2.Cu | 0.2 | 65.25,11.95 69.6,16.3 | corridor crossing (D39): from the end of the carried track to U7, on L3 over VBUS_B's trunk and on L4 under pair A |
+| ADC_L_A | B.Cu | 0.2 | 69.6,16.3 69.6,20.05 | corridor crossing (D39): from the end of the carried track to U7, on L3 over VBUS_B's trunk and on L4 under pair A |
+| ADC_L_A | via | 0.45/0.3 | 65.25,11.95 | corridor crossing (D39): from the end of the carried track to U7, on L3 over VBUS_B's trunk and on L4 under pair A |
+| ADC_L_A | via | 0.45/0.3 | 69.6,16.3 | corridor crossing (D39): from the end of the carried track to U7, on L3 over VBUS_B's trunk and on L4 under pair A |
 <!-- route:end -->
 
 <!-- channel_route:begin -->
@@ -337,42 +402,41 @@ left open in a trial: drawn here, they are fixed before it starts.
 | VBUS_A | via | 0.60/0.30 | 27.6,19.25 | |
 | VBUS_A | via | 0.60/0.30 | 28.9,19.25 | |
 | VBUS_A | B.Cu | 1.00 | 26.33,19.25 27.6,19.25 28.9,19.25 | |
-| VBUS_A | B.Cu | 1.80 | 20.9,7.9 26.33,7.9 26.33,19.25 | under the pairs, then to the lift vias at the receptacle |
-| VBUS_A | via | 0.60/0.30 | 20.9,7.9 |  |
-| VBUS_A | via | 0.60/0.30 | 21.7,7.9 |  |
-| VBUS_A | via | 0.60/0.30 | 22.5,7.9 |  |
-| VBUS_A | F.Cu | 0.60 | J2.B4 19.9,7.9 22.5,7.9 | pad B4 to the lift vias |
-| VBUS_A | F.Cu | 0.60 | 19.9,7.9 19.9,9.0 | the port capacitor C116's pad 1 |
-| VBUS_A | F.Cu | 0.25 | 15.3,5.9 15.3,4.7 19.7,4.7 19.7,5.9 | pad A4 to pad B4, under the connector body |
 <!-- channel_route:end -->
 
 ## GND fanout
 
-Every GND surface pad (SMD, or a connector pad without paste: J5's pad 5) gets the board's via,
-the Default class's 0.45/0.30 (`make_project.py`; eight of them are deleted again, below), to L2
-on the nearest free spot (16 directions, outward
-from its part first, 0.1 mm rings) and a 0.20 mm stub to it; the search keeps 0.15 mm from other
-copper, 0.5 mm from the HS pairs, 0.20 mm from another via's hole (JLCPCB's via figure, the
-custom rule `VIA_HOLE_TO_HOLE`), the board's 0.25 mm hole-to-hole minimum from a pad's hole, and
-0.3 mm from the edge. Until issue #8 the via was 0.45/0.25 with 0.25 mm between all holes: the same
-0.50 mm between two via centres. The router input of issue #8 equals the one before it except for
-the via's name (`450:250` → `450:300`), so every fanout via landed where it was. Each exposed
-pad gets five vias, at its centre and at the offset on the four axes, inside the cross of its
-paste windows; the residual risk is solder wicking into them (V-MFG-03 inspects U1 and U6).
+Every GND surface pad (SMD, or a connector pad without paste: J5's pad 5) reaches L2 in one of
+two ways (`route.py`, `gnd_fanout`).
 
-The search reads a pad's oblong hole as a round hole of the drill's width at the pad's centre
-(`route.py`, `_Copper`). The receptacles' plated shell slots (0.60 x 1.70 mm at the rear, 0.60 x
-1.40 mm at the front, D37) are oblong: beside each rear slot the search put the via of the
-contact pad A1 or B1 on the pad's own row, 0.046 mm from the slot's hole, which JLCDFM called
-Danger (issue #8, 2026-11-13; 8 vias) and KiCad's DRC did not see. The session had been routed
-around those 8 vias, so they stay in the router's input and the patch (stage 5, below) deletes
-them: for J1.B1 no free spot for a via exists within 3 mm, and for J2.B1 and J3.B1 only across
-the slot, 1.9 mm from the pad (measured with the slot as a capsule, 0.25 mm of hole-to-hole,
-against the board's copper). Each of the 8 contact pads keeps its 0.20 mm stub, which ends
-0.05 mm inside the ring of its plated slot's pad, and reaches L2 through the slot's wall (the
-plane joins a plated pad solid), a much wider path than a 0.30 mm via. `check_routing.py` rule
-10 measures every pair of drilled holes with a slot as a capsule. When a new session is routed,
-read the slot as a capsule in `_Copper` and delete stage 5.
+- **A stub to a plated GND hole of its own part**, where one is in reach: a 0.20 mm track on L1
+  that leaves the pad's centre square to the hole's axis, ends 0.05 mm inside the hole's pad
+  and is at most 1.0 mm long. The plane joins a plated pad solid, so the pad reaches L2 through
+  the hole's wall, a much wider path than a 0.30 mm via. These are the receptacles' contact
+  pads A1 and B1 (8 pads), each 0.675 mm from the rear shell slot beside it.
+- **A via**, for every other pad: the board's via, the Default class's 0.45/0.30
+  (`make_project.py`), on the nearest free spot (16 directions, outward from its part first,
+  0.1 mm rings) and a 0.20 mm stub to it. The search keeps 0.15 mm from other copper, 0.5 mm
+  from the HS pairs, 0.20 mm from another via's hole (JLCPCB's via figure, the custom rule
+  `VIA_HOLE_TO_HOLE`), the board's 0.25 mm hole-to-hole minimum from a pad's hole, and 0.3 mm
+  from the edge. A pad's hole is its whole shape: a plated slot is measured to its edge.
+
+Each exposed pad gets five vias, at its centre and at the offset on the four axes, inside the
+cross of its paste windows; the residual risk is solder wicking into them (V-MFG-03 inspects
+U1 and U6).
+
+**Why the stub (issues #8 and #13).** Until Rev0.5 the search read an oblong hole as a round
+one of the drill's width at the pad's centre. The receptacles' plated shell slots (0.60 x
+1.70 mm at the rear, 0.60 x 1.40 mm at the front, D37) are oblong: beside each rear slot the
+search put the via of the contact pad A1 or B1 on the pad's own row, 0.046 mm from the slot's
+hole, which JLCDFM called Danger (issue #8, 2026-11-13; 8 vias) and KiCad's DRC did not see.
+Rev0.5's session had been routed around those vias, so its patch deleted them and drew the
+stubs. No via fits there: with the slot as a capsule, no free spot existed within 3 mm of
+J1.B1, and for J2.B1 and J3.B1 only across the slot, 1.9 mm from the pad (Rev0.5's board). Since
+Rev0.6 the fanout draws the stub itself and the patch has no such rows. `check_routing.py`
+rule 10 measures every pair of drilled holes with a slot as a capsule, by its own arithmetic.
+Until issue #8 the via was 0.45/0.25 with 0.25 mm between all holes, the same 0.50 mm between
+two via centres.
 
 <!-- epad:begin -->
 | Pad | Offset | Why |
@@ -394,13 +458,81 @@ read the slot as a capsule in `_Copper` and delete stage 5.
 L1 carries no pour: the pairs' width was computed for a microstrip without coplanar ground
 (D27), and between the 0402 parts a pour would leave islands. Every zone removes its islands.
 
+## Carried from Rev0.5
+
+Rev0.6 moves 31 of the 304 parts (D39): J3 with OUT B's port parts (C216, D3, Q33, R203, R204,
+R209, R210), J1 with its CC and ESD parts and its soft start (D1, D5, R1, R2, C35–C37, Q53, R34,
+TP14), the MAU104 with its filter (U5, C5–C8, R10, TP3), and OUT B's button and LEDs (SW2, D12,
+D13, R240, R241). The copper of the other 273 parts stays as Rev0.5 routed it: the router session
+and the patch table of Rev0.5, at the commit the table below names. `scripts/carry.py` reads both
+from Git history, checks each against the table's SHA-256, and applies them to this revision's
+board after the GND fanout, with the functions `make_pcb.py` uses for a session and a patch. Then
+it drops what no longer stands, in rounds, until a round drops nothing:
+
+- every carried track or via that KiCad's DRC names in a violation: a short to a pad of a moved
+  part, a crossing with a track this document draws (VBUS_B's trunk and the corridor crossings lie
+  where Rev0.5 had other runs), a clearance. The whole segment goes, not the part in the way;
+- every carried cluster of connected tracks and vias that reaches no pad and no drawn item: what a
+  dropped segment left floating.
+
+A carried route that lost its far end stays, with an open end. The router continues from it, or the
+patch table does, and the patch table takes away what nobody continued.
+
+`carry.py` writes the result, `routing/carried.json`: the drawn items taken away and every carried
+track and via that stands, in the board's nanometres. `make_pcb.py` applies it before it writes the
+router input, so the router sees the carried copper as fixed wires and routes what is left open. It
+refuses the record when the table below, or the board before the carry (its router input's
+SHA-256), is not what the record was made from: run `carry.py`, then `autoroute.py`.
+`carry.py --check` builds the record again and compares it with the file.
+
+<!-- carry:begin commit=866ef440b5ad63606609d63caaa09a53cf7046db -->
+| Item | Value | SHA-256 |
+|---|---|---|
+| session | design/ecad/routing/usb-power-hub.ses | c908c2349fcd4965ba991493cdb486820b2334d04959f8732a9f55e16bd9224a |
+| patch | design/ecad/ROUTING_Rev0.5.md | 10abeae25a4f004327a07e2dd6e5db76f880a49386d23954b84c480db51299be |
+| skip | Slot vias: | - |
+<!-- carry:end -->
+
+- `session` and `patch` are paths at that commit; the patch is the patch table of that file.
+- `skip`: patch rows whose Why begins with this text are not carried. Rev0.5's *Slot vias* rows
+  re-drew the GND stubs at the receptacles' rear slots; since Rev0.6 the GND fanout draws those
+  stubs itself (*GND fanout*), and two of the receptacles moved.
+- The carried patch's `remove` rows take away drawn items of this board too. Rev0.5's patch had
+  replaced 18 tracks and vias of the route table at U1 (BTN_A, DOUT_B_3V, LED_ON_A, RUN, SWDIO,
+  TAP_A_P, V3V3) by its own; the route table still draws them, and the record lists them under
+  `remove`.
+
+Counts (`carry.py` prints them, and `carried.json` holds the lists): Rev0.5's session adds 1,755
+track segments and 142 vias, its patch (259 rows without the skipped ones) 578 and 86, after
+taking 254 items away. Of those, 2,005 track segments and 205 vias stand on this board. 115 were
+dropped: 40 that DRC named (shorts, crossings and clearances; KiCad does not split them by type
+the same way in every run, so the record holds their number alone) and 75 that floated, of 19 nets
+(VBUS_J1 20, V12F 16, CC2_B 15, GJ1 12, BTN_B 8, VBUS_B 8, V5L 6, CC2_J1 5, LED_ON_B 5,
+LED_FLT_B 4, V12 4, ADC_L_A 2, DCH_B 2, DISG_B 2, GND 2, LEDA_FLT_B 1, LEDA_ON_B 1, TAP_B_P 1,
+USB_P1_P 1). DRC counts 36 connections open on the board with the carried copper, before the
+router.
+
+Why carried, and not routed again. One router run on the Rev0.6 placement without the carried
+copper (37 passes, with VBUS_B's trunk where the first trial had it, under pair A) left 40
+connections open by DRC's count, most of them at U1, where Rev0.5 had needed its window re-route
+(ROUTING_Rev0.5.md at the commit above, *After the router*). Carried, U1's exposed pad keeps the
+plane webs Rev0.5 measured (N 1.66, E 1.70, S 1.65, W 1.80 mm), the analog blocks keep Rev0.5's
+tracks, and the router and the patch have 36 connections to make instead of the whole board. None
+of Rev0.5's JLCPCB evidence carries over with the copper: Rev0.6's files are new files.
+
 ## Router
 
 Freerouting 2.5.0 (the jar and the JRE are named, with their SHA-256, in
 `routing/autoroute.json`) routes what the tables above leave, from the board after the plane,
-the hand-drawn tracks and the GND fanout. `autoroute.py` exports that board's DSN, adds the
-classes and keepouts below, runs the router with its optimizer off (it made the result worse in
-every trial), and writes `routing/usb-power-hub.ses`. The router's own via is the board's, 0.45/0.30.
+the hand-drawn tracks, the GND fanout and the carried record. `autoroute.py` exports that board's
+DSN, adds the classes and keepouts below, runs the router with its optimizer off (it made the
+result worse in every trial), and writes `routing/usb-power-hub.ses`. The router's own via is the
+board's, 0.45/0.30.
+The committed session is 8 passes (`autoroute.py --passes 8`, about 5 minutes). With the carried
+copper fixed, more passes change nothing: the router's score was best after pass 2, no later pass
+of 16 beat it, and it keeps the best board. Sessions of 3 and of 8 passes from one input were the
+same bytes, and so were those of 8 and of 16 (measured on an earlier input of this revision, before
+VBUS_B's trunk moved to y = 14.0; the committed input was run once, with 8 passes).
 The router models a via by its copper circle alone; the drill appears only in the padstack's name.
 KiCad's DSN export sizes the router's keepout around each NPTH hole with the board's
 `min_hole_clearance`, so that minimum stays 0.25 mm, and the 0.20 mm figures for vias are custom
@@ -482,336 +614,96 @@ against 24 without it (one router run each).
 
 ## After the router
 
-The committed session leaves 16 connections unrouted (DRC's count of unconnected items), 11 places
-in the analog blocks where an L3 track runs along an L4 track (D36) and 5 dangling-track warnings,
-the stubs of 5 of those connections. Its L2 plane is sound: the webs of U1's exposed pad are
-2.06–2.37 mm (rule 9 asks 1.60 mm) and the longest void is 2.81 mm. `make_pcb.py` draws the patch
-table on the board after the session and before the zones are filled. At each point of a `remove`
-row, the via of its net centred exactly there is deleted (such a point is the via's position to
-7 decimals, as KiCad wrote it), or else every track of its net through the point. The other rows
-draw tracks and vias as the route table does. The 275 rows, 40 `remove` and 235 drawn, leave 0
-unconnected items, 0 DRC violations and no D36 place, and bring U1's webs down to 1.65–1.80 mm
-(N 1.66, E 1.70, S 1.65, W 1.80).
+The committed session adds 251 track segments and 1 via to the carried copper: 207.7 mm on 46
+nets, of which V5L takes 65.2 mm, VBUS_J1 25.9 mm and USB_P1_P 22.3 mm. 204 of the segments are
+shorter than 1.0 mm, many on nets DRC had counted complete before the router, and two repeat a
+carried AMP_L_A segment exactly: same-net copper on copper, which DRC accepts. Why the router
+draws them was not looked into; its own count of unrouted connections (99, in
+`routing/autoroute.json`) is not DRC's either. The session leaves 9
+connections unrouted (DRC's count of unconnected items) and 10 dangling-track warnings, and no
+place in the analog blocks where an L3 track runs along an L4 track (D36). The L2 plane is as
+Rev0.5's patch left it, because neither the session nor the patch puts a via at U1: the webs of
+U1's exposed pad are N 1.66, E 1.70, S 1.65 and W 1.80 mm (rule 9 asks 1.60 mm) and the longest
+void is 2.81 mm. `make_pcb.py` draws the patch table on the board after the session and before
+the zones are filled. At each point of a `remove` row, the via of its net centred exactly there is
+deleted (such a point is the via's position to 7 decimals, as KiCad wrote it), or else every track
+of its net through the point. The other rows draw tracks and vias as the route table does. The 42
+rows, 10 `remove` and 32 drawn, take 24 track segments away, draw 33 and 12 vias, and leave 0
+unconnected items, 0 DRC violations and no D36 place.
 
-The Why column names the stage that wrote a row. The stages ran in this order, each on the board
-the one before left, on a 0.05 mm grid, with every other net's copper, the DSN keepouts and D36 as
-obstacles:
+The Why column names the stage that wrote a row. The two stages ran in this order, the second on
+the board the first left, on a 0.05 mm grid, with every other net's copper, the DSN keepouts and
+D36 as obstacles:
 
-1. **N window.** North of U1, in x 38.9–46.2, y 60.1–65.6, the router left three U1 pins open (BTN_B
-   pin 35, LED_ON_B pin 30, LED_FLT_B pin 31), and routing the window's nets one after another
-   left three connections open in the trial that was run (BTN_B, LED_ON_A, CLKOUT). So the window
-   is routed as a whole by negotiated congestion: the copper of 14 nets inside it is ripped up
-   (*ripped up* rows) and drawn again together with the three open nets (*routed again*,
-   *unrouted by the router, joined*). Each net is routed in turn and pays for the cells the other
-   nets of the window hold, at a price that grows every iteration, and for the cells where nets
-   met before; the vias around U1 are counted as rule 9 counts the voids of L2, and a web under
-   1.7 mm is a conflict. The search stopped after 14 iterations with 2 clearance conflicts and
-   V3V3's pad 22 unconnected. A `remove` row takes a whole session track, so the tracks the
-   re-route left ending in nothing are deleted (*dead end*), the live part of a track that such a
-   row also took is drawn again (*the live part*), and a via left with one layer gets a short
-   joint (*joint at a via*).
-2. **U1 joins.** V3V3 pad 22, EVT_L_A pad 6 and QSPI_SD3 pad 51 are joined to their nets by a search
-   with the plane rule off (`plane_via` 0: with it on, no path exists, because the pockets around
-   these pads hold no cell where a via keeps the rule), and the webs are measured the way rule 9
-   measures them before a row is accepted.
-3. **Web nudge.** After the joins the south web was 1.58 mm. DOUT_A_3V's via moved 0.25 mm south,
-   and the web is 1.65 mm.
-4. **Analog blocks.** The 11 D36 places belong to six nets: ADC_CC1, ADC_CC2, ADC_H_A, ADC_M_A and
-   EN_G_A on L3, and LED_FLT_A on L4 (the *D36* rows name the places). They are ripped up and
-   routed again, together with the 11 connections the router left open there (INP_L_A, INP_L_B,
-   LAD2_B, V_INJ ×7, X_L_B; *unrouted by the router*).
-5. **Slot vias.** Not the router's: found by JLCDFM on the first Rev0.5 Gerber (issue #8). The 8
-   GND fanout vias beside the receptacles' rear slots, and their stubs, are deleted (*remove*
-   rows: the via by its exact position, the stub by its middle), and each stub is drawn again
-   from its contact pad into the slot's pad (*stub ends in its plated slot's pad*). See *GND
-   fanout*. The routing of every other net is the session's and the stages above, untouched.
+1. **Tails.** Seven of the dangling tracks are carried copper that ends where a moved part stood:
+   five of GND, at the old places of J3's and of J1's parts, one of V5L (0.23 mm, at Q53's old
+   place) and one of LED_FLT_B (1.45 mm, beside the corridor crossing that replaces it). The carry keeps a
+   route that lost its far end (*Carried from Rev0.5*); nobody continued these, so each is taken
+   away back to the next via, pad or junction.
+2. **Moved parts.** The 9 open connections are at the parts D39 moved: V5L at C35 and Q53 (two),
+   J1's CC lines at D1, R1 and R2 (CC1_J1 two, CC2_J1 one), CC2_B at J3's pad B5, EN_B at R203 and
+   R204, DIS_B at R209, and TAP_B_P, whose straight L1 run of Rev0.5 crossed the place where Q53
+   and C35 now stand. Each is one search from the pad, or from the open end of the carried route
+   (EN_B: of the 5.3 mm the router drew), to the rest of its net. Three are long: EN_B 31.0 mm (20.3 mm of it on L3 along y = 8.9), DIS_B
+   34.0 mm (on L3 between VBUS_B's trunk and pair A, then on L4 under pair B) and TAP_B_P 24.2 mm
+   (on L3 under Q53, 1.2 mm beside the line Rev0.5 had it on L1). See *Not settled*, *Long routes*.
 
-The programs that wrote the rows (a negotiated-congestion window router, an exact-obstacle search
-and a dead-end remover) are scratch tools and are not in the repository. The table is their
-output, and `check_routing.py`, not the tools, accepts it.
+Rev0.5's own patch (its window re-route north of U1, the joins at U1, the analog blocks) is not in
+this table: it is carried, with Rev0.5's session, by the record (*Carried from Rev0.5*).
 
-The table belongs to the session whose SHA-256 `routing/autoroute.json` records. A new session
-moves the router's tracks, and a `remove` row that finds nothing stops `make_pcb.py`. After a
-new session, rewrite the table.
+The program that wrote the rows (an exact-obstacle search that also takes dead ends away) is a
+scratch tool and is not in the repository. The table is its output, and `check_routing.py`, not
+the tool, accepts it.
+
+The table belongs to the carried record and to the session whose SHA-256 `routing/autoroute.json`
+records. A new record or a new session moves the tracks its rows name, and a `remove` row that
+finds nothing stops `make_pcb.py`. After either, rewrite the table.
 
 <!-- patch:begin -->
 | Net | Layer | Width | Points | Why |
 |---|---|---:|---|---|
-| BTN_A | remove | - | 42.6500000,62.6500000 42.7500,62.0688 42.7750,61.8625 42.7500,62.4000 42.7000,62.6000 41.6665,57.8497 | N window: ripped up, drawn again below |
-| CLKOUT | remove | - | 45.5723000,64.8121000 45.0825,63.3846 45.3628,64.1337 43.6000,62.0988 44.5733,63.1043 45.4675,64.7073 43.9721,62.7322 45.1266,65.2578 | N window: ripped up, drawn again below |
-| DOUT_B_3V | remove | - | 43.3500000,61.0000000 44.0000,61.0000 45.4438,60.6000 44.8250,60.8250 45.1000,60.6500 45.2250,60.6250 43.3500,60.1790 | N window: ripped up, drawn again below |
-| DVDD | remove | - | 39.0297,60.2000 39.3870,60.1099 44.0846,60.1467 43.7626,61.3246 43.1433,61.5002 46.2748,59.7752 41.4996,60.3002 45.1403,60.0004 43.9382,60.7211 | N window: ripped up, drawn again below |
-| LED_FLT_A | remove | - | 44.6019000,62.6526000 44.8000,62.1460 44.7009,62.5536 38.9515,59.8664 43.5472,65.1562 44.6019,63.3771 | N window: ripped up, drawn again below |
-| LED_ON_A | remove | - | 45.3000000,61.4500000 45.4937,61.0000 45.3250,61.0250 44.7008,59.8781 | N window: ripped up, drawn again below |
-| RUN | remove | - | 46.2750,60.3250 45.9545,64.0945 45.8188,60.2000 46.0250,60.2250 45.8995,65.5505 46.0490,64.7950 46.2000,63.5500 45.8600,63.9450 | N window: ripped up, drawn again below |
-| SWCLK | remove | - | 45.5909,65.8530 46.0490,62.9720 45.4495,59.9495 | N window: ripped up, drawn again below |
-| SWDIO | remove | - | 44.4500000,60.5000000 44.7750,60.1750 44.1266,62.9220 44.0545,61.8727 42.1273,65.5838 44.1987,63.2532 44.2523,60.6977 | N window: ripped up, drawn again below |
-| TAP_A_N | remove | - | 42.0581000,64.2736000 41.4290,63.6446 40.8000,62.4265 54.3359,64.2736 | N window: ripped up, drawn again below |
-| TAP_A_P | remove | - | 41.1500000,61.0500000 41.1750,61.8125 41.1500,61.2250 44.3461,61.3260 41.5510,61.4510 42.8860,61.8520 46.0273,60.8000 | N window: ripped up, drawn again below |
-| TAP_B_N | remove | - | 39.4652000,63.2802000 39.7326,63.0128 40.0000,62.2914 39.2115,65.0093 39.3383,63.4070 | N window: ripped up, drawn again below |
-| TAP_B_P | remove | - | 39.9290000,61.0073000 40.4000,61.6030 40.2194,61.1880 39.9839,61.0073 43.3092,63.0097 42.6203,63.1510 46.8322,63.1808 44.0337,63.0245 43.6640,62.8683 | N window: ripped up, drawn again below |
-| V3V3 | remove | - | 39.1812,61.4188 42.7200,63.9300 43.0250,63.5750 39.0535,63.9134 43.9148,66.1596 39.2934,62.1441 43.3495,64.6095 41.7469,60.3684 39.0952,60.6000 39.5605,64.3675 43.1500,62.0688 42.6160,64.4620 43.8524,65.1124 41.1354,64.7550 43.1500,62.8500 43.1750,61.8625 44.0705,60.1324 39.5437,60.4842 | N window: ripped up, drawn again below |
-| DOUT_B_3V | remove | - | 44.2362,58.4718 45.1223,57.3882 47.9207,54.3923 59.5784,51.5939 | N window: dead end the re-route left |
-| DVDD | remove | - | 40.0507,59.1002 | N window: dead end the re-route left |
-| INP_L_A | remove | - | 29.435,26.2074 | N window: dead end the re-route left |
-| LED_FLT_A | remove | - | 38.9515000,51.1449999 39.3971,69.0335 42.4926,66.7333 39.2774,51.145 40.0559,69.4792 41.3808,68.3674 40.0187,50.7297 | N window: dead end the re-route left |
-| LED_FLT_B | remove | - | 67.6537,13.9958 | N window: dead end the re-route left |
-| LED_ON_A | remove | - | 44.1017,58.6418 | N window: dead end the re-route left |
-| SWCLK | remove | - | 45.1328,68.3022 45.1328000,70.2933000 | N window: dead end the re-route left |
-| SWDIO | remove | - | 40.0558,68.3254 40.0558000,68.9954999 | N window: dead end the re-route left |
-| TAP_A_P | remove | - | 48.0933,59.8892 58.2528,58.9785 | N window: dead end the re-route left |
-| TAP_B_P | remove | - | 51.2191,61.4361 | N window: dead end the re-route left |
-| V3V3 | remove | - | 44.3065,59.5317 44.59,58.8835 45.2555,58.6 | N window: dead end the re-route left |
-| DOUT_A_3V | remove | - | 42.6444001,56.2022999 43.4,56.2023 | via nudged 0.25 mm south for the L2 web of U1's south side |
-| ADC_CC1 | remove | - | 41.8196000,35.1320000 38.2590,35.6206 33.5991,40.6068 34.3931,36.4145 41.5753,35.3763 27.4467,53.2604 24.4284,59.3816 30.5229,47.0813 76.1493,33.0707 68.9048,34.1413 51.7799,35.1320 62.2356,34.6367 | D36: its L3 run at (75.08, 34.14) ran along L4 ADC_VREF_CHK |
-| ADC_CC2 | remove | - | 33.1130000,41.8574000 12.6627,62.8243 16.2319,59.3803 25.9500,51.2323 22.2760,55.7064 32.2499,42.2274 13.1742,62.9567 28.9150,47.4671 13.8316,62.6783 31.8800,43.5497 32.8665,41.8574 12.5303,61.7018 13.1960,60.0460 71.5237,35.5322 63.8210,38.5308 45.6347,41.8574 58.3205,41.6934 59.6534,41.5294 77.9939,33.7661 | D36: its L3 run at (58.48, 41.53) ran along L4 V12F |
-| ADC_H_A | remove | - | 3.9017000,37.6016000 3.3359,36.4218 2.7700,33.7030 3.9017,37.2947 50.8522,31.1187 36.9982,39.7067 22.0631,40.1047 4.4622,37.6016 37.3961,35.5123 37.6947,31.4173 69.1957,25.6344 6.2743,38.8531 | D36: its L3 run at (7.53, 40.10) ran along L4 V12F |
-| ADC_M_A | remove | - | 14.4630001,31.1517000 14.3906,31.1517 34.7324,39.7224 25.9598,36.1337 20.0378,33.6427 68.9456,23.3444 31.1852,37.9280 36.6774,39.5302 39.4711,29.1404 36.8695,35.5401 53.9119,26.5388 | D36: its L3 runs ran along L4 V12F (4 points) and LED_FLT_A (2 points) |
-| EN_G_A | remove | - | 19.7540000,44.8146000 49.0936000,45.8052000 50.8001000,56.9282999 55.4733000,57.9924000 15.4462,36.7148 17.9969,38.6844 16.3659,40.7865 13.7732,35.8715 16.8600,44.9150 15.9025,43.2700 16.3813,44.1713 55.4733,57.6729 14.6253,36.3087 51.7486,55.8535 16.8794,41.5853 17.0939,36.6353 52.8611,54.9050 12.2750,47.4900 15.4250,46.6150 16.3910,42.3591 55.4616,57.3417 15.0215,34.7698 16.7342,35.1295 15.8523,38.6969 17.1470,37.8345 13.5023,34.9361 16.9085,41.3000 13.3360,35.2683 18.7939,41.6679 16.5800,45.4600 50.8001,56.8651 19.2739,44.3346 49.0936,50.5135 48.5983,45.3099 54.9412,57.4603 33.9285,44.8146 | D36: its L3 run at (19.75, 44.81) ran along L4 HOLD_L_A |
-| LED_FLT_A | remove | - | 34.7088000,14.3745000 40.4340000,50.3144000 34.4356,13.2732 34.7088,13.9604 40.3460,50.2264 40.2581,42.0433 33.8757,38.7507 40.0748,33.7647 31.6255,37.1489 36.0284,38.9918 35.0726,39.3652 31.9809,37.7807 31.8743,26.9164 31.7499,36.7481 33.2916,15.7918 32.7987,38.1361 39.1882,33.5814 36.4017,37.1416 37.4434,34.6230 | D36: its L4 run at (52.53, 33.59) lay under L3 V12F, and 2 more under ADC_M_A |
-| BTN_A | F.Cu | 0.15 | 42.75,62.25 42.75,62.4 41.95,63.2 41.95,63.25 41.15,64.05 41.15,64.25 40.85,64.55 37,64.55 35.75,63.3 | N window: routed again |
-| BTN_A | B.Cu | 0.15 | 35.75,63.3 35.75,61.5 38.8,58.45 38.8,57.4 39.95,56.25 40.65,56.95 41.65,55.95 41.65,54.1 | N window: routed again |
-| BTN_A | via | 0.45/0.3 | 35.75,63.3 | N window: routed again |
-| CLKOUT | F.Cu | 0.15 | 43.55,62.25 43.55,62.6 | N window: routed again |
-| CLKOUT | In2.Cu | 0.15 | 43.55,62.6 43.55,62.75 43.25,63.05 43.25,63.1 43.1,63.25 43.15,63.3 43,63.45 44.2,64.65 | N window: routed again |
-| CLKOUT | B.Cu | 0.15 | 44.2,64.65 44.4,64.85 44.4,64.9 44.65,65.15 44.65,65.65 | N window: routed again |
-| CLKOUT | via | 0.45/0.3 | 43.55,62.6 | N window: routed again |
-| CLKOUT | via | 0.45/0.3 | 44.2,64.65 | N window: routed again |
-| DOUT_B_3V | F.Cu | 0.15 | 45.2,60.65 44.95,60.65 44.85,60.75 | N window: routed again |
-| DOUT_B_3V | In2.Cu | 0.15 | 44.85,60.75 45.3,61.2 45.85,60.65 46,60.65 48.75,63.4 49.15,63.4 49.3,63.55 53.7,63.55 54.15,63.1 | N window: routed again |
-| DOUT_B_3V | B.Cu | 0.15 | 54.15,63.1 54.15,51.7 | N window: routed again |
-| DOUT_B_3V | In2.Cu | 0.15 | 54.15,51.7 54.1,51.65 | N window: routed again |
-| DOUT_B_3V | via | 0.45/0.3 | 44.85,60.75 | N window: routed again |
-| DOUT_B_3V | via | 0.45/0.3 | 54.15,63.1 | N window: routed again |
-| DOUT_B_3V | via | 0.45/0.3 | 54.15,51.7 | N window: routed again |
-| DVDD | F.Cu | 0.15 | 39.15,60.2 39.3,60.2 39.35,60.15 39.4,60.15 39.5,60.05 | N window: routed again |
-| DVDD | B.Cu | 0.15 | 47.8,59.3 46.4,57.9 46.3,58 44.3,56 44.3,54.55 44.45,54.4 44.45,53.2 | N window: routed again |
-| DVDD | In2.Cu | 0.15 | 44.45,53.2 44.25,53.2 41.65,55.8 42.15,56.3 39.65,58.8 39.75,58.9 | N window: routed again |
-| DVDD | via | 0.45/0.3 | 44.45,53.2 | N window: routed again |
-| LED_ON_A | F.Cu | 0.15 | 45.6,61.05 45.6,61.15 45.55,61.2 45.75,61.4 45.75,61.45 | N window: routed again |
-| LED_ON_A | B.Cu | 0.15 | 45.75,61.45 45.55,61.25 45.55,61.2 45.7,61.05 45.7,60.2 45.2,59.7 45.35,59.55 45.35,59.2 45.3,59.15 45.3,59.1 44.15,57.95 | N window: routed again |
-| LED_ON_A | via | 0.45/0.3 | 45.75,61.45 | N window: routed again |
-| RUN | F.Cu | 0.15 | 45.7,64.3 45.7,64.7 45.65,64.75 45.65,65.25 | N window: routed again |
-| RUN | F.Cu | 0.15 | 46.05,60.25 46.25,60.25 46.35,60.35 | N window: routed again |
-| RUN | F.Cu | 0.15 | 46.35,63.45 46.15,63.65 46.15,63.7 46.1,63.75 | N window: routed again |
-| SWCLK | F.Cu | 0.15 | 45.3,70.4 45.95,71.05 47.9,71.05 51.1,67.85 | N window: routed again |
-| SWCLK | B.Cu | 0.15 | 51.1,67.85 51.1,60.5 51.05,60.45 | N window: routed again |
-| SWCLK | In2.Cu | 0.15 | 51.05,60.45 49.55,60.45 49.35,60.25 48.85,60.25 48.45,60.65 48.6,60.8 48.25,61.15 46.95,61.15 46.55,60.75 46.8,60.5 46.3,60 46.25,60 45.4,59.15 45.2,59.15 45.05,59.3 | N window: routed again |
-| SWCLK | via | 0.45/0.3 | 51.1,67.85 | N window: routed again |
-| SWCLK | via | 0.45/0.3 | 51.05,60.45 | N window: routed again |
-| SWDIO | F.Cu | 0.15 | 45.05,59.85 44.85,59.85 44.4,60.3 | N window: routed again |
-| SWDIO | B.Cu | 0.15 | 44.4,60.3 43.45,59.35 43.45,59.15 43.2,58.9 42.75,59.35 42.3,58.9 42.2,59 42.05,58.85 42,58.9 41.6,58.5 41.6,58.15 40.95,57.5 39.85,58.6 39.75,58.5 39.6,58.65 39.55,58.65 36.75,61.45 36.75,68.35 | N window: routed again |
-| SWDIO | F.Cu | 0.15 | 36.75,68.35 39.25,68.35 39.85,68.95 | N window: routed again |
-| SWDIO | via | 0.45/0.3 | 44.4,60.3 | N window: routed again |
-| SWDIO | via | 0.45/0.3 | 36.75,68.35 | N window: routed again |
-| TAP_A_N | F.Cu | 0.15 | 40.85,61.4 40.85,61.15 40.95,61.05 | N window: routed again |
-| TAP_A_N | B.Cu | 0.15 | 40.95,61.05 41.65,61.75 41.45,61.95 41.35,61.85 41.2,62 41.05,61.85 40.95,61.95 40.85,61.85 40.2,61.85 40.15,61.8 40.1,61.85 39.8,61.85 39.6,62.05 38.55,61 37.55,62 37.55,65.6 38.2,66.25 38.2,66.3 38.15,66.35 38.15,66.55 38.4,66.8 38.4,68.85 | N window: routed again |
-| TAP_A_N | F.Cu | 0.15 | 38.4,68.85 39.2,68.85 41.75,71.4 52.85,71.4 58.45,65.8 60.45,65.8 60.8,66.15 64.55,66.15 66.4,64.3 | N window: routed again |
-| TAP_A_N | via | 0.45/0.3 | 40.95,61.05 | N window: routed again |
-| TAP_A_N | via | 0.45/0.3 | 38.4,68.85 | N window: routed again |
-| TAP_A_P | F.Cu | 0.15 | 41.25,62.25 41.25,62.55 41.3,62.6 | N window: routed again |
-| TAP_A_P | In2.Cu | 0.15 | 41.3,62.6 41.35,62.65 41.25,62.75 41.25,63 41.15,63.1 41.15,63.15 40.9,63.4 | N window: routed again |
-| TAP_A_P | B.Cu | 0.15 | 40.9,63.4 40.9,63.45 40.85,63.5 40.9,63.55 40.95,63.55 41.15,63.75 41.15,64.3 41.05,64.4 41.05,64.55 42.35,65.85 42.5,65.7 42.85,66.05 42.85,67.1 43.85,68.1 | N window: routed again |
-| TAP_A_P | In2.Cu | 0.15 | 43.85,68.1 45.3,68.1 46.25,69.05 48.25,69.05 48.6,68.7 | N window: routed again |
-| TAP_A_P | F.Cu | 0.15 | 48.6,68.7 48.6,67.9 51.55,64.95 51.55,60.2 51.65,60.1 51.65,59.1 | N window: routed again |
-| TAP_A_P | In2.Cu | 0.15 | 51.65,59.1 51.6,59.05 | N window: routed again |
-| TAP_A_P | via | 0.45/0.3 | 41.3,62.6 | N window: routed again |
-| TAP_A_P | via | 0.45/0.3 | 40.9,63.4 | N window: routed again |
-| TAP_A_P | via | 0.45/0.3 | 43.85,68.1 | N window: routed again |
-| TAP_A_P | via | 0.45/0.3 | 48.6,68.7 | N window: routed again |
-| TAP_A_P | via | 0.45/0.3 | 51.65,59.1 | N window: routed again |
-| TAP_B_N | F.Cu | 0.15 | 39.95,62.25 39.95,62.4 39.8,62.55 39.45,62.55 39.4,62.5 39.35,62.5 39.25,62.4 39.15,62.4 | N window: routed again |
-| TAP_B_N | B.Cu | 0.15 | 39.15,62.4 39.2,62.45 39.2,62.65 38.8,63.05 38.8,66.25 38.65,66.4 | N window: routed again |
-| TAP_B_N | In2.Cu | 0.15 | 38.65,66.4 39.2,66.4 | N window: routed again |
-| TAP_B_N | via | 0.45/0.3 | 39.15,62.4 | N window: routed again |
-| TAP_B_N | via | 0.45/0.3 | 38.65,66.4 | N window: routed again |
-| TAP_B_P | F.Cu | 0.15 | 40.35,61.4 40.35,61.3 40,60.95 39.85,60.95 39.6,60.7 | N window: routed again |
-| TAP_B_P | B.Cu | 0.15 | 39.6,60.7 39,60.1 37.2,61.9 37.2,66.2 37.25,66.25 | N window: routed again |
-| TAP_B_P | In2.Cu | 0.15 | 37.25,66.25 37.15,66.15 37.1,66.15 36.45,66.8 37.25,67.6 45.3,67.6 45.55,67.35 51.5,67.35 52.2,68.05 | N window: routed again |
-| TAP_B_P | B.Cu | 0.15 | 52.2,68.05 52.2,60.25 | N window: routed again |
-| TAP_B_P | In2.Cu | 0.15 | 52.2,60.25 52.3,60.25 | N window: routed again |
-| TAP_B_P | via | 0.45/0.3 | 39.6,60.7 | N window: routed again |
-| TAP_B_P | via | 0.45/0.3 | 37.25,66.25 | N window: routed again |
-| TAP_B_P | via | 0.45/0.3 | 52.2,68.05 | N window: routed again |
-| TAP_B_P | via | 0.45/0.3 | 52.2,60.25 | N window: routed again |
-| V3V3 | F.Cu | 0.15 | 45,64.3 45,64.9 45.05,64.95 43.95,66.05 43.95,67.1 | N window: routed again |
-| V3V3 | F.Cu | 0.15 | 43.25,61.4 43.25,61.05 | N window: routed again |
-| V3V3 | In2.Cu | 0.15 | 43.25,61.05 43.2,61.1 43.25,61.15 43.15,61.25 43.2,61.3 43.05,61.45 43.05,61.5 42.8,61.75 42.75,61.75 42.7,61.8 42.5,61.8 42.45,61.85 41.95,61.85 41.75,62.05 41.55,62.05 41.4,61.9 40.85,61.9 40.8,61.85 40.2,61.85 40.15,61.8 40.1,61.85 33.45,61.85 | N window: routed again |
-| V3V3 | via | 0.45/0.3 | 43.25,61.05 | N window: routed again |
-| V3V3 | F.Cu | 0.15 | 39.5,61.75 39.3,61.75 38.7,61.15 | N window: routed again |
-| V3V3 | F.Cu | 0.15 | 42.6,64.25 42.6,64.45 42.2,64.85 42.1,64.85 42.05,64.9 42,64.9 41.8,65.1 41.8,67.75 | N window: routed again |
-| V3V3 | F.Cu | 0.15 | 38.85,63.8 38.6,63.55 37.75,63.55 36.95,62.75 | N window: routed again |
-| V3V3 | F.Cu | 0.15 | 36.6,62 36.25,62 | N window: routed again |
-| V3V3 | In2.Cu | 0.15 | 36.25,62 36.15,61.9 | N window: routed again |
-| V3V3 | via | 0.45/0.3 | 36.25,62 | N window: routed again |
-| BTN_B | F.Cu | 0.15 | 42.35,61.4 42.35,61.3 42.1,61.05 42.1,61 | N window: unrouted by the router, joined |
-| BTN_B | In2.Cu | 0.15 | 42.1,61 42.05,60.95 42.05,60.75 41.75,60.45 41.8,60.4 41.7,60.3 41.75,60.25 41.35,59.85 41.7,59.5 41.6,59.4 42.1,58.9 42.4,58.9 42.8,58.5 42.7,58.4 42.85,58.25 42.8,58.2 44,57 44.35,57 45.15,56.2 45.5,56.2 47.9,53.8 47.85,53.75 | N window: unrouted by the router, joined |
-| BTN_B | B.Cu | 0.15 | 47.85,53.75 47.85,40.5 | N window: unrouted by the router, joined |
-| BTN_B | F.Cu | 0.15 | 47.85,40.5 50.3,38.05 50.3,37.9 | N window: unrouted by the router, joined |
-| BTN_B | In2.Cu | 0.15 | 50.3,37.9 63.55,37.9 | N window: unrouted by the router, joined |
-| BTN_B | B.Cu | 0.15 | 63.55,37.9 63.55,33.95 63.45,33.85 63.45,29.35 64.05,28.75 64.05,9.3 63.75,9 | N window: unrouted by the router, joined |
-| BTN_B | F.Cu | 0.15 | 63.75,9 63.55,9 | N window: unrouted by the router, joined |
-| BTN_B | via | 0.45/0.3 | 42.1,61 | N window: unrouted by the router, joined |
-| BTN_B | via | 0.45/0.3 | 47.85,53.75 | N window: unrouted by the router, joined |
-| BTN_B | via | 0.45/0.3 | 47.85,40.5 | N window: unrouted by the router, joined |
-| BTN_B | via | 0.45/0.3 | 50.3,37.9 | N window: unrouted by the router, joined |
-| BTN_B | via | 0.45/0.3 | 63.55,37.9 | N window: unrouted by the router, joined |
-| BTN_B | via | 0.45/0.3 | 63.75,9 | N window: unrouted by the router, joined |
-| LED_ON_B | F.Cu | 0.15 | 44.45,62.25 44.45,62.4 44.7,62.65 44.7,62.7 | N window: unrouted by the router, joined |
-| LED_ON_B | B.Cu | 0.15 | 44.7,62.7 45.1,63.1 45.05,63.15 45.15,63.25 45.15,63.5 45.1,63.55 45.1,63.85 44.7,64.25 44.7,64.75 47.3,67.35 49.5,65.15 49.75,65.4 50.1,65.05 50.1,64.7 | N window: unrouted by the router, joined |
-| LED_ON_B | In2.Cu | 0.15 | 50.1,64.7 50.3,64.9 62.95,64.9 63.05,64.8 | N window: unrouted by the router, joined |
-| LED_ON_B | F.Cu | 0.15 | 63.05,64.8 67.15,60.7 67.15,53.5 67.95,52.7 | N window: unrouted by the router, joined |
-| LED_ON_B | B.Cu | 0.15 | 67.95,52.7 67.95,48.8 68.45,48.3 68.45,14.5 | N window: unrouted by the router, joined |
-| LED_ON_B | F.Cu | 0.15 | 68.45,14.5 68.75,14.2 | N window: unrouted by the router, joined |
-| LED_ON_B | via | 0.45/0.3 | 44.7,62.7 | N window: unrouted by the router, joined |
-| LED_ON_B | via | 0.45/0.3 | 50.1,64.7 | N window: unrouted by the router, joined |
-| LED_ON_B | via | 0.45/0.3 | 63.05,64.8 | N window: unrouted by the router, joined |
-| LED_ON_B | via | 0.45/0.3 | 67.95,52.7 | N window: unrouted by the router, joined |
-| LED_ON_B | via | 0.45/0.3 | 68.45,14.5 | N window: unrouted by the router, joined |
-| LED_FLT_B | F.Cu | 0.15 | 44,62.25 44,62.4 44.2,62.6 44.2,62.85 44.5,63.15 44.3,63.35 44.3,63.45 | N window: unrouted by the router, joined |
-| LED_FLT_B | B.Cu | 0.15 | 44.3,63.45 43.7,64.05 43.7,64.75 43.75,64.8 43.75,65.6 43.85,65.7 43.85,65.95 44.35,66.45 44.35,70.75 45.2,71.6 46.2,70.6 47.2,71.6 48.8,70 49.2,70.4 | N window: unrouted by the router, joined |
-| LED_FLT_B | In2.Cu | 0.15 | 49.2,70.4 64.65,70.4 | N window: unrouted by the router, joined |
-| LED_FLT_B | B.Cu | 0.15 | 64.65,70.4 64.65,14.8 | N window: unrouted by the router, joined |
-| LED_FLT_B | F.Cu | 0.15 | 64.65,14.8 66.1,14.8 67.45,13.45 | N window: unrouted by the router, joined |
-| LED_FLT_B | via | 0.45/0.3 | 44.3,63.45 | N window: unrouted by the router, joined |
-| LED_FLT_B | via | 0.45/0.3 | 49.2,70.4 | N window: unrouted by the router, joined |
-| LED_FLT_B | via | 0.45/0.3 | 64.65,70.4 | N window: unrouted by the router, joined |
-| LED_FLT_B | via | 0.45/0.3 | 64.65,14.8 | N window: unrouted by the router, joined |
-| TAP_B_P | In2.Cu | 0.2 | 52.9638,59.6914 52.2,60.25 | N window: the live part of a track whose dead end is removed |
-| SWCLK | F.Cu | 0.2 | 44.9583,70.2933 45.1328,70.2933 | N window: joint at a via that kept one layer |
-| SWCLK | F.Cu | 0.15 | 45.3,70.4 45.1328,70.2933 | N window: joint at a via that kept one layer |
-| SWDIO | F.Cu | 0.15 | 39.85,68.95 40.0558,68.9955 | N window: joint at a via that kept one layer |
-| TAP_A_P | In2.Cu | 0.2 | 51.6,59.05 67.5016,58.9785 | N window: the live part of a track whose dead end is removed |
-| DOUT_B_3V | In2.Cu | 0.2 | 68.4378,51.5939 54.1,51.65 | N window: the live part of a track whose dead end is removed |
-| V3V3 | F.Cu | 0.15 | 45.2,58.65 44.85,58.65 44.25,59.25 44.25,59.5 | U1 V3V3 pad 22 joined to V3V3 |
-| V3V3 | In2.Cu | 0.15 | 44.25,59.5 43.05,60.7 43.2,60.85 | U1 V3V3 pad 22 joined to V3V3 |
-| V3V3 | via | 0.45/0.3 | 44.25,59.5 | U1 V3V3 pad 22 joined to V3V3 |
-| EVT_L_A | F.Cu | 0.15 | 41.65,55.35 41.65,55.95 41.35,56.25 40.9,56.25 40.45,55.8 | U1 EVT_L_A pad 6 joined to EVT_L_A |
-| EVT_L_A | B.Cu | 0.15 | 40.45,55.8 40.45,55 39.4,53.95 39.4,46.8 | U1 EVT_L_A pad 6 joined to EVT_L_A |
-| EVT_L_A | In2.Cu | 0.15 | 39.4,46.8 26.1,46.8 | U1 EVT_L_A pad 6 joined to EVT_L_A |
-| EVT_L_A | F.Cu | 0.15 | 26.1,46.8 25.9,47 | U1 EVT_L_A pad 6 joined to EVT_L_A |
-| EVT_L_A | via | 0.45/0.3 | 40.45,55.8 | U1 EVT_L_A pad 6 joined to EVT_L_A |
-| EVT_L_A | via | 0.45/0.3 | 39.4,46.8 | U1 EVT_L_A pad 6 joined to EVT_L_A |
-| EVT_L_A | via | 0.45/0.3 | 26.1,46.8 | U1 EVT_L_A pad 6 joined to EVT_L_A |
-| QSPI_SD3 | F.Cu | 0.15 | 39.15,57.8 39.8,57.8 40.2,57.4 40.2,57.15 | U1 QSPI_SD3 pad 51 joined to QSPI_SD3 |
-| QSPI_SD3 | In2.Cu | 0.15 | 40.2,57.15 39.1,56.05 37.15,56.05 36.7,56.5 35.1,56.5 34.45,55.85 | U1 QSPI_SD3 pad 51 joined to QSPI_SD3 |
-| QSPI_SD3 | F.Cu | 0.15 | 34.45,55.85 35.5,54.8 35.5,54.4 35.9,54 | U1 QSPI_SD3 pad 51 joined to QSPI_SD3 |
-| QSPI_SD3 | via | 0.45/0.3 | 40.2,57.15 | U1 QSPI_SD3 pad 51 joined to QSPI_SD3 |
-| QSPI_SD3 | via | 0.45/0.3 | 34.45,55.85 | U1 QSPI_SD3 pad 51 joined to QSPI_SD3 |
-| DOUT_A_3V | F.Cu | 0.2 | 42.6444,55.9523 42.8944,56.2023 44.1703,56.2023 | via nudged 0.25 mm south for the L2 web of U1's south side |
-| DOUT_A_3V | In2.Cu | 0.2 | 42.6444,55.9523 42.8944,56.2023 43.6692,56.2023 | via nudged 0.25 mm south for the L2 web of U1's south side |
-| DOUT_A_3V | via | 0.45/0.3 | 42.6444,55.9523 | via nudged 0.25 mm south for the L2 web of U1's south side |
-| INP_L_A | F.Cu | 0.2 | 24.6,23.35 25,22.95 25.75,22.95 26.7,22 26.7,21.15 27.05,20.8 29.15,20.8 29.6,21.25 | unrouted by the router |
-| INP_L_A | B.Cu | 0.2 | 29.6,21.25 29.6,24.05 29.45,24.2 | unrouted by the router |
-| INP_L_A | F.Cu | 0.2 | 29.45,24.2 29.45,24.55 | unrouted by the router |
-| INP_L_A | via | 0.45/0.3 | 29.6,21.25 | unrouted by the router |
-| INP_L_A | via | 0.45/0.3 | 29.45,24.2 | unrouted by the router |
-| INP_L_B | F.Cu | 0.2 | 62.95,26.4 62.2,27.15 59.4,27.15 58.35,26.1 58.35,23.9 | unrouted by the router |
-| LAD2_B | F.Cu | 0.2 | 62.8,23.9 63.05,24.15 | unrouted by the router |
-| LAD2_B | B.Cu | 0.2 | 63.05,24.15 63.05,22.8 63.1,22.75 63.1,20.8 62.95,20.65 | unrouted by the router |
-| LAD2_B | F.Cu | 0.2 | 62.95,20.65 60.9,20.65 60.25,21.3 59.45,21.3 | unrouted by the router |
-| LAD2_B | via | 0.45/0.3 | 63.05,24.15 | unrouted by the router |
-| LAD2_B | via | 0.45/0.3 | 62.95,20.65 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 39.4,13.95 39.75,13.6 39.75,11.9 39,11.15 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 26.55,23.8 26.45,23.9 26.4,23.9 26.25,24.05 26.25,24.1 26.2,24.1 26.2,24.15 26.15,24.15 25.9,24.4 25.75,24.4 | unrouted by the router |
-| V_INJ | In2.Cu | 0.2 | 25.75,24.4 15.05,24.4 15,24.45 | unrouted by the router |
-| V_INJ | via | 0.45/0.3 | 25.75,24.4 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 39.1,23.3 39.1,20.35 40.1,19.35 43.95,19.35 46.75,22.15 46.75,23.3 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 38.1,8.7 38.1,9.55 38,9.65 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 60.35,23.8 60.25,23.9 60.2,23.9 60.05,24.05 60.05,24.1 60,24.1 60,24.15 59.95,24.15 59.75,24.35 59.55,24.35 | unrouted by the router |
-| V_INJ | In2.Cu | 0.2 | 59.55,24.35 47.5,24.35 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 47.5,24.35 47.05,23.9 | unrouted by the router |
-| V_INJ | via | 0.45/0.3 | 59.55,24.35 | unrouted by the router |
-| V_INJ | via | 0.45/0.3 | 47.5,24.35 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 39.8,13.65 41.65,15.5 | unrouted by the router |
-| V_INJ | B.Cu | 0.2 | 41.65,15.5 41.65,19.25 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 41.65,19.25 41.65,19.3 | unrouted by the router |
-| V_INJ | via | 0.45/0.3 | 41.65,15.5 | unrouted by the router |
-| V_INJ | via | 0.45/0.3 | 41.65,19.25 | unrouted by the router |
-| V_INJ | In2.Cu | 0.2 | 25.9,24.55 27.05,24.55 27.3,24.8 33.75,24.8 | unrouted by the router |
-| V_INJ | F.Cu | 0.2 | 33.75,24.8 34.2,24.35 35.5,24.35 36.45,25.3 36.45,26.2 37.45,27.2 39.9,27.2 40.55,26.55 40.55,24.5 39.9,23.85 39.15,23.85 | unrouted by the router |
-| V_INJ | via | 0.45/0.3 | 33.75,24.8 | unrouted by the router |
-| X_L_B | F.Cu | 0.2 | 54.95,23.9 54.95,26.2 55.3,26.55 | unrouted by the router |
-| X_L_B | In2.Cu | 0.2 | 55.3,26.55 61.35,26.55 | unrouted by the router |
-| X_L_B | via | 0.45/0.3 | 55.3,26.55 | unrouted by the router |
-| X_L_B | via | 0.45/0.3 | 61.35,26.55 | unrouted by the router |
-| ADC_CC1 | F.Cu | 0.2 | 21.65,62.15 27.5,56.3 27.5,49.95 33.75,43.7 33.75,37.1 33.8,37.05 33.8,37 33.85,37 33.85,36.95 33.9,36.95 33.9,36.9 33.95,36.9 33.95,36.85 34,36.85 34,36.8 34.05,36.8 34.05,36.75 34.1,36.75 34.1,36.7 34.15,36.7 34.15,36.65 34.2,36.65 34.2,36.6 34.25,36.6 34.25,36.55 34.3,36.55 34.3,36.5 34.35,36.5 34.35,36.45 34.4,36.45 34.4,36.4 34.45,36.4 34.45,36.35 34.5,36.35 34.5,36.3 34.55,36.3 34.55,36.25 34.6,36.25 34.6,36.2 34.65,36.2 34.65,36.15 34.7,36.15 34.7,36.1 34.75,36.1 35.2,35.65 40.8,35.65 41.9,34.55 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC1 | In2.Cu | 0.2 | 41.9,34.55 75,34.55 76.85,32.7 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC1 | via | 0.45/0.3 | 41.9,34.55 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | F.Cu | 0.2 | 13.85,62.6 13.45,63 12.75,63 12.55,62.8 12.55,60.6 15.9,57.25 23.1,57.25 27,53.35 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | In2.Cu | 0.2 | 27,53.35 30.2,53.35 30.35,53.2 40.6,53.2 42.25,51.55 43.8,51.55 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | B.Cu | 0.2 | 43.8,51.55 43.8,39.05 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | In2.Cu | 0.2 | 43.8,39.05 65.2,39.05 67.65,36.6 79.15,36.6 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | F.Cu | 0.2 | 79.15,36.6 79.15,33.1 79.5,32.75 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | via | 0.45/0.3 | 27,53.35 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | via | 0.45/0.3 | 43.8,51.55 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | via | 0.45/0.3 | 43.8,39.05 | D36: routed again, no L3 run along an L4 track |
-| ADC_CC2 | via | 0.45/0.3 | 79.15,36.6 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | F.Cu | 0.2 | 3,31.8 3.8,31.8 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | In2.Cu | 0.2 | 3.8,31.8 33.75,31.8 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | F.Cu | 0.2 | 33.75,31.8 34.2,31.8 36.55,34.15 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | B.Cu | 0.2 | 36.55,34.15 36.55,27.9 36.75,27.7 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | In2.Cu | 0.2 | 36.75,27.7 66.7,27.7 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | F.Cu | 0.2 | 66.7,27.7 73.95,20.45 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | via | 0.45/0.3 | 3.8,31.8 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | via | 0.45/0.3 | 33.75,31.8 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | via | 0.45/0.3 | 36.55,34.15 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | via | 0.45/0.3 | 36.75,27.7 | D36: routed again, no L3 run along an L4 track |
-| ADC_H_A | via | 0.45/0.3 | 66.7,27.7 | D36: routed again, no L3 run along an L4 track |
-| ADC_M_A | F.Cu | 0.2 | 14,31.45 14.15,31.3 15.2,31.3 | D36: routed again, no L3 run along an L4 track |
-| ADC_M_A | B.Cu | 0.2 | 15.2,31.3 15.2,40.25 | D36: routed again, no L3 run along an L4 track |
-| ADC_M_A | In2.Cu | 0.2 | 15.2,40.25 46.5,40.25 46.75,40 65.6,40 | D36: routed again, no L3 run along an L4 track |
-| ADC_M_A | F.Cu | 0.2 | 65.6,40 66.35,39.25 66.35,29.4 66.1,29.15 66.1,26.7 71.9,20.9 | D36: routed again, no L3 run along an L4 track |
-| ADC_M_A | via | 0.45/0.3 | 15.2,31.3 | D36: routed again, no L3 run along an L4 track |
-| ADC_M_A | via | 0.45/0.3 | 15.2,40.25 | D36: routed again, no L3 run along an L4 track |
-| ADC_M_A | via | 0.45/0.3 | 65.6,40 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 53.45,55.2 53.45,55.6 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | In2.Cu | 0.2 | 53.45,55.6 54.85,57 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 54.85,57 55.15,57.3 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | via | 0.45/0.3 | 53.45,55.6 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | via | 0.45/0.3 | 54.85,57 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 16.25,41.55 16.25,42.5 15.9,42.85 15.9,43.55 16.7,44.35 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 16.55,45.5 16.7,45.35 16.7,44.95 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 10.3,47.3 11.7,45.9 16,45.9 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 17,38.6 17,39.15 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | In2.Cu | 0.2 | 17,39.15 15.75,39.15 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 15.75,39.15 15.75,40.4 16.35,41 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | via | 0.45/0.3 | 17,39.15 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | via | 0.45/0.3 | 15.75,39.15 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 52.05,54.8 51.95,54.7 51.6,54.7 51.25,54.35 51.25,52.5 50.9,52.15 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | B.Cu | 0.2 | 50.9,52.15 50.9,45.35 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | In2.Cu | 0.2 | 50.9,45.35 33.8,45.35 33.2,44.75 17.6,44.75 17.45,44.9 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | F.Cu | 0.2 | 17.45,44.9 17.1,44.9 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | via | 0.45/0.3 | 50.9,52.15 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | via | 0.45/0.3 | 50.9,45.35 | D36: routed again, no L3 run along an L4 track |
-| EN_G_A | via | 0.45/0.3 | 17.45,44.9 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | F.Cu | 0.2 | 34.6,13.6 36.4,15.4 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | B.Cu | 0.2 | 36.4,15.4 36.4,15.9 35.9,16.4 35.9,17.05 39.15,20.3 39.15,33.2 39.5,33.55 39.6,33.45 39.75,33.6 39.75,33.45 39.95,33.65 39.95,33.6 40.2,33.85 40.2,36.1 40.15,36.15 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | F.Cu | 0.2 | 40.15,36.15 45.75,41.75 47.35,41.75 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | B.Cu | 0.2 | 47.35,41.75 47.35,55.15 49.65,57.45 49.65,63.25 49,63.9 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | In2.Cu | 0.2 | 49,63.9 46.5,63.9 45.85,63.25 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | F.Cu | 0.2 | 45.85,63.25 45.2,62.6 45.2,62.45 44.85,62.1 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | via | 0.45/0.3 | 36.4,15.4 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | via | 0.45/0.3 | 40.15,36.15 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | via | 0.45/0.3 | 47.35,41.75 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | via | 0.45/0.3 | 49,63.9 | D36: routed again, no L3 run along an L4 track |
-| LED_FLT_A | via | 0.45/0.3 | 45.85,63.25 | D36: routed again, no L3 run along an L4 track |
-| GND | remove | - | 79.825,65.6975 79.5125,65.6975 | Slot vias: J1.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | remove | - | 72.175,65.6975 72.4875,65.6975 | Slot vias: J1.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | remove | - | 21.325,65.6975 21.0125,65.6975 | Slot vias: J4.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | remove | - | 13.675,65.6975 13.9875,65.6975 | Slot vias: J4.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | remove | - | 21.325,6.3025 21.0125,6.3025 | Slot vias: J2.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | remove | - | 13.675,6.3025 13.9875,6.3025 | Slot vias: J2.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | remove | - | 55.125,6.3025 54.8125,6.3025 | Slot vias: J3.B1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | remove | - | 47.475,6.3025 47.7875,6.3025 | Slot vias: J3.A1's fanout via, 0.046 mm from its plated slot's hole, and its stub; the stub is drawn again below |
-| GND | F.Cu | 0.2 | J1.A1 79.87,65.6975 | Slot vias: J1.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
-| GND | F.Cu | 0.2 | J1.B1 72.13,65.6975 | Slot vias: J1.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
-| GND | F.Cu | 0.2 | J4.A1 21.37,65.6975 | Slot vias: J4.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
-| GND | F.Cu | 0.2 | J4.B1 13.63,65.6975 | Slot vias: J4.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
-| GND | F.Cu | 0.2 | J2.B1 21.37,6.3025 | Slot vias: J2.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
-| GND | F.Cu | 0.2 | J2.A1 13.63,6.3025 | Slot vias: J2.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
-| GND | F.Cu | 0.2 | J3.B1 55.17,6.3025 | Slot vias: J3.B1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
-| GND | F.Cu | 0.2 | J3.A1 47.43,6.3025 | Slot vias: J3.A1's stub ends in its plated slot's pad, 0.05 mm inside the ring, the way to L2 |
+| GND | remove | - | 47.4858,8.9 | Tails: a carried track that ends where a moved part stood |
+| GND | remove | - | 48.5496,10.0621 48.2617,9.3371 49.1559,8.0059 50.05,6.6983 | Tails: a carried track that ends where a moved part stood |
+| GND | remove | - | 69.1157,60.7257 69.9175,61.0514 70.4096,61.0353 70.5076,60.9373 70.7263,60.8752 71.0736,60.6845 72.2619,60.4938 | Tails: a carried track that ends where a moved part stood |
+| GND | remove | - | 73.2594,60.5719 | Tails: a carried track that ends where a moved part stood |
+| GND | remove | - | 74.5986,57.8319 | Tails: a carried track that ends where a moved part stood |
+| GND | remove | - | 75.9387,56.4927 | Tails: a carried track that ends where a moved part stood |
+| GND | remove | - | 76.4948,56.0704 | Tails: a carried track that ends where a moved part stood |
+| GND | remove | - | 77.25,65.1539 77.5106,64.3321 77.7713,63.1277 | Tails: a carried track that ends where a moved part stood |
+| V5L | remove | - | 75.5825,52.03 | Tails: a carried track that ends where a moved part stood |
+| LED_FLT_B | remove | - | 65.375,14.8 | Tails: a carried track that ends where a moved part stood |
+| V5L | F.Cu | 0.31 | 84.35,51.8 84.35,50.85 | Moved parts: V5L to C35 and Q53 beside J1 (D39) |
+| V5L | F.Cu | 0.31 | 82,51.95 82,50.85 | Moved parts: V5L to C35 and Q53 beside J1 (D39) |
+| CC1_J1 | F.Cu | 0.2 | 79.7,60.7 79.1,61.3 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC1_J1 | B.Cu | 0.2 | 79.1,61.3 84.1,66.3 84.1,66.7 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC1_J1 | F.Cu | 0.2 | 84.1,66.7 83.8,66.4 83.8,65.85 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC1_J1 | via | 0.45/0.3 | 79.1,61.3 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC1_J1 | via | 0.45/0.3 | 84.1,66.7 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC1_J1 | F.Cu | 0.2 | 75.4,60.3 75.9,59.8 78.55,59.8 79.15,60.4 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC2_J1 | F.Cu | 0.2 | 75.35,62.9 75.8,63.35 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC2_J1 | In2.Cu | 0.2 | 75.8,63.35 79.55,63.35 79.7,63.2 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC2_J1 | F.Cu | 0.2 | 79.7,63.2 79.7,62.8 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC2_J1 | via | 0.45/0.3 | 75.8,63.35 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC2_J1 | via | 0.45/0.3 | 79.7,63.2 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
+| CC2_B | F.Cu | 0.2 | 84.2,6.15 84.2,5.4 84.15,5.35 | Moved parts: J3's CC2 to D3 and R204 (D39) |
+| CC2_B | B.Cu | 0.2 | 84.15,5.35 78.9,10.6 | Moved parts: J3's CC2 to D3 and R204 (D39) |
+| CC2_B | F.Cu | 0.2 | 78.9,10.6 79.35,11.05 79.35,12 | Moved parts: J3's CC2 to D3 and R204 (D39) |
+| CC2_B | via | 0.45/0.3 | 84.15,5.35 | Moved parts: J3's CC2 to D3 and R204 (D39) |
+| CC2_B | via | 0.45/0.3 | 78.9,10.6 | Moved parts: J3's CC2 to D3 and R204 (D39) |
+| EN_B | In2.Cu | 0.2 | 45.7,8.9 65.95,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
+| EN_B | F.Cu | 0.2 | 65.95,8.9 76.65,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
+| EN_B | via | 0.45/0.3 | 45.7,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
+| EN_B | via | 0.45/0.3 | 65.95,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
+| DIS_B | F.Cu | 0.2 | 55.3,13.2 57.5,15.4 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
+| DIS_B | In2.Cu | 0.2 | 57.5,15.4 67.25,15.4 68.65,16.8 79.6,16.8 80.45,15.95 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
+| DIS_B | B.Cu | 0.2 | 80.45,15.95 83.15,13.25 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
+| DIS_B | F.Cu | 0.2 | 83.15,13.25 86.35,13.25 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
+| DIS_B | via | 0.45/0.3 | 57.5,15.4 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
+| DIS_B | via | 0.45/0.3 | 80.45,15.95 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
+| DIS_B | via | 0.45/0.3 | 83.15,13.25 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
+| TAP_B_P | F.Cu | 0.2 | 80.05,55.85 80.05,54.2 | Moved parts: TAP_B_P from the end of the carried track to R37 (D39) |
+| TAP_B_P | In2.Cu | 0.2 | 80.05,54.2 84.7,49.55 88.35,45.9 95.1,39.15 96.35,39.15 | Moved parts: TAP_B_P from the end of the carried track to R37 (D39) |
+| TAP_B_P | via | 0.45/0.3 | 80.05,54.2 | Moved parts: TAP_B_P from the end of the carried track to R37 (D39) |
 <!-- patch:end -->
 
 ## Not settled
@@ -834,14 +726,29 @@ new session, rewrite the table.
   current leaves L4 for the crossing's width. `check_routing.py` holds every such pair to 45° or
   more and counts them; their effect on the measurement is not computed and is not measured
   until V-MEAS-01 on the first board.
-- **Thin webs at U1.** After the patch U1's exposed pad keeps 1.66 mm of plane copper on its north
-  side and 1.65 mm on its south, 0.06 and 0.05 mm over rule 9's 1.60 mm (east 1.70, west 1.80).
-  A row added near U1 later can break it; `make_pcb.py` fails when a web falls under the limit.
-  Rule 9 reads the 2-D copper of L2, not the return currents.
-- **Long routes.** The patch joins what the router left open where it found room, not by the
-  shortest way. V_INJ runs 87.9 mm with 8 vias, BTN_B 78.9 mm, LED_ON_B 81.0 mm and LED_FLT_B
-  91.0 mm (they were 17.7, 7.6, 4.0 and 1.8 mm of unconnected stubs in the session), and the four
-  taps TAP_A_P, TAP_A_N, TAP_B_P and TAP_B_N 102.9–110.6 mm (90.0–109.7 mm in the session). The taps
-  sit behind their 1 kΩ resistors, so the pairs carry no stub beyond a pad, but what the wire's
-  capacitance does to a 12 Mbit/s edge is not computed, and CIRCUIT_DESIGN_Rev0.6.md §3.3 sets no
-  length limit. `check_routing.py` has no length rule.
+- **Thin webs at U1.** With Rev0.5's copper carried, U1's exposed pad keeps 1.66 mm of plane
+  copper on its north side and 1.65 mm on its south, 0.06 and 0.05 mm over rule 9's 1.60 mm (east
+  1.70, west 1.80). A row added near U1 later can break it; `make_pcb.py` fails when a web falls
+  under the limit. Rule 9 reads the 2-D copper of L2, not the return currents.
+- **Port B's margin.** Port B's copper is 39.12 mΩ of the 40 mΩ, 0.88 mΩ to spare, with the trunk
+  3.0 mm wide (port A: 35.24 mΩ). D39 put J3 on the far side of the board from Q37, and the trunk
+  is 35.1 mm long for it. A change to VBUS_B's rows can break the limit; `check_routing.py` fails
+  when it does. The 40 mΩ is copper and contacts together (*Port voltage*, above).
+- **Long routes.** The patches, Rev0.5's and this one, join what the router left open where they
+  found room, not by the shortest way. V_INJ runs 90.8 mm with 8 vias, BTN_B 80.3 mm, LED_ON_B
+  84.0 mm and LED_FLT_B 90.8 mm, and the four taps TAP_A_P, TAP_A_N, TAP_B_P and TAP_B_N
+  103.3–111.2 mm (102.9–110.6 mm in Rev0.5). D39 lengthened two of port B's control lines,
+  because U1 stays in the west and their parts moved east with J3: EN_B is 88.9 mm (52.7 mm in
+  Rev0.5) and DIS_B 83.5 mm (49.4 mm). Both are static while a port measures. The taps sit behind
+  their 1 kΩ resistors, so the pairs carry no stub beyond a pad, but what the wire's capacitance
+  does to a 12 Mbit/s edge is not computed, and CIRCUIT_DESIGN_Rev0.6.md §3.3 sets no length
+  limit. `check_routing.py` has no length rule.
+- **L3 beside what it should stay off.** Three places this revision's rows add, each outside what
+  a rule of this document forbids, none computed: DIS_B runs on L3 for 9.8 mm along y = 15.4,
+  across the 3.0 mm leg of VBUS_B's L4 trunk at x = 60.13 and then for 5.6 mm over the north edge
+  of its run along y = 14.0 (that band ends at y = 15.5; `TRUNK_L3` keeps L3 off a trunk only
+  inside the analog blocks), and passes ADC_L_A's via at 69.6, 16.3 with 0.175 mm of clearance;
+  TAP_B_P crosses the north-east corner of the ADC's supply block on L3 for 5.0 mm,
+  under C10 with the L2 plane between, where Rev0.5 crossed it on L1; LED_ON_B and ADC_L_A cross
+  the trunk on L3 at 45°. V-MEAS-01 on the first board is where an effect on the reading would
+  show.

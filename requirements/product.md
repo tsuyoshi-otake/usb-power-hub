@@ -3,7 +3,8 @@
 **State: WIP — MANUFACTURING PROHIBITED.** Opened 2026-11-03. Revised for circuit Rev0.4
 on 2026-11-03; amended 2026-11-04 for D29 (the bare RP2040), D30 (leaded HASL) and D31 (the bare CH335F);
 amended 2026-11-12 for circuit Rev0.5, D37 (the USB-C receptacles machine-placed, issue #8) and D38 (the
-data-line taps, issue #10).
+data-line taps, issue #10); amended 2026-11-19 for the layout revision Rev0.6, D39 (the connectors
+mirror-symmetric, issue #13: REQ-MECH-02's pitch figure; no requirement changes).
 
 This file is the authority for **what** the product must do (CLAUDE.md Section 2).
 **How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.6.md`. **How each requirement is
@@ -148,7 +149,7 @@ which implements and tests it); firmware follows it. Every multi-byte field is l
 | ID | Requirement | Status | Source |
 |---|---|---|---|
 | REQ-MECH-01 | PCB 100 × 72 mm, 1.6 mm, 4 layers, leaded HASL (D30; not RoHS), JLCPCB stackup JLC04161H-7628 named on the order. The outline stays within 100 × 100 mm (JLCPCB's base price tier as quoted on 2026-11-03, the user's condition in D24). The outline was sized with the USB-C modules and their headers (D24, D33); since D37 the receptacles themselves stand on it; OI-23 and OI-24 are closed. | Settled (4 layers, ≤ 100 × 100 mm, finish) / Delegated (100 × 72 mm, stackup) | D10, D24, D27, D30, D37, CLAUDE.md §10.3 |
-| REQ-MECH-02 | Two USB-C plugs fit J2 and J3 at the same time, verified with real cables. Design input: J2–J3 centre pitch ≥ 18 mm. J2 and J3 stand 33.8 mm apart (the receptacles are 8.94 mm wide; the 20 mm modules gave ≥ 20 mm before D37). | Settled (requirement, OI-1) / Delegated (18 mm) | OI-1, D21, D37 |
+| REQ-MECH-02 | Two USB-C plugs fit J2 and J3 at the same time, verified with real cables. Design input: J2–J3 centre pitch ≥ 18 mm. J2 and J3 stand 65.0 mm apart since D39 (33.8 mm in Rev0.5; the receptacles are 8.94 mm wide; the 20 mm modules gave ≥ 20 mm before D37). | Settled (requirement, OI-1) / Delegated (18 mm) | OI-1, D21, D37, D39 |
 | REQ-MECH-03 | ≥ 3 mounting points, at least one near each connector end; insertion force is not carried by solder joints. Each receptacle's four plated shell slots are soldered and its two pegs sit in the PCB's holes (D37); the plug's insertion force (0.5–2.0 kgf) enters the PCB through those slots, by design, and the enclosure's openings and the mounting points keep the rest of it off the board. Whether the slots hold on a 1.6 mm board, against a land drawn for 0.80 mm, is read in V-MECH-01 and V-MFG-03. | Settled | CLAUDE.md §7, D37 |
 | REQ-MECH-04 | Fasteners have ≥ 4 mm thread engagement or use heat-set inserts. | Settled (rule) / Delegated (heat-set M2 ×4) | CLAUDE.md §7, D21 |
 | REQ-MECH-05 | Case openings clear the mating plug's overmould, verified with a real cable. | Settled | CLAUDE.md §7 |

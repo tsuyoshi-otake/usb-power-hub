@@ -8,7 +8,8 @@ the host PC over a plain COM port.
 > generated KiCad project: its part library (a symbol and a footprint for every part,
 > checked on paper), a captured schematic (ERC clean, checked against the circuit
 > document by script), and a placed, routed and labelled board (DRC clean). The board is
-> being revised as Rev0.6 (issue #13), which has no release yet. The last candidate
+> Rev0.6 (issue #13): its four receptacles stand mirror-symmetric (D39), it is routed and
+> passes its checkers; it has no release yet, and JLCPCB has not seen its files. The last candidate
 > manufacturing set, Rev0.5's (`manufacturing/releases/rev0.5/r02/`, state `WIP`),
 > is not orderable: it has been through the JLCPCB gate once (2026-11-13), which found two
 > defects that r02 fixes, and the user has not approved it. Nothing has been ordered or paid,
@@ -107,7 +108,9 @@ datasheets or maker's drawing (G20, G21, D37). The schematic is captured (issue 
 D34) and includes J1's soft start (D35, issue #7) and the four data-line taps (D38, issue
 #10). The parts are placed (P3) and routed (P4, under D36's L3/L4 rule): DRC reports 0
 violations and 0 unconnected items, and `check_routing.py` rule 9 keeps the L2 plane whole
-under U1 and U6. The silkscreen labels are placed, and a candidate manufacturing set (P5:
+under U1 and U6. Rev0.6 moved 31 parts with the connectors (D39) and carries Rev0.5's routing
+where it still stands (`design/ecad/scripts/carry.py`); the rest is a new router session and
+a new patch. The silkscreen labels are placed, and a candidate manufacturing set (P5:
 Gerber, drill, JLCPCB BOM and CPL, schematic PDF, renders, a `WIP` manifest) is generated
 into `manufacturing/working/rev0.6/`, which Git does not track and nobody may order from;
 `manufacturing/releases/rev0.5/r02/` holds Rev0.5's files as a release candidate (state

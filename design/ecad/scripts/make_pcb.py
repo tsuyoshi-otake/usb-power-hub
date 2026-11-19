@@ -12,7 +12,9 @@ Inputs:
 - design/ecad/PLACEMENT_Rev0.6.md, the position and rotation of every part, and the
   silkscreen labels (its silk table);
 - design/ecad/ROUTING_Rev0.6.md, the plane, the hand-drawn tracks, the GND fanout, the zones,
-  and the classes and keepouts of the router;
+  the carry table, the classes and keepouts of the router, and the patch drawn after it;
+- design/ecad/routing/carried.json, the previous revision's routing that still stands on this
+  board (carry.py writes it from the sources the carry table names);
 - design/ecad/routing/usb-power-hub.ses, the router's session, with routing/autoroute.json, the
   SHA-256 of the router input it was made from (autoroute.py writes both).
 Output: design/ecad/source/usb-power-hub.kicad_pcb, rebuilt from nothing on every run:
@@ -23,7 +25,8 @@ Output: design/ecad/source/usb-power-hub.kicad_pcb, rebuilt from nothing on ever
 - the reference designators hidden on F.SilkS; they stay on F.Fab. 300 designators at 1.0 mm
   (CLAUDE.md 6) do not fit;
 - the routing, in route.py's order: the In1 plane, the hand-drawn tracks, the GND fanout, the
-  session's tracks and vias, the pours, and every zone filled;
+  carried record's tracks and vias, the session's, the patch table's, the pours, and every zone
+  filled;
 - the silk table's labels, each a text on F.SilkS with its leader segments. They are added
   after the session, so they are not in the router input; the footprints' own silkscreen is.
 The UUID generator is seeded, so the items come out in the same order, and
@@ -35,11 +38,16 @@ differs by those two filled polygons, and the Gerber's B_Cu member with it. The 
 therefore the source of truth (release r02 was made from a run without the islands): do not
 regenerate it to compare, and do not treat a changed board hash after a re-run as a changed design.
 
+The carried record is applied only when it names the commit, the two SHA-256 and the skip texts
+of the document's carry table, and the SHA-256 of the router input of the board before it (plane,
+hand-drawn tracks, GND fanout; the document's classes and keepouts): a change to the schematic,
+the placement or those parts of the routing document makes the record stale, and the script
+stops and asks for carry.py.
 The session is imported only when the router input of this run (KiCad's DSN of the board before
-the session, with the document's classes and keepouts) has the SHA-256 autoroute.json records:
-a change to the schematic, the placement or the routing document before that step makes the
-session stale, and the script stops and asks for autoroute.py. --dsn writes that router input
-and stops; autoroute.py calls it so.
+the session, the carried copper included, with the document's classes and keepouts) has the
+SHA-256 autoroute.json records: a change before that step makes the session stale, and the script
+stops and asks for autoroute.py. --dsn writes that router input and stops; autoroute.py calls it
+so.
 
 Order: make_project.py writes a bare board when it runs, so this script runs after it, and
 after make_schematic.py. The board is built in a temporary directory: the source project is
@@ -75,6 +83,7 @@ ROUTING = ECAD / "ROUTING_Rev0.6.md"
 NAME = "usb-power-hub"
 SESSION = ECAD / "routing" / f"{NAME}.ses"
 RECORD = ECAD / "routing" / "autoroute.json"
+CARRIED = ECAD / "routing" / "carried.json"
 CLI = pathlib.Path(sys.executable).resolve().parents[1] / "bin" / "kicad-cli.exe"
 SKIP_FIELDS = {"Footprint"}                 # the footprint itself carries it
 ROTATIONS = {0, 90, 180, 270}
@@ -198,6 +207,21 @@ def natural(ref):
     return (m.group(1), int(m.group(2))) if m else (ref, 0)
 
 
+def read_inputs(tmp):
+    """(comps, pins, place, routing, regions, silk): the schematic's netlist, exported into tmp,
+    and the two documents. It stops if they do not name the same parts."""
+    place = read_placement(DOC)
+    routing, regions = read_routing(DOC, ROUTING)
+    silk = read_silk(DOC)
+    comps, pins = read_netlist(export_netlist(tmp))
+    unplaced = sorted(set(comps) - set(place), key=natural)
+    unknown = sorted(set(place) - set(comps), key=natural)
+    if unplaced or unknown:
+        raise SystemExit(f"{DOC.name}: not placed: {' '.join(unplaced) or '-'};"
+                         f" not in the netlist: {' '.join(unknown) or '-'}")
+    return comps, pins, place, routing, regions, silk
+
+
 # ---- the board -------------------------------------------------------------------------------
 def to_sheet(x, y):
     ox, oy = proj.ORIGIN_MM
@@ -263,6 +287,7 @@ def add_silk(board, silk):
 def router_input(board, routing, regions, tmp):
     """KiCad's DSN of the board as it stands, with the routing document's classes and keepouts."""
     raw = tmp / "router-raw.dsn"
+    raw.unlink(missing_ok=True)
     pcbnew.ExportSpecctraDSN(board, str(raw))
     if not raw.exists():
         raise SystemExit("pcbnew exported no DSN")
@@ -284,8 +309,27 @@ def session():
     return data.decode("utf-8"), record
 
 
-def build(pcb, comps, pins, place, routing, regions, silk, tmp, dsn_out=None):
-    """Write the placed and routed board to pcb; with dsn_out, write the router input instead."""
+def carried(carry, base):
+    """routing/carried.json, after checking that carry.py made it from the sources the routing
+    document's carry table names, and for this board: base is the digest of the router input of
+    the board before the carried routing."""
+    if not CARRIED.exists():
+        raise SystemExit(f"no {CARRIED.name} in {CARRIED.parent.as_posix()}: run carry.py")
+    record = json.loads(CARRIED.read_text(encoding="utf-8"))
+    named = {k: carry[k] for k in ("commit", "session_sha256", "patch_sha256", "skip")}
+    if {k: record.get(k) for k in named} != named:
+        raise SystemExit(f"{CARRIED.name} was not made from the sources the carry table of {ROUTING.name}"
+                         f" names: run carry.py")
+    if record.get("base_dsn_sha256") != base:
+        raise SystemExit(f"{CARRIED.name} was made for another board ({str(record.get('base_dsn_sha256'))[:12]},"
+                         f" this board {base[:12]}): the schematic, the placement or the routing document"
+                         f" changed; run carry.py, then autoroute.py")
+    return record
+
+
+def base_board(pcb, comps, pins, place, routing):
+    """Write the skeleton to pcb and return it loaded, placed, with the In1 plane, the hand-drawn
+    tracks and the GND fanout: what the carried routing and the router start from."""
     # pcbnew writes the footprints sorted by UUID, and gives each new item a random one. Seeding
     # the generator makes the UUIDs, and so the footprint order, the same on every run;
     # make_project.fix_uuids then renumbers them by position in the file.
@@ -302,10 +346,23 @@ def build(pcb, comps, pins, place, routing, regions, silk, tmp, dsn_out=None):
     route.plane(board, routing["zones"], proj.SIZE_MM)
     n_t, n_v = route.apply_rows(board, routing["rows"])
     hs = {n for p in routing["pairs"] for n in p["nets"]}
-    n_f, unfanned = route.gnd_fanout(board, routing["epads"], hs,
-                                     (proj.VIA_HOLE_TO_HOLE, proj.RULES["min_hole_to_hole"]))
+    n_f, joined, unfanned = route.gnd_fanout(board, routing["epads"], hs,
+                                             (proj.VIA_HOLE_TO_HOLE, proj.RULES["min_hole_to_hole"]))
     print(f"routing document: {n_t} track segments, {n_v} vias; GND fanout: {n_f} vias,"
+          f" {len(joined)} pad(s) joined to a plated hole of their part"
+          f"{': ' + ' '.join(joined) if joined else ''},"
           f" {len(unfanned)} pad(s) left to the router{': ' + ' '.join(unfanned) if unfanned else ''}")
+    return board
+
+
+def build(pcb, comps, pins, place, routing, regions, silk, tmp, dsn_out=None):
+    """Write the placed and routed board to pcb; with dsn_out, write the router input instead."""
+    board = base_board(pcb, comps, pins, place, routing)
+    if routing["carry"]:
+        base = route.dsn_digest(router_input(board, routing, regions, tmp))
+        c_t, c_v, c_r = route.apply_carried(board, carried(routing["carry"], base))
+        print(f"carried from {routing['carry']['commit'][:7]}: {c_t} track segments, {c_v} vias,"
+              f" {c_r} drawn item(s) taken away")
     dsn = router_input(board, routing, regions, tmp)
     digest = route.dsn_digest(dsn)
     if dsn_out is not None:
@@ -320,7 +377,7 @@ def build(pcb, comps, pins, place, routing, regions, silk, tmp, dsn_out=None):
     p_t, p_v, p_r = route.apply_patch(board, routing["patch"])
     route.pours(board, routing["zones"], proj.SIZE_MM)
     print(f"session: {s_t} track segments, {s_v} vias; patch: {p_t} track segments, {p_v} vias,"
-          f" {p_r} session item(s) removed; {len(list(board.Zones()))} zones filled")
+          f" {p_r} item(s) removed; {len(list(board.Zones()))} zones filled")
     n_l, n_s = add_silk(board, silk)
     print(f"silkscreen: {n_l} labels, {n_s} leader segments")
     if not pcbnew.SaveBoard(str(pcb), board):
@@ -337,17 +394,9 @@ def main(argv):
         raise SystemExit("usage: make_pcb.py [--no-check | --dsn <out.dsn>]")
     pcb, pro, prl, _ = proj.paths(SRC)
     pro_before = pro.read_bytes()
-    place = read_placement(DOC)
-    routing, regions = read_routing(DOC, ROUTING)
-    silk = read_silk(DOC)
     with tempfile.TemporaryDirectory() as tmp:
         tmp = pathlib.Path(tmp)
-        comps, pins = read_netlist(export_netlist(tmp))
-        unplaced = sorted(set(comps) - set(place), key=natural)
-        unknown = sorted(set(place) - set(comps), key=natural)
-        if unplaced or unknown:
-            raise SystemExit(f"{DOC.name}: not placed: {' '.join(unplaced) or '-'};"
-                             f" not in the netlist: {' '.join(unknown) or '-'}")
+        comps, pins, place, routing, regions, silk = read_inputs(tmp)
         work = tmp / "board"
         work.mkdir()
         # a copy of the project beside the board, so pcbnew loads its rules and net classes

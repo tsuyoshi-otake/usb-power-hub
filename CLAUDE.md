@@ -42,9 +42,12 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > the exported netlist and `design/ecad/PLACEMENT_Rev0.6.md`, and `check_pcb.py` checks it
 > against that document, the capture list's placement notes and DRC. J1–J4 are the SMD
 > receptacles C2765186 (D37) on the board's edges, each front face 1.06 mm past the outline,
-> and 22 parts around U1 stand 0.4–0.8 mm further out than in Rev0.4, so that the router can
+> mirror-symmetric about x = 50 mm since Rev0.6 (D39): J2 and J3 at x = 17.5 and 82.5 mm on
+> the front edge, J4 and J1 at the same x on the back edge. 22 parts around U1 stand
+> 0.4–0.8 mm further out than in Rev0.4, so that the router can
 > leave the 0.4 mm-pitch pins. The board is routed (P4, D36): `make_pcb.py` adds the tracks, the
-> zones and the patch of `design/ecad/ROUTING_Rev0.6.md` and the Freerouting session in
+> zones and the patch of `design/ecad/ROUTING_Rev0.6.md`, the routing carried from Rev0.5
+> (`design/ecad/routing/carried.json`, written by `carry.py`) and the Freerouting session in
 > `design/ecad/routing/` (written by `autoroute.py`). `check_routing.py` checks the result
 > against that document: DRC with 0 violations and 0 unconnected items, the USB pairs, the
 > Kelvin taps, D36's L3/L4 rule, the port-path copper and, new in Rev0.5, the L2 plane (its
@@ -53,11 +56,13 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > a plated slot is a capsule, which KiCad's DRC does not measure). The router knows no antipad, so its vias split the
 > plane until the document gave it one (`plane_via`, ROUTING_Rev0.6.md, *Router*); Rev0.4's
 > committed board fails the rule, with voids up to 3.65 mm and 0.47 mm of plane beside the
-> east side of U1's pad. The committed session leaves 16 connections and 11 D36 places open;
-> the patch in the document (275 rows in five stages: a re-routed window north of U1, three
-> U1 pads joined, one via nudged, the analog blocks, and the eight slot vias the JLCPCB gate
-> found) closes them and leaves U1's plane webs
-> 1.65–1.80 mm against rule 9's 1.60 mm. Nothing is routed by hand in KiCad. The silkscreen
+> east side of U1's pad. Rev0.6 moved 31 of the 304 parts (D39) and routed only what they
+> touch: Rev0.5's session and patch are carried where they still stand (2,005 track segments
+> and 205 vias; 115 dropped), VBUS_B's trunk to J3 and five crossings of pair A's corridor are
+> drawn in the document, a new 8-pass session adds 251 segments, and a patch of 42 rows takes
+> seven carried tails away and joins the 9 connections the session left open. U1's plane webs
+> stay 1.65–1.80 mm against rule 9's 1.60 mm, and port B's copper is 39.12 mΩ of the 40 mΩ
+> (port A 35.24 mΩ). Nothing is routed by hand in KiCad. The silkscreen
 > labels are placed (P5): `make_pcb.py` adds the table in `PLACEMENT_Rev0.6.md`, *Silkscreen*,
 > and `check_silk.py` checks it against JLCPCB's legend limits and CLAUDE.md §6. A candidate
 > manufacturing set (P5) is written by `make_outputs.py` into `manufacturing/working/rev0.6/`
@@ -223,7 +228,7 @@ usb-power-hub/
 ├─ tests/                       # fixtures/ reports/ — physical test evidence
 ├─ docs/
 │  └─ decisions/                # one file per closed architectural decision (until
-│                               #   created, decisions D1–D38 live in circuit §10)
+│                               #   created, decisions D1–D39 live in circuit §10)
 └─ mockup/                      # the three.js appearance model — reference only
 ```
 
@@ -666,7 +671,7 @@ summary; where the two differ, `product.md` wins and this list is the defect.
 
 ### 10.4 Decisions closed
 
-Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.6.md` Section 10 (D1–D38; D12 is
+Recorded in `design/circuit/CIRCUIT_DESIGN_Rev0.6.md` Section 10 (D1–D39; D12 is
 withdrawn and not reused).
 
 - **User decisions:** KiCad (D2), CDC-ACM ×2 (D7), 4 layers (D10), the outline limit of
@@ -692,7 +697,11 @@ withdrawn and not reused).
   (D37, 2026-11-12: the cost request 「安価に製造できないとね、製造コストを下げて」 and the
   choice 「USB-C直付けのみ (推奨)」, then 「GND パッドを 0.035 mm 短く (推奨)」 for its land),
   and the data-line taps (D38, 2026-11-12: 「可能ならデータ線部分もロジックアナライズできると
-  USB接続機器を開発するのに便利なんだけど、出来る?」; the circuit is Claude's).
+  USB接続機器を開発するのに便利なんだけど、出来る?」; the circuit is Claude's),
+  and the mirror-symmetric connectors, a layout revision, Rev0.6 (D39, issue #13: looking at the lid
+  PCB's legend, 「なんかUSBの位置がアシンメトリーで変だね」, the choices 「再配置を検討」 and
+  「C2 を試し配置」 on 2026-11-18, and after the trial 「C2 で進める」 on 2026-11-19; Claude had
+  recommended keeping Rev0.5's positions).
   D1 (PD sink) and D11 (USB2514B) were also user decisions; both are superseded because
   their parts are Extended.
 - **Under the delegation:** on 2026-11-03 the user delegated the open choices
@@ -743,7 +752,7 @@ Numbers are stable; close them in Git with evidence, do not renumber.
 
 | ID | Issue | Evidence |
 |---|---|---|
-| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). *Rev0.5 (D37):* J2 and J3 are 8.94 mm receptacles, 33.8 mm apart. *Enclosure Rev0.1 (issue #11):* each opening has a 15.0 × 8.0 mm pocket for the plug's overmould, on paper. Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.6 §10 D21, D37; `design/mechanical/ENCLOSURE_Rev0.1.md` E6 |
+| OI-1 | **Two USB-C plugs cannot be inserted at once.** The mockup's downstream pitch is 10.8 mm; plug overmolds are 12–14 mm. *Rev0.3:* J2/J3 are 20 mm-wide Akizuki modules placed side by side, so the pitch is ≥ 20 mm (D21, REQ-MECH-02). *Rev0.5 (D37):* J2 and J3 are 8.94 mm receptacles, 33.8 mm apart. *Rev0.6 (D39):* 65.0 mm apart. *Enclosure Rev0.1 (issue #11):* each opening has a 15.0 × 8.0 mm pocket for the plug's overmould, on paper. Open until checked with real cables (V-MECH-01). | `PORT_Z = 5.4` in the mockup; Rev0.6 §10 D21, D37, D39; `design/mechanical/ENCLOSURE_Rev0.1.md` E6 |
 | OI-2 | ~~No crystal for the USB hub.~~ **Closed by decision** (D19, Claude delegated, 2026-11-03): a 12 MHz Basic crystal (C9002), Y2 → CH335F. D23 removed Y1 (→ STM32 HSE) because the MCU module carried its own crystal; D29 restored Y1, the same C9002, → RP2040 XOSC, checked on the first board (V-MEAS-06). The history: D6's shared oscillator was superseded by D11; the USB2514B (24 MHz) was itself superseded by D13. Y2 against CH335F's built-in load capacitors is checked at bring-up (G9). | Rev0.6 §6.3 |
 | OI-3 | ~~Range switching unimplementable.~~ **Closed by decision** (D9/D17): ranges 0.1 Ω / 10 Ω / 510 Ω in a nested bypass ladder, LM393 up-ranging ≤ 3 µs per stage, firmware hold ≤ 100 µs, bypass default ON. Bring-up proves the budget (V-MEAS-02). | Rev0.6 §3.2, §4 |
 | OI-4 | ~~Power budget contradicts the spec.~~ **Closed by decision** (D14): D1's PD sink is superseded; port power comes from J4, a power-only 5 V input. Its USB-C advertisement drives the advertisement and budget rules (REQ-PWR-04/05). | Rev0.6 §3.1, §7.2 |
@@ -786,6 +795,16 @@ Status on 2026-11-13 (issues #8 and #10, Rev0.5): `[x]` = done, with the evidenc
 (state `WIP`; nothing ordered, nothing paid). It supersedes Rev0.5's r01, whose JLCPCB gate found
 two defects, and Rev0.4's r01 and r02: the copper, the BOM and the CPL all changed, so their JLCPCB
 evidence does not carry over. The `[x]` items hold for r02 only: any regenerated file needs them again.
+
+**Rev0.6 (issue #13, 2026-11-19) has no release candidate, and no `[x]` below is Rev0.6's.** Its
+copper and its CPL are new; its BOM and its hand-solder list are Rev0.5 r02's, byte for byte, and
+its exported netlist differs from Rev0.5's in the title block alone. On the tracked Rev0.6 board
+and its untracked candidate set (`manufacturing/working/rev0.6/`) the generators' own checkers pass
+(`check_schematic.py`, `check_libraries.py`, `check_pcb.py`, `check_routing.py`, `check_silk.py`,
+`check_outputs.py`: ERC and DRC 0, 0 unconnected, Top only, the Kelvin lands, the three lands, the
+fiducials, BOM against CPL). Everything JLCPCB or a person reads must be done again on Rev0.6's
+files before any of it is ticked for Rev0.6: the independent check of the set, the stock check,
+the placement preview, JLCDFM, the part mapping and the quote.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
       `WIP`; the user approves.*
