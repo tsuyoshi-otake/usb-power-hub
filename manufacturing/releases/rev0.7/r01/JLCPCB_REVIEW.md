@@ -16,7 +16,7 @@ and the earlier reviews (sections 2 to 6). **JLCDFM was never run on Rev0.7** (s
 | What was ordered | `UsbPowerHub_Main_Rev0.7_Gerber.zip`, `_BOM_JLCPCB.csv`, `_CPL_JLCPCB.csv` of this directory |
 | Ordered and paid | 2026-11-20, about 00:40 (JST), by the user, from JLCONE |
 | Quantities | 5 boards, 2 assembled (Economic PCBA, Top side) |
-| Amount paid, coupons used | **not recorded: the user has not given them yet** (section 6) |
+| Amount paid, coupons used | **$30.99**, shipping included, by card; a discount of $31.56 (section 6, read 2026-11-20) |
 | Account data | the order number, the file number, the SMT number and the address are not recorded anywhere in this repository |
 
 Evidence: no screenshot and no page text was saved; the other PC kept nothing that this repository can name.
@@ -120,9 +120,33 @@ The lines add up (9.05 + 44.84 = 53.89). Rev0.6 r01's quote of 2026-11-19 was $5
 Production file"; its PCBA lines were not read one by one, so the $0.01 is not located.
 
 - Shipping seen before checkout: OCS Express $8.66, 4 to 6 business days.
-- Coupons: in the cart the coupon "$30 Off $50" was seen applied. **The amount actually paid and the coupons
-  actually used are not recorded: the user gives them.**
+- Coupons: in the cart the coupon "$30 Off $50" was seen applied.
 - The cart item of Rev0.6 r01 was removed from the cart by the user before the payment.
+
+**What was paid**, read by Claude on 2026-11-20 in the user's Chrome, after the user signed in (「確認して」,
+then 「サインインした」), from the order's page and the account's coupon list. Read only; nothing was changed.
+
+| Line | Amount |
+|---|---:|
+| Merchandise total (PCB $9.05 + PCBA $44.84) | 53.89 |
+| Shipping, OCS Express | 8.66 |
+| Discount | -31.56 |
+| **Order total, paid** | **30.99** |
+
+- The lines add up (53.89 + 8.66 - 31.56 = 30.99). The order list shows the discount spread over the items:
+  PCB $3.76 (from $9.05) and PCBA $18.57 (from $44.84), together $22.33.
+- Paid by card; submitted 00:42, paid and reviewed 00:44, in production 00:46 (JST, 2026-11-20).
+- **Which coupons make up the $31.56 is not shown** on the order's page. The account's list of coupons used
+  in the last six months names two that are still valid and so are new: "$30 Off $50" ($30, orders over $50,
+  until 2026-12-04) and "BF Prototype $8 - JLCONE" ($8, orders over $20, until 2026-11-29; not among the four
+  read on 2026-11-20 before the order). The list names no order, and $30 + $8 = $38 is not $31.56, so how the
+  discount is made is not settled here; JLCONE's own desktop discount ("Save $1-$20") is a third possibility.
+- The order total, $30.99, is $22.90 below the quote without shipping ($53.89).
+
+Also read on the order's page, not reported from the other PC: "Electrical Test: Flying Probe Fully Test",
+"Mark on PCB: Remove Mark", "Appearance Quality: IPC Class 2 Standard", "Silkscreen Technology: Ink-jet
+Printing Silkscreen", "Specify Stackup: no", "Confirm Production file: Yes", total weight 0.59 kg. The state
+of both items was "Data Preparation": JLCPCB had not yet prepared the production file (section 8, step 1).
 
 ## 7. Not done before the order
 
@@ -141,6 +165,7 @@ Production file"; its PCBA lines were not read one by one, so the $0.01 is not l
 1. **The production file** (JLCPCB prepares it; 48 hours after that it is approved by itself). Read in it: the
    12 non-plated holes not plated; the 16 slots of J1-J4 plated and 0.60 mm wide; J5's eight pads open in the
    mask with no paste; the legend at J5; the stackup JLCPCB names.
-2. The user gives the amount paid and the coupons used; they are added to section 6.
+2. ~~The amount paid and the coupons used~~: read on 2026-11-20 (section 6); the split of the discount is
+   not shown.
 3. The hand-soldered parts from Akizuki (`UsbPowerHub_Main_Rev0.7_HandSolder.csv`).
 4. The enclosure and the lid for the Rev0.7 board.

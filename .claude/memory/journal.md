@@ -2381,3 +2381,12 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   the jaw's shape, which is not known. Learning: when a tool's size becomes known, read it against the board's
   courtyards too, not only against the enclosure; the width arrived a day after the order. Not done: any
   print, the clamp on anything.
+- **Follow-up 9 (2026-11-20): the amount paid, read.** The user asked Claude to read it (「確認して」) and signed
+  in to JLCPCB in Chrome (「サインインした」). Read only, from the order's page and the used-coupon list: paid
+  $30.99 by card = merchandise $53.89 + OCS Express $8.66 - discount $31.56. The page does not split the
+  discount; the used list names "$30 Off $50" and "BF Prototype $8 - JLCONE" with no order, and $38 is not
+  $31.56, so the split stays open. Also read: Flying Probe Fully Test, Remove Mark, "Data Preparation" (no
+  production file yet). Written to r01's `JLCPCB_REVIEW.md` section 6 and the manifest; `SHA256SUMS.txt`
+  regenerated (two lines change, the ten manufacturing files' hashes do not). No order number, file number,
+  SMT number or address is written. Learning: an order page's discount total is not a coupon record; read the
+  used-coupon list too, and say when the two do not add up.
