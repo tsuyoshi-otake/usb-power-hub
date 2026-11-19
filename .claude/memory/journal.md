@@ -2360,3 +2360,7 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   and did not say "do not order before it".
   The repository was found PUBLIC (`gh repo view`), with no LICENSE and the committer's address in history; the
   user decides.
+- **Follow-up 7 (2026-11-20): public, MIT.** The user keeps the repository public (「publicに変更」) and chose the
+  licence (「LICENSEはMITでいいよ」). `LICENSE` added (MIT, 2026, the GitHub account's name); CLAUDE.md section 2's
+  "no public remote" rule is replaced by the decision. Checked before: no e-mail address or token in tracked
+  files, one local path in rules.md, no tags or releases; the history's committer address is public.

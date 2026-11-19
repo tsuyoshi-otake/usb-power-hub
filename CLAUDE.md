@@ -177,7 +177,7 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > The repository is under Git since 2026-11-03 (commit `4dd10fb` is the design
 > as it was paused on 2026-08-16). Its one remote, `origin`, is the **private**
 > GitHub repository `tsuyoshi-otake/usb-power-hub`, created on 2026-11-03 at the
-> user's request 「一旦コミットプッシュしちゃいなよ」. Section 2 asks that it stay private. **On 2026-11-20 `gh repo view` reports it PUBLIC** (it was PRIVATE at the push of that day, about 00:35 JST); the user set it and decides whether it returns to private. It has no LICENSE file, and its history carries the committer's e-mail address.
+> user's request 「一旦コミットプッシュしちゃいなよ」. Section 2 asks that it stay private. **On 2026-11-20 `gh repo view` reports it PUBLIC** (it was PRIVATE at the push of that day, about 00:35 JST); the user set it and keeps it public (「publicに変更」), under the MIT licence since that day. Its history carries the committer's e-mail address.
 
 The mockup is a **mechanical and layout intent reference only**. Per easy-stick
 14.15/14.19: an artifact kept as a reference is evidence for the thing it is
@@ -324,7 +324,8 @@ Naming and Git:
   non-ASCII, no parentheses.
 - Commit messages in English, describing the change in detail and referencing
   the tracking Issue number.
-- **Do not create a public remote repository.**
+- The remote repository is public by the user's decision of 2026-11-20 (「publicに変更」), under the MIT
+  licence (`LICENSE`; 「LICENSEはMITでいいよ」). No account data, credential or address goes into it.
 
 ---
 
