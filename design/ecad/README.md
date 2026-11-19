@@ -131,8 +131,8 @@ only when every check passed and every corruption was caught (1 otherwise, 2 for
 arguments). The corruptions are made on in-memory copies in the same run, so a result always comes
 with the proof that the checker can fail; neither script writes a file, and neither has a `test_`
 script. On Rev0.6 r01 (2026-11-19): 30 checks, 0 failed, 8 corruptions, 0 missed, and 13 checks,
-0 failed, 16 corruptions, 0 missed, in 0.3 s and 0.6 s on this machine. Rev0.6 r02 gives the same
-figures. The second script's last argument must be a set of another PCB revision: r01 beside r02
+0 failed, 16 corruptions, 0 missed, in 0.3 s and 0.6 s on this machine. Rev0.6 r02 and Rev0.7
+r01 give the same figures. The second script's last argument must be a set of another PCB revision: r01 beside r02
 shares its CPL, paste and drill files, so three of the corruptions made from it change nothing and
 are reported `MISSED`.
 

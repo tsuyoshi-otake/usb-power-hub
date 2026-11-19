@@ -2329,3 +2329,13 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   answered 「まあ、届くよ」 and 「図らなくていいよ」. Decision (user): no measurement before manufacture; J5 stays as
   drawn (rows 1.60 and 4.14 mm from the edge), and the first board with the clamp on it is the check. D40 records
   it. Nothing on the board changed.
+- **Follow-up 4 (2026-11-19): Rev0.7 r01.** On the user's 「r01 を作る」. `make_outputs.py` run again from the
+  tracked board (commit 474dea4) gave the working set's ten files byte for byte (check_outputs 2970, 0 failed);
+  they are copied to `manufacturing/releases/rev0.7/r01/` with a manifest and checksums, state WIP. Verified on
+  the copied files: independent_check_sets 30/0 with 8/0 corruptions, independent_check_positions 13/0 with
+  16/0 (Rev0.5 r02 as the foreign set); BOM, CPL, hand-solder list, ERC and DRC reports byte-identical to
+  Rev0.6 r02's. Drill files: plated 473 hits (471), six new and four gone, all at J5; non-plated 12 (15), the
+  Tag-Connect land's three holes gone. Learning: a text diff of two Gerber layers of different revisions says
+  nothing about geometry (13 of 15 members differ after the revision text is made equal, the Top paste among
+  them, whose flashes the position check proves unchanged in place); compare drill hits and the board instead.
+  Not done: any JLCPCB tool on these files, the cart (Rev0.6 r01's), the enclosure and the lid for Rev0.7.

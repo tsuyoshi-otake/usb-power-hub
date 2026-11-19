@@ -21,7 +21,9 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 
 > **WIP — MANUFACTURING PROHIBITED.**
 >
-> **The tracked board is Rev0.7 (issue #14, D40, 2026-11-19), and it has no release.** After the
+> **The tracked board is Rev0.7 (issue #14, D40, 2026-11-19); its release candidate is
+> `manufacturing/releases/rev0.7/r01/` (state `WIP`, made on the user's 「r01 を作る」; nothing ordered,
+> nothing paid, no approval, and JLCPCB has seen none of its files).** After the
 > user's 「2.54で端にしてねこんなので挟むから。SWD経由で君にデバッグまで自動化して開発したいからさ。」
 > (with a picture of two spring-pin clamps), J5, the SWD land, is eight bare pads, 1.7 mm at
 > 2.54 mm pitch, 1.6 mm inside the back edge: 1 SWDIO, 3 and 5 GND, 7 SWCLK in the edge row, 2 V3V3,
@@ -29,12 +31,14 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > part changes: the BOM, the CPL and the hand-solder list are Rev0.6 r02's byte for byte. Rev0.6's
 > copper is carried (`carry.py`, now from a revision that carried one itself), the tracks at J5 are
 > drawn in `ROUTING_Rev0.7.md`, and `check_pcb.py`, `check_routing.py` and `check_silk.py` pass on
-> the tracked board. **Not done for Rev0.7:** a release candidate, the JLCPCB gate (JLCPCB has seen
+> the tracked board. **Not done for Rev0.7:** the JLCPCB gate (JLCPCB has seen
 > none of its files, and the user's cart holds Rev0.6 r01's), the enclosure and the lid (both drawn
 > for the Rev0.6 board; `design/mechanical/` still reads `board_interface_Rev0.6.json`), and the
-> clamp itself: it has two rows and eight pins (user, 2026-11-19: 「2 列 8 ピン」), but its
+> clamp itself: it has two rows and eight pins (user, 2026-11-19: 「2 列 8 ピン」; the variant
+> "2.54mm Double row 4P" of an AliExpress listing, D40), but its
 > drawing is not known, so the pad size, the distance from the edge and the row
-> order are estimates until the real clamp is tried on a board. Below, every statement about a
+> order are estimates until the real clamp is tried on a board; the user does not measure it before
+> manufacture (「図らなくていいよ」). Below, every statement about a
 > release, a JLCPCB gate, the enclosure or the lid is Rev0.6's or older; "Rev0.6" in a sentence
 > about placement or routing still describes this board except at J5.
 >
@@ -871,15 +875,17 @@ on 2026-11-19 (the manifest's *Akizuki stock*): all in stock for 2 boards, at th
 2026-11-13; MCP3208-CI/P (g100238) is marked 在庫僅少 at 41 packs, 72 on 2026-11-13. Not done on
 Rev0.6's files: the assembled parcel's shipping and a quote with impedance control.
 
-**Rev0.7 (issue #14, 2026-11-19) has no release candidate, and no `[x]` below is Rev0.7's.** Its
+**Rev0.7 (issue #14, 2026-11-19) has the release candidate `manufacturing/releases/rev0.7/r01/`
+(state `WIP`; nothing ordered, nothing paid), and no `[x]` below is Rev0.7's.** Its
 copper differs from Rev0.6's at J5 and its top mask, top legend and Gerber zip are new; its BOM, its
-CPL and its hand-solder list are Rev0.6 r02's byte for byte. On the tracked board and the untracked
-`manufacturing/working/rev0.7/` the generators' checkers pass (`check_schematic.py`,
+CPL and its hand-solder list are Rev0.6 r02's byte for byte. On the tracked board and r01's files
+(byte-identical to the untracked `manufacturing/working/rev0.7/`) the generators' checkers pass (`check_schematic.py`,
 `check_libraries.py`, `check_pcb.py`, `check_routing.py`, `check_silk.py`, `check_outputs.py`) and so
 do the two independent checks (`independent_check_sets.py`, `independent_check_positions.py`, with
 Rev0.5 r02 as the foreign set: Rev0.6's CPL is this one's byte for byte and would prove nothing). Not
-done on Rev0.7: a release, JLCDFM, the placement preview, a
-quote, the stock reads, the enclosure and the lid for the new land, and the clamp on a board.
+done on Rev0.7: JLCDFM, the placement preview, a
+quote, the stock reads, the enclosure and the lid for the new land, and the clamp on a board
+(`manufacturing/releases/rev0.7/r01/RELEASE_MANIFEST.md`, *Open gates*).
 
 **r02 (2026-11-19) supersedes r01 by its top silkscreen alone**
 (`manufacturing/releases/rev0.6/r02/RELEASE_MANIFEST.md`, *What changed against r01*). The paragraph
