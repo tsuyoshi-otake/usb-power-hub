@@ -32,7 +32,8 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > the tracked board. **Not done for Rev0.7:** a release candidate, the JLCPCB gate (JLCPCB has seen
 > none of its files, and the user's cart holds Rev0.6 r01's), the enclosure and the lid (both drawn
 > for the Rev0.6 board; `design/mechanical/` still reads `board_interface_Rev0.6.json`), and the
-> clamp itself: its drawing is not known, so the pad size, the distance from the edge and the row
+> clamp itself: it has two rows and eight pins (user, 2026-11-19: 「2 列 8 ピン」), but its
+> drawing is not known, so the pad size, the distance from the edge and the row
 > order are estimates until the real clamp is tried on a board. Below, every statement about a
 > release, a JLCPCB gate, the enclosure or the lid is Rev0.6's or older; "Rev0.6" in a sentence
 > about placement or routing still describes this board except at J5.

@@ -2314,3 +2314,7 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Learning.** In `rules.md`, *KiCad 9 routing checks*: the chained carry; what a `remove` point hits; draw the
   nets of a new land before the router; find a lost link by a net diff.
 - **Commits.** This entry's. Not pushed.
+- **Follow-up (2026-11-19).** Asked whether the clamp has one row of 4 pins or two rows of 8, the user answered
+  「2 列 8 ピン」. Recorded in D40 and CLAUDE.md §0. The land already has 2 × 4 pads; nothing on the board changed.
+  Still unknown: the distance between the clamp's rows, its jaw reach (the inner row is 4.14 mm from the edge),
+  its pin diameter. No check was run: documents only.
