@@ -72,8 +72,14 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > (`make_outputs.py`; `make_pcb.py` is not byte-reproducible in the pours' fill, see
 > `design/ecad/README.md`), and is **not orderable**. Rev0.6's release candidate is
 > `manufacturing/releases/rev0.6/r01/` (state `WIP`, issue #13): the same ten files with a
-> manifest and checksums, and **JLCPCB has not seen them**: no JLCDFM, no part mapping, no
-> placement preview, no quote. The last candidate that went through the JLCPCB gate is Rev0.5's,
+> manifest and checksums. The JLCPCB gate ran on it on 2026-11-19 (its `JLCPCB_REVIEW.md`;
+> **nothing ordered, nothing paid**, no approval): part mapping 41 of 41 with 0 substituted, the
+> placement preview (the four receptacles and every moved part that is not symmetrical), JLCDFM
+> with each Danger item judged against measurements on the board, and a quote of $52.85 without
+> shipping. It changed no file and left three findings to the user: a GND via carried from
+> Rev0.5's routing stands 0.059 mm from pad 3 of D1 (one net), JLCDFM lists the non-plated drill
+> file as plated, and the receptacles' slots are 0.60 mm wide. It holds only for the files whose
+> SHA-256 the review records. The candidate before it is Rev0.5's,
 > `manufacturing/releases/rev0.5/r02/` (state `WIP`,
 > **nothing ordered, nothing paid**, no approval), with its manifest, checksums and the gate's
 > `JLCPCB_REVIEW.md`; r01 beside it is superseded and keeps the stock check of the shared BOM
@@ -806,16 +812,22 @@ two defects, and Rev0.4's r01 and r02: the copper, the BOM and the CPL all chang
 evidence does not carry over. The `[x]` items hold for r02 only: any regenerated file needs them again.
 
 **Rev0.6 (issue #13, 2026-11-19) has the release candidate `manufacturing/releases/rev0.6/r01/`
-(state `WIP`; nothing uploaded, nothing ordered, nothing paid), and no `[x]` below is Rev0.6's.** Its
+(state `WIP`; nothing ordered, nothing paid), and no `[x]` below is Rev0.6's.** Its
 copper and its CPL are new; its BOM and its hand-solder list are Rev0.5 r02's, byte for byte, and
 its exported netlist differs from Rev0.5's in the title block alone. On the tracked Rev0.6 board
 and its candidate set (r01, byte-identical to the untracked `manufacturing/working/rev0.6/`) the
 generators' own checkers pass
 (`check_schematic.py`, `check_libraries.py`, `check_pcb.py`, `check_routing.py`, `check_silk.py`,
 `check_outputs.py`: ERC and DRC 0, 0 unconnected, Top only, the Kelvin lands, the three lands, the
-fiducials, BOM against CPL). Everything JLCPCB or a person reads must be done again on Rev0.6's
-files before any of it is ticked for Rev0.6: the independent check of the set, the stock check,
-the placement preview, JLCDFM, the part mapping and the quote.
+fiducials, BOM against CPL). The JLCPCB gate ran on r01's files on 2026-11-19
+(`manufacturing/releases/rev0.6/r01/JLCPCB_REVIEW.md`), and what it read holds only while the three
+SHA-256 it records stand: the part mapping (41 of 41, 0 substituted, 38 Basic and the three allowed
+Extended), JLCPCB's assembly stock on that day (every code above 500), the placement preview (J1-J4
+and every moved part that is not symmetrical, one instance of each other class) and a quote of
+$52.85 without shipping. JLCDFM ran and is **not accepted**: the user decides on the GND via
+0.059 mm from D1 pad 3, on the non-plated holes that JLCDFM lists as plated, and on the 0.60 mm
+slots. Not done on Rev0.6's files: the independent check of the set, the Akizuki stock, the
+assembled parcel's shipping and a quote with impedance control.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
       `WIP`; the user approves.*

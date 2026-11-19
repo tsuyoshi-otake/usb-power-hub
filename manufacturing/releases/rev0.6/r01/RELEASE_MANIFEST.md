@@ -2,9 +2,10 @@
 
 > **State: WIP. Not approved, not ordered, MANUFACTURING PROHIBITED.** r01 is the first candidate set of
 > Rev0.6 (issue #13): the board with its four USB-C receptacles mirror-symmetric about x = 50 mm (D39). No net
-> and no part changed against Rev0.5; the copper, the silkscreen and the CPL are new. **JLCPCB has not seen
-> these files:** no JLCDFM run, no part mapping, no placement preview, no quote. It becomes orderable only after
-> the gates in "Open gates" and the user's approval (CLAUDE.md 3, 8, 12).
+> and no part changed against Rev0.5; the copper, the silkscreen and the CPL are new. The JLCPCB gate ran on
+> these files on 2026-11-19 (`JLCPCB_REVIEW.md`): JLCDFM, part mapping, the placement preview and a quote. It
+> changed no file and left decisions for the user. **Nothing was ordered or paid.** The set becomes orderable
+> only after the gates in "Open gates" and the user's approval (CLAUDE.md 3, 8, 12).
 
 | Item | Value |
 |---|---|
@@ -20,17 +21,17 @@
 | Impedance control | not ordered for the prototype (D27); the user decides at the JLCPCB step with a fresh quote (CIRCUIT_DESIGN_Rev0.6.md §9) |
 | Finish | leaded HASL (D30; board setting `HAL SnPb`) |
 | Via class | **413 vias, every hole 0.30 mm:** 381 of 0.45 mm pad (ring 0.075 mm) and 32 of 0.60 mm pad (ring 0.150 mm). JLCPCB's standard class "0.3mm/(0.4/0.45mm)". Rev0.5 r02 had 397 |
-| Solder mask, silkscreen colour | not decided |
+| Solder mask, silkscreen colour | not decided; the quote of 2026-11-19 took the form's defaults (green, white) |
 | Assembly side | Top only (REQ-MFG-01); Economic PCBA |
-| Quantities | not entered: no quote form was opened for Rev0.6 (Rev0.5's quote was for 5 boards, 2 assembled) |
+| Quantities | not decided; the quote of 2026-11-19 was read for 5 boards, 2 assembled |
 | Machine-placed parts | 262 footprints, 41 LCSC parts; Extended: C2040, C2765186, C5137013 (D29, D31, D37) |
 | Hand-soldered parts | 8 (`UsbPowerHub_Main_Rev0.6_HandSolder.csv`), in neither BOM nor CPL |
 | Not populated (DNP, BOM-excluded) | 34: FID1 FID2 FID3 H1 H2 H3 H4 J5 TP1 TP2 TP3 TP4 TP5 TP6 TP7 TP8 TP9 TP10 TP11 TP12 TP13 TP14 TP101 TP102 TP103 TP104 TP105 TP106 TP201 TP202 TP203 TP204 TP205 TP206 |
 | ERC | 0 violations (`UsbPowerHub_Main_Rev0.6_ERC.json`) |
 | DRC | 0 violations, 0 unconnected items, 0 schematic-parity items (`UsbPowerHub_Main_Rev0.6_DRC.json`), including JLCPCB's hole figures as custom rules; the slots as capsules are measured by rule 10 of `check_routing.py`, which KiCad's DRC does not do |
-| JLCPCB DFM, part mapping, placement preview | **not run on these files.** Rev0.5's review (`../../rev0.5/r02/JLCPCB_REVIEW.md`) holds only for the Gerber zip, BOM and CPL whose SHA-256 it records; this Gerber and this CPL are other files |
-| Quote | **none for these files.** Rev0.5 r02's was $51.94 without shipping (2026-11-13); it is not Rev0.6's |
-| Sourcing | the BOM is the file Rev0.5's check read (`../../rev0.5/r01/SOURCING_CHECK.md`, PASS on 2026-11-13, SHA-256 below); the stock moves, and the check is repeated before payment |
+| JLCPCB DFM, part mapping, placement preview | run on these files on 2026-11-19, **not accepted** (`JLCPCB_REVIEW.md`). Part mapping 41 of 41, 0 substituted. Placement preview: the four receptacles and every moved part that is not symmetrical read, one instance of each other class. JLCDFM: every Danger item judged against measurements; three findings wait for the user (a GND via 0.059 mm from D1 pad 3, the non-plated holes that JLCDFM lists as plated, the 0.60 mm plated slots). The review holds only for the three SHA-256 it records |
+| Quote | $52.85 without shipping on 2026-11-19 (PCB $8.00, Economic PCBA $44.85; 5 boards, 2 assembled), `JLCPCB_REVIEW.md` section 6. Rev0.5 r02's was $51.94 |
+| Sourcing | the BOM is the file Rev0.5's check read (`../../rev0.5/r01/SOURCING_CHECK.md`, PASS on 2026-11-13, SHA-256 below). JLCPCB's assembly stock was read again on 2026-11-19 for the 41 codes (all above 500; `JLCPCB_REVIEW.md` section 3); the Akizuki stock was not. The stock moves, and the check is repeated before payment |
 | EasyEDA import (D32) | `../../rev0.4/r01/EASYEDA_IMPORT.md`: blocked at the user's sign-in; not run on Rev0.6 |
 | Firmware | none |
 | JLCPCB order number | **none: nothing was ordered or paid** |
@@ -64,6 +65,7 @@ Rev0.6 is a layout revision (CLAUDE.md §2: a new PCB revision for any layout ch
 | `UsbPowerHub_Main_Rev0.6_Preview_Bottom.png` | 3D render, bottom |
 | `UsbPowerHub_Main_Rev0.6_Preview_Top.png` | 3D render, top |
 | `UsbPowerHub_Main_Rev0.6_Schematic.pdf` | the schematic, every sheet |
+| `JLCPCB_REVIEW.md` | the JLCPCB gate of 2026-11-19 on the Gerber zip, the BOM and the CPL above: findings, options, part mapping, JLCDFM, placement preview, quote, and the decisions left to the user |
 | `SHA256SUMS.txt` | SHA-256 of every file above and of this manifest; `sha256sum -c SHA256SUMS.txt` |
 
 The ECAD source is not copied here: it is tracked in `design/ecad/source/` and identified by the hashes below;
@@ -88,10 +90,11 @@ copy it in at approval.
 
 | Gate | State | Owner |
 |---|---|---|
-| JLCDFM on this Gerber | **not run** | Claude, after the user's OK to upload and the user's sign-in |
-| Part mapping and placement preview on this BOM and CPL | **not run.** The receptacle's model shift and the model rotations were read on Rev0.5's and Rev0.4's files; J1 and J3 stand at new places and 26 more machine-placed parts moved | Claude, after the user's OK to upload |
-| Quote | **not read** for these files | user, at the JLCPCB step |
-| Sourcing | Rev0.5's check of 2026-11-13 read the same BOM file; to be repeated before payment | Claude, before payment |
+| JLCDFM on this Gerber | run on 2026-11-19, **not accepted**: the user decides on the GND via beside D1 pad 3, on "Confirm Production file" for the non-plated holes, and on the 0.60 mm plated slots (`JLCPCB_REVIEW.md` sections 1 and 8). Six "Pad spacing", 22 "pad to line spacing" and 3 mask-exposure Danger rows were judged by measurement and not identified one by one | user |
+| Part mapping and placement preview on this BOM and CPL | run on 2026-11-19: 41 of 41, 0 substituted; J1-J4 and the 7 other moved parts that are not symmetrical read in the preview, one instance of each other class. A viewer reading, not JLCPCB's pick-and-place; "Confirm Parts Placement" is the user's choice | user |
+| Quote | read on 2026-11-19: $52.85 without shipping. Not read: the assembled parcel's shipping, a quote with impedance control | user, in the cart |
+| Sourcing | Rev0.5's check of 2026-11-13 read the same BOM file; JLCPCB's stock was read again on 2026-11-19, the Akizuki stock was not; to be repeated before payment | Claude, before payment |
+| Independent check of the set | **not run** on Rev0.6's files (Rev0.5 r02 had one, CLAUDE.md 12) | Claude |
 | Mechanical overlay | the enclosure and the lid PCB are drawn for this board on paper (Enclosure Rev0.2 and Lid Rev0.2, issue #13 step 7; `design/mechanical/`); nothing is printed and no cable was tried | user (print, cables) |
 | EasyEDA import (D32) | blocked at the user's sign-in | user |
 | The open issues of CLAUDE.md 11 | OI-1, OI-5, OI-6, OI-8 (panelization), OI-26 and OI-33 stand | user (built board, real cables) |
@@ -99,10 +102,18 @@ copy it in at approval.
 
 ## Residual risks
 
-- **No JLCPCB review covers this set.** JLCDFM's Danger items on Rev0.5's Gerber (via annular ring of the 0.30 mm
-  vias, THT-to-SMD distance, mask opening exposing a trace, pad spacing, silkscreen over a plugged via, the
-  receptacles' plated-slot width) are judged in `../../rev0.5/r02/JLCPCB_REVIEW.md`. The lands and the via class
-  are the same here, so the same items are to be expected, but nothing has read this Gerber.
+- **The JLCPCB review of 2026-11-19 is JLCDFM's and a viewer's reading, not JLCPCB's production check**
+  (`JLCPCB_REVIEW.md`). JLCDFM's Danger items (via annular ring of the 0.30 mm vias, THT-to-SMD distance, mask
+  opening exposing a trace, pad spacing, pad to line spacing, silkscreen over a plugged via, the receptacles'
+  plated-slot width) are judged there against measurements on the board, not row by row. JLCDFM's list of items
+  changed since Rev0.5's run, and no control run of Rev0.5's Gerber was made.
+- A GND via carried from Rev0.5's routing stands 0.059 mm from pad 3 (GND) of D1, which D39 moved beside it: one
+  net, so DRC is clean, but the mask between them may not hold. Two older pairs are alike (C27 pad 2 0.090 mm,
+  TP13 0.095 mm). No checker of the repository measures a pad against a via of its own net.
+- 13 via holes stand in a pad, as on Rev0.5: 5 in U1's exposed pad, 6 in U6's, and a 0.60 mm via in pad 3 of
+  Q18 and of Q38. Solder can wick into them (V-MFG-03).
+- JLCDFM's viewer lists the non-plated drill file as a plated layer, although the file declares itself
+  non-plated; how JLCPCB's CAM reads the 15 non-plated holes is seen only in its production file.
 - The CPL's origin is the board's lower-left corner. Its Mid is the footprint's origin, plus the JLCPCB model
   shift of `design/ecad/jlcpcb_model_frame.json` for the receptacle C2765186 (J1-J4), and its angles are KiCad's
   plus the model rotation of that table (easy-stick 14.18). The table holds what JLCPCB's placement previews

@@ -542,6 +542,13 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   and fails L10 instead of the hole's own check) and 1 of 72 of `test_check_enclosure.py`
   (`port_to_screw_max 45.21`, the board's figure). After a placement change run every suite
   and read why each failure fails before changing the checker.
+- **Copper carried from an older revision can stand beside a moved part's pad of its own net, and no checker
+  of the repository sees it** (#13, 2026-11-19). D39 moved D1 by 6.5 mm; a GND via of `carried.json` then
+  stood 0.059 mm from D1 pad 3 (the Rev0.5 board has the same via, 6.3 mm from that pad). KiCad's clearance is
+  between nets, so the carried via "still stands", and `check_routing.py` has no rule for a pad against a via of
+  its own net; JLCDFM's "Pad spacing" found it at the JLCPCB gate, after the release was cut. After a carry,
+  measure pad-to-via gaps by net before cutting the release (`gate_measure.py` M2 in the gate's evidence:
+  3 pairs under 0.10 mm on Rev0.6, 2 on Rev0.5). Verified by: `gate_measure5.py` on both boards.
 
 ## KiCad 9 hole rules (#8, 2026-11-12)
 
@@ -700,7 +707,28 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **JLCDFM appears to read KiCad's rounded-rectangle pads as plain rectangles.** Its first pad-spacing
   row was a C20 pad against a V3V3 via at 0.05 mm; with sharp corners the same measure gives 0.05 mm and
   the real shape 0.105 mm (checked for that row only). On the real shapes every pad-to-via pair under
-  0.15 mm was on one net, and different nets are the DRC's (0.15 mm clearance).
+  0.15 mm was on one net, and different nets are the DRC's (0.15 mm clearance). Its dialogs name the
+  0.15 mm-radius pads "rect", though the Gerber draws them with RoundRect macros (#13, 2026-11-19). Read as
+  rectangles, the Rev0.6 and the Rev0.5 board each give 13 pad-to-track pairs of different nets at
+  0.091-0.094 mm, the number of "0.09mm" Danger rows in JLCDFM's item "Measure pad to line spacing"; the
+  closest real pair is 0.152 mm. The reading explains the kind of row, not every count: for pad to via it
+  gives 16 pairs under 0.10 mm against JLCDFM's 7.
+- **JLCDFM's list of items changes between runs: compare two revisions by measuring both boards, not by
+  its counts** (#13, 2026-11-19). 29 rows on 2026-11-13, 35 on 2026-11-19: new are "Measure pad to line
+  spacing" (a row without a name, 22 Danger), "Pth without pad", "Via without pad", a second "Trace spacing"
+  and two rows without a name. "Via placed within a pad" went from 0 to 2 while both boards hold the same 13
+  via holes in pads. Keep the measuring scripts with the gate's evidence and run them on the older board too
+  (`git show <commit>:design/ecad/source/usb-power-hub.kicad_pcb` into `~/tmp`); a control upload of the older
+  Gerber needs the user's OK of its own. Verified by: `gate_measure3.py` on the Rev0.6 board and on the
+  Rev0.5 board of `1ba282f`, whose M9 sections are identical.
+- **JLCDFM's viewer lists KiCad's NPTH drill file as "Plated drill layers"**, and "Pth without pad" then
+  lists every non-plated hole twice (15 holes, 30 Warning), although the file says
+  `TF.FileFunction,NonPlated` and `TA.AperFunction,NonPlated,NPTH` (#13). Not a defect of the file; what
+  JLCPCB's CAM does with it is seen only in the production file ("Confirm Production file").
+- **Record every charge line of the Quote & Order tab, and read the stock before the upload** (#13). Rev0.5's
+  review kept only the total, so Rev0.6's +$0.91 with a byte-identical BOM could not be attributed.
+  `tools/jlc_stock.py` with all 41 codes returns in under a minute; on 2026-11-19 it ran at 15:24, after the
+  upload of 14:50, and CLAUDE.md 4.1 asks for before.
 - **JLCDFM's limits are its own and can contradict JLCPCB's capabilities page.** Plated slot width:
   JLCDFM Danger below 0.61 mm, Warning 0.61-0.81, Good above 0.81; JLCPCB's page (read 2026-11-13) gives
   0.35 mm minimum for multi-layer boards with a length of at least twice the width. 16 Danger rows for the
@@ -720,6 +748,13 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **Browser evidence:** `computer screenshot` keeps nothing unless `save_to_disk` is true; a
   large `zoom` region can time out (take a plain scaled screenshot instead). Screenshots can show
   account details, so they live outside the repository.
+- **Browser tool facts (2026-11-19).** jlcdfm.com: the first `file_upload` on its hidden input can only reload
+  the page (the URL gains `?_t=`); find the input again and upload again. "DFM check" must be clicked, and the
+  analysis takes about 45 s. A row with 0, 0, 0 has no Details dialog: the previous dialog's text stays. The
+  dialog can be dragged by its title when it covers the board. `javascript_exec` returns `{}` for an async
+  IIFE: use a top-level `await`, then a plain expression. JLCPCB's placement viewer: its toolbar ("Fit Selected
+  Objects", "Fix All In Window", undo) exists only at page scroll 0, and a greyed undo shows that no part was
+  moved.
 - **JLCPCB coupons live in four places, and the coupon center is only one** (#8, 2026-11-13). A first pass
   over the coupon center and My Coupons ("0 unused; PCBA Special Offer $9 is the best") missed the Black
   Friday warm-up coupons, which are claimable only on the event page (`jlcpcb.com/events/black-friday-2026`;

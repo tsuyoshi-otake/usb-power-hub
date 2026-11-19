@@ -9,10 +9,12 @@ the host PC over a plain COM port.
 > checked on paper), a captured schematic (ERC clean, checked against the circuit
 > document by script), and a placed, routed and labelled board (DRC clean). The board is
 > Rev0.6 (issue #13): its four receptacles stand mirror-symmetric (D39), it is routed and
-> passes its checkers; its candidate set is `manufacturing/releases/rev0.6/r01/` (state `WIP`), and
-> JLCPCB has not seen its files. The last candidate that JLCPCB's tools read, Rev0.5's
-> (`manufacturing/releases/rev0.5/r02/`, state `WIP`),
-> is not orderable either: it has been through the JLCPCB gate once (2026-11-13), which found two
+> passes its checkers; its candidate set is `manufacturing/releases/rev0.6/r01/` (state `WIP`). It
+> has been through the JLCPCB gate once (2026-11-19: JLCDFM, part mapping, placement preview and a
+> quote of $52.85 without shipping), which changed no file and left three findings for the user to
+> decide (`JLCPCB_REVIEW.md` in that directory); the user has not approved it. The candidate before
+> it, Rev0.5's (`manufacturing/releases/rev0.5/r02/`, state `WIP`),
+> is not orderable either: its gate of 2026-11-13 found two
 > defects that r02 fixes, and the user has not approved it. Nothing has been ordered or paid,
 > and there is no firmware. Nothing has been built or measured. Do not order anything from
 > this repository.

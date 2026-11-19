@@ -1895,3 +1895,63 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   a step that only copies files is still graded before its commit).
 - **Commits.** `7c5eec9` (r01), `f074c52` (Enclosure Rev0.2 and Lid Rev0.2), `7d5ad3e` (r01's manifest row), and
   this entry's. Not pushed.
+
+## 2026-11-19 rev06-jlcpcb-gate (#13): the JLCPCB gate on Rev0.6 r01 (uploaded and read; nothing ordered, nothing paid)
+
+- **Request.** The user's 「アップロードする」, the answer to whether to upload Rev0.6 r01 to JLCPCB and run the gate
+  (JLCDFM, part mapping, placement preview, quote). It covered r01's three files and nothing else: no order, no
+  payment, no terms, no coupon, no download, no upload of an older Gerber.
+- **Result.** `manufacturing/releases/rev0.6/r01/JLCPCB_REVIEW.md`; the ten files of the set did not change and the
+  state stays `WIP`.
+  - Part mapping 41 of 41, 0 substituted, 38 Basic and the three allowed Extended. JLCPCB's stock for the 41 codes
+    read with `tools/jlc_stock.py` (lowest: CH335F 4,378).
+  - Placement preview: J1-J4 (front face 1.05-1.06 mm past the edge, tails 6.33-6.34 mm, pegs 2.83 mm) and the 7
+    other moved parts that are not symmetrical, one instance of each other class; no part dragged.
+  - Quote $52.85 without shipping (PCB $8.00, Economic PCBA $44.85, each line recorded), $0.91 above Rev0.5 r02's.
+  - JLCDFM: 35 items, Danger in 7 of them, each judged against measurements on the board.
+- **Findings left to the user.** (1) A GND via stands 0.059 mm from pad 3 (GND) of D1. (2) JLCDFM lists the
+  non-plated drill file as a plated layer and the 15 non-plated holes as "Pth without pad". (3) The receptacles'
+  0.60 mm plated slots, as on Rev0.5.
+- **What did not fit, and why.**
+  - JLCDFM's counts could not be compared with Rev0.5's run of 2026-11-13: its list has 35 rows where Rev0.5's
+    record has 29 (first counted here as 28; the file gives 29). Investigated by running the same scripts on the
+    Rev0.5 board, extracted from `1ba282f`: the same 13 via holes in pads, the same 13 pad-to-track pairs under
+    the rectangle reading, 15 non-plated holes. So "Via placed within a pad" (0 to 2), "Pth without pad" and the
+    22 Danger of "Measure pad to line spacing" come from the list, not from the board.
+  - The one change that is the board's: pad-to-via pairs of one net under 0.10 mm went from 2 to 3. Root cause:
+    the via at KiCad (127.7713, 59.8161) is in `design/ecad/routing/carried.json` and on the Rev0.5 board, 6.3 mm
+    from D1 pad 3; D39 moved D1 by 6.5 mm beside it. KiCad's clearance is between nets, and no checker of the
+    repository measures a pad against a via of its own net. Confirmed with `gate_measure5.py` on both boards and
+    in JLCDFM's viewer (row 2 of "Pad spacing"). Not fixed: a fix changes the copper and needs a new release.
+  - The first `file_upload` on jlcdfm.com only reloaded the page; the second uploaded. Whether the first left a
+    record in the account is not known.
+  - The stock was read at 15:24, after the upload of 14:50; CLAUDE.md 4.1 asks for before the upload.
+  - Rev0.5's review kept the PCBA price as a total only, so the +$0.91 with a byte-identical BOM cannot be
+    attributed to a line.
+  - `gate_measure.py`, copied unchanged from Rev0.5's gate, stops in M7 with a TypeError (a circle against a
+    segment); M7 is `gate_measure2.py`'s. Not fixed, so that the script stays the one Rev0.5 was measured with.
+- **Verification.**
+  - Main session: `sha256sum -c` (12 OK); the ten generated files unchanged against `a4dff8f`; the measuring
+    scripts on both boards; the 28 moved CPL rows by `diff` against Rev0.5 r02's; every rubric command run before
+    the grading.
+  - Independent verifier (`rubric-verifier`, sonnet, fresh context; `.claude/goal-loop/rev06-jlcpcb-gate/rubric.md`,
+    C1 to C9): 9 pass, first iteration. It ran all five scripts on the Rev0.6 board and three on the Rev0.5 board
+    itself and compared every figure of the record (0.059 mm at D1 pad 3, 3 / 152 and 2 / 149 pad-to-via pairs,
+    13 pairs at 0.091-0.094 mm, 0.152 / 0.170 mm, the 13 via holes as 5 + 6 + 1 + 1, 15 non-plated holes,
+    131 silkscreen-to-via pairs, 0.227 mm), the 41 codes against the BOM, the 28 CPL rows, 17 rotations, the
+    stock file, the price arithmetic, every JLCDFM triple against the statistics file, and the four documents
+    against the record. It cannot see the web pages. It left `listed.txt` in the system temp directory, which
+    was deleted afterwards.
+- **Not verified.** Six of the 7 "Pad spacing" Danger rows, the 22 of "pad to line spacing" and the 3 of the
+  mask-exposure item were judged by measurement and not identified row by row. No control run of Rev0.5 r02's
+  Gerber on today's JLCDFM. JLCDFM's SMT DFM tab, the names of two rows without a name, a quote with impedance
+  control, the OCS price, the assembled parcel's shipping, the Akizuki stock, the "42 Parts confirmed" counter and
+  the independent check of the set that Rev0.5 r02 had were not read or run. The placement preview is a viewer
+  reading; screenshots were not saved.
+- **Left in the user's accounts.** One auto-saved quote draft (`UsbPowerHub_Main_Rev0.6_Gerber`) and JLCDFM's upload
+  record. Evidence outside the repository: `~/tmp/usb-power-hub/rev06-gate/evidence/`.
+- **Learning.** In `rules.md`: JLCDFM's list changes between runs, so compare boards by measurement; the "rect"
+  reading of rounded pads (the existing rule, extended); JLCDFM lists KiCad's NPTH file as plated; record every
+  charge line and read the stock before the upload; browser facts of 2026-11-19; and, under the routing checks,
+  carried copper beside a moved pad of its own net.
+- **Commits.** This entry's. Not pushed.
