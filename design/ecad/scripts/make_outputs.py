@@ -46,7 +46,8 @@ What it CANNOT see: whether JLCPCB reads the files as meant. The uploads of Rev0
 and -12: DFM, part mapping, placement preview, quote; issues #6 and #8) are recorded in
 manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md (and r02's) with the SHA-256 of the Gerber
 zip, BOM and CPL they saw; Rev0.5's (2026-11-13, issue #8) in manufacturing/releases/rev0.5/
-r01/JLCPCB_REVIEW.md and r02's; Rev0.6 has had none. This script does not read those files: a change to a source, to
+r01/JLCPCB_REVIEW.md and r02's; Rev0.6's (2026-11-19, issue #13) in manufacturing/releases/
+rev0.6/r01/JLCPCB_REVIEW.md; Rev0.7 has had none. This script does not read those files: a change to a source, to
 this script or to jlcpcb_model_frame.json that changes one of those three hashes makes a review
 stale. The table's shift for the receptacle C2765186 (J1-J4) is what the placement preview
 showed, to about 0.04 mm; whether JLCPCB's pick-and-place puts the part where its viewer draws
@@ -288,7 +289,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         f"| ERC | {count(erc, 'violations')} violations |",
         f"| DRC | {count(drc, 'violations')} violations, {count(drc, 'unconnected_items')} unconnected items, "
         f"{count(drc, 'schematic_parity')} schematic-parity items |",
-        "| JLCPCB DFM, part mapping, placement preview | none for Rev0.6. Rev0.5's review (`manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md`, r01's beside it) and Rev0.4's (`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, r02's beside it) hold only for the Gerber zip, BOM and CPL whose SHA-256 they record: they saw other files and do not carry over |",
+        "| JLCPCB DFM, part mapping, placement preview | none for Rev0.7. Rev0.6's review (`manufacturing/releases/rev0.6/r01/JLCPCB_REVIEW.md`), Rev0.5's (`manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md`, r01's beside it) and Rev0.4's (`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, r02's beside it) hold only for the Gerber zip, BOM and CPL whose SHA-256 they record: they saw other files and do not carry over |",
         "| Firmware | none |",
         "| JLCPCB order number | none |",
         "| Approver, approval time | none: WIP |",

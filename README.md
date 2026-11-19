@@ -8,11 +8,14 @@ the host PC over a plain COM port.
 > generated KiCad project: its part library (a symbol and a footprint for every part,
 > checked on paper), a captured schematic (ERC clean, checked against the circuit
 > document by script), and a placed, routed and labelled board (DRC clean). The board is
+> Rev0.7 (issue #14): Rev0.6 with J5, the SWD land, as eight bare pads at 2.54 mm at the back edge
+> for a spring-pin clamp (D40). It is routed and passes its checkers, has no release and JLCPCB has
+> not seen its files. The board before it is
 > Rev0.6 (issue #13): its four receptacles stand mirror-symmetric (D39), it is routed and
-> passes its checkers; its candidate set is `manufacturing/releases/rev0.6/r01/` (state `WIP`). It
+> passes its checkers; its candidate sets are `manufacturing/releases/rev0.6/r01/` and `r02/` (state `WIP`; r02 differs by its top silkscreen alone). r01
 > has been through the JLCPCB gate once (2026-11-19: JLCDFM, part mapping, placement preview and a
 > quote of $52.85 without shipping), which changed no file and left three findings for the user to
-> decide (`JLCPCB_REVIEW.md` in that directory): two are decided since (both kept as they are), one is open. The user has
+> decide (`JLCPCB_REVIEW.md` in `r01/`): two are decided since (both kept as they are), one is open. The user has
 > not approved the set. The candidate before
 > it, Rev0.5's (`manufacturing/releases/rev0.5/r02/`, state `WIP`),
 > is not orderable either: its gate of 2026-11-13 found two
@@ -114,9 +117,10 @@ D34) and includes J1's soft start (D35, issue #7) and the four data-line taps (D
 violations and 0 unconnected items, and `check_routing.py` rule 9 keeps the L2 plane whole
 under U1 and U6. Rev0.6 moved 31 parts with the connectors (D39) and carries Rev0.5's routing
 where it still stands (`design/ecad/scripts/carry.py`); the rest is a new router session and
-a new patch. The silkscreen labels are placed, and a candidate manufacturing set (P5:
+a new patch. Rev0.7 changes J5's land (D40) and carries Rev0.6's routing the same way, with the
+tracks at J5 drawn in the routing document. The silkscreen labels are placed, and a candidate manufacturing set (P5:
 Gerber, drill, JLCPCB BOM and CPL, schematic PDF, renders, a `WIP` manifest) is generated
-into `manufacturing/working/rev0.6/`, which Git does not track and nobody may order from;
+into `manufacturing/working/rev0.7/`, which Git does not track and nobody may order from;
 `manufacturing/releases/rev0.5/r02/` holds Rev0.5's files as a release candidate (state
 `WIP`, nothing ordered; r01 beside it is superseded). The JLCPCB gate ran on 2026-11-13
 (JLCDFM, part mapping, the placement preview of the receptacle, a quote of $51.94 without
@@ -141,7 +145,7 @@ The KiCad project, its libraries, its schematic and its board are generated, not
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_pcb.py         # its negative tests
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_routing.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_silk.py
-"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py           # writes manufacturing/working/rev0.6, runs check_outputs.py
+"<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py           # writes manufacturing/working/rev0.7, runs check_outputs.py
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_outputs.py     # its negative tests
 ```
 

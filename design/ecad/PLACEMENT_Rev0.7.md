@@ -3,7 +3,8 @@
 > **WIP — MANUFACTURING PROHIBITED.** Where every part of Rev0.7 sits on the
 > 100 × 72 mm board (D24), and why, with its silkscreen labels. Issue #6 P3 and P5, reworked
 > for the machine-placed USB-C receptacles of issue #8 (D37) and the data-line taps of issue #10
-> (D38), and for the mirror-symmetric connectors of issue #13 (D39, Rev0.6); placement problems
+> (D38), for the mirror-symmetric connectors of issue #13 (D39, Rev0.6) and for J5's clamp pads at
+> the back edge (issue #14, D40, Rev0.7); placement problems
 > that routing (P4) finds are fixed here, in this file.
 
 `design/ecad/scripts/make_pcb.py` builds `source/usb-power-hub.kicad_pcb` from this file and
@@ -172,7 +173,7 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 | H4 | 96.5 | 68.5 | 0 | MH4 | M2 clearance hole, back right; the screw goes into the case's heat-set insert (D21) |
 | J1 | 82.5 | 69.385 | 180 | PORT_HOST | HOST receptacle; front face 1.06 mm past the back edge |
 | J4 | 17.5 | 69.385 | 180 | PORT_PWR | 5 V input receptacle; front face 1.06 mm past the back edge |
-| J5 | 44.5 | 69.2 | 0 | MCU | SWD (TC2030-NL), north of U1 |
+| J5 | 44.5 | 69.13 | 0 | MCU | SWD pads for a clamp (2 x 4 at 2.54 mm), north of U1; the edge row stands 1.6 mm inside the back edge (issue #14) |
 | Q50 | 72.05 | 44.8 | 0 | ADCSUP | ADC_SCLK, next to R27 |
 | Q51 | 76.4 | 42.75 | 0 | ADCSUP | ADC_CS, next to R28 |
 | Q52 | 76.15 | 46.4 | 0 | ADCSUP | ADC_DIN, next to R29 |
@@ -414,8 +415,10 @@ part. `make_pcb.py` writes each row as a text on F.SilkS, with its leader, after
   hand, so each has its reference within 1.5 mm of its courtyard (`F1`, `U5`, `U7`, `U17`,
   `RS10`, `RS11`, `RS20`, `RS21`). Pin 1 and polarity are the footprints' own marks
   (check_libraries.py keeps them on every polar part).
-- J5's six pads stand at a 1.27 mm pitch, where a 1.0 mm text does not fit, so their names are
-  a legend 5 mm to the right of J5: one row per pad row, the even pads above the odd ones as on
+- J5's eight pads stand 0.84 mm apart, 1.6 mm inside the back edge, and a clamp's pins land on
+  them, so their names are not between them: they are
+  a legend to the right of J5: one row per pad row, the odd pads (the edge row) above the even
+  ones as on
   the board, each pad as `<number> <net>` from left to right (`NC`: no net). `SWD` stands left
   of J5 and `BOOT` left of SW3. SW1 and SW2, the port buttons, have no label on this board:
   each stands beside its port's receptacle, and the lid carries their legend.
@@ -439,8 +442,8 @@ part. `make_pcb.py` writes each row as a text on F.SilkS, with its leader, after
 | TP8 | VBUS_IN | 3.6 | 55.2 | 0 | 1 | 1 | 0.17 | 6.7,54.7 10.3,54.7 10.3,55.0 |
 | TP9 | V_J4 | 24.5 | 53.6 | 0 | 1 | 1 | 0.17 | - |
 | TP10 | DVDD | 49.7 | 62.6 | 90 | 1 | 1 | 0.17 | - |
-| TP11 | RUN | 39.5 | 67.45 | 0 | 1 | 1 | 0.17 | 41.134,67.027 44.981,65.921 |
-| TP12 | CLKOUT | 49.7 | 68.4 | 90 | 1 | 1 | 0.17 | - |
+| TP11 | RUN | 37.6 | 66.9 | 0 | 1 | 1 | 0.17 | 39.15,66.55 44.3,66.55 45,66.25 |
+| TP12 | CLKOUT | 50.45 | 68.4 | 90 | 1 | 1 | 0.17 | - |
 | TP13 | VDD33_HUB | 97.25 | 30.85 | 90 | 1 | 1 | 0.17 | - |
 | TP14 | VBUS_J1 | 87.3 | 50.7 | 0 | 1 | 1 | 0.17 | - |
 | TP101 | OUT_H_A | 10.2 | 29.85 | 90 | 0.8 | 1 | 0.17 | 9.569,32.373 7.546,33.761 |
@@ -456,9 +459,9 @@ part. `make_pcb.py` writes each row as a text on F.SilkS, with its leader, after
 | TP205 | VSUP_B | 33.35 | 37.55 | 0 | 0.8 | 1 | 0.17 | - |
 | TP206 | VBUS_B | 67.25 | 32.95 | 90 | 1 | 1 | 0.17 | - |
 | SW3 | BOOT | 26 | 68.6 | 0 | 1 | 1 | 0.17 | - |
-| J5 | SWD | 38.5 | 70.25 | 0 | 1 | 1 | 0.17 | - |
-| J5.even | 2 SWDIO 4 SWCLK 6 NC | 60.5 | 70.3 | 0 | 0.8 | 1 | 0.17 | - |
-| J5.odd | 1 V3V3 3 RUN 5 GND | 59.73 | 68.9 | 0 | 0.8 | 1 | 0.17 | - |
+| J5 | SWD | 37.58 | 70.25 | 0 | 1 | 1 | 0.17 | - |
+| J5.odd | 1 SWDIO 3 GND 5 GND 7 SWCLK | 61.6 | 70.3 | 0 | 0.8 | 1 | 0.17 | - |
+| J5.even | 2 V3V3 4 RUN 6 NC 8 NC | 60.07 | 68.9 | 0 | 0.8 | 1 | 0.17 | - |
 | F1 | F1 | 7.5 | 49.5 | 0 | 1 | 1 | 0.17 | - |
 | U5 | U5 | 51.5 | 8.5 | 0 | 1 | 1 | 0.17 | - |
 | U7 | U7 | 90.25 | 23 | 0 | 1 | 1 | 0.17 | - |

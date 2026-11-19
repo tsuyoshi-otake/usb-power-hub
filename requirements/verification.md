@@ -28,7 +28,7 @@ pass counts. Entries that rely on a script note this under *Limits*.
 - the intended host PCs;
 - Type-C sink tester (Rd = 5.1 kΩ);
 - ≥ 3 different USB-C cables, including the widest overmould on hand;
-- an SWD probe with a TC2030-NL cable (debug only; programming uses the ROM USB bootloader).
+- an SWD probe with a 2.54 mm spring-pin clamp, one row of 4 pins or two (debug only; programming uses the ROM USB bootloader).
 
 ---
 
@@ -445,7 +445,8 @@ pass counts. Entries that rely on a script note this under *Limits*.
   - Bottom paste apertures 0, and every CPL entry on Top.
   - Every hand-soldered part is in the hand-assembly list and in none of the BOM or CPL.
   - 3 fiducials with 1 mm copper / 2 mm mask.
-  - TC2030-NL footprint with its alignment holes.
+  - J5's eight pads at 2.54 mm, without paste, the edge row 1.6 mm inside the back edge (D40); on the
+    first board, the clamp's pins meet SWDIO, SWCLK and GND, and a probe reads the RP2040's ID.
   - Every REQ-MFG-04 test pad present and labelled.
   - G18 passes.
 

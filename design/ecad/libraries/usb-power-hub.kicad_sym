@@ -7748,37 +7748,33 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "TC2030-NL"
+	(symbol "SWD-PADS-2x4"
+		(pin_names
+			(offset 1.016)
+		)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(property "Reference" "J"
-			(at 2.54 11.43 0)
+			(at -10.16 8.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "TC2030-NL (DNL)"
-			(at 2.54 8.89 0)
+		(property "Value" "SWD pads 2x4 P2.54 (DNL)"
+			(at 10.16 8.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify right)
 			)
 		)
-		(property "Footprint" "usb-power-hub:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
-			(at 0 -17.78 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "https://www.tag-connect.com/wp-content/uploads/bsk-pdf-manager/2019/12/TC2030-IDC-NL-Datasheet-Rev-B.pdf"
-			(at 0 -15.24 0)
+		(property "Footprint" "usb-power-hub:SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp"
+			(at -10.16 -10.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7786,7 +7782,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Tag-Connect (footprint only); none (Footprint only, not populated); register: usb-power-hub library.json"
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(effects
 				(font
@@ -7795,7 +7791,7 @@
 				(hide yes)
 			)
 		)
-		(property "ki_fp_filters" "Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
+		(property "Description" "SWD access for a spring-pin clamp: 2 x 4 bare pads at 2.54 mm, at the board edge. SWD-PADS-2x4; none (Copper only, not populated); register: usb-power-hub library.json"
 			(at 0 0 0)
 			(effects
 				(font
@@ -7804,7 +7800,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Tag-Connect (footprint only)"
+		(property "ki_fp_filters" "SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp"
 			(at 0 0 0)
 			(effects
 				(font
@@ -7813,7 +7809,7 @@
 				(hide yes)
 			)
 		)
-		(property "Class" "Footprint only, not populated"
+		(property "Class" "Copper only, not populated"
 			(at 0 0 0)
 			(effects
 				(font
@@ -7822,11 +7818,24 @@
 				(hide yes)
 			)
 		)
-		(symbol "TC2030-NL_0_0"
-			(pin power_in line
-				(at -2.54 10.16 270)
+		(symbol "SWD-PADS-2x4_0_1"
+			(rectangle
+				(start -10.16 7.62)
+				(end 10.16 -5.08)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "SWD-PADS-2x4_1_1"
+			(pin passive line
+				(at -12.7 5.08 0)
 				(length 2.54)
-				(name "VCC"
+				(name "SWDIO"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -7841,8 +7850,26 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at -2.54 -10.16 90)
+			(pin passive line
+				(at -12.7 2.54 0)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -12.7 0 0)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -7859,26 +7886,8 @@
 					)
 				)
 			)
-			(pin open_collector line
-				(at 7.62 5.08 180)
-				(length 2.54)
-				(name "~{RESET}"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "3"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin output line
-				(at 7.62 0 180)
+			(pin passive line
+				(at -12.7 -2.54 0)
 				(length 2.54)
 				(name "SWCLK"
 					(effects
@@ -7887,19 +7896,18 @@
 						)
 					)
 				)
-				(number "4"
+				(number "7"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(alternate "TCK" output line)
 			)
-			(pin bidirectional line
-				(at 7.62 -2.54 180)
+			(pin passive line
+				(at 12.7 5.08 180)
 				(length 2.54)
-				(name "SWDIO"
+				(name "VCC"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -7913,12 +7921,29 @@
 						)
 					)
 				)
-				(alternate "TMS" bidirectional line)
 			)
-			(pin input line
-				(at 7.62 -5.08 180)
+			(pin passive line
+				(at 12.7 2.54 180)
 				(length 2.54)
-				(name "SWO"
+				(name "~{RESET}"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 12.7 0 180)
+				(length 2.54)
+				(name "NC"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -7932,19 +7957,23 @@
 						)
 					)
 				)
-				(alternate "TDO" input line)
 			)
-		)
-		(symbol "TC2030-NL_0_1"
-			(rectangle
-				(start -5.08 7.62)
-				(end 5.08 -7.62)
-				(stroke
-					(width 0)
-					(type default)
+			(pin passive line
+				(at 12.7 -2.54 180)
+				(length 2.54)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
 				)
-				(fill
-					(type background)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
 				)
 			)
 		)

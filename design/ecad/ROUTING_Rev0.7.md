@@ -4,7 +4,8 @@
 > routed, and why. Issue #6 P4, reworked for the machine-placed receptacles and the data-line
 > taps (issues #8 and #10, D37 and D38) and for the mirror-symmetric connectors (issue #13, D39,
 > Rev0.6: Rev0.5's routing carried where it still stands, a new router session for the rest and
-> a new patch). Nothing here has been built or measured.
+> a new patch) and for J5's clamp pads at the back edge (issue #14, D40, Rev0.7: Rev0.6's routing
+> carried, the tracks at J5 drawn here). Nothing here has been built or measured.
 
 `design/ecad/scripts/make_pcb.py` builds `source/usb-power-hub.kicad_pcb` from the placement,
 this file, the carried record and the committed router session in `routing/`; `scripts/carry.py`
@@ -190,7 +191,7 @@ left open in a trial: drawn here, they are fixed before it starts.
   the pair crosses the pair on L4, with L2 between them, changes layer in that strip, and
   crosses the trunk on L1 or L3. Five nets do: BTN_B, LED_ON_B and LED_FLT_B to OUT B's button
   and LED resistors, V12F to the MAU104's filter, and ADC_L_A, which Rev0.5 routed along the
-  south edge, to U7. Each continues the open end of its carried track (*Carried from Rev0.5*)
+  south edge, to U7. Each continues the open end of its carried track (*Carried from Rev0.6*)
   and is drawn here, before the router, so that the router cannot close the strip. In the first
   trial the trunk ran under the pair (y = 17.0) and the router laid V5L along y = 16.6:
   LED_ON_B, LED_FLT_B and ADC_L_A then had no path on any layer between x = 58.6 and the
@@ -214,7 +215,7 @@ left open in a trial: drawn here, they are fixed before it starts.
   *After the router*), and the router joins the via. The 22 parts around U1 stand 0.4–0.8 mm
   further out for it (PLACEMENT_Rev0.7.md, *Deviations*). Rev0.5's router left five U1 pins
   open (BTN_B, LED_ON_B, LED_FLT_B, EVT_L_A and QSPI_SD3) and Rev0.5's patch joined them;
-  Rev0.6 carries that copper where it still stands (*Carried from Rev0.5*).
+  Rev0.6 and Rev0.7 carry that copper where it still stands (*Carried from Rev0.6*).
 
 <!-- route:begin -->
 | Net | Layer | Width | Points | Why |
@@ -297,6 +298,23 @@ left open in a trial: drawn here, they are fixed before it starts.
 | SWCLK | via | 0.45/0.3 | 44.85,59.35 | SWCLK: U1 pin 24 to a via |
 | SWDIO | F.Cu | 0.15 | 45.2,59.85 45.1,59.85 44.45,60.5 | SWDIO: U1 pin 25 to a via |
 | SWDIO | via | 0.45/0.3 | 44.45,60.5 | SWDIO: U1 pin 25 to a via |
+| SWDIO | F.Cu | 0.2 | 39.85,68.95 40.5,70 | J5 (issue #14): from the corner of the carried track into pad 1 |
+| V3V3 | F.Cu | 0.2 | 35.577,67.829 40.5,67.829 | J5 (issue #14): Rev0.6's L1 run along y = 67.83, now ending in pad 2; it had gone on to x = 43.23, where pad 4 (RUN) stands |
+| V3V3 | F.Cu | 0.15 | 41.8,67.75 41.3,67.75 | J5 (issue #14): C15's branch into pad 2 |
+| V3V3 | F.Cu | 0.15 | 43.95,66.05 43.95,66.75 41.8,66.75 | J5 (issue #14): R26's branch to C15's, south of pad 4 |
+| V3V3 | F.Cu | 0.15 | 52.9,65.3 49.07,69.13 42.75,69.13 41.96,68.34 41.96,67.91 41.8,67.75 | J5 (issue #14): C3's branch, on Rev0.6's diagonal, then between J5's rows and down between pads 2 and 4 to C15's branch |
+| RUN | F.Cu | 0.2 | 44.5,66.95 44.5,67.25 43.9,67.6 | J5 (issue #14): from the corner of the carried track into pad 4 |
+| TAP_A_N | In2.Cu | 0.15 | 38.4,68.85 39.3,69.75 54.5,69.75 | J5 (issue #14): under J5 on L3, where Rev0.6 ran on L1 along y = 71.4, 0.15 mm above the place of the edge row |
+| TAP_A_N | via | 0.45/0.3 | 54.5,69.75 | J5 (issue #14): back to the carried L1 track east of J5 |
+| TAP_A_P | B.Cu | 0.15 | 42.85,67.1 42.85,68.24 41.96,69.13 | J5 (issue #14): to a via in the middle of pads 1 to 4; Rev0.6's via stood where pad 4 is |
+| TAP_A_P | via | 0.45/0.3 | 41.96,69.13 | J5 (issue #14): to a via in the middle of pads 1 to 4; Rev0.6's via stood where pad 4 is |
+| TAP_A_P | In2.Cu | 0.15 | 41.96,69.13 48.34,69.13 49.62,67.85 | J5 (issue #14): under J5 on L3, between its rows |
+| TAP_A_P | via | 0.45/0.3 | 49.62,67.85 | J5 (issue #14): east of pad 8, 0.52 mm south-west of V3V3's diagonal; Rev0.6's via stood where pad 8 is |
+| TAP_A_P | F.Cu | 0.15 | 49.62,67.85 51.55,65.92 51.55,64.95 | J5 (issue #14): to the carried L1 track down to R35 |
+| LED_FLT_B | B.Cu | 0.15 | 49.2,70.4 49.6,70.8 | J5 (issue #14): the via to L3 moved north-east, out of pad 7 |
+| LED_FLT_B | via | 0.45/0.3 | 49.6,70.8 | J5 (issue #14): the via to L3 moved north-east, out of pad 7 |
+| LED_FLT_B | In2.Cu | 0.15 | 49.6,70.8 50,70.4 64.65,70.4 | J5 (issue #14): Rev0.6's L3 run along y = 70.4, from the moved via |
+| TAP_A_N | F.Cu | 0.15 | 54.5,69.75 58.45,65.8 | J5 (issue #14): the east part of Rev0.6's L1 diagonal, from the new via |
 | DOUT_B_3V | F.Cu | 0.15 | 45.2,60.65 45,60.65 44.65,61 43.35,61 | DOUT_B_3V: U1 pin 27 to a via |
 | DOUT_B_3V | via | 0.45/0.3 | 43.35,61 | DOUT_B_3V: U1 pin 27 to a via |
 | LED_ON_A | F.Cu | 0.15 | 45.3,61.05 45.3,61.45 | LED_ON_A: U1 pin 28 to a via |
@@ -406,7 +424,7 @@ left open in a trial: drawn here, they are fixed before it starts.
 
 ## GND fanout
 
-Every GND surface pad (SMD, or a connector pad without paste: J5's pad 5) reaches L2 in one of
+Every GND surface pad (SMD, or a connector pad without paste: J5's pads 3 and 5) reaches L2 in one of
 two ways (`route.py`, `gnd_fanout`).
 
 - **A stub to a plated GND hole of its own part**, where one is in reach: a 0.20 mm track on L1
@@ -458,20 +476,20 @@ two via centres.
 L1 carries no pour: the pairs' width was computed for a microstrip without coplanar ground
 (D27), and between the 0402 parts a pour would leave islands. Every zone removes its islands.
 
-## Carried from Rev0.5
+## Carried from Rev0.6
 
-Rev0.6 moves 31 of the 304 parts (D39): J3 with OUT B's port parts (C216, D3, Q33, R203, R204,
-R209, R210), J1 with its CC and ESD parts and its soft start (D1, D5, R1, R2, C35–C37, Q53, R34,
-TP14), the MAU104 with its filter (U5, C5–C8, R10, TP3), and OUT B's button and LEDs (SW2, D12,
-D13, R240, R241). The copper of the other 273 parts stays as Rev0.5 routed it: the router session
-and the patch table of Rev0.5, at the commit the table below names. `scripts/carry.py` reads both
-from Git history, checks each against the table's SHA-256, and applies them to this revision's
-board after the GND fanout, with the functions `make_pcb.py` uses for a session and a patch. Then
-it drops what no longer stands, in rounds, until a round drops nothing:
+Rev0.7 changes one footprint, J5 (D40, issue #14): eight pads at 2.54 mm at the back edge where
+six stood at 1.27 mm, 3.5 mm further north. No other part moves. The copper of the other 303
+parts stays as Rev0.6 had it, and Rev0.6's copper is itself three things: its carried record
+(what stood of Rev0.5's session and patch after D39 moved 31 parts), its router session and its
+patch table, at the commit the table below names. `scripts/carry.py` reads all three from Git
+history, checks each against the table's SHA-256, and applies them to this revision's board after
+the GND fanout, in that order, with the functions `make_pcb.py` uses for a record, a session and
+a patch. Then it drops what no longer stands, in rounds, until a round drops nothing:
 
-- every carried track or via that KiCad's DRC names in a violation: a short to a pad of a moved
-  part, a crossing with a track this document draws (VBUS_B's trunk and the corridor crossings lie
-  where Rev0.5 had other runs), a clearance. The whole segment goes, not the part in the way;
+- every carried track or via that KiCad's DRC names in a violation: a short to one of J5's new
+  pads, a crossing with a track this document draws at J5, a clearance. The whole segment goes,
+  not the part in the way;
 - every carried cluster of connected tracks and vias that reaches no pad and no drawn item: what a
   dropped segment left floating.
 
@@ -485,40 +503,43 @@ refuses the record when the table below, or the board before the carry (its rout
 SHA-256), is not what the record was made from: run `carry.py`, then `autoroute.py`.
 `carry.py --check` builds the record again and compares it with the file.
 
-<!-- carry:begin commit=866ef440b5ad63606609d63caaa09a53cf7046db -->
+<!-- carry:begin commit=ebc4fdbcc8bd0f30bb9dc20ebae2bccf9c042de7 -->
 | Item | Value | SHA-256 |
 |---|---|---|
-| session | design/ecad/routing/usb-power-hub.ses | c908c2349fcd4965ba991493cdb486820b2334d04959f8732a9f55e16bd9224a |
-| patch | design/ecad/ROUTING_Rev0.5.md | 10abeae25a4f004327a07e2dd6e5db76f880a49386d23954b84c480db51299be |
-| skip | Slot vias: | - |
+| carried | design/ecad/routing/carried.json | a435d9633a0c469990d54610c3ce92a0dc46683ee258f0a71f2dae2ddd7f0170 |
+| session | design/ecad/routing/usb-power-hub.ses | 4748d6458a3f3093b1602889e545351feebad673813af2166d6f3b3353fb7301 |
+| patch | design/ecad/ROUTING_Rev0.6.md | e3a38d6262b84c6489f33340bbf9b1f9b4e387c554c7337c3bfd2eab0bbff6a8 |
 <!-- carry:end -->
 
-- `session` and `patch` are paths at that commit; the patch is the patch table of that file.
-- `skip`: patch rows whose Why begins with this text are not carried. Rev0.5's *Slot vias* rows
-  re-drew the GND stubs at the receptacles' rear slots; since Rev0.6 the GND fanout draws those
-  stubs itself (*GND fanout*), and two of the receptacles moved.
-- The carried patch's `remove` rows take away drawn items of this board too. Rev0.5's patch had
-  replaced 18 tracks and vias of the route table at U1 (BTN_A, DOUT_B_3V, LED_ON_A, RUN, SWDIO,
-  TAP_A_P, V3V3) by its own; the route table still draws them, and the record lists them under
-  `remove`.
+- `carried`, `session` and `patch` are paths at that commit; the patch is the patch table of that
+  file. The `carried` row is optional: a revision that carries a board with no record of its own
+  leaves it out (Rev0.6 carried Rev0.5 so).
+- `skip` (an optional row): patch rows whose Why begins with this text are not carried. Rev0.6 used
+  it for Rev0.5's *Slot vias* rows; Rev0.7 has none.
+- The carried record's and the carried patch's `remove` entries take away drawn items of this
+  board too. Rev0.5's patch had replaced 18 tracks and vias of the route table at U1 (BTN_A,
+  DOUT_B_3V, LED_ON_A, RUN, SWDIO, TAP_A_P, V3V3) by its own; the route table still draws them,
+  Rev0.6's record lists them under `remove`, and so does this one.
 
-Counts (`carry.py` prints them, and `carried.json` holds the lists): Rev0.5's session adds 1,755
-track segments and 142 vias, its patch (259 rows without the skipped ones) 578 and 86, after
-taking 254 items away. Of those, 2,005 track segments and 205 vias stand on this board. 115 were
-dropped: 40 that DRC named (shorts, crossings and clearances; KiCad does not split them by type
-the same way in every run, so the record holds their number alone) and 75 that floated, of 19 nets
-(VBUS_J1 20, V12F 16, CC2_B 15, GJ1 12, BTN_B 8, VBUS_B 8, V5L 6, CC2_J1 5, LED_ON_B 5,
-LED_FLT_B 4, V12 4, ADC_L_A 2, DCH_B 2, DISG_B 2, GND 2, LEDA_FLT_B 1, LEDA_ON_B 1, TAP_B_P 1,
-USB_P1_P 1). DRC counts 36 connections open on the board with the carried copper, before the
-router.
+Counts (`carry.py` prints them, and `carried.json` holds the lists): Rev0.6's record adds 2,005
+track segments and 205 vias, its session 251 and 1, its patch (42 rows) 33 and 12, after taking
+24 items away. Of those, 2,248 track segments and 215 vias stand on this board. 20 were dropped,
+all named by DRC (shorts and clearances; KiCad does not split them by type the same way in every
+run, so the record holds their number alone) and none floating, of 6 nets (SWCLK 6, V3V3 5,
+TAP_A_P 4, SWDIO 2, TAP_A_N 2, LED_FLT_B 1). DRC counts 0 connections open on the board with the
+carried copper, before the router, because the route table draws every net's new path at J5.
 
-Why carried, and not routed again. One router run on the Rev0.6 placement without the carried
-copper (37 passes, with VBUS_B's trunk where the first trial had it, under pair A) left 40
-connections open by DRC's count, most of them at U1, where Rev0.5 had needed its window re-route
-(ROUTING_Rev0.5.md at the commit above, *After the router*). Carried, U1's exposed pad keeps the
-plane webs Rev0.5 measured (N 1.66, E 1.70, S 1.65, W 1.80 mm), the analog blocks keep Rev0.5's
-tracks, and the router and the patch have 36 connections to make instead of the whole board. None
-of Rev0.5's JLCPCB evidence carries over with the copper: Rev0.6's files are new files.
+Why the J5 tracks are drawn, and not left to the router. A first run that left them to it had the
+router take TAP_A_N along the back edge, 0.15 mm above the edge row's place, inside the copper-to-
+edge distance, and stand vias between the pads. The 17 rows of the route table whose Why begins
+with `J5 (issue #14)` put TAP_A_N and TAP_A_P on L3 under the land, V3V3 on L1 between its rows,
+and no via inside a pad.
+
+Why carried, and not routed again. As in Rev0.6: one router run on the Rev0.6 placement without
+carried copper (37 passes) left 40 connections open by DRC's count, most of them at U1, where
+Rev0.5 had needed its window re-route. Carried, U1's exposed pad keeps the plane webs Rev0.5
+measured (N 1.66, E 1.70, S 1.65, W 1.80 mm) and the analog blocks keep Rev0.5's tracks. None of
+Rev0.5's or Rev0.6's JLCPCB evidence carries over with the copper: Rev0.7's files are new files.
 
 ## Router
 
@@ -614,46 +635,38 @@ against 24 without it (one router run each).
 
 ## After the router
 
-The committed session adds 251 track segments and 1 via to the carried copper: 207.7 mm on 46
-nets, of which V5L takes 65.2 mm, VBUS_J1 25.9 mm and USB_P1_P 22.3 mm. 204 of the segments are
-shorter than 1.0 mm, many on nets DRC had counted complete before the router, and two repeat a
-carried AMP_L_A segment exactly: same-net copper on copper, which DRC accepts. Why the router
-draws them was not looked into; its own count of unrouted connections (99, in
-`routing/autoroute.json`) is not DRC's either. The session leaves 9
-connections unrouted (DRC's count of unconnected items) and 10 dangling-track warnings, and no
-place in the analog blocks where an L3 track runs along an L4 track (D36). The L2 plane is as
-Rev0.5's patch left it, because neither the session nor the patch puts a via at U1: the webs of
-U1's exposed pad are N 1.66, E 1.70, S 1.65 and W 1.80 mm (rule 9 asks 1.60 mm) and the longest
-void is 2.81 mm. `make_pcb.py` draws the patch table on the board after the session and before
-the zones are filled. At each point of a `remove` row, the via of its net centred exactly there is
-deleted (such a point is the via's position to 7 decimals, as KiCad wrote it), or else every track
-of its net through the point. The other rows draw tracks and vias as the route table does. The 42
-rows, 10 `remove` and 32 drawn, take 24 track segments away, draw 33 and 12 vias, and leave 0
-unconnected items, 0 DRC violations and no D36 place.
+The committed session adds 47 track segments and no via to the carried copper. DRC counted 0
+connections open before the router (`carry.py` prints that count), so every one of them is on a
+net that was complete: short pieces, same-net copper on copper, which DRC accepts. Rev0.6's
+session had 204 such pieces among its 251. Why the router draws them was not looked into; its
+own count of unrouted connections (96, in `routing/autoroute.json`) is not DRC's either. The
+session leaves 0 connections unrouted (DRC's count of unconnected items) and 8 dangling-track
+warnings, and no place in the analog blocks where an L3 track runs along an L4 track (D36). The
+L2 plane is as Rev0.5's patch left it at U1, because neither the session nor the patch puts a via
+at U1: the webs of U1's exposed pad are N 1.66, E 1.70, S 1.65 and W 1.80 mm (rule 9 asks
+1.60 mm) and the longest void is 2.81 mm. `make_pcb.py` draws the patch table on the board after
+the session and before the zones are filled. At each point of a `remove` row, the via of its net
+centred exactly there is deleted (such a point is the via's position to 7 decimals, as KiCad
+wrote it), or else every track of its net whose copper covers the point: the track's width
+counts, so a point within half a width of another track of the net takes that one away too. The
+other rows draw tracks and vias as the route table does. The 5 rows, all `remove`, take 11 track
+segments away and leave 0 unconnected items, 0 DRC violations and no D36 place.
 
-The Why column names the stage that wrote a row. The two stages ran in this order, the second on
-the board the first left, on a 0.05 mm grid, with every other net's copper, the DSN keepouts and
-D36 as obstacles:
+**Tails at J5 (issue #14).** The 8 dangling tracks, and three pieces between them, are carried
+copper of Rev0.6 that ended at, or ran through, the place of J5's new pads: RUN's end at the old
+land, the two ends of TAP_A_N's L1 run along y = 71.4, five pieces of TAP_A_P between its two old
+vias, LED_FLT_B's L3 run from its old via, and V3V3's diagonal and run to the old land. The carry
+keeps a route that lost its far end (*Carried from Rev0.6*). The route table draws each net's new
+path at J5 before the router (*Hand-drawn tracks*, the rows whose Why begins with `J5 (issue #14)`), so
+these rows only take the old pieces away. Each point was chosen on the old piece and 0.10 mm or
+more from the new track of the same net, because the two overlap or run 0.07–0.08 mm apart in
+several places. The rows were written by hand from a list of the nets' tracks around J5.
 
-1. **Tails.** Seven of the dangling tracks are carried copper that ends where a moved part stood:
-   five of GND, at the old places of J3's and of J1's parts, one of V5L (0.23 mm, at Q53's old
-   place) and one of LED_FLT_B (1.45 mm, beside the corridor crossing that replaces it). The carry keeps a
-   route that lost its far end (*Carried from Rev0.5*); nobody continued these, so each is taken
-   away back to the next via, pad or junction.
-2. **Moved parts.** The 9 open connections are at the parts D39 moved: V5L at C35 and Q53 (two),
-   J1's CC lines at D1, R1 and R2 (CC1_J1 two, CC2_J1 one), CC2_B at J3's pad B5, EN_B at R203 and
-   R204, DIS_B at R209, and TAP_B_P, whose straight L1 run of Rev0.5 crossed the place where Q53
-   and C35 now stand. Each is one search from the pad, or from the open end of the carried route
-   (EN_B: of the 5.3 mm the router drew), to the rest of its net. Three are long: EN_B 31.0 mm (20.3 mm of it on L3 along y = 8.9), DIS_B
-   34.0 mm (on L3 between VBUS_B's trunk and pair A, then on L4 under pair B) and TAP_B_P 24.2 mm
-   (on L3 under Q53, 1.2 mm beside the line Rev0.5 had it on L1). See *Not settled*, *Long routes*.
-
-Rev0.5's own patch (its window re-route north of U1, the joins at U1, the analog blocks) is not in
-this table: it is carried, with Rev0.5's session, by the record (*Carried from Rev0.5*).
-
-The program that wrote the rows (an exact-obstacle search that also takes dead ends away) is a
-scratch tool and is not in the repository. The table is its output, and `check_routing.py`, not
-the tool, accepts it.
+Rev0.6's patch (its tails and the 9 connections at the parts D39 moved: V5L, J1's CC lines,
+CC2_B, EN_B, DIS_B and TAP_B_P) and, inside Rev0.6's record, Rev0.5's own patch (its window
+re-route north of U1, the joins at U1, the analog blocks) are not in this table: they are carried
+by the record (*Carried from Rev0.6*). Their rows and their Why are in `ROUTING_Rev0.6.md` and
+`ROUTING_Rev0.5.md` in Git history, at the commits the carry tables name.
 
 The table belongs to the carried record and to the session whose SHA-256 `routing/autoroute.json`
 records. A new record or a new session moves the tracks its rows name, and a `remove` row that
@@ -662,48 +675,11 @@ finds nothing stops `make_pcb.py`. After either, rewrite the table.
 <!-- patch:begin -->
 | Net | Layer | Width | Points | Why |
 |---|---|---:|---|---|
-| GND | remove | - | 47.4858,8.9 | Tails: a carried track that ends where a moved part stood |
-| GND | remove | - | 48.5496,10.0621 48.2617,9.3371 49.1559,8.0059 50.05,6.6983 | Tails: a carried track that ends where a moved part stood |
-| GND | remove | - | 69.1157,60.7257 69.9175,61.0514 70.4096,61.0353 70.5076,60.9373 70.7263,60.8752 71.0736,60.6845 72.2619,60.4938 | Tails: a carried track that ends where a moved part stood |
-| GND | remove | - | 73.2594,60.5719 | Tails: a carried track that ends where a moved part stood |
-| GND | remove | - | 74.5986,57.8319 | Tails: a carried track that ends where a moved part stood |
-| GND | remove | - | 75.9387,56.4927 | Tails: a carried track that ends where a moved part stood |
-| GND | remove | - | 76.4948,56.0704 | Tails: a carried track that ends where a moved part stood |
-| GND | remove | - | 77.25,65.1539 77.5106,64.3321 77.7713,63.1277 | Tails: a carried track that ends where a moved part stood |
-| V5L | remove | - | 75.5825,52.03 | Tails: a carried track that ends where a moved part stood |
-| LED_FLT_B | remove | - | 65.375,14.8 | Tails: a carried track that ends where a moved part stood |
-| V5L | F.Cu | 0.31 | 84.35,51.8 84.35,50.85 | Moved parts: V5L to C35 and Q53 beside J1 (D39) |
-| V5L | F.Cu | 0.31 | 82,51.95 82,50.85 | Moved parts: V5L to C35 and Q53 beside J1 (D39) |
-| CC1_J1 | F.Cu | 0.2 | 79.7,60.7 79.1,61.3 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC1_J1 | B.Cu | 0.2 | 79.1,61.3 84.1,66.3 84.1,66.7 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC1_J1 | F.Cu | 0.2 | 84.1,66.7 83.8,66.4 83.8,65.85 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC1_J1 | via | 0.45/0.3 | 79.1,61.3 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC1_J1 | via | 0.45/0.3 | 84.1,66.7 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC1_J1 | F.Cu | 0.2 | 75.4,60.3 75.9,59.8 78.55,59.8 79.15,60.4 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC2_J1 | F.Cu | 0.2 | 75.35,62.9 75.8,63.35 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC2_J1 | In2.Cu | 0.2 | 75.8,63.35 79.55,63.35 79.7,63.2 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC2_J1 | F.Cu | 0.2 | 79.7,63.2 79.7,62.8 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC2_J1 | via | 0.45/0.3 | 75.8,63.35 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC2_J1 | via | 0.45/0.3 | 79.7,63.2 | Moved parts: J1's CC lines to D1, R1 and R2 (D39) |
-| CC2_B | F.Cu | 0.2 | 84.2,6.15 84.2,5.4 84.15,5.35 | Moved parts: J3's CC2 to D3 and R204 (D39) |
-| CC2_B | B.Cu | 0.2 | 84.15,5.35 78.9,10.6 | Moved parts: J3's CC2 to D3 and R204 (D39) |
-| CC2_B | F.Cu | 0.2 | 78.9,10.6 79.35,11.05 79.35,12 | Moved parts: J3's CC2 to D3 and R204 (D39) |
-| CC2_B | via | 0.45/0.3 | 84.15,5.35 | Moved parts: J3's CC2 to D3 and R204 (D39) |
-| CC2_B | via | 0.45/0.3 | 78.9,10.6 | Moved parts: J3's CC2 to D3 and R204 (D39) |
-| EN_B | In2.Cu | 0.2 | 45.7,8.9 65.95,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
-| EN_B | F.Cu | 0.2 | 65.95,8.9 76.65,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
-| EN_B | via | 0.45/0.3 | 45.7,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
-| EN_B | via | 0.45/0.3 | 65.95,8.9 | Moved parts: EN_B from the open end the router left to R203 and R204 (D39) |
-| DIS_B | F.Cu | 0.2 | 55.3,13.2 57.5,15.4 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
-| DIS_B | In2.Cu | 0.2 | 57.5,15.4 67.25,15.4 68.65,16.8 79.6,16.8 80.45,15.95 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
-| DIS_B | B.Cu | 0.2 | 80.45,15.95 83.15,13.25 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
-| DIS_B | F.Cu | 0.2 | 83.15,13.25 86.35,13.25 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
-| DIS_B | via | 0.45/0.3 | 57.5,15.4 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
-| DIS_B | via | 0.45/0.3 | 80.45,15.95 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
-| DIS_B | via | 0.45/0.3 | 83.15,13.25 | Moved parts: DIS_B from the end of the carried track to R209 (D39) |
-| TAP_B_P | F.Cu | 0.2 | 80.05,55.85 80.05,54.2 | Moved parts: TAP_B_P from the end of the carried track to R37 (D39) |
-| TAP_B_P | In2.Cu | 0.2 | 80.05,54.2 84.7,49.55 88.35,45.9 95.1,39.15 96.35,39.15 | Moved parts: TAP_B_P from the end of the carried track to R37 (D39) |
-| TAP_B_P | via | 0.45/0.3 | 80.05,54.2 | Moved parts: TAP_B_P from the end of the carried track to R37 (D39) |
+| RUN | remove | - | 44.5,68 | J5 (issue #14): the carried tail to Rev0.6's pad at (44.5, 68.565); the route table's track into pad 4 replaces it |
+| TAP_A_N | remove | - | 38.8,68.85 53.5,70.75 | J5 (issue #14): the two carried ends of Rev0.6's L1 run along y = 71.4; the route table's L3 track and its diagonal from (54.5, 69.75) replace them |
+| TAP_A_P | remove | - | 43.35,67.6 44.5,68.1 45.775,68.575 47.25,69 48.4,68.85 | J5 (issue #14): the carried pieces between Rev0.6's two vias, which stood where pads 4 and 8 are |
+| LED_FLT_B | remove | - | 49.5,70.4 | J5 (issue #14): the carried L3 run from Rev0.6's via at (49.2, 70.4); the route table draws it from the moved via |
+| V3V3 | remove | - | 48.97,69.23 | J5 (issue #14): the carried diagonal and run along y = 69.2 to Rev0.6's pad; the route table's branch between J5's rows replaces them |
 <!-- patch:end -->
 
 ## Not settled

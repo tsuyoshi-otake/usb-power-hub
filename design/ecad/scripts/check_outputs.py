@@ -49,7 +49,8 @@ What it CANNOT see:
   the evidence (CLAUDE.md 8, JLCPCB gate). The uploads of Rev0.4 (2026-11-11 and -12) are
   recorded in manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the three
   files they saw, Rev0.5's (2026-11-13) in manufacturing/releases/rev0.5/r01/JLCPCB_REVIEW.md
-  and r02's; Rev0.6 has had none. This checker does not read those files, so it cannot tell a review that has gone
+  and r02's, Rev0.6's (2026-11-19) in manufacturing/releases/rev0.6/r01/JLCPCB_REVIEW.md; Rev0.7 has had
+  none. This checker does not read those files, so it cannot tell a review that has gone
   stale.
 - whether the table's numbers are right: it checks that the CPL follows the table and that the
   table is well formed, not what JLCPCB's models look like. The receptacle C2765186's shift

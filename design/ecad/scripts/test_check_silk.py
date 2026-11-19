@@ -311,18 +311,19 @@ class CheckSilkTest(unittest.TestCase):
                              "FAIL silk RS11:", "reads as RS10's")
 
     def test_legend_wrong_net(self):
-        self.assertFailsWith(run_check(board=retext("1 V3V3 3 RUN 5 GND", "1 GND 3 RUN 5 V3V3"),
-                                       doc=set_row("J5.odd", Text="1 GND 3 RUN 5 V3V3")),
-                             "FAIL silk J5.odd: text '1 GND 3 RUN 5 V3V3', its pads' nets give '1 V3V3 3 RUN 5 GND'")
+        self.assertFailsWith(run_check(board=retext("1 SWDIO 3 GND 5 GND 7 SWCLK", "1 SWCLK 3 GND 5 GND 7 SWDIO"),
+                                       doc=set_row("J5.odd", Text="1 SWCLK 3 GND 5 GND 7 SWDIO")),
+                             "FAIL silk J5.odd: text '1 SWCLK 3 GND 5 GND 7 SWDIO', its pads' nets give "
+                             "'1 SWDIO 3 GND 5 GND 7 SWCLK'")
 
     def test_legend_rows_swapped(self):
-        self.assertFailsWith(run_check(board=both(move_text("2 SWDIO 4 SWCLK 6 NC", 60.5, 68.9),
-                                                  move_text("1 V3V3 3 RUN 5 GND", 59.73, 70.3)),
-                                       doc=lambda t: set_row("J5.odd", y="70.3")(set_row("J5.even", y="68.9")(t))),
+        self.assertFailsWith(run_check(board=both(move_text("2 V3V3 4 RUN 6 NC 8 NC", 60.07, 70.3),
+                                                  move_text("1 SWDIO 3 GND 5 GND 7 SWCLK", 61.6, 68.9)),
+                                       doc=lambda t: set_row("J5.odd", y="68.9")(set_row("J5.even", y="70.3")(t))),
                              "FAIL silk J5.even: row at y", "not on the side of J5's even pads")
 
     def test_legend_far(self):
-        self.assertFailsWith(run_check(board=move_text("2 SWDIO 4 SWCLK 6 NC", 70.5, 70.3),
+        self.assertFailsWith(run_check(board=move_text("2 V3V3 4 RUN 6 NC 8 NC", 70.5, 68.9),
                                        doc=set_row("J5.even", x="70.5")),
                              "FAIL silk J5.even:", "mm from J5's courtyard, want <= 6.0 mm")
 

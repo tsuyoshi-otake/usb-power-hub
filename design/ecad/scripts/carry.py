@@ -1,20 +1,24 @@
-"""Carry the previous revision's routing onto this revision's board (issue #13; ROUTING_Rev0.7.md,
-"Carried from Rev0.5").
+"""Carry the previous revision's routing onto this revision's board (issues #13 and #14;
+ROUTING_Rev0.7.md, "Carried from Rev0.6").
 
 Run with KiCad's own Python from the repository root, after make_schematic.py and before
 autoroute.py:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/carry.py [--check]
 
-Rev0.6 moves 31 of the 304 parts (D39). The copper of the other parts stays as Rev0.5 routed it,
+A layout revision moves or changes a few parts (Rev0.6, D39: 31 of 304; Rev0.7, D40: J5 alone).
+The copper of the other parts stays as the previous revision had it,
 so the routing of the analog blocks and of U1 does not change with a connector's position. What
 this script does:
 1. It builds the board as make_pcb.py does up to the GND fanout (make_pcb.base_board).
-2. It reads the two sources the routing document's carry table names, at the commit the table
+2. It reads the sources the routing document's carry table names, at the commit the table
    names, with `git show`, and checks each against the table's SHA-256: the previous revision's
-   router session, and its routing document, whose patch table holds what was drawn after that
+   own carried record if it had one (the table's optional `carried` row; Rev0.7 carries Rev0.6,
+   which carried Rev0.5), its router session, and its routing document, whose patch table holds
+   what was drawn after that
    session.
-3. It applies both with the pipeline's own functions (route.import_session, route.apply_patch),
+3. It applies them in that order with the pipeline's own functions (route.apply_carried,
+   route.import_session, route.apply_patch),
    less the patch rows whose Why begins with a text the table skips. The patch's remove rows
    take away drawn items of this board too, where the previous revision had replaced them.
 4. It drops what no longer stands, in rounds, until a round drops nothing. First every carried
@@ -142,12 +146,15 @@ def compute(tmp):
     board = mp.base_board(path, comps, pins, place, routing)
     base_digest = route.dsn_digest(mp.router_input(board, routing, regions, tmp))
     base = {t.m_Uuid.AsString(): route.item_key(board, t) for t in board.GetTracks()}
+    c_t = c_v = 0
+    if "carried" in carry:               # the previous revision had carried copper of its own
+        c_t, c_v, _ = route.apply_carried(board, json.loads(source(carry["commit"], carry["carried"], carry["carried_sha256"])))
     s_t, s_v = route.import_session(board, session, mp.sx)
     p_t, p_v, p_r = route.apply_patch(board, rows)
     left = {t.m_Uuid.AsString() for t in board.GetTracks()}
     remove = sorted(key for u, key in base.items() if u not in left)
     mine = left - set(base)
-    lines = [f"sources at {carry['commit'][:7]}: session {s_t} track segments, {s_v} vias; patch"
+    lines = [f"sources at {carry['commit'][:7]}: carried record {c_t} track segments, {c_v} vias; session {s_t} track segments, {s_v} vias; patch"
              f" ({len(rows)} rows) {p_t} track segments, {p_v} vias, {p_r} item(s) removed, of which"
              f" {len(remove)} drawn by this revision's document"]
     dropped = collections.Counter()
@@ -192,7 +199,7 @@ def compute(tmp):
     by_drc = sum(dropped.values())
     # DRC's own split of what it names is not in the record: one run calls a short shorting_items
     # and the next solder_mask_bridge, and --check compares the record with the file
-    record = dict(commit=carry["commit"], session_sha256=carry["session_sha256"],
+    record = dict(commit=carry["commit"], carried_sha256=carry.get("carried_sha256"), session_sha256=carry["session_sha256"],
                   patch_sha256=carry["patch_sha256"], skip=carry["skip"], base_dsn_sha256=base_digest,
                   dropped=dict(drc=by_drc, floating=floating), remove=[list(k) for k in remove],
                   tracks=tracks, vias=vias)

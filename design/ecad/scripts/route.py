@@ -150,7 +150,8 @@ def patch_rows(tables):
 
 
 def _carry(tables):
-    """The `carry` table: the commit and the two sources the carried routing is made from, each
+    """The `carry` table: the commit and the sources the carried routing is made from (the previous
+    revision's session and patch, and its own carried record when it had one), each
     with its SHA-256, and the Why prefixes of the source's patch rows that are not carried.
     None without the table: nothing is carried."""
     if "carry" not in tables:
@@ -160,10 +161,10 @@ def _carry(tables):
     for r in rows:
         if r["Item"] == "skip":
             out["skip"].append(r["Value"])
-        elif r["Item"] in ("session", "patch") and r["Item"] not in out and re.fullmatch(r"[0-9a-f]{64}", r["SHA-256"]):
+        elif r["Item"] in ("carried", "session", "patch") and r["Item"] not in out and re.fullmatch(r"[0-9a-f]{64}", r["SHA-256"]):
             out[r["Item"]], out[r["Item"] + "_sha256"] = r["Value"], r["SHA-256"]
         else:
-            raise SystemExit(f"carry: {r}: a row is one session, one patch (each with its SHA-256) or a skip")
+            raise SystemExit(f"carry: {r}: a row is one carried record, one session, one patch (each with its SHA-256) or a skip")
     if not (out["commit"] and "session" in out and "patch" in out):
         raise SystemExit("carry: the table names a commit (commit=...), one session and one patch")
     return out

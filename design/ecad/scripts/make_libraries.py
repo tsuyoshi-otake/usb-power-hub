@@ -530,9 +530,34 @@ def gen_usbc_receptacle(name, p, part):
     return fp
 
 
+def gen_pad_grid(name, p, part):
+    """Bare pads on a grid, for the spring pins of a clamp (issue #14): no paste, no hole, no
+    part. Origin at the grid's centre; `pads` gives [number, column, row], column 0 at -x and
+    row 0 at -y. Pad 1 is square, the others round, and a silkscreen bar stands beside pad 1's
+    row end."""
+    pitch, d = p["pitch"], p["pad"]
+    cols, rows = p["grid"]
+    xs = [r((i - (cols - 1) / 2) * pitch) for i in range(cols)]
+    ys = [r((j - (rows - 1) / 2) * pitch) for j in range(rows)]
+    x0, x1, y0, y1 = r(xs[0] - d / 2), r(xs[-1] + d / 2), r(ys[0] - d / 2), r(ys[-1] + d / 2)
+    fp = header(name, f"{cols} x {rows} bare pads of {d} mm at {pitch} mm pitch for a spring-pin clamp, "
+                f"no part fitted", "SWD pogo clamp test pads", ["smd", "exclude_from_pos_files", "exclude_from_bom"],
+                (0, r(y1 + 1.3)), (0, r(y1 + 2.6)))
+    one = next(q for q in p["pads"] if q[0] == "1")
+    fp.append(line((r(x0 - 0.4), r(ys[one[2]] - d / 2)), (r(x0 - 0.4), r(ys[one[2]] + d / 2)), "F.SilkS", SILK_W))
+    fp.append(rect((r(x0 - 0.6), r(y0 - 0.25)), (r(x1 + 0.25), r(y1 + 0.25)), "F.CrtYd", 0.05))
+    fp.append(rect((x0, y0), (x1, y1), "F.Fab", 0.1))
+    fp.append(fab_ref((0, 0)))
+    for num, col, row in p["pads"]:
+        fp.append(smd_pad(num, (xs[col], ys[row]), (d, d), layers=("F.Cu", "F.Mask"),
+                          shape="rect" if num == "1" else "circle"))
+    fp.append(["embedded_fonts", S("no")])
+    return fp
+
+
 GENERATORS = {"qfn": gen_qfn, "kelvin_chip": gen_kelvin_chip, "chip_kelvin_tie": gen_chip_kelvin_tie,
               "axial_kelvin": gen_axial_kelvin, "radial": gen_radial, "sip": gen_sip,
-              "usbc_receptacle": gen_usbc_receptacle}
+              "usbc_receptacle": gen_usbc_receptacle, "pad_grid": gen_pad_grid}
 
 
 def write_footprints(parts, pretty):

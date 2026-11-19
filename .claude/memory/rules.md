@@ -559,6 +559,22 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   its own net; JLCDFM's "Pad spacing" found it at the JLCPCB gate, after the release was cut. After a carry,
   measure pad-to-via gaps by net before cutting the release (`gate_measure.py` M2 in the gate's evidence:
   3 pairs under 0.10 mm on Rev0.6, 2 on Rev0.5). Verified by: `gate_measure5.py` on both boards.
+- **A revision that carries a revision which itself carried needs three sources, not two** (#14, 2026-11-19).
+  Rev0.6's copper is its `carried.json` plus its session plus its patch. The carry table's optional `carried` row
+  names the first; `carry.py` applies it before the session. Without it only the session's 251 segments would
+  come over. Verified by: Rev0.7's carry kept 2,248 segments and 215 vias and left 0 connections open.
+- **A patch `remove` point hits by the track's width, and has no layer** (#14). `route.apply_patch` uses
+  `HitTest(point, 0)`: every track of the net whose copper covers the point goes, on any layer. A point 0.042 mm
+  from a carried end also removed a new track 0.07 mm away; a point on an L3 run also lies on a B.Cu jog at the
+  same x, y. Choose each point 0.10 mm or more from every track that must stay, and do not draw a replacement
+  collinear with what it replaces: shift it, or move its via off the line. Verified by: 12 items removed for 11
+  wanted, then 11 after the points moved.
+- **Draw the nets of a new land near the edge before the router, and diff the nets that crossed the old land**
+  (#14). Left to the router, TAP_A_N ran 0.15 mm above J5's edge row inside the copper-to-edge distance. And
+  Rev0.6's V3V3 crossed the old land on its way from C3 to the west half: with the land gone DRC named an open at
+  C12/C13, 15 mm away, because it reports the closest pair of two islands, not the lost link. Compare the net's
+  tracks with the previous board's (a region dump of both, then `diff`) to find it. Verified by: the diff showed
+  the four V3V3 segments that had left; one new branch closed the open.
 
 ## KiCad 9 hole rules (#8, 2026-11-12)
 

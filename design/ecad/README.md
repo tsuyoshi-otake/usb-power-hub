@@ -1,6 +1,6 @@
-# KiCad project (Rev0.6, issues #6, #8, #10, #13)
+# KiCad project (Rev0.7, issues #6, #8, #10, #13, #14)
 
-> **WIP — MANUFACTURING PROHIBITED.** Rev0.6 is captured, placed, routed and labelled in
+> **WIP — MANUFACTURING PROHIBITED.** Rev0.7 is captured, placed, routed and labelled in
 > KiCad 9.0.8 until the design is complete, then imported into EasyEDA (D32). Its candidate
 > manufacturing set (step 7) is a `WIP` set: nothing here is orderable.
 
@@ -29,10 +29,10 @@ written and checked.
 | 1 | `make_project.py` | `design/experiments/stackup-impedance/stackups.json` | `.kicad_pro`, `.kicad_dru`, a bare `.kicad_pcb` | `make_project.py --check` | `test_make_project.py` |
 | 2 | `make_libraries.py` | `libraries/library.json` | `libraries/usb-power-hub.kicad_sym`, `usb-power-hub.pretty/` | `check_libraries.py` | `test_check_libraries.py` |
 | 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.7_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
-| 4 | `carry.py` | the step-6 inputs up to the GND fanout; Rev0.5's session and patch table, read from Git history at the commit the carry table of `ROUTING_Rev0.7.md` names | `routing/carried.json` | `carry.py --check`; `make_pcb.py`, which refuses a record made for another board or from other sources | `test_carry.py` |
+| 4 | `carry.py` | the step-6 inputs up to the GND fanout; the previous revision's carried record, session and patch table (Rev0.6's), read from Git history at the commit the carry table of `ROUTING_Rev0.7.md` names | `routing/carried.json` | `carry.py --check`; `make_pcb.py`, which refuses a record made for another board or from other sources | `test_carry.py` |
 | 5 | `autoroute.py` | what `make_pcb.py --dsn` writes from the step-6 inputs, the carried record included | `routing/usb-power-hub.ses`, `routing/autoroute.json` | `make_pcb.py`, which refuses a session made from other input | — |
 | 6 | `make_pcb.py` | the schematic's exported netlist, `PLACEMENT_Rev0.7.md`, `ROUTING_Rev0.7.md`, the carried record, the session, the footprints | `.kicad_pcb` | `make_project.py --check`, `check_pcb.py`, `check_routing.py` (each with DRC), `check_silk.py` | `test_check_pcb.py`, `test_check_routing.py`, `test_check_silk.py` |
-| 7 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_frame.json` | `manufacturing/working/rev0.6/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
+| 7 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_frame.json` | `manufacturing/working/rev0.7/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
 
 ```sh
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py
@@ -44,7 +44,7 @@ written and checked.
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py
 ```
 
-Step 4 needs the repository's Git history: it reads Rev0.5's session and patch table at the
+Step 4 needs the repository's Git history: it reads Rev0.6's carried record, session and patch table at the
 commit the carry table names, and takes about 8 s on this machine. It is needed only when its
 inputs change: `make_pcb.py` stops and asks for it when the record no longer matches the carry
 table or the board before the carry.
@@ -115,7 +115,7 @@ as a plain interpreter), and they are not a pipeline step: run them on a release
 | `independent_check_positions.py` | the Gerber zip, the CPL, the BOM, the hand-solder list, the board, `jlcpcb_model_frame.json`, the previous release's Gerber zip and CPL | 13: the parts and their codes in the three lists, every CPL point and rotation, every Top paste flash, every hit of the two drill files | 16, three of them the previous release's files in the place of this set's |
 
 ```sh
-R=manufacturing/releases/rev0.6/r02/UsbPowerHub_Main_Rev0.6
+R=manufacturing/working/rev0.7/UsbPowerHub_Main_Rev0.7
 P=manufacturing/releases/rev0.5/r02/UsbPowerHub_Main_Rev0.5
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/independent_check_sets.py \
     ${R}_Gerber.zip ${R}_CPL_JLCPCB.csv ${R}_BOM_JLCPCB.csv ${R}_HandSolder.csv \
@@ -156,7 +156,7 @@ and records written before that day name them so.
 | A part's position or rotation | `PLACEMENT_Rev0.7.md` | steps 4 to 7 |
 | A silkscreen label | `PLACEMENT_Rev0.7.md`, *Silkscreen* | steps 6 and 7 (labels are not router input) |
 | A hand-drawn track, a zone, a router class or keepout | `ROUTING_Rev0.7.md` | steps 4 to 7 |
-| A row of the carry table (*Carried from Rev0.5*) | `ROUTING_Rev0.7.md` | steps 4 to 7 |
+| A row of the carry table (*Carried from Rev0.6*) | `ROUTING_Rev0.7.md` | steps 4 to 7 |
 | A row of the patch table (*After the router*) | `ROUTING_Rev0.7.md` | steps 6 and 7 (the record and the session stay: the patch is not router input) |
 | A part's JLCPCB model rotation or shift | `jlcpcb_model_frame.json` | step 7, then the JLCPCB placement preview |
 | A symbol or footprint | `libraries/library.json`, `make_libraries.py` | steps 2 to 7 |

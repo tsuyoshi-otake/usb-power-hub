@@ -21,7 +21,7 @@ circuit document together.
 - `Value` is the register's Value (its `value`, else its id), except for `R` and `C`, whose
   Value is the passive table's, and test pads, whose Value is their net's name.
 - `Order` is the JLCPCB code, `Akizuki <code>`, or `none` for a part that is not bought
-  (test pads, J5's TC2030-NL footprint). A part with `none`, or whose register sets
+  (test pads, J5's bare SWD pads). A part with `none`, or whose register sets
   `in_bom: false`, is excluded from the BOM. A hand-soldered Akizuki part stays in KiCad's
   BOM, which is the purchase list, with an `Akizuki` field and no `LCSC` field; the JLCPCB
   BOM and CPL (P5) take only the rows with an `LCSC` field (V-MFG-01).
@@ -199,7 +199,7 @@ widest thickness code).
 | R25 | R | 1k | C11702 | 1=QSPI_SS 2=BOOT_SW | BOOTSEL, next to U8 |
 | SW3 | TS-1187A-B-A-B | TS-1187A-B-A-B | C318884 | 1=BOOT_SW 2=GND | behind the lid pinhole |
 | R26 | R | 10k | C25744 | 1=V3V3 2=RUN | RUN pull-up |
-| J5 | TC2030-NL | TC2030-NL (DNL) | none | 1=V3V3 2=SWDIO 3=RUN 4=SWCLK 5=GND 6=NC | SWD, footprint only (debug) |
+| J5 | SWD-PADS-2x4 | SWD pads 2x4 P2.54 (DNL) | none | 1=SWDIO 2=V3V3 3=GND 4=RUN 5=GND 6=NC 7=SWCLK 8=NC | SWD for a spring-pin clamp at the board edge, bare pads (debug; issue #14) |
 | TP10 | TestPoint | DVDD | none | 1=DVDD | D29 |
 | TP11 | TestPoint | RUN | none | 1=RUN | D29 |
 | TP12 | TestPoint | CLKOUT | none | 1=CLKOUT | D29, GPOUT0 (V-MEAS-06) |

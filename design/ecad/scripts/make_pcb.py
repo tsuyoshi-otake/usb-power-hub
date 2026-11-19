@@ -316,7 +316,7 @@ def carried(carry, base):
     if not CARRIED.exists():
         raise SystemExit(f"no {CARRIED.name} in {CARRIED.parent.as_posix()}: run carry.py")
     record = json.loads(CARRIED.read_text(encoding="utf-8"))
-    named = {k: carry[k] for k in ("commit", "session_sha256", "patch_sha256", "skip")}
+    named = {k: carry.get(k) for k in ("commit", "carried_sha256", "session_sha256", "patch_sha256", "skip")}
     if {k: record.get(k) for k in named} != named:
         raise SystemExit(f"{CARRIED.name} was not made from the sources the carry table of {ROUTING.name}"
                          f" names: run carry.py")

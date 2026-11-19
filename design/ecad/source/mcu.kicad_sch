@@ -1442,37 +1442,33 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "usb-power-hub:TC2030-NL"
+		(symbol "usb-power-hub:SWD-PADS-2x4"
+			(pin_names
+				(offset 1.016)
+			)
 			(exclude_from_sim no)
 			(in_bom no)
 			(on_board yes)
 			(property "Reference" "J"
-				(at 2.54 11.43 0)
+				(at -10.16 8.89 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
+					(justify left)
 				)
 			)
-			(property "Value" "TC2030-NL (DNL)"
-				(at 2.54 8.89 0)
+			(property "Value" "SWD pads 2x4 P2.54 (DNL)"
+				(at 10.16 8.89 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
+					(justify right)
 				)
 			)
-			(property "Footprint" "usb-power-hub:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
-				(at 0 -17.78 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "https://www.tag-connect.com/wp-content/uploads/bsk-pdf-manager/2019/12/TC2030-IDC-NL-Datasheet-Rev-B.pdf"
-				(at 0 -15.24 0)
+			(property "Footprint" "usb-power-hub:SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp"
+				(at -10.16 -10.16 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1480,7 +1476,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Tag-Connect (footprint only); none (Footprint only, not populated); register: usb-power-hub library.json"
+			(property "Datasheet" "~"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1489,7 +1485,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
+			(property "Description" "SWD access for a spring-pin clamp: 2 x 4 bare pads at 2.54 mm, at the board edge. SWD-PADS-2x4; none (Copper only, not populated); register: usb-power-hub library.json"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1498,7 +1494,7 @@
 					(hide yes)
 				)
 			)
-			(property "Manufacturer" "Tag-Connect (footprint only)"
+			(property "ki_fp_filters" "SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1507,7 +1503,7 @@
 					(hide yes)
 				)
 			)
-			(property "Class" "Footprint only, not populated"
+			(property "Class" "Copper only, not populated"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1516,11 +1512,24 @@
 					(hide yes)
 				)
 			)
-			(symbol "TC2030-NL_0_0"
-				(pin power_in line
-					(at -2.54 10.16 270)
+			(symbol "SWD-PADS-2x4_0_1"
+				(rectangle
+					(start -10.16 7.62)
+					(end 10.16 -5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "SWD-PADS-2x4_1_1"
+				(pin passive line
+					(at -12.7 5.08 0)
 					(length 2.54)
-					(name "VCC"
+					(name "SWDIO"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1535,8 +1544,26 @@
 						)
 					)
 				)
-				(pin power_in line
-					(at -2.54 -10.16 90)
+				(pin passive line
+					(at -12.7 2.54 0)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -12.7 0 0)
 					(length 2.54)
 					(name "GND"
 						(effects
@@ -1553,26 +1580,8 @@
 						)
 					)
 				)
-				(pin open_collector line
-					(at 7.62 5.08 180)
-					(length 2.54)
-					(name "~{RESET}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin output line
-					(at 7.62 0 180)
+				(pin passive line
+					(at -12.7 -2.54 0)
 					(length 2.54)
 					(name "SWCLK"
 						(effects
@@ -1581,19 +1590,18 @@
 							)
 						)
 					)
-					(number "4"
+					(number "7"
 						(effects
 							(font
 								(size 1.27 1.27)
 							)
 						)
 					)
-					(alternate "TCK" output line)
 				)
-				(pin bidirectional line
-					(at 7.62 -2.54 180)
+				(pin passive line
+					(at 12.7 5.08 180)
 					(length 2.54)
-					(name "SWDIO"
+					(name "VCC"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1607,12 +1615,29 @@
 							)
 						)
 					)
-					(alternate "TMS" bidirectional line)
 				)
-				(pin input line
-					(at 7.62 -5.08 180)
+				(pin passive line
+					(at 12.7 2.54 180)
 					(length 2.54)
-					(name "SWO"
+					(name "~{RESET}"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 12.7 0 180)
+					(length 2.54)
+					(name "NC"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1626,19 +1651,23 @@
 							)
 						)
 					)
-					(alternate "TDO" input line)
 				)
-			)
-			(symbol "TC2030-NL_0_1"
-				(rectangle
-					(start -5.08 7.62)
-					(end 5.08 -7.62)
-					(stroke
-						(width 0)
-						(type default)
+				(pin passive line
+					(at 12.7 -2.54 180)
+					(length 2.54)
+					(name "NC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
 					)
-					(fill
-						(type background)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
 					)
 				)
 			)
@@ -6070,8 +6099,8 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 147.32)
-			(xy 22.86 144.78)
+			(xy 30.48 142.24)
+			(xy 27.94 142.24)
 		)
 		(stroke
 			(width 0)
@@ -6079,42 +6108,9 @@
 		)
 		(uuid "1b447fdb-774b-5cc3-a7e2-2fdb81e9e230")
 	)
-	(global_label "V3V3"
+	(global_label "SWDIO"
 		(shape passive)
-		(at 22.86 144.78 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "ce5ed486-d59e-5b17-b255-cc97f5870865")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 22.86 144.78 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 22.86 167.64)
-			(xy 22.86 170.18)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3f925ced-ca77-5c8b-81ba-eb6b5ac6fe23")
-	)
-	(global_label "GND"
-		(shape passive)
-		(at 22.86 170.18 270)
+		(at 27.94 142.24 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6122,9 +6118,9 @@
 			)
 			(justify right)
 		)
-		(uuid "56b767fc-a74c-53b1-8f31-648f238eff3f")
+		(uuid "ce5ed486-d59e-5b17-b255-cc97f5870865")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 22.86 170.18 270)
+			(at 27.94 142.24 180)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6136,8 +6132,8 @@
 	)
 	(wire
 		(pts
-			(xy 33.02 152.4)
-			(xy 35.56 152.4)
+			(xy 30.48 144.78)
+			(xy 27.94 144.78)
 		)
 		(stroke
 			(width 0)
@@ -6145,65 +6141,98 @@
 		)
 		(uuid "ea94668d-19b0-51ae-9da4-326e02091497")
 	)
-	(global_label "RUN"
+	(global_label "GND"
 		(shape passive)
-		(at 35.56 152.4 0)
+		(at 27.94 144.78 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
 		(uuid "6e85027a-f66e-5eb9-9b11-766bd1c03c58")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 35.56 152.4 0)
+			(at 27.94 144.78 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
 	)
 	(wire
 		(pts
-			(xy 33.02 157.48)
-			(xy 35.56 157.48)
+			(xy 30.48 147.32)
+			(xy 27.94 147.32)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "ce749944-4545-548a-a692-783f5e3111e7")
+		(uuid "3f925ced-ca77-5c8b-81ba-eb6b5ac6fe23")
 	)
-	(global_label "SWCLK"
+	(global_label "GND"
 		(shape passive)
-		(at 35.56 157.48 0)
+		(at 27.94 147.32 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
-		(uuid "affc8de8-8af8-541f-9905-53614d3e3aa7")
+		(uuid "56b767fc-a74c-53b1-8f31-648f238eff3f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 35.56 157.48 0)
+			(at 27.94 147.32 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
 	)
 	(wire
 		(pts
-			(xy 33.02 160.02)
-			(xy 35.56 160.02)
+			(xy 30.48 149.86)
+			(xy 27.94 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "51426320-2e94-5730-8c23-f1cb6e79a596")
+	)
+	(global_label "SWCLK"
+		(shape passive)
+		(at 27.94 149.86 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "09606f1a-4b89-570f-a929-b42b73ccda72")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 149.86 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 55.88 142.24)
+			(xy 58.42 142.24)
 		)
 		(stroke
 			(width 0)
@@ -6211,9 +6240,9 @@
 		)
 		(uuid "ae796204-b56f-5b4a-8d87-bc4d8fe2d53b")
 	)
-	(global_label "SWDIO"
+	(global_label "V3V3"
 		(shape passive)
-		(at 35.56 160.02 0)
+		(at 58.42 142.24 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6223,7 +6252,40 @@
 		)
 		(uuid "2fe6c6c4-c062-53c4-95ac-d5f703f95d0b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 35.56 160.02 0)
+			(at 58.42 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 55.88 144.78)
+			(xy 58.42 144.78)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce749944-4545-548a-a692-783f5e3111e7")
+	)
+	(global_label "RUN"
+		(shape passive)
+		(at 58.42 144.78 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "affc8de8-8af8-541f-9905-53614d3e3aa7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 58.42 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6234,13 +6296,17 @@
 		)
 	)
 	(no_connect
-		(at 33.02 162.56)
+		(at 55.88 147.32)
 		(uuid "77109119-1590-5d49-8d05-accc2fc6c830")
+	)
+	(no_connect
+		(at 55.88 149.86)
+		(uuid "d45672c9-afe3-522f-baf6-ac85c0594043")
 	)
 	(wire
 		(pts
-			(xy 55.88 144.78)
-			(xy 55.88 147.32)
+			(xy 78.74 144.78)
+			(xy 78.74 147.32)
 		)
 		(stroke
 			(width 0)
@@ -6250,7 +6316,7 @@
 	)
 	(global_label "DVDD"
 		(shape passive)
-		(at 55.88 147.32 270)
+		(at 78.74 147.32 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6260,7 +6326,7 @@
 		)
 		(uuid "f2a6814d-0895-5e7d-973a-6f078e17dc4f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 55.88 147.32 270)
+			(at 78.74 147.32 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6272,8 +6338,8 @@
 	)
 	(wire
 		(pts
-			(xy 71.12 144.78)
-			(xy 71.12 147.32)
+			(xy 93.98 144.78)
+			(xy 93.98 147.32)
 		)
 		(stroke
 			(width 0)
@@ -6283,7 +6349,7 @@
 	)
 	(global_label "RUN"
 		(shape passive)
-		(at 71.12 147.32 270)
+		(at 93.98 147.32 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6293,7 +6359,7 @@
 		)
 		(uuid "097b4024-43f1-596c-b9f3-55128081b051")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 71.12 147.32 270)
+			(at 93.98 147.32 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6305,8 +6371,8 @@
 	)
 	(wire
 		(pts
-			(xy 86.36 144.78)
-			(xy 86.36 147.32)
+			(xy 109.22 144.78)
+			(xy 109.22 147.32)
 		)
 		(stroke
 			(width 0)
@@ -6316,7 +6382,7 @@
 	)
 	(global_label "CLKOUT"
 		(shape passive)
-		(at 86.36 147.32 270)
+		(at 109.22 147.32 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6326,7 +6392,7 @@
 		)
 		(uuid "e562454a-ba79-5572-afa7-b69934babc27")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 86.36 147.32 270)
+			(at 109.22 147.32 270)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9344,8 +9410,8 @@
 		)
 	)
 	(symbol
-		(lib_id "usb-power-hub:TC2030-NL")
-		(at 25.4 157.48 0)
+		(lib_id "usb-power-hub:SWD-PADS-2x4")
+		(at 43.18 147.32 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9353,32 +9419,25 @@
 		(dnp no)
 		(uuid "4a6ee223-8658-5576-8958-2aa70139f0c9")
 		(property "Reference" "J5"
-			(at 27.94 146.05 0)
+			(at 33.02 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "TC2030-NL (DNL)"
-			(at 27.94 148.59 0)
+		(property "Value" "SWD pads 2x4 P2.54 (DNL)"
+			(at 53.34 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify right)
 			)
 		)
-		(property "Footprint" "usb-power-hub:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
-			(at 25.4 175.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "https://www.tag-connect.com/wp-content/uploads/bsk-pdf-manager/2019/12/TC2030-IDC-NL-Datasheet-Rev-B.pdf"
-			(at 25.4 172.72 0)
+		(property "Footprint" "usb-power-hub:SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp"
+			(at 33.02 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9386,8 +9445,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Tag-Connect (footprint only); none (Footprint only, not populated); register: usb-power-hub library.json"
-			(at 25.4 157.48 0)
+		(property "Datasheet" "~"
+			(at 43.18 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9395,8 +9454,8 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Tag-Connect (footprint only)"
-			(at 25.4 157.48 0)
+		(property "Description" "SWD access for a spring-pin clamp: 2 x 4 bare pads at 2.54 mm, at the board edge. SWD-PADS-2x4; none (Copper only, not populated); register: usb-power-hub library.json"
+			(at 43.18 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9404,8 +9463,8 @@
 				(hide yes)
 			)
 		)
-		(property "Class" "Footprint only, not populated"
-			(at 25.4 157.48 0)
+		(property "Class" "Copper only, not populated"
+			(at 43.18 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9431,6 +9490,12 @@
 		(pin "6"
 			(uuid "10d5de83-18a4-5014-81ef-0c539cc3af08")
 		)
+		(pin "7"
+			(uuid "e2df41e0-a762-53f9-935c-ae455fed6f86")
+		)
+		(pin "8"
+			(uuid "e1774cd2-c741-57c6-9b5c-da057d706487")
+		)
 		(instances
 			(project "usb-power-hub"
 				(path "/d22f7430-a824-5395-8835-5937190d797a/7baea723-c0a4-5753-bfa2-ae4348369015"
@@ -9442,7 +9507,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 55.88 144.78 0)
+		(at 78.74 144.78 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9450,7 +9515,7 @@
 		(dnp no)
 		(uuid "c8ae7f30-6723-5e1a-abc7-0eb72072c0d3")
 		(property "Reference" "TP10"
-			(at 55.88 137.922 0)
+			(at 78.74 137.922 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9458,7 +9523,7 @@
 			)
 		)
 		(property "Value" "DVDD"
-			(at 55.88 139.7 0)
+			(at 78.74 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9466,7 +9531,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 60.96 144.78 0)
+			(at 83.82 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9475,7 +9540,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 60.96 144.78 0)
+			(at 83.82 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9484,7 +9549,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 55.88 144.78 0)
+			(at 78.74 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9493,7 +9558,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 55.88 144.78 0)
+			(at 78.74 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9515,7 +9580,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 71.12 144.78 0)
+		(at 93.98 144.78 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9523,7 +9588,7 @@
 		(dnp no)
 		(uuid "191a0f5a-3d73-5347-a66b-5c417c504324")
 		(property "Reference" "TP11"
-			(at 71.12 137.922 0)
+			(at 93.98 137.922 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9531,7 +9596,7 @@
 			)
 		)
 		(property "Value" "RUN"
-			(at 71.12 139.7 0)
+			(at 93.98 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9539,7 +9604,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 76.2 144.78 0)
+			(at 99.06 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9548,7 +9613,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 76.2 144.78 0)
+			(at 99.06 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9557,7 +9622,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 71.12 144.78 0)
+			(at 93.98 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9566,7 +9631,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 71.12 144.78 0)
+			(at 93.98 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9588,7 +9653,7 @@
 	)
 	(symbol
 		(lib_id "usb-power-hub:TestPoint")
-		(at 86.36 144.78 0)
+		(at 109.22 144.78 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -9596,7 +9661,7 @@
 		(dnp no)
 		(uuid "ba7c72f9-5f02-5a75-a556-a9bb85e31152")
 		(property "Reference" "TP12"
-			(at 86.36 137.922 0)
+			(at 109.22 137.922 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9604,7 +9669,7 @@
 			)
 		)
 		(property "Value" "CLKOUT"
-			(at 86.36 139.7 0)
+			(at 109.22 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9612,7 +9677,7 @@
 			)
 		)
 		(property "Footprint" "usb-power-hub:TestPoint_Pad_D1.0mm"
-			(at 91.44 144.78 0)
+			(at 114.3 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9621,7 +9686,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 91.44 144.78 0)
+			(at 114.3 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9630,7 +9695,7 @@
 			)
 		)
 		(property "Description" "TestPoint; none (Copper only); register: usb-power-hub library.json"
-			(at 86.36 144.78 0)
+			(at 109.22 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9639,7 +9704,7 @@
 			)
 		)
 		(property "Class" "Copper only"
-			(at 86.36 144.78 0)
+			(at 109.22 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)

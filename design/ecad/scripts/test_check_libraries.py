@@ -111,7 +111,8 @@ R_L = "R_Shunt_0805_2012Metric_Kelvin"
 MAU = "Converter_DCDC_Minmax_MAU104_SIP"
 USBC = "USB_C_Receptacle_SHOUHAN_TYPE-C-16PIN-2MD-073"
 USBC_ID = "TYPE-C-16PIN-2MD-073"
-TC2030 = "Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
+SOT223 = "SOT-223-3_TabPin2"                 # a stock copy (U3)
+SWD = "SWD_Pads_2x04_P2.54mm_D1.7mm_Clamp"  # J5, a generated land of bare pads (issue #14)
 
 
 class CheckLibrariesFails(unittest.TestCase):
@@ -160,8 +161,8 @@ class CheckLibrariesFails(unittest.TestCase):
 
     def test_stock_copy_altered(self):
         def c(lib, src):
-            edit_fp(lib, TC2030, lambda t: t.remove(pad(t, "6")))
-        self.assertFailsWith(run_check(c), f"differs from KiCad's {TC2030} outside its silkscreen",
+            edit_fp(lib, SOT223, lambda t: t.remove(pad(t, "3")))
+        self.assertFailsWith(run_check(c), f"differs from KiCad's {SOT223} outside its silkscreen",
                              "are not the symbol's pins")
 
     def test_stock_copy_with_kicad_crlf(self):
@@ -257,6 +258,16 @@ class CheckLibrariesFails(unittest.TestCase):
         status, out = run_check(c)
         self.assertFailsWith((status, out), "FAIL DRC")
         self.assertNotIn(f"FAIL TSL1TTER100D / {R_H}", out)
+
+    def test_clamp_pad_off_pitch(self):
+        def c(lib, src):
+            edit_fp(lib, SWD, lambda t: sx.first(pad(t, "7"), "at").__setitem__(1, 3.56))
+        self.assertFailsWith(run_check(c), f"/ {SWD}", "no pad '7' at")
+
+    def test_clamp_pad_with_paste(self):
+        def c(lib, src):
+            edit_fp(lib, SWD, lambda t: sx.first(pad(t, "1"), "layers").append("F.Paste"))
+        self.assertFailsWith(run_check(c), f"/ {SWD}", "a pad has paste; the land has none")
 
     def test_hand_part_paste(self):
         def c(lib, src):

@@ -222,7 +222,12 @@ class CheckTest(unittest.TestCase):
 
     def test_pair_track_on_back_layer(self):
         def edit(tree):
-            sx.first(segments(tree, "USB_A_N", "F.Cu")[0], "layer")[1] = "B.Cu"
+            # the longest one. The first segment in the file is whichever the board's order gives: on
+            # the Rev0.7 board it was the 0.30 mm lead-in at R35, which DRC then reported as a TAP_A_P
+            # track on B.Cu (clearance, dangling, unconnected), and this message did not appear
+            s = max(segments(tree, "USB_A_N", "F.Cu"),
+                    key=lambda s: abs(ends(s)[0][1] - ends(s)[1][1]) + abs(ends(s)[0][2] - ends(s)[1][2]))
+            sx.first(s, "layer")[1] = "B.Cu"
         self.assertFailsWith(run_check(board=edit), "FAIL pair A: USB_A_N track on B.Cu")
 
     # ---- JLCPCB's hole figures (make_project.py RULES and PTH_RULES, issue #8) -----------------

@@ -2275,3 +2275,42 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   how to look at a board region. `design/ecad/README.md`: the position check needs a foreign set of another
   revision.
 - **Commits.** `850e817` (legend, checker, tests, board) and this entry's (r02, documents). Not pushed.
+
+## 2026-11-19 rev07-swd-clamp-pads (#14)
+
+- **Request.** After the answer that J5 was a TC2030-NL land at 1.27 mm, the user sent a picture of two spring-pin
+  clamps: 「2.54で端にしてねこんなので挟むから。SWD経由で君にデバッグまで自動化して開発したいからさ。」
+- **Decision (D40).** J5 = 2 × 4 bare round pads, 1.7 mm at 2.54 mm, pad 1 square, no paste, at (44.5, 69.13): the
+  edge row (1 SWDIO, 3 GND, 5 GND, 7 SWCLK) 1.6 mm inside the back edge, the inner row 2 V3V3, 4 RUN, 6 and 8 NC.
+  The pitch and the place are the user's, the rest mine. A copper change, so Rev0.7: pure rename `bb90ad6`,
+  pointers `7eae085`, then this change.
+- **What was built.** `make_libraries.py`: a `pad_grid` generator; `library.json`: `SWD-PADS-2x4` for `TC2030-NL`.
+  `carry.py`, `route.py`, `make_pcb.py`: a carry table may name the previous revision's own carried record
+  (`carried` row), applied before its session and patch, because Rev0.6's copper is a record plus a session plus a
+  patch. 17 route-table rows draw the J5 nets before the router; 5 patch rows take 11 old pieces away.
+- **Failures on the way, each with its cause.**
+  1. First place (y 69.23): the courtyard left the MCU region, and the router took TAP_A_N along the back edge,
+     0.15 mm above the edge row (copper_edge_clearance). Cause: the J5 nets were left to the router. Fix: draw them.
+  2. Two V3V3 opens. One was a branch I drew that ended 0.7 mm short of a carried track the carry had dropped. The
+     other DRC named at C12/C13, 15 mm south: Rev0.6's V3V3 ran through the old land and joined the east island
+     (C3) to the west one; my TAP_A_P via and track stood on that path. DRC names the closest pair of the two
+     islands, not where the link was lost. Found by diffing the net's tracks against the Rev0.6 board.
+  3. A `remove` point 0.042 mm from a carried end also took my own track 0.07 mm away: `apply_patch` uses
+     `HitTest`, which counts the track's width. 12 items removed for 11 wanted, then a dangling track.
+  4. A `remove` point for LED_FLT_B's L3 run could not miss my jog on B.Cu at the same x, y: the row has no layer.
+     Fix: the via moved to (49.6, 70.8), off the line.
+  5. `test_pair_track_on_back_layer` failed on the new board: it moved `segments(...)[0]`, which is now a 0.30 mm
+     lead-in at R35 that DRC reports as a TAP_A_P track on B.Cu. The test now moves the longest segment.
+- **Verification.** `make_pcb.py`: check_pcb 13,709, check_routing 3,505, check_silk 3,364 checks, 0 failed; 0
+  unconnected, plane webs at U1 unchanged (1.65–1.80 mm), ports 35.24 and 39.12 mΩ. BOM, CPL and hand-solder list
+  equal Rev0.6 r02's byte for byte. Same-net pad-to-via gaps under 0.12 mm: the list equals Rev0.6's except J5's
+  (two fanout vias 0.104 mm from pads 3 and 5; none new under 0.10 mm). The J5 corner was read in the top render.
+  All eight test suites pass (19, 31, 19, 41, 35, 31, 37, 40 tests); the independent checks pass on
+  `manufacturing/working/rev0.7/` (30 checks with 8 corruptions caught, 13 with 16; Rev0.5 r02 as the foreign set).
+  A fresh-context verifier graded `.claude/goal-loop/rev07-swd-pads/rubric.md`: 9 of 9 pass (smallest margin of
+  foreign copper to a J5 pad: via 0.235 mm, track 0.185 mm).
+- **Not verified.** The clamp: its drawing is not known (pin count, pin diameter, jaw reach, side). JLCPCB has seen
+  no Rev0.7 file. The enclosure and the lid are still Rev0.6's (`board_interface_Rev0.6.json`). No release.
+- **Learning.** In `rules.md`, *KiCad 9 routing checks*: the chained carry; what a `remove` point hits; draw the
+  nets of a new land before the router; find a lost link by a net diff.
+- **Commits.** This entry's. Not pushed.

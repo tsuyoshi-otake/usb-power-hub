@@ -26,7 +26,7 @@ copper) is what decides.
 The router counts what it leaves unrouted differently from DRC (on the Rev0.7 board 99 against
 DRC's 9), so its count is recorded, not judged: make_pcb.py applies the routing document's patch
 table after the session, and check_routing.py's DRC decides.
---passes: the committed Rev0.6 session is 8 passes (about 5 minutes). With the carried copper
+--passes: the committed session is 8 passes (about 5 minutes). With the carried copper
 fixed, more passes gave the same session (ROUTING_Rev0.7.md, Router).
 Exit status: 0 = the session is written; 1 = the router failed and no session was written.
 """

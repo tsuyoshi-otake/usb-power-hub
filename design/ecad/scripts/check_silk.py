@@ -60,8 +60,8 @@ What it CANNOT see:
 - legibility after printing, and whether a label is under a case opening (V-MECH-01). A
   part's body above the board is its courtyard.
 - whether a reader takes the legend's rows for J5's pad rows: rule 4 checks their order, not
-  that anyone reads them so. The pads themselves carry no name: 1.0 mm text does not fit their
-  1.27 mm pitch.
+  that anyone reads them so. The pads themselves carry no name: a clamp's pins land on them, and
+  1.0 mm text does not fit the 0.84 mm between them.
 - KiCad's DRC checks silk-to-silk and silk-to-copper overlap too; check_pcb.py runs it.
 """
 import argparse

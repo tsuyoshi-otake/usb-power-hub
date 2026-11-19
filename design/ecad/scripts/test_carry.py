@@ -64,6 +64,14 @@ class Table(unittest.TestCase):
                          ("abc1234", "a/b.ses", "a/ROUTING.md", ["Slot vias:"]))
         self.assertEqual((got["session_sha256"], got["patch_sha256"]), (SHA, SHA))
 
+    def test_carried_row_is_optional_and_read(self):
+        self.assertNotIn("carried", table(GOOD))
+        got = table([("carried", "a/carried.json", SHA)] + GOOD)
+        self.assertEqual((got["carried"], got["carried_sha256"]), ("a/carried.json", SHA))
+
+    def test_two_carried_records(self):
+        fails(self, lambda: table([("carried", "a.json", SHA), ("carried", "b.json", SHA)] + GOOD), "carry:")
+
     def test_no_table_carries_nothing(self):
         self.assertIsNone(route._carry({}))
 
@@ -209,6 +217,18 @@ class Stale(unittest.TestCase):
     def test_made_from_another_patch(self):
         self.write(patch_sha256="f" * 64)
         fails(self, lambda: mp.carried(self.CARRY, "b" * 64), "not made from the sources")
+
+    def test_made_without_the_carried_record_the_table_names(self):
+        self.write()
+        fails(self, lambda: mp.carried(dict(self.CARRY, carried_sha256=SHA), "b" * 64), "not made from the sources")
+
+    def test_made_from_another_carried_record(self):
+        self.write(carried_sha256="f" * 64)
+        fails(self, lambda: mp.carried(dict(self.CARRY, carried_sha256=SHA), "b" * 64), "not made from the sources")
+
+    def test_record_of_a_chained_carry_is_taken(self):
+        self.write(carried_sha256=SHA)
+        self.assertEqual(mp.carried(dict(self.CARRY, carried_sha256=SHA), "b" * 64)["carried_sha256"], SHA)
 
     def test_made_with_another_skip(self):
         self.write(skip=[])
