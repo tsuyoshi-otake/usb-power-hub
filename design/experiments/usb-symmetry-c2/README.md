@@ -5,6 +5,12 @@
 > neither. It answers two questions. At placement level (2026-11-18): do the parts fit if the
 > connectors mirror? At routing level (2026-11-19, section "Routed"): what does the router leave
 > open on that placement, beside what it left open on the board?
+>
+> **Since 2026-11-19 the trial is history.** After it the user chose 「C2 で進める」: C2 becomes the
+> board as PCB revision Rev0.6 (issue #13). The scripts here name the Rev0.5 documents
+> (`PLACEMENT_Rev0.5.md`, `ROUTING_Rev0.5.md`), which were renamed for Rev0.6, and stop on any
+> document whose lines have moved on. They reproduce at commit `866ef44`, the last one with the
+> Rev0.5 documents under their names. "The board" below is the Rev0.5 board.
 
 ## Why
 
@@ -252,6 +258,8 @@ board into the scratch directory.
 | `routed_c2_top.png` | a copy of the C2 render `route_trial.py report` wrote on 2026-11-19 |
 
 ## If C2 goes ahead
+
+It went ahead on 2026-11-19 (issue #13, Rev0.6); this section is what the trial said beforehand.
 
 It is a new PCB revision, and every step after placement is repeated: the placement document, a
 new router session and its patch, `check_routing.py` (the plane and hole rules), the silkscreen,

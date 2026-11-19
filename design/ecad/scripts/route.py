@@ -1,10 +1,10 @@
-"""Route the Rev0.5 board from the routing document (issue #6 P4; CLAUDE.md 5.1, 5.3, 5.4).
+"""Route the Rev0.6 board from the routing document (issue #6 P4; CLAUDE.md 5.1, 5.3, 5.4).
 
 A library, not a script. make_pcb.py owns the board file and calls it after placing the parts;
 autoroute.py calls it to build Freerouting's input. Both parse the documents with
 make_pcb.doc_tables and hand this module the tables.
 
-The routed board is built in this order (design/ecad/ROUTING_Rev0.5.md):
+The routed board is built in this order (design/ecad/ROUTING_Rev0.6.md):
 1. `plane()`: In1.Cu becomes a plane layer holding the document's In1 zone (GND).
 2. `apply_rows()`: the hand-drawn tracks and vias of the `route` table and, for both channels,
    the `channel_route` table; channel B is channel A moved by dx, with the placement's
@@ -84,7 +84,7 @@ def channel_b(row, refs, dx):
 def read(tables, refs, dx):
     """The routing document's tables -> {zones, pairs, rows, classes, keepouts, epads}.
 
-    tables: make_pcb.doc_tables of ROUTING_Rev0.5.md; refs: the placement's Ref A -> Ref B
+    tables: make_pcb.doc_tables of ROUTING_Rev0.6.md; refs: the placement's Ref A -> Ref B
     (J2 -> J3 among them); dx: the placement's channel offset.
     """
     need = ("zones", "pairs", "route", "channel_route", "epad", "classes", "keepouts", "router_layers",
@@ -289,7 +289,7 @@ class _Copper:
     """The board's copper items, bucketed on a grid: (net, item, frame box, hole or None). A hole
     is (x, y, radius): a pad's from its position and the drill's width, so an oblong hole, a
     plated slot, is read as a round one at its centre. That put the GND fanout via of 8
-    receptacle contact pads 0.046 mm from a slot's hole (issue #8); ROUTING_Rev0.5.md's patch,
+    receptacle contact pads 0.046 mm from a slot's hole (issue #8); ROUTING_Rev0.6.md's patch,
     stage 5, deletes them, because the committed session was routed around them, and
     check_routing.py rule 10 measures the slot as a capsule. Read it as a capsule here before the
     next session is routed."""

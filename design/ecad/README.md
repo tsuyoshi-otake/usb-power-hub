@@ -1,6 +1,6 @@
-# KiCad project (Rev0.5, issues #6, #8, #10)
+# KiCad project (Rev0.6, issues #6, #8, #10, #13)
 
-> **WIP — MANUFACTURING PROHIBITED.** Rev0.5 is captured, placed, routed and labelled in
+> **WIP — MANUFACTURING PROHIBITED.** Rev0.6 is captured, placed, routed and labelled in
 > KiCad 9.0.8 until the design is complete, then imported into EasyEDA (D32). Its candidate
 > manufacturing set (step 6) is a `WIP` set: nothing here is orderable.
 
@@ -13,8 +13,8 @@ not to edit.
 |---|---|
 | `source/` | The KiCad project: `usb-power-hub.kicad_pro` (rules, net classes), `usb-power-hub.kicad_dru` (JLCPCB's hole figures for vias and PTH pads as custom DRC rules, issue #8), the root sheet and six sub-sheets, `usb-power-hub.kicad_pcb` (stackup, outline, placed footprints). |
 | `libraries/` | The project symbols and footprints and `library.json`, the datasheet facts they are checked against (its README). |
-| `PLACEMENT_Rev0.5.md` | Where every part sits on the board, and why (P3), and its silkscreen labels: text, position, size, stroke and leader (P5). |
-| `ROUTING_Rev0.5.md` | The plane, the hand-drawn tracks (USB pairs, Kelvin taps, power trunks), the zones, the router's classes, keepouts, layer preferences and costs, the patch drawn after the router, and why (P4). |
+| `PLACEMENT_Rev0.6.md` | Where every part sits on the board, and why (P3), and its silkscreen labels: text, position, size, stroke and leader (P5). |
+| `ROUTING_Rev0.6.md` | The plane, the hand-drawn tracks (USB pairs, Kelvin taps, power trunks), the zones, the router's classes, keepouts, layer preferences and costs, the patch drawn after the router, and why (P4). |
 | `routing/` | The router's session `usb-power-hub.ses` and `autoroute.json`, which records the router input, the jar, the Java runtime and the arguments that produced it. |
 | `scripts/` | The generators, their checkers and the checkers' negative tests. |
 
@@ -28,10 +28,10 @@ written and checked.
 |---|---|---|---|---|---|
 | 1 | `make_project.py` | `design/experiments/stackup-impedance/stackups.json` | `.kicad_pro`, `.kicad_dru`, a bare `.kicad_pcb` | `make_project.py --check` | `test_make_project.py` |
 | 2 | `make_libraries.py` | `libraries/library.json` | `libraries/usb-power-hub.kicad_sym`, `usb-power-hub.pretty/` | `check_libraries.py` | `test_check_libraries.py` |
-| 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.5_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
+| 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.6_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
 | 4 | `autoroute.py` | what `make_pcb.py --dsn` writes from the step-5 inputs | `routing/usb-power-hub.ses`, `routing/autoroute.json` | `make_pcb.py`, which refuses a session made from other input | — |
-| 5 | `make_pcb.py` | the schematic's exported netlist, `PLACEMENT_Rev0.5.md`, `ROUTING_Rev0.5.md`, the session, the footprints | `.kicad_pcb` | `make_project.py --check`, `check_pcb.py`, `check_routing.py` (each with DRC), `check_silk.py` | `test_check_pcb.py`, `test_check_routing.py`, `test_check_silk.py` |
-| 6 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_frame.json` | `manufacturing/working/rev0.5/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
+| 5 | `make_pcb.py` | the schematic's exported netlist, `PLACEMENT_Rev0.6.md`, `ROUTING_Rev0.6.md`, the session, the footprints | `.kicad_pcb` | `make_project.py --check`, `check_pcb.py`, `check_routing.py` (each with DRC), `check_silk.py` | `test_check_pcb.py`, `test_check_routing.py`, `test_check_silk.py` |
+| 6 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_frame.json` | `manufacturing/working/rev0.6/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
 
 ```sh
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_project.py
@@ -48,7 +48,7 @@ script). It is needed only when its input changes: `make_pcb.py` stops and asks 
 the session no longer matches the board it would route. The committed session took about
 26 min (40 passes, single-threaded: the router stops after 10 passes without a better score,
 and its best pass was the 30th) on this machine. A new session also needs a new patch table
-(`ROUTING_Rev0.5.md`, *After the router*).
+(`ROUTING_Rev0.6.md`, *After the router*).
 
 `make_project.py` writes a bare board, so `make_pcb.py` runs after it; until then
 `check_pcb.py` fails, because the board holds no footprints. A re-run of any generator but
@@ -98,10 +98,10 @@ checker to name each fault; they never write to `source/`, `libraries/` or `manu
 | Change | Edit | Then run |
 |---|---|---|
 | A part, pin or net | the capture list | steps 3 to 6 |
-| A part's position or rotation | `PLACEMENT_Rev0.5.md` | steps 4 to 6 |
-| A silkscreen label | `PLACEMENT_Rev0.5.md`, *Silkscreen* | steps 5 and 6 (labels are not router input) |
-| A hand-drawn track, a zone, a router class or keepout | `ROUTING_Rev0.5.md` | steps 4 to 6 |
-| A row of the patch table (*After the router*) | `ROUTING_Rev0.5.md` | steps 5 and 6 (the session stays: the patch is not router input) |
+| A part's position or rotation | `PLACEMENT_Rev0.6.md` | steps 4 to 6 |
+| A silkscreen label | `PLACEMENT_Rev0.6.md`, *Silkscreen* | steps 5 and 6 (labels are not router input) |
+| A hand-drawn track, a zone, a router class or keepout | `ROUTING_Rev0.6.md` | steps 4 to 6 |
+| A row of the patch table (*After the router*) | `ROUTING_Rev0.6.md` | steps 5 and 6 (the session stays: the patch is not router input) |
 | A part's JLCPCB model rotation or shift | `jlcpcb_model_frame.json` | step 6, then the JLCPCB placement preview |
 | A symbol or footprint | `libraries/library.json`, `make_libraries.py` | steps 2 to 6 |
 | Rules, net classes, stackup, outline | `make_project.py` | step 1, then 4 to 6 |

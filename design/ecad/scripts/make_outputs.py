@@ -1,10 +1,10 @@
-"""Write the Rev0.5 manufacturing candidate from the KiCad project (issue #6 P5; CLAUDE.md 2, 8).
+"""Write the Rev0.6 manufacturing candidate from the KiCad project (issue #6 P5; CLAUDE.md 2, 8).
 
 Run with KiCad's own Python from the repository root, after make_pcb.py:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py [--no-check]
 
-Output: manufacturing/working/rev0.5/, rebuilt on every run. It is a WIP candidate: never
+Output: manufacturing/working/rev0.6/, rebuilt on every run. It is a WIP candidate: never
 orderable (CLAUDE.md 2, manufacturing/working/), and not a release. Every file is named
 <Product>_<Board>_<Revision>_<Artifact> (CLAUDE.md 2):
 - _Gerber.zip: the Gerbers of the 4 copper layers, paste, silkscreen, mask and Edge.Cuts with
@@ -46,7 +46,7 @@ What it CANNOT see: whether JLCPCB reads the files as meant. The uploads of Rev0
 and -12: DFM, part mapping, placement preview, quote; issues #6 and #8) are recorded in
 manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md (and r02's) with the SHA-256 of the Gerber
 zip, BOM and CPL they saw; Rev0.5's (2026-11-13, issue #8) in manufacturing/releases/rev0.5/
-r01/JLCPCB_REVIEW.md and r02's. This script does not read those files: a change to a source, to
+r01/JLCPCB_REVIEW.md and r02's; Rev0.6 has had none. This script does not read those files: a change to a source, to
 this script or to jlcpcb_model_frame.json that changes one of those three hashes makes a review
 stale. The table's shift for the receptacle C2765186 (J1-J4) is what the placement preview
 showed, to about 0.04 mm; whether JLCPCB's pick-and-place puts the part where its viewer draws
@@ -71,9 +71,9 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 SRC = ROOT / "design" / "ecad" / "source"
 FRAMES = ROOT / "design" / "ecad" / "jlcpcb_model_frame.json"
-OUT = ROOT / "manufacturing" / "working" / "rev0.5"
+OUT = ROOT / "manufacturing" / "working" / "rev0.6"
 NICK = "usb-power-hub"
-PREFIX = "UsbPowerHub_Main_Rev0.5"
+PREFIX = "UsbPowerHub_Main_Rev0.6"
 CLI = pathlib.Path(sys.executable).resolve().parents[1] / "bin" / "kicad-cli.exe"
 ORIGIN = (50.0, 122.0)                     # the board's lower-left corner on the sheet
 LAYERS = "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"
@@ -260,7 +260,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
     dnp = sorted((fp.GetReference() for fp in board.GetFootprints()
                   if fp.GetAttributes() & pcbnew.FP_EXCLUDE_FROM_BOM), key=natural)
     lines = [
-        "# USB Power-Control Hub Rev0.5 — manufacturing candidate",
+        "# USB Power-Control Hub Rev0.6 — manufacturing candidate",
         "",
         "> **State: WIP — MANUFACTURING PROHIBITED.** A candidate set in `manufacturing/working/`:",
         "> never orderable, not a release (CLAUDE.md 2, 3). Written by",
@@ -288,7 +288,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         f"| ERC | {count(erc, 'violations')} violations |",
         f"| DRC | {count(drc, 'violations')} violations, {count(drc, 'unconnected_items')} unconnected items, "
         f"{count(drc, 'schematic_parity')} schematic-parity items |",
-        "| JLCPCB DFM, part mapping, placement preview | Rev0.5's review is `manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md` (r01's beside it); it holds only for the Gerber zip, BOM and CPL whose SHA-256 it records. Rev0.4's review (`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, r02's beside it) saw other files and does not carry over |",
+        "| JLCPCB DFM, part mapping, placement preview | none for Rev0.6. Rev0.5's review (`manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md`, r01's beside it) and Rev0.4's (`manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md`, r02's beside it) hold only for the Gerber zip, BOM and CPL whose SHA-256 they record: they saw other files and do not carry over |",
         "| Firmware | none |",
         "| JLCPCB order number | none |",
         "| Approver, approval time | none: WIP |",
@@ -316,11 +316,12 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
         "- The receptacle's land is the maker's, drawn for a 0.80 mm board; this one is 1.6 mm",
         "  (OI-33). Whether the shell legs reach through the plated slots and the joints carry the",
         "  plug's insertion force shows only on the first board (V-MFG-03, V-MECH-01).",
-        "- JLCDFM's Danger items of this Gerber (via annular ring of the 0.30 mm vias, THT-to-SMD",
-        "  distance, mask opening exposing a trace, pad spacing, silkscreen over a plugged via, the",
-        "  receptacles' plated-slot width) are judged one by one in",
+        "- JLCDFM has not read this Gerber. Its Danger items on Rev0.5's (via annular ring of the",
+        "  0.30 mm vias, THT-to-SMD distance, mask opening exposing a trace, pad spacing, silkscreen",
+        "  over a plugged via, the receptacles' plated-slot width) are judged one by one in",
         "  manufacturing/releases/rev0.5/r02/JLCPCB_REVIEW.md: most are JLCDFM's own reading of the",
-        "  geometry, the slot width is a decision for the user. JLCPCB's own DFM at order time can differ.",
+        "  geometry, the slot width is a decision for the user. The lands and the via class are the",
+        "  same here, so the same items are to be expected; JLCPCB's own DFM at order time can differ.",
         "- No footprint is proven on a board; no order-time stock check has been done (CLAUDE.md 0).",
         "- The open issues of CLAUDE.md 11 stand; the set is not orderable until each is closed.",
         "",

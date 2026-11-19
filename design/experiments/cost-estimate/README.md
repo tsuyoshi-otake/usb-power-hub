@@ -152,7 +152,7 @@ change on r02's quote, because its own total above is dearer than the quote and 
 r02's 16,482 yen (above) becomes **14,235 yen for 2 units, 7,118 yen per unit**. The Akizuki order falls
 from 7,695 to 4,790 yen, still under the 11,000 yen free-shipping line. What this cannot see: the real
 price of the new BOM and CPL, which only the JLCPCB form gives (CLAUDE.md §9); impedance control, which
-D37 reopens and does not decide (CIRCUIT_DESIGN_Rev0.5.md §9: $33.08 and an auto-selected $1.05 on
+D37 reopens and does not decide (CIRCUIT_DESIGN_Rev0.6.md §9: $33.08 and an auto-selected $1.05 on
 2026-11-03, 5,461 yen at 160 yen/USD); and the receptacle's joints, whose yield the first board shows
 (V-MFG-03, OI-33).
 

@@ -1,6 +1,6 @@
-# USB Power-Control Hub — Rev0.5 routing
+# USB Power-Control Hub — Rev0.6 routing
 
-> **WIP — MANUFACTURING PROHIBITED.** How the placed Rev0.5 board (PLACEMENT_Rev0.5.md) is
+> **WIP — MANUFACTURING PROHIBITED.** How the placed Rev0.6 board (PLACEMENT_Rev0.6.md) is
 > routed, and why. Issue #6 P4, reworked for the machine-placed receptacles and the data-line
 > taps (issues #8 and #10, D37 and D38). Nothing here has been built or measured.
 
@@ -12,7 +12,7 @@ rebuilds the board.
 
 ## Frame and format
 
-- The board frame of PLACEMENT_Rev0.5.md: origin at the lower-left corner, x right, y up, in mm;
+- The board frame of PLACEMENT_Rev0.6.md: origin at the lower-left corner, x right, y up, in mm;
   a board point (x, y) is at (50 + x, 122 − y) on KiCad's sheet.
 - A point is `x,y` or `REF.PAD`, the pad's centre; a pad point must be on the row's net.
 - A track row draws one track through its points on one layer, at one width. A `via` row places
@@ -54,7 +54,7 @@ judged on paper and has not been measured.
 
 ## Widths and currents
 
-IPC-2221 for a 10 °C rise, at the currents of CIRCUIT_DESIGN_Rev0.5.md: 1.221 A, the highest
+IPC-2221 for a 10 °C rise, at the currents of CIRCUIT_DESIGN_Rev0.6.md: 1.221 A, the highest
 over-current trip (D34), per port, and 2.46 A from J4 with both ports at it.
 
 | Path | Current | Outer width for ΔT 10 °C | Drawn |
@@ -66,7 +66,7 @@ over-current trip (D34), per port, and 2.46 A from J4 with both ports at it.
 | LAD2 (MID range only) | ≤ 0.5 A (stuck MID, §4) | 0.396 mm | 0.5–0.6 mm |
 | J1's VBUS, J1 to Q53 | 0.277 A | 0.051 mm (inner: 0.306 mm) | 0.20 mm, on F.Cu and B.Cu only (router class J1_POWER) |
 | V5L, Q53 to the hub, U2, U5 and the dividers | 0.277 A | 0.051 mm (inner: 0.306 mm) | 0.31 mm on any layer (router class V5L_POWER); restricted to L1 and L4 it was left unconnected in every trial |
-| V5L, C27 into U6 pin 26 (the hub's own V5) | 85 mA typical (CIRCUIT_DESIGN_Rev0.5.md §7.1) | below 0.051 mm | 0.20 mm on F.Cu, one track (route table): the pin is 0.20 mm wide at 0.4 mm pitch, so a 0.31 mm track would not clear its neighbours |
+| V5L, C27 into U6 pin 26 (the hub's own V5) | 85 mA typical (CIRCUIT_DESIGN_Rev0.6.md §7.1) | below 0.051 mm | 0.20 mm on F.Cu, one track (route table): the pin is 0.20 mm wide at 0.4 mm pitch, so a 0.31 mm track would not clear its neighbours |
 
 A 0.60/0.30 via passes about 1 A; a port path changes layer through two vias or more at each
 end (three for VBUS). Inner layers carry no port current.
@@ -76,7 +76,7 @@ port's receptacle, is the sum of the nets below between their pads. A `+` joins 
 receptacle into one node: the connector ties its VBUS contacts together, and the current splits
 between the two pads by their paths. `check_routing.py` computes each by nodal analysis of the
 tracks and vias (20 °C copper, 35 µm outer, 18 µm via plating over 1.6 mm) and holds the sum to
-the `limit`, the 40 mΩ CIRCUIT_DESIGN_Rev0.5.md §3.1 allows for copper and connector contacts
+the `limit`, the 40 mΩ CIRCUIT_DESIGN_Rev0.6.md §3.1 allows for copper and connector contacts
 together (see Not settled).
 
 <!-- port_path:begin limit=40 -->
@@ -185,7 +185,7 @@ left open in a trial: drawn here, they are fixed before it starts.
   names a U1 pin draw those pins before the router starts: to their part where it is a few mm
   away, otherwise 0.4 mm to a via on a free spot (a 0.05 mm grid search with the obstacles of
   *After the router*), and the router joins the via. The 22 parts around U1 stand 0.4–0.8 mm
-  further out for it (PLACEMENT_Rev0.5.md, *Deviations*). Five U1 pins are still open after the
+  further out for it (PLACEMENT_Rev0.6.md, *Deviations*). Five U1 pins are still open after the
   router (BTN_B, LED_ON_B, LED_FLT_B, EVT_L_A and QSPI_SD3), and the patch joins them
   (*After the router*).
 
@@ -816,11 +816,11 @@ new session, rewrite the table.
 
 ## Not settled
 
-- **Port voltage.** CIRCUIT_DESIGN_Rev0.5.md §3.1 allows about 40 mΩ for the copper and the
+- **Port voltage.** CIRCUIT_DESIGN_Rev0.6.md §3.1 allows about 40 mΩ for the copper and the
   contacts of a port path; `check_routing.py` computes the board copper alone (J4's two VBUS
   pads to the two VBUS pads of the port's receptacle, HIGH range). The contacts of the two
   receptacles and of the plugs are the connector's rating and are not known on paper.
-- **One GND net.** CLAUDE.md 5.4 asks for a quiet ADC ground with one defined tie; Rev0.5 has
+- **One GND net.** CLAUDE.md 5.4 asks for a quiet ADC ground with one defined tie; Rev0.6 has
   one GND net and no net tie, so the ADC shares L2. The port return currents run from J2/J3 to
   J4 west of the ADC block.
 - **The HS pairs' impedance** stays D27's model value until JLCPCB's differential calculator
@@ -843,5 +843,5 @@ new session, rewrite the table.
   91.0 mm (they were 17.7, 7.6, 4.0 and 1.8 mm of unconnected stubs in the session), and the four
   taps TAP_A_P, TAP_A_N, TAP_B_P and TAP_B_N 102.9–110.6 mm (90.0–109.7 mm in the session). The taps
   sit behind their 1 kΩ resistors, so the pairs carry no stub beyond a pad, but what the wire's
-  capacitance does to a 12 Mbit/s edge is not computed, and CIRCUIT_DESIGN_Rev0.5.md §3.3 sets no
+  capacitance does to a 12 Mbit/s edge is not computed, and CIRCUIT_DESIGN_Rev0.6.md §3.3 sets no
   length limit. `check_routing.py` has no length rule.

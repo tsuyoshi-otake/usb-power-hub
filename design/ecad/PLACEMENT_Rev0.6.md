@@ -1,6 +1,6 @@
-# USB Power-Control Hub — Rev0.5 placement
+# USB Power-Control Hub — Rev0.6 placement
 
-> **WIP — MANUFACTURING PROHIBITED.** Where every part of Rev0.5 sits on the
+> **WIP — MANUFACTURING PROHIBITED.** Where every part of Rev0.6 sits on the
 > 100 × 72 mm board (D24), and why, with its silkscreen labels. Issue #6 P3 and P5, reworked
 > for the machine-placed USB-C receptacles of issue #8 (D37) and the data-line taps of issue #10
 > (D38); placement problems that routing (P4) finds are fixed here, in this file.
@@ -28,7 +28,7 @@ here, never in KiCad: the next run of `make_pcb.py` rebuilds the board.
 - In the channel table, channel B is channel A moved by `dx` in x: the same y, the same
   rotation. `{x}` in a region name is `A` or `B`.
 - Three parts of each channel sheet are in the common table: R139/C114/C115 and R239/C214/C215,
-  the over-current threshold filters at U30's inputs (Rev0.5 §3.4). U30 is shared, so the two
+  the over-current threshold filters at U30's inputs (Rev0.6 §3.4). U30 is shared, so the two
   sets sit beside it and cannot be 33.8 mm apart.
 - A note's `at X pin N` (also `pins N/M`, `pad N`; a receptacle's pads are named A1 to B8)
   means the part has a pad on that pin's net
@@ -104,7 +104,7 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 - The HS pair reaches the pad row through a lane from the corridor (*Keepouts*), so no
   courtyard stands in a lane.
 - A port's own parts stand beside its receptacle: the CC network west of the lane, the port
-  capacitor and the discharge circuit east of it (Rev0.5 §3.1).
+  capacitor and the discharge circuit east of it (Rev0.6 §3.1).
 
 ## Common parts
 
@@ -365,7 +365,7 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
 | Label | Text | x | y | Rot | Width | Height | Stroke | Leader |
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | title | USB Power-Control Hub | 66 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
-| revision | Rev0.5 | 71 | 8.25 | 0 | 1.2 | 1.2 | 0.2 | - |
+| revision | Rev0.6 | 71 | 8.25 | 0 | 1.2 | 1.2 | 0.2 | - |
 | J1 | HOST | 68.6 | 69.5 | 0 | 1 | 1 | 0.17 | - |
 | J2 | OUT A | 9.6 | 3 | 0 | 1 | 1 | 0.17 | - |
 | J3 | OUT B | 43.4 | 3 | 0 | 1 | 1 | 0.17 | - |
@@ -421,4 +421,4 @@ a text on F.SilkS, with its leader, after the routing; `check_silk.py` checks th
   decouplers of pins 43–45 and 48–50 stand in one column at x 36.2, and the USB pair leaves
   pins 46/47 west through R20/R22, then turns north and east past R23 and R21. P4 moved this
   block outward (*Deviations*) and drew the escapes the router left open
-  (`ROUTING_Rev0.5.md`, *Hand-drawn tracks*).
+  (`ROUTING_Rev0.6.md`, *Hand-drawn tracks*).

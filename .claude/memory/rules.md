@@ -463,7 +463,7 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
     void, a row of them a slot. The first Rev0.5 session passed DRC and left U1's exposed pad
     no plane copper on its east side (a slot 5.04 mm long); Rev0.4's committed board has
     voids up to 3.65 mm, and nothing had flagged them.
-  - Give the router the antipad (`route.py`, ROUTING_Rev0.5.md *Router*): every via padstack
+  - Give the router the antipad (`route.py`, ROUTING_Rev0.6.md *Router*): every via padstack
     0.60 mm larger on In1.Cu (`plane_via`, so different-net vias stand at least 1.20 mm
     apart; 48 pairs closer before, none after, on one pass), a keepout around drilled pads
     (`PLANE_HOLES`), and a copy `_gnd` of the padstack for GND vias, which have no antipad.

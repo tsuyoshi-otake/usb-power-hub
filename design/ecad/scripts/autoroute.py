@@ -1,11 +1,11 @@
-"""Route the Rev0.5 board with Freerouting and keep the session (issue #6 P4; CLAUDE.md 5.3).
+"""Route the Rev0.6 board with Freerouting and keep the session (issue #6 P4; CLAUDE.md 5.3).
 
 Run with KiCad's own Python from the repository root:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/autoroute.py --java <java.exe> --jar <freerouting-2.5.0.jar>
 
 1. make_pcb.py --dsn writes the router input: the placed board with the In1 plane, the
-   hand-drawn tracks and the GND fanout of ROUTING_Rev0.5.md, and its router classes and
+   hand-drawn tracks and the GND fanout of ROUTING_Rev0.6.md, and its router classes and
    keepouts.
 2. Freerouting routes it, headless, with the optimizer off (in every trial on this board it
    made the result worse) and the net class USB_HS ignored (the pairs are drawn by hand).

@@ -8,7 +8,7 @@ writes the schematic):
 
 --src holds the KiCad project (default design/ecad/source), --lib the project libraries
 (default design/ecad/libraries), --doc the netlist document (default
-design/circuit/CIRCUIT_DESIGN_Rev0.5_netlist.md), --circuit the circuit document and --parts
+design/circuit/CIRCUIT_DESIGN_Rev0.6_netlist.md), --circuit the circuit document and --parts
 requirements/parts.md (the tests pass corrupted copies). With --reports, the ERC report and
 the exported netlist are kept there. This file reads the document with its own parser, not the
 generator's.
@@ -41,7 +41,7 @@ Exit status: 0 = every check passed; 1 = at least one failed. Each failure print
 `FAIL <who>: <what>`.
 
 What it CANNOT see:
-- whether the document's circuit is right: that is CIRCUIT_DESIGN_Rev0.5.md and its
+- whether the document's circuit is right: that is CIRCUIT_DESIGN_Rev0.6.md and its
   _calc.py. This checker proves only that the schematic carries what the document says.
 - pin functions: it compares pin numbers. A symbol with a wrong pin map passes here;
   check_libraries.py (P1) checks the pin names against the datasheets.
@@ -69,7 +69,7 @@ ROOT = HERE.parents[2]
 NICK = "usb-power-hub"
 KICAD = pathlib.Path(sys.executable).resolve().parents[1]
 CLI = KICAD / "bin" / "kicad-cli.exe"
-CIRCUIT = ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.5.md"
+CIRCUIT = ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.6.md"
 PARTS_MD = ROOT / "requirements" / "parts.md"
 NON_PARTS = {"R", "C", "TestPoint", "Fiducial", "MountingHole"}   # not in circuit 6.2
 USB_PINS = {"J1": ("A6", "A7", "B6", "B7"), "J2": ("A6", "A7", "B6", "B7"), "J3": ("A6", "A7", "B6", "B7"),
@@ -427,7 +427,7 @@ def main(argv):
     ap.add_argument("--src", type=pathlib.Path, default=ROOT / "design" / "ecad" / "source")
     ap.add_argument("--lib", type=pathlib.Path, default=ROOT / "design" / "ecad" / "libraries")
     ap.add_argument("--doc", type=pathlib.Path,
-                    default=ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.5_netlist.md")
+                    default=ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.6_netlist.md")
     ap.add_argument("--circuit", type=pathlib.Path, default=CIRCUIT)
     ap.add_argument("--parts", type=pathlib.Path, default=PARTS_MD)
     ap.add_argument("--reports", type=pathlib.Path)

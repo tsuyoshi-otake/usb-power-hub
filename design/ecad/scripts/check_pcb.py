@@ -8,8 +8,8 @@ the board):
 
 --src holds the KiCad project (default design/ecad/source), --lib the project libraries
 (default design/ecad/libraries), --doc the placement document (default
-design/ecad/PLACEMENT_Rev0.5.md) and --capture the capture list (default
-design/circuit/CIRCUIT_DESIGN_Rev0.5_netlist.md); the tests pass corrupted copies. With
+design/ecad/PLACEMENT_Rev0.6.md) and --capture the capture list (default
+design/circuit/CIRCUIT_DESIGN_Rev0.6_netlist.md); the tests pass corrupted copies. With
 --reports, the DRC report and the exported netlist are kept there. This file reads the
 document with its own parser, not make_pcb.py's, and the board with pcbnew.
 
@@ -496,9 +496,9 @@ def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=pathlib.Path, default=ROOT / "design" / "ecad" / "source")
     ap.add_argument("--lib", type=pathlib.Path, default=ROOT / "design" / "ecad" / "libraries")
-    ap.add_argument("--doc", type=pathlib.Path, default=ROOT / "design" / "ecad" / "PLACEMENT_Rev0.5.md")
+    ap.add_argument("--doc", type=pathlib.Path, default=ROOT / "design" / "ecad" / "PLACEMENT_Rev0.6.md")
     ap.add_argument("--capture", type=pathlib.Path,
-                    default=ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.5_netlist.md")
+                    default=ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.6_netlist.md")
     ap.add_argument("--reports", type=pathlib.Path)
     a = ap.parse_args(argv[1:])
     rep = Report()

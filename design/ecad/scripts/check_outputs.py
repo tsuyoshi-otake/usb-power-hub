@@ -1,4 +1,4 @@
-"""Check the Rev0.5 manufacturing candidate against the board it was made from (issue #6 P5;
+"""Check the Rev0.6 manufacturing candidate against the board it was made from (issue #6 P5;
 CLAUDE.md 2, 8 Gerber and BOM/CPL gates).
 
 Run with KiCad's own Python from the repository root (make_outputs.py runs it after it writes
@@ -6,7 +6,7 @@ the set):
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/check_outputs.py [--out DIR] [--src DIR]
 
---out holds the set (default manufacturing/working/rev0.5), --src the KiCad project
+--out holds the set (default manufacturing/working/rev0.6), --src the KiCad project
 (default design/ecad/source); the tests pass corrupted copies. The files are read with this
 script's own parsers, the board with pcbnew; nothing of make_outputs.py is imported.
 
@@ -49,7 +49,7 @@ What it CANNOT see:
   the evidence (CLAUDE.md 8, JLCPCB gate). The uploads of Rev0.4 (2026-11-11 and -12) are
   recorded in manufacturing/releases/rev0.4/r01/JLCPCB_REVIEW.md with the SHA-256 of the three
   files they saw, Rev0.5's (2026-11-13) in manufacturing/releases/rev0.5/r01/JLCPCB_REVIEW.md
-  and r02's. This checker does not read those files, so it cannot tell a review that has gone
+  and r02's; Rev0.6 has had none. This checker does not read those files, so it cannot tell a review that has gone
   stale.
 - whether the table's numbers are right: it checks that the CPL follows the table and that the
   table is well formed, not what JLCPCB's models look like. The receptacle C2765186's shift
@@ -79,7 +79,7 @@ import pcbnew
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 NICK = "usb-power-hub"
-PREFIX = "UsbPowerHub_Main_Rev0.5"
+PREFIX = "UsbPowerHub_Main_Rev0.6"
 ORIGIN = (50.0, 122.0)
 BOARD = (100.0, 72.0)
 MID_TOL = 0.05
@@ -505,7 +505,7 @@ def check_private(rep, files, z):
 def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=pathlib.Path, default=ROOT / "manufacturing" / "working" / "rev0.5")
+    ap.add_argument("--out", type=pathlib.Path, default=ROOT / "manufacturing" / "working" / "rev0.6")
     ap.add_argument("--src", type=pathlib.Path, default=ROOT / "design" / "ecad" / "source")
     ap.add_argument("--frames", type=pathlib.Path, default=ROOT / "design" / "ecad" / "jlcpcb_model_frame.json")
     a = ap.parse_args(argv[1:])

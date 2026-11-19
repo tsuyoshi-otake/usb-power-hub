@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Reproduce the calculated numbers quoted in CIRCUIT_DESIGN_Rev0.5.md.
+"""Reproduce the calculated numbers quoted in CIRCUIT_DESIGN_Rev0.6.md.
 
 Usage:
-    python design/circuit/CIRCUIT_DESIGN_Rev0.5_calc.py
+    python design/circuit/CIRCUIT_DESIGN_Rev0.6_calc.py
 
 Every section header names the document section that quotes its output. The
 inputs below are the Rev0.4 component values (Rev0.5's D37 and D38 change none of
-them) and datasheet or catalogue figures recorded in requirements/parts.md. Change a value here and in the
+them, and Rev0.6 changes the layout only) and datasheet or catalogue figures recorded in requirements/parts.md. Change a value here and in the
 document together; the document is the design, this script is its arithmetic.
 
 What this script CANNOT see (CLAUDE.md Section 8 - a checker only proves what
@@ -28,7 +28,7 @@ it looks at):
 """
 import math
 
-# ---- inputs (Rev0.4 values, unchanged by Rev0.5) -------------------------------------------------
+# ---- inputs (Rev0.4 values, unchanged by Rev0.5 and Rev0.6) --------------------------------------
 VDDA = 3.3                    # MCP3208 V_REF = VDDA (its V_DD is V5A, 5 V)
 LSB = VDDA / 4096             # 12-bit
 RS = {"LOW": 510.0, "MID": 10.0, "HIGH": 0.1}    # shunts R_L, R_M, R_H
