@@ -7,7 +7,8 @@ terms or consent were accepted (the form's "I agree to the Terms and Conditions"
 was claimed, nothing was downloaded, and "Confirm Parts Placement" was left at No.
 
 This is Rev0.6's first pass through the gate. It found **no defect that changes a file of this directory**, and
-three findings that are the user's to decide (section 1). The state stays `WIP`.
+three findings that are the user's to decide (section 1). The state stays `WIP`. After the gate, on 2026-11-19,
+the user accepted the first of them as it is (finding 1, 「受け入れる」); the other two wait.
 
 | Item | Value |
 |---|---|
@@ -30,11 +31,12 @@ Screenshots were **not saved to disk**: what they showed is recorded below and i
 
 ## 1. What the gate found
 
-No file of r01 changed. Three findings need the user's decision (section 8), and three are records.
+No file of r01 changed. Three findings needed the user's decision (section 8): finding 1 is decided, findings 2
+and 3 wait. Three more are records.
 
 | # | Finding | Found by | Judgement |
 |---|---|---|---|
-| 1 | **A GND via stands 0.059 mm from pad 3 (GND) of D1.** The via (0.45 mm land, 0.30 mm hole) is at KiCad (127.7713, 59.8161), Gerber frame (77.77, 62.18); D1, J1's PSM712, moved from x = 122.4 to 128.9 mm with J1 (D39). The via is not new: it is in `design/ecad/routing/carried.json`, the routing carried from Rev0.5, and on the Rev0.5 board, where D1's pad 3 stood 6.3 mm from it. | JLCDFM "Pad spacing", row 2 (0.06 mm, a 0.45 mm round land against a 1.475 × 0.60 mm pad beside J1's left rear slot); `gate_measure5.out`, `gate_measure5_rev05.out` | One net, so no short and no DRC violation (KiCad's clearance is between nets; no checker of this repository measures a pad against a via of its own net). The risk is the 0.059 mm strip of solder mask between the pad's opening and the via: it may not hold, and D1's joint can then wet onto the via's land. The board already has two such pairs from Rev0.5 (C27 pad 2, 0.090 mm; TP13, 0.095 mm), which Rev0.5's review accepted. **Decision for the user**: accept, or move the via in a new release. |
+| 1 | **A GND via stands 0.059 mm from pad 3 (GND) of D1.** The via (0.45 mm land, 0.30 mm hole) is at KiCad (127.7713, 59.8161), Gerber frame (77.77, 62.18); D1, J1's PSM712, moved from x = 122.4 to 128.9 mm with J1 (D39). The via is not new: it is in `design/ecad/routing/carried.json`, the routing carried from Rev0.5, and on the Rev0.5 board, where D1's pad 3 stood 6.3 mm from it. | JLCDFM "Pad spacing", row 2 (0.06 mm, a 0.45 mm round land against a 1.475 × 0.60 mm pad beside J1's left rear slot); `gate_measure5.out`, `gate_measure5_rev05.out` | One net, so no short and no DRC violation (KiCad's clearance is between nets; no checker of this repository measures a pad against a via of its own net). The risk is the 0.059 mm strip of solder mask between the pad's opening and the via: it may not hold, and D1's joint can then wet onto the via's land. The board already has two such pairs from Rev0.5 (C27 pad 2, 0.090 mm; TP13, 0.095 mm), which Rev0.5's review accepted. **Decided by the user on 2026-11-19: accepted as it is** (「受け入れる」, the answer to 「D1 脇の GND ビア（同一ネット、間隔 0.059 mm）はこのまま受け入れますか？」; Claude had recommended accepting). The via stays, and the first boards show whether D1's joint wets onto it. The alternative was to move the via in a new release. |
 | 2 | **JLCDFM lists the non-plated drill file as a plated layer.** Both `..._NPTH.drl` and `..._PTH.drl` appear as "Plated drill layers", and the new item "Pth without pad" lists the 15 non-plated holes twice (30 Warning: 8 receptacle pegs of 0.65 mm, 3 holes of J5 of 0.991 mm, H1-H4 of 2.2 mm). | JLCDFM's layer list and "Pth without pad" | Not a defect of the file: its header says `TF.FileFunction,NonPlated,1,4,NPTH` and its three tools carry `TA.AperFunction,NonPlated,NPTH,ComponentDrill`. Whether JLCPCB's CAM reads it as JLCDFM's viewer does is seen only in the production file. **Decision for the user**: order with "Confirm Production file", or accept. |
 | 3 | **The receptacles' plated slots are 0.60 mm wide**, under JLCDFM's Danger limit of 0.61 mm ("Slot width check", 16 Danger). | JLCDFM | As on Rev0.5 and still open: JLCPCB's capabilities page gave 0.35 mm as the minimum plated slot width (read 2026-11-13, not read again). **Decision for the user.** |
 | 4 | JLCDFM's item list changed between 2026-11-13 and 2026-11-19: 35 rows now, 29 in Rev0.5's record (its three "Unconnected via" rows counted as three). The six new rows: "Measure pad to line spacing" (a row without a name), "Pth without pad", "Via without pad", a second "Trace spacing" row and two rows without a name over the bottom copper. | reading the page | Counts of Rev0.5's run and of this one cannot be compared item by item. Where an item is new or its count moved, the two boards were measured instead (section 4, *The two boards, measured*). A control run of Rev0.5 r02's Gerber on today's JLCDFM was not made: the user's OK covered Rev0.6 r01's files. |
@@ -197,8 +199,9 @@ Read on 2026-11-19 at about 15:04 (USD, the account's currency; `quote.txt`).
 
 ## 8. Decisions for the user
 
-1. **D1's GND via** (finding 1): accept the 0.059 mm of mask between D1 pad 3 and a via of its own net, or move
-   the via, which changes the copper and needs a new release and this gate again.
+1. **D1's GND via** (finding 1): **decided on 2026-11-19, accepted** (「受け入れる」): the 0.059 mm of mask between
+   D1 pad 3 and a via of its own net stays. The alternative was to move the via, which changes the copper and
+   needs a new release and this gate again.
 2. **Non-plated holes** (finding 2): order with "Confirm Production file" to see how JLCPCB's CAM reads the 15
    holes, or accept JLCDFM's reading as its viewer's.
 3. **Slot width** (finding 3): accept and let JLCPCB's own DFM decide, or widen the slots, which means leaving the

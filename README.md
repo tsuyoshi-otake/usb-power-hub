@@ -12,7 +12,8 @@ the host PC over a plain COM port.
 > passes its checkers; its candidate set is `manufacturing/releases/rev0.6/r01/` (state `WIP`). It
 > has been through the JLCPCB gate once (2026-11-19: JLCDFM, part mapping, placement preview and a
 > quote of $52.85 without shipping), which changed no file and left three findings for the user to
-> decide (`JLCPCB_REVIEW.md` in that directory); the user has not approved it. The candidate before
+> decide (`JLCPCB_REVIEW.md` in that directory): one is accepted since, two are open. The user has
+> not approved the set. The candidate before
 > it, Rev0.5's (`manufacturing/releases/rev0.5/r02/`, state `WIP`),
 > is not orderable either: its gate of 2026-11-13 found two
 > defects that r02 fixes, and the user has not approved it. Nothing has been ordered or paid,

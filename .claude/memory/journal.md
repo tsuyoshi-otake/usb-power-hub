@@ -1955,3 +1955,22 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   charge line and read the stock before the upload; browser facts of 2026-11-19; and, under the routing checks,
   carried copper beside a moved pad of its own net.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-gate-decision (#13): the user accepts the GND via beside D1 pad 3 as it is
+
+- **Decision (user).** 「受け入れる」, the answer to 「D1 脇の GND ビア（同一ネット、間隔 0.059 mm）はこのまま受け入れますか？」
+  (the choices were 「受け入れる」 and 「r02 で直す」; Claude had recommended accepting). Finding 1 of
+  `manufacturing/releases/rev0.6/r01/JLCPCB_REVIEW.md` is closed as accepted. No copper changes, r01 stays the
+  candidate, and its review stays valid for the same three SHA-256.
+- **Why accepting was recommended.** One net, so no short. The board already carries two pairs of the same kind
+  from Rev0.5 (C27 pad 2 0.090 mm, TP13 0.095 mm). Moving the via changes the copper: a new release and the whole
+  JLCPCB gate again, with another upload.
+- **What changed.** The review (header, finding 1, section 8 item 1), the manifest (the gate row, the open gate,
+  the residual risk), `CLAUDE.md` (Sections 0 and 12) and `README.md` say that finding 1 is accepted and that
+  findings 2 and 3 wait. `SHA256SUMS.txt` regenerated for the two changed documents.
+- **Verification.** `sha256sum -c` (12 OK); no `UsbPowerHub_Main_Rev0.6_*` file differs from `88de49c`; 0 CR
+  bytes; the state reads `WIP` in the manifest. No independent verifier for this change: it records one decision
+  in four documents.
+- **Not verified.** Whether D1's joint wets onto the via is seen only on the first boards. Still the user's:
+  "Confirm Production file" for the non-plated holes, the 0.60 mm slots, and the rest of the review's section 8.
+- **Commits.** `88de49c` (the gate's record) and this entry's. Not pushed.

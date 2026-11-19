@@ -78,8 +78,9 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > with each Danger item judged against measurements on the board, and a quote of $52.85 without
 > shipping. It changed no file and left three findings to the user: a GND via carried from
 > Rev0.5's routing stands 0.059 mm from pad 3 of D1 (one net), JLCDFM lists the non-plated drill
-> file as plated, and the receptacles' slots are 0.60 mm wide. It holds only for the files whose
-> SHA-256 the review records. The candidate before it is Rev0.5's,
+> file as plated, and the receptacles' slots are 0.60 mm wide. The user accepted the first as it
+> is on 2026-11-19 (「受け入れる」); the other two wait. The review holds only for the files whose
+> SHA-256 it records. The candidate before it is Rev0.5's,
 > `manufacturing/releases/rev0.5/r02/` (state `WIP`,
 > **nothing ordered, nothing paid**, no approval), with its manifest, checksums and the gate's
 > `JLCPCB_REVIEW.md`; r01 beside it is superseded and keeps the stock check of the shared BOM
@@ -824,9 +825,9 @@ fiducials, BOM against CPL). The JLCPCB gate ran on r01's files on 2026-11-19
 SHA-256 it records stand: the part mapping (41 of 41, 0 substituted, 38 Basic and the three allowed
 Extended), JLCPCB's assembly stock on that day (every code above 500), the placement preview (J1-J4
 and every moved part that is not symmetrical, one instance of each other class) and a quote of
-$52.85 without shipping. JLCDFM ran and is **not accepted**: the user decides on the GND via
-0.059 mm from D1 pad 3, on the non-plated holes that JLCDFM lists as plated, and on the 0.60 mm
-slots. Not done on Rev0.6's files: the independent check of the set, the Akizuki stock, the
+$52.85 without shipping. JLCDFM ran and is **not accepted**: the user accepted the GND via
+0.059 mm from D1 pad 3 as it is on 2026-11-19 (「受け入れる」) and still decides on the non-plated
+holes that JLCDFM lists as plated and on the 0.60 mm slots. Not done on Rev0.6's files: the independent check of the set, the Akizuki stock, the
 assembled parcel's shipping and a quote with impedance control.
 
 - [ ] PCB revision correct; `MANUFACTURING APPROVED` recorded in this file. *Not done: the state is
