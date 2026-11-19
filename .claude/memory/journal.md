@@ -2228,3 +2228,22 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   select on a click; SAVE TO CART needs the customs description.
 - **Record.** Outside the repository, `~/tmp/usb-power-hub/rev06-gate/evidence/jlcpcb-cart-2026-11-19.txt`.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-cart-confirm-production-file (#13)
+
+- **What.** The user's 「Yes にする」, 「これ1ドルはらったほうがいいの?」 and 「Yes・自動承認なし」: the JLCPCB cart item
+  of Rev0.6 r01 now has "Confirm Production file: Yes" with "Do not confirm automatically" ticked. Nothing ordered,
+  nothing paid; r01 stays `WIP`.
+- **Why.** JLCDFM finding 2 (the non-plated drill file listed as plated) can be read in JLCPCB's production file
+  before anything is made; the option costs $1.05.
+- **Read.** Quote: PCB $9.05 + Economic PCBA $44.85 = $53.90. Cart: one item, as before (the save replaced it);
+  Product Detail "Confirm Production file: Yes", tooltip "Production will not start until we have your manual
+  confirmation."; Coupons -$30.00 still put on by the cart; Subtotal $43.44 with DHL $19.54; $23.90 without
+  shipping, $32.56 with OCS at the $8.66 read earlier.
+- **Found.** "Edit Order" keeps the options and the BOM and empties the customs Product Description; it was set to
+  the user's earlier choice again.
+- **Not verified.** The checkout was not opened. One read, by me; a verifier cannot repeat it. The dialog's tick is
+  seen afterwards only through the tooltip's wording.
+- **Learning.** In `rules.md`, the coupon rule's cart part, extended in place.
+- **Record.** Outside the repository, `~/tmp/usb-power-hub/rev06-gate/evidence/jlcpcb-cart-2026-11-19.txt`.
+- **Commits.** This entry's. Not pushed.
