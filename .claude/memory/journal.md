@@ -2202,3 +2202,29 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Learning.** In `rules.md`, the coupon rule: a coupon's name is not its terms, and how a claim shows.
 - **Record.** The same file outside the repository, extended.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-cart (#13)
+
+- **Request.** 「確かめる」, the answer to "カートに保存して、$30 引きが適用されるか確かめますか？" (told beforehand: it
+  means uploading r01's three files again, agreeing to the quote form's terms, pressing SAVE TO CART). The customs
+  "Product Description" turned out to be required; asked, the user chose "Development Board (Recommended)".
+  Nothing ordered, nothing paid; r01 stays `WIP`.
+- **Done (the user's signed-in Chrome, about 20:19-20:36 JST).** r01's Gerber, BOM and CPL (SHA-256 checked, 12 OK)
+  uploaded; the gate's options, plus Specify Stackup JLC04161H-7628 (D27; no price change); 41 parts, the 510 ohm
+  row C17734 ticked by hand; total $52.85, the gate's lines one by one; Product Description
+  "Development Board - HS Code 847330"; saved to the cart.
+- **Found, in the cart.** The cart puts "$30 Off $50" on by itself: $52.85 - $30.00 = $22.85, with DHL $19.54 the
+  subtotal is $42.39. Valid coupons: that one, JLCONE PCB $5, PCBA Special Offer $9. BF PCBA $12 (over $50) is
+  listed unavailable: an SMT coupon counts the PCBA price ($44.85) alone, the ALL coupon the whole order. Shipping
+  to Japan for the assembled parcel (0.59 kg): OCS $8.66, UPS Saver $9.59, S.F Economy $18.28, DHL $19.54, FedEx
+  $24.26; with OCS the order is $31.51.
+- **Slip, corrected.** A click sent in the same batch as the coupon list's close landed on the $5 card and selected
+  it; the $30 card was selected again and the summary read -$30.00 / $42.39. Cart state only.
+- **Not verified.** The checkout applies coupons in its payment section, behind the address and shipping steps; I
+  opened the checkout once, pressed nothing and left, so the final application, tax lines and payment were not
+  seen. Duty rates for the HS code were not looked up. The cart item has "Confirm Production file: No" (JLCDFM
+  finding 2 is the user's decision at the order). One read, by me; a verifier cannot repeat it.
+- **Learning.** In `rules.md`, the coupon rule: the cart's coupon list answers what the threshold counts; overlays
+  select on a click; SAVE TO CART needs the customs description.
+- **Record.** Outside the repository, `~/tmp/usb-power-hub/rev06-gate/evidence/jlcpcb-cart-2026-11-19.txt`.
+- **Commits.** This entry's. Not pushed.

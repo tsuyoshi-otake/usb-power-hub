@@ -809,8 +809,14 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   the card's own link (a scripted `click()` opens nothing, and a click one row off opens the neighbour's); the
   coupon center carries the same terms in hidden `role="tooltip"` elements. No page says whether "orders over
   $N" of an SMT coupon counts the PCB with the PCBA price or the PCBA price alone (#13, 2026-11-19: BF PCBA $12
-  over $50, against PCB $8.00 + PCBA $44.85): only the checkout shows which coupons an order can take, so say
-  "may apply", with both sums. A script that collects every tooltip of a signed-in page also returns the header's
+  over $50, against PCB $8.00 + PCBA $44.85). The cart says it: tick the item and open "Coupons >" in the
+  summary, which lists "valid" and "Unavailable" coupons for that item and puts the best one on by itself. Read
+  there on 2026-11-19: an SMT coupon counts the PCBA price alone (BF PCBA $12 unavailable at $44.85), a coupon of
+  type ALL counts PCB + PCBA ($30 off at $52.85). The checkout page applies coupons only in its payment section,
+  behind the address and shipping steps, which are the user's. The cart's lists (coupons, shipping) are overlays
+  whose cards select on a click: after closing one, take a screenshot before the next click (a click sent in the
+  same batch as the close landed on a coupon card and changed the selection). SAVE TO CART needs the customs
+  "Product Description": ask the user for it. A script that collects every tooltip of a signed-in page also returns the header's
   account popover: filter on "Coupon Terms" before printing. A coupon's name is not its terms: claimed on
   2026-11-19, "BF PCBA $15" needs an order over $100, and the flash "$30 Off $50" is of type ALL (no product
   named), over $50, so it outranks the SMT coupons for an order just above $50. A claim shows as the dialog
