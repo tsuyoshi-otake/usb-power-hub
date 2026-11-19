@@ -92,7 +92,7 @@ copy it in at approval.
 | Part mapping and placement preview on this BOM and CPL | **not run.** The receptacle's model shift and the model rotations were read on Rev0.5's and Rev0.4's files; J1 and J3 stand at new places and 26 more machine-placed parts moved | Claude, after the user's OK to upload |
 | Quote | **not read** for these files | user, at the JLCPCB step |
 | Sourcing | Rev0.5's check of 2026-11-13 read the same BOM file; to be repeated before payment | Claude, before payment |
-| Mechanical overlay | the enclosure and the lid PCB are being redrawn for this board (issue #13 step 7); nothing is printed and no cable was tried | user (print, cables) |
+| Mechanical overlay | the enclosure and the lid PCB are drawn for this board on paper (Enclosure Rev0.2 and Lid Rev0.2, issue #13 step 7; `design/mechanical/`); nothing is printed and no cable was tried | user (print, cables) |
 | EasyEDA import (D32) | blocked at the user's sign-in | user |
 | The open issues of CLAUDE.md 11 | OI-1, OI-5, OI-6, OI-8 (panelization), OI-26 and OI-33 stand | user (built board, real cables) |
 | User approval before any order or payment | not given | user |
