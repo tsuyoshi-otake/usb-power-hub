@@ -1,11 +1,11 @@
-"""Route the Rev0.6 board with Freerouting and keep the session (issue #6 P4; CLAUDE.md 5.3).
+"""Route the Rev0.7 board with Freerouting and keep the session (issue #6 P4; CLAUDE.md 5.3).
 
 Run with KiCad's own Python from the repository root:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/autoroute.py --java <java.exe> --jar <freerouting-2.5.0.jar> --passes 8
 
 1. make_pcb.py --dsn writes the router input: the placed board with the In1 plane, the
-   hand-drawn tracks and the GND fanout of ROUTING_Rev0.6.md, the carried record
+   hand-drawn tracks and the GND fanout of ROUTING_Rev0.7.md, the carried record
    (routing/carried.json, written by carry.py before this script), and the document's router
    classes and keepouts.
 2. Freerouting routes it, headless, with the optimizer off (in every trial on this board it
@@ -23,11 +23,11 @@ are named on the command line.
 What it CANNOT see: whether the routing is good. The router's own unrouted count is reported,
 but check_routing.py (DRC, the pairs, the Kelvin taps, the analog layer rule, the port path's
 copper) is what decides.
-The router counts what it leaves unrouted differently from DRC (on the Rev0.6 board 99 against
+The router counts what it leaves unrouted differently from DRC (on the Rev0.7 board 99 against
 DRC's 9), so its count is recorded, not judged: make_pcb.py applies the routing document's patch
 table after the session, and check_routing.py's DRC decides.
 --passes: the committed Rev0.6 session is 8 passes (about 5 minutes). With the carried copper
-fixed, more passes gave the same session (ROUTING_Rev0.6.md, Router).
+fixed, more passes gave the same session (ROUTING_Rev0.7.md, Router).
 Exit status: 0 = the session is written; 1 = the router failed and no session was written.
 """
 import argparse

@@ -1,4 +1,4 @@
-"""Write the KiCad 9 project skeleton of Rev0.6 (D32): design/ecad/source/usb-power-hub.*
+"""Write the KiCad 9 project skeleton of Rev0.7 (D32): design/ecad/source/usb-power-hub.*
 
 Run with KiCad's own Python, which carries the pcbnew module, from the repository root:
 
@@ -61,9 +61,9 @@ SIZE_MM = (100.0, 72.0)                              # D24
 THICKNESS_MM = 1.6                                   # CLAUDE.md 1, the ordered thickness
 DATE = "2026-11-04"
 TITLE = "USB Power-Control Hub"
-REV = "Rev0.6"
+REV = "Rev0.7"
 COMMENTS = ("WIP - MANUFACTURING PROHIBITED",
-            "Source: design/circuit/CIRCUIT_DESIGN_Rev0.6.md",
+            "Source: design/circuit/CIRCUIT_DESIGN_Rev0.7.md",
             "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
 UUID_NS = uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/tsuyoshi-otake/usb-power-hub")
 

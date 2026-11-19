@@ -3,7 +3,7 @@
 > **Superseded for the USB-C modules by D37 (2026-11-12).** Rev0.5 replaces the four Akizuki
 > modules and their pin headers with machine-placed receptacles (C2765186), so the module
 > outlines, the header strips and the space under a module below describe Rev0.4. The study is
-> kept as that record and was not re-run; the board is placed from `design/ecad/PLACEMENT_Rev0.6.md`.
+> kept as that record and was not re-run; the board is placed from `design/ecad/PLACEMENT_Rev0.7.md`.
 
 **Question.** Does the Rev0.4 part set fit on the board? This is OI-23. D10 fixed the board at
 85 × 35 mm before Rev0.3/Rev0.4 moved the large parts onto Akizuki modules and DIP packages.
@@ -29,13 +29,13 @@ re-run's.
 - A block placement at **100 × 72 mm** passes every check below.
 - D24 (2026-11-03) adopts 100 × 72 mm. The user's condition was 「100x100未満ならいいんだっけ」:
   stay inside JLCPCB's 100 × 100 mm price tier. The size inside it came from this study
-  (CIRCUIT_DESIGN_Rev0.6.md §10).
+  (CIRCUIT_DESIGN_Rev0.7.md §10).
 
 This directory is a trial, not design data (CLAUDE.md §2: `design/experiments/` is
 non-authoritative). The block positions are a proposal. Nothing here is a footprint, an
 outline drawing or a layout.
 
-The placement that issue #6 P3 made from this proposal is `design/ecad/PLACEMENT_Rev0.6.md`;
+The placement that issue #6 P3 made from this proposal is `design/ecad/PLACEMENT_Rev0.7.md`;
 its *Deviations from the study* lists where the real footprints did not fit these blocks.
 
 ## Files

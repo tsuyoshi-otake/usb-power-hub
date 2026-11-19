@@ -34,7 +34,7 @@ import uuid
 HERE = pathlib.Path(__file__).resolve().parent
 CHECK = HERE / "check_routing.py"
 ECAD = HERE.parent
-DOCS = {"doc": ECAD / "ROUTING_Rev0.6.md", "placement": ECAD / "PLACEMENT_Rev0.6.md"}
+DOCS = {"doc": ECAD / "ROUTING_Rev0.7.md", "placement": ECAD / "PLACEMENT_Rev0.7.md"}
 ORIGIN = (50.0, 122.0)
 
 _spec = importlib.util.spec_from_file_location("sexpr", HERE / "sexpr.py")
@@ -350,7 +350,7 @@ class CheckTest(unittest.TestCase):
 
     def test_port_trunk_removed(self):
         def edit(tree):
-            # SRC_A's 1.20 mm trunk between the switch FETs (ROUTING_Rev0.6.md, x 1.2)
+            # SRC_A's 1.20 mm trunk between the switch FETs (ROUTING_Rev0.7.md, x 1.2)
             x = sheet(1.2, 0)[0]
             trunk = [s for s in segments(tree, "SRC_A", "F.Cu")
                      if sx.first(s, "width")[1] == 1.2 and all(abs(e[1] - x) < 1e-6 for e in ends(s))]

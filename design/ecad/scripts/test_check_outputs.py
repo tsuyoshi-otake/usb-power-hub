@@ -5,7 +5,7 @@ Run with KiCad's Python from the repository root, after make_outputs.py has writ
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/test_check_outputs.py
 
-Each test copies manufacturing/working/rev0.6, design/ecad/source and the model frame table
+Each test copies manufacturing/working/rev0.7, design/ecad/source and the model frame table
 into a temporary directory, corrupts the copies and runs check_outputs.py on them in a new
 process. After a corruption the test rewrites SHA256SUMS.txt (and, when it edits the board,
 the manifest's source hashes), so that only the rule under test breaks; the tests of those two
@@ -32,10 +32,10 @@ import zipfile
 HERE = pathlib.Path(__file__).resolve().parent
 CHECK = HERE / "check_outputs.py"
 ROOT = HERE.parents[2]
-OUT = ROOT / "manufacturing" / "working" / "rev0.6"
+OUT = ROOT / "manufacturing" / "working" / "rev0.7"
 SRC = ROOT / "design" / "ecad" / "source"
 FRAMES = ROOT / "design" / "ecad" / "jlcpcb_model_frame.json"
-PREFIX = "UsbPowerHub_Main_Rev0.6"
+PREFIX = "UsbPowerHub_Main_Rev0.7"
 ZIP = f"{PREFIX}_Gerber.zip"
 BOM = f"{PREFIX}_BOM_JLCPCB.csv"
 CPL = f"{PREFIX}_CPL_JLCPCB.csv"
@@ -92,7 +92,7 @@ def run_check(corrupt=None, sums=True):
     """Copy, corrupt(out, src), rehash unless sums is False, check."""
     with tempfile.TemporaryDirectory(prefix="outtest-") as tmp:
         t = pathlib.Path(tmp)
-        out, src = t / "rev0.6", t / "source"
+        out, src = t / "rev0.7", t / "source"
         shutil.copytree(OUT, out)
         shutil.copytree(SRC, src)
         table = t / FRAMES.name                 # a corruption reaches it as src.parent / FRAMES.name

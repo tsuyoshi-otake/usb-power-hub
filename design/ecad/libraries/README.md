@@ -1,6 +1,6 @@
-# Project libraries (Rev0.6, issues #6 P1, P5, #8)
+# Project libraries (Rev0.7, issues #6 P1, P5, #8, #14)
 
-The KiCad symbol and footprint library for every part in Rev0.6 §6.2. State: **WIP**. No
+The KiCad symbol and footprint library for every part in Rev0.7 §6.2. State: **WIP**. No
 land here has been soldered or seen in the JLCPCB placement preview.
 
 | File | What it is | Written by |

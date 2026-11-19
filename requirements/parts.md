@@ -7,7 +7,7 @@ USB-C receptacles C2765186, machine-placed). Every row is a *candidate* until a 
 marks it confirmed against the actual PCBA order (CLAUDE.md Section 4.1).
 
 This is the single place for candidates, stock and datasheet facts. The circuit document
-(`design/circuit/CIRCUIT_DESIGN_Rev0.6.md`) derives the constraints; this file records which
+(`design/circuit/CIRCUIT_DESIGN_Rev0.7.md`) derives the constraints; this file records which
 parts meet them.
 
 ## The sourcing rule (D13, user, 2026-11-03)
@@ -17,7 +17,7 @@ parts meet them.
 - **Hand-soldered by the user:** large parts, which MUST be **in stock at Akizuki**
   (akizukidenshi.com).
 - **Never** an Extended-only PCBA. Where no allowed part does a job, the function is reduced
-  (circuit Rev0.6 §7.4).
+  (circuit Rev0.7 §7.4).
 - **Avoid special or hard-to-source parts**, and **reduce part types and count** (the user's
   restated list, 2026-11-03; quoted in circuit Rev0.4's header). One part per value and one
   voltage rating per value: 41 machine-placed types (the capture, D34, dropped the 1 nF
@@ -140,7 +140,7 @@ is in Git at commit `5a697aa`.
     2026-11-04; D28):* RCWV = √(P × R), 3.16 V here. Short-time overload 2.5 × RCWV for 5 s
     (6.25 W), ΔR ≤ 1 %; pulse overload 4 × RCWV (16 W), 1 s on / 25 s off, 10,000 cycles,
     ΔR ≤ ±(1 % + 0.05 Ω). The stuck-MID fault, 2.35 W for 10 ms, is inside the short-time
-    rating for up to 5 s (Rev0.6 §4).
+    rating for up to 5 s (Rev0.7 §4).
   - *To confirm on the first board (V-MEAS-00):* R_M shifts < 0.1 % after 100 faults. The
     datasheet bounds the shift only after its harsher test.
 - *Verified (MF-R300, Bourns MF-R series datasheet, Akizuki `/goodsaffix/mfr.pdf`,
@@ -233,7 +233,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
     and pull-down 50–80 kΩ; pins are not rated above IOVDD + 0.5 V. GPOUT0–3 are on GPIO21,
     23, 24 and 25.
   - *To confirm on the first board (V-MEAS-06):* DVDD, the USB series resistance, Y1's start-up
-    and frequency; before layout, the land against Figure 167 (Rev0.6 G20).
+    and frequency; before layout, the land against Figure 167 (Rev0.7 G20).
 - *Verified (C2765186, SHOU HAN drawing "TYPE-C 16PIN 2MD(073)" REV. A and its specification,
   as LCSC lists them for C2765186; read 2026-11-12 for D37):*
   - JLCPCB's assembly pool: class Extended (not Preferred), 1,070,668 in stock, $0.0728 each
@@ -244,7 +244,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
     A5 CC1, B7 DN2, A6 DP1, A7 DN1, B6 DP2, A8 SBU1 and B5 CC2 are 0.30 mm wide), four plated
     shell slots (the shield, NOTE 4-2) and two unplated pegs, ø0.65 mm. The drawing's pad row
     reads B7, A6, A7, B6 from left to right: D−, D+, D−, D+ alternate, so joining A6 to B6
-    and A7 to B7 needs one crossing (ROUTING_Rev0.6.md).
+    and A7 to B7 needs one crossing (ROUTING_Rev0.7.md).
   - Rating 5 V, 3 A, −25 to +85 °C. Insertion force 0.5–2.0 kgf, removal 0.8–2.0 kgf,
     10,000 cycles (after them: contact resistance ≤ 0.1 Ω, removal 0.8–2.0 kgf). Contact
     resistance (LLCR) 40 mΩ per pin at most for VBUS, GND and the other pins, 50 mΩ for the
@@ -288,7 +288,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
     24 µA (§3.1, §4.2). PWREN1–4# are outputs.
   - ESD: 6 kV HBM on the USB signal pins (§4.1). −40 to 85 °C. No thermal resistance is
     given.
-  - *Land (Rev0.6 G21, issue #6 P1):* §5.6 gives the package only (body 4.0 ± 0.1 mm,
+  - *Land (Rev0.7 G21, issue #6 P1):* §5.6 gives the package only (body 4.0 ± 0.1 mm,
     terminal 0.20 ± 0.05 × 0.35 ± 0.1 mm, ePad 2.7 ± 0.2 mm), no land. The footprint
     `CH335F_QFN-28-1EP_4x4mm_P0.4mm_EP2.7x2.7mm` has 0.80 × 0.20 mm pads centred 1.95 mm out,
     covering each nominal terminal and reaching 0.35 mm past the nominal body edge (0.30 mm
@@ -312,7 +312,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - *Desk check (D28; TI SLOS099F, January 2014, via LCSC C7433, fetched 2026-11-04):* the large-signal gain
     row is specified on a single 15 V supply, V<sub>O</sub> = 1.4 V to 11.4 V,
     R<sub>L</sub> ≥ 500 kΩ: A<sub>VD</sub> ≥ 100 V/mV (OP07C, 25 °C). The supply-sensitivity
-    row runs from ±3 V. Rev0.6 §3.2 uses 1.4 V as the output low limit and the ±15 V common
+    row runs from ±3 V. Rev0.7 §3.2 uses 1.4 V as the output low limit and the ±15 V common
     mode range, read rail-relative, for the inputs.
   - *To confirm on the first board (V-MEAS-00):* the gate headroom at 1 A and loop stability.
 - *Verified (LM393):*
@@ -321,7 +321,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - Open-collector output, sink ≥ 6 mA (16 typ).
   - *D34 (onsemi LM393/D Rev. 25, April 2014, via LCSC C7955, fetched 2026-11-04):* note 1:
     below a 36 V supply, an input's absolute maximum equals the supply voltage, so the LM393s
-    run from V12F (Rev0.6 §3.2). Common mode 0 to V<sub>CC</sub> − 1.5 V at 25 °C,
+    run from V12F (Rev0.7 §3.2). Common mode 0 to V<sub>CC</sub> − 1.5 V at 25 °C,
     V<sub>CC</sub> − 2.0 V over temperature. V<sub>IO</sub> ±5 / ±9 mV max, I<sub>IB</sub>
     250 / 400 nA max (25 °C / over temperature). I<sub>CC</sub> 0.4 typ / 1.0 max mA for both
     comparators at 25 °C, 2.5 mA max at V<sub>CC</sub> = 30 V. Output leakage 0.1 nA typ at
@@ -339,9 +339,9 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - *D35 (the same sheet via LCSC C15127, fetched 2026-11-04, read from its graphs):* Figure 10,
     single-pulse power junction-to-ambient, about 25 W at 10 ms; Figure 4, R<sub>DS(on)</sub>
     × 1.23 at 70 °C; Figure 7, the gate-charge plateau near −2 V at −4 A. Q53, the J1 soft
-    start, takes ≤ 2.26 W for ≤ 6.7 ms (Rev0.6 §3.1). *To confirm:* V-PWR-03.
+    start, takes ≤ 2.26 W for ≤ 6.7 ms (Rev0.7 §3.1). *To confirm:* V-PWR-03.
 - *Verified (2N7002, JSCJ / JCET datasheet, September 2016, via LCSC C8545, fetched 2026-11-04):*
-  V<sub>th(GS)</sub> 1.0 min / 2.5 max V at 250 µA. Rev0.6 §3.2's reset hold gives its gate
+  V<sub>th(GS)</sub> 1.0 min / 2.5 max V at 250 µA. Rev0.7 §3.2's reset hold gives its gate
   ≥ 2.70 V. *D34 (the same sheet, page 2):* I<sub>DSS</sub> 80 nA max at V<sub>DS</sub> = 60 V;
   I<sub>GSS</sub> ±80 nA at ±20 V; C<sub>iss</sub> 50 pF max.
   - *To confirm on the first board (V-MEAS-06):* the HOLD gates (Q19, Q20, Q39, Q40) stay
@@ -349,15 +349,15 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
 - *Verified (AO3400A):* R<sub>DS(on)</sub> 19 / 32 mΩ at 4.5 V; V<sub>GS(th)</sub> 0.65 / 1.05 /
   1.45 V. *D34 (via LCSC C20917, fetched 2026-11-04):* C<sub>iss</sub> 630 pF typ, Q<sub>g</sub>
   6 / 7 nC at 4.5 V. That gate on DIS_x directly took 10.0 µs to reach 2.5 V, so it sits
-  behind 100 kΩ (DISG_x, Rev0.6 §3.4).
+  behind 100 kΩ (DISG_x, Rev0.7 §3.4).
 - *Verified (S9012, JSCJ, via LCSC C8543, fetched 2026-11-04; D34):* PNP, I<sub>C</sub> −500 mA,
   V<sub>CEO</sub> −30 V (LCSC listing). h<sub>FE</sub> 120–400 at V<sub>CE</sub> = −1 V,
   I<sub>C</sub> = −50 mA, in ranks L 120–200, H 200–350, J 300–400. C8543 is listed by LCSC
-  as "S9012 2T1(RANGE:200-350)", rank H; Rev0.6 §3.4 uses 200–350. *To confirm:* the rank
+  as "S9012 2T1(RANGE:200-350)", rank H; Rev0.7 §3.4 uses 200–350. *To confirm:* the rank
   marking on the reel.
 - *Verified (LEDs, D34):* KT-0805G (C2297) V<sub>F</sub> 2.6–3.1 V at 5 mA, the only
   V<sub>F</sub> figure on its sheet; NCD0805R1 (C84256) V<sub>F</sub> 1.5–2.6 V at 20 mA. At
-  510 Ω from a 3.3 V GPIO, the green's current is not guaranteed (Rev0.6 §6.4). *To confirm:*
+  510 Ω from a 3.3 V GPIO, the green's current is not guaranteed (Rev0.7 §6.4). *To confirm:*
   V-HOST-01.
 - *Verified (AMS1117):*
   - Dropout 1.1 / 1.3 V at 800 mA; 90 °C/W.
@@ -373,7 +373,7 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   - Deviation over −25 to 85 °C: 4.5 typ / 17 max mV.
   - *D34:* I<sub>ref</sub> ≤ 4 µA, plus ≤ 1.2 µA over temperature, in the V_INJ divider's
     spread. The sheet's text states no load-capacitance limit, and neither CJ431 has a
-    capacitor (Rev0.6 §4.1). *To confirm:* V-MEAS-00.
+    capacitor (Rev0.7 §4.1). *To confirm:* V-MEAS-00.
 - *Verified (SMBJ6.5CA):* V<sub>RWM</sub> 6.5 V, V<sub>BR</sub> 7.22–7.98 V, clamp 11.2 V,
   I<sub>R</sub> 500 µA max. It sits only on non-measured rails (J1, J4 VBUS) because of that
   leakage.
@@ -383,13 +383,13 @@ All rows checked 2026-11-03 with `tools/jlc_stock.py`; rows added or changed for
   motional capacitance is given.
   - *To confirm (G9):* Y2 against the CH335F's built-in load capacitors.
   - *To confirm (V-MEAS-06):* Y1 on the RP2040 XOSC at ≈ 10.5 pF load: start-up and
-    frequency (Rev0.6 §6.3). Fallback: ABM8-272-T3 (C20625731, Extended, 7,921 on 2026-11-04,
+    frequency (Rev0.7 §6.3). Fallback: ABM8-272-T3 (C20625731, Extended, 7,921 on 2026-11-04,
     the same SMD3225-4P land), which would be a third Extended part (after D29 and D31)
     and needs the user's decision.
 
 ### Passives (Basic, by value)
 
-Each Use is the binding in `design/circuit/CIRCUIT_DESIGN_Rev0.6_netlist.md` (D34, issue #6
+Each Use is the binding in `design/circuit/CIRCUIT_DESIGN_Rev0.7_netlist.md` (D34, issue #6
 P2), which lists every reference; counts are for both channels. The tolerance and TCR are
 the MPN's, from UNI-ROYAL's code: in `0402WGF100JTCE` the `F` is ±1 % and the `J` in `100J`
 is the decimal multiplier (10 Ω), not ±5 %. LCSC's listing parameters disagreed with the MPN

@@ -8,7 +8,7 @@ the board):
         [--src DIR] [--doc FILE]
 
 --src holds the KiCad project (default design/ecad/source) and --doc the placement document
-(default design/ecad/PLACEMENT_Rev0.6.md); the tests pass corrupted copies. The document is read with
+(default design/ecad/PLACEMENT_Rev0.7.md); the tests pass corrupted copies. The document is read with
 check_pcb.py's parser, not make_pcb.py's, and the board with pcbnew. Distances are pcbnew's
 own shape collisions: a text is its stroked glyphs, a pad its F.Mask opening.
 
@@ -480,7 +480,7 @@ def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=pathlib.Path, default=ROOT / "design" / "ecad" / "source")
-    ap.add_argument("--doc", type=pathlib.Path, default=ROOT / "design" / "ecad" / "PLACEMENT_Rev0.6.md")
+    ap.add_argument("--doc", type=pathlib.Path, default=ROOT / "design" / "ecad" / "PLACEMENT_Rev0.7.md")
     a = ap.parse_args(argv[1:])
     rep = Report()
     pcb, prl = a.src / f"{NICK}.kicad_pcb", a.src / f"{NICK}.kicad_prl"

@@ -4,7 +4,7 @@
   "kicad": "9.0.8",
   "reviewed": "Claude, issue #6 P1, 2026-11-04",
   "about": [
-    "The parts register of Rev0.6 (design/circuit/CIRCUIT_DESIGN_Rev0.6.md 6.2). One entry per symbol.",
+    "The parts register of Rev0.7 (design/circuit/CIRCUIT_DESIGN_Rev0.7.md 6.2). One entry per symbol.",
     "'land' holds what the datasheet says, in the datasheet's own terms; make_libraries.py --check measures the footprint file against it.",
     "'footprint.params' holds design choices for a generated footprint; nothing checks them except the land check and the DRC run.",
     "'pins' maps each symbol pin number to the datasheet's pin name. A [datasheet, symbol] pair means the stock symbol spells the same pin differently; the check then compares the symbol's spelling exactly.",
@@ -41,7 +41,7 @@
         "45": "VREG_VOUT", "46": "USB_DM", "47": "USB_DP", "48": "USB_VDD", "49": "IOVDD", "50": "DVDD",
         "51": "QSPI_SD3", "52": "QSPI_SCLK", "53": "QSPI_SD0", "54": "QSPI_SD2", "55": "QSPI_SD1",
         "56": ["QSPI_SS_N", "~{QSPI_SS}"], "57": "GND"},
-      "notes": ["Figure 3 gives the ePad no number; it is numbered 57 as in KiCad's symbol and Rev0.6 6.5.",
+      "notes": ["Figure 3 gives the ePad no number; it is numbered 57 as in KiCad's symbol and Rev0.7 6.5.",
                 "G20: the land is generated from Figure 167's numbers, not copied from a stock QFN-56 footprint."]
     },
     {
@@ -419,7 +419,7 @@
       "pins": {"A1": "GND", "A4": "VBUS", "A5": "CC1", "A6": "DP1", "A7": "DN1", "A8": "SBU1",
                "B1": "GND", "B4": "VBUS", "B5": "CC2", "B6": "DP2", "B7": "DN2", "B8": "SBU2", "S1": "SHIELD"},
       "notes": ["Each 0.60 pad carries two contacts (the drawing labels A1 B12, A4 B9, B4 A9, B1 A12); the footprint numbers it after the first, and the symbol has one pin per pad.",
-                "Pad order left to right in the top view, opening toward the viewer: A1 A4 B8 A5 B7 A6 A7 B6 A8 B5 B4 B1, so D- (B7), D+ (A6), D- (A7), D+ (B6) alternate: joining A6 to B6 and A7 to B7 needs one crossing (ROUTING_Rev0.6.md). KiCad's USB_C_Receptacle_HRO_TYPE-C-31-M-12 has the same order, A1 at -x and the opening toward +y.",
+                "Pad order left to right in the top view, opening toward the viewer: A1 A4 B8 A5 B7 A6 A7 B6 A8 B5 B4 B1, so D- (B7), D+ (A6), D- (A7), D+ (B6) alternate: joining A6 to B6 and A7 to B7 needs one crossing (ROUTING_Rev0.7.md). KiCad's USB_C_Receptacle_HRO_TYPE-C-31-M-12 has the same order, A1 at -x and the opening toward +y.",
                 "DERIVED: the slot pads' 1.0 width (land.slot_pad_width).",
                 "UNCERTAIN: the drawing is for a 0.80 mm board (THICKNESS 0.80MM); this board is 1.6 mm, so the shell legs may not reach through the slots. The first board shows it (V-MFG-03); the legs are soldered by reflow from Top."]
     },
@@ -504,7 +504,7 @@
     {
       "id": "TC2030-NL",
       "value": "TC2030-NL (DNL)",
-      "refs": "SWD (no designator in Rev0.6)",
+      "refs": "SWD (no designator in Rev0.7)",
       "mpn": null,
       "manufacturer": "Tag-Connect (footprint only)",
       "order": {"vendor": "none", "code": "", "class": "Footprint only, not populated"},
@@ -584,7 +584,7 @@
       "mpn": null, "manufacturer": null,
       "order": {"vendor": "none", "code": "", "class": "Schematic only"},
       "symbol": {"base": "power:PWR_FLAG"},
-      "footprint": {"none": "ERC marker on V5L, V12F, VDDA and V5A, nets whose supply arrives through a passive part (CIRCUIT_DESIGN_Rev0.6_netlist.md); not a part, no footprint"},
+      "footprint": {"none": "ERC marker on V5L, V12F, VDDA and V5A, nets whose supply arrives through a passive part (CIRCUIT_DESIGN_Rev0.7_netlist.md); not a part, no footprint"},
       "datasheet": {"title": "KiCad 9.0.8 power.kicad_sym", "revision": "-", "url": "", "pins": "1 power output", "land": "-"},
       "land": {"kind": "none"},
       "pins": {"1": ["power flag", "~"]}

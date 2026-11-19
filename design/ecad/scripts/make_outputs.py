@@ -1,10 +1,10 @@
-"""Write the Rev0.6 manufacturing candidate from the KiCad project (issue #6 P5; CLAUDE.md 2, 8).
+"""Write the Rev0.7 manufacturing candidate from the KiCad project (issue #6 P5; CLAUDE.md 2, 8).
 
 Run with KiCad's own Python from the repository root, after make_pcb.py:
 
     "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/make_outputs.py [--no-check]
 
-Output: manufacturing/working/rev0.6/, rebuilt on every run. It is a WIP candidate: never
+Output: manufacturing/working/rev0.7/, rebuilt on every run. It is a WIP candidate: never
 orderable (CLAUDE.md 2, manufacturing/working/), and not a release. Every file is named
 <Product>_<Board>_<Revision>_<Artifact> (CLAUDE.md 2):
 - _Gerber.zip: the Gerbers of the 4 copper layers, paste, silkscreen, mask and Edge.Cuts with
@@ -71,9 +71,9 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 SRC = ROOT / "design" / "ecad" / "source"
 FRAMES = ROOT / "design" / "ecad" / "jlcpcb_model_frame.json"
-OUT = ROOT / "manufacturing" / "working" / "rev0.6"
+OUT = ROOT / "manufacturing" / "working" / "rev0.7"
 NICK = "usb-power-hub"
-PREFIX = "UsbPowerHub_Main_Rev0.6"
+PREFIX = "UsbPowerHub_Main_Rev0.7"
 CLI = pathlib.Path(sys.executable).resolve().parents[1] / "bin" / "kicad-cli.exe"
 ORIGIN = (50.0, 122.0)                     # the board's lower-left corner on the sheet
 LAYERS = "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"
@@ -260,7 +260,7 @@ def manifest(board, pcb, machine, hand, files, erc, drc, sources):
     dnp = sorted((fp.GetReference() for fp in board.GetFootprints()
                   if fp.GetAttributes() & pcbnew.FP_EXCLUDE_FROM_BOM), key=natural)
     lines = [
-        "# USB Power-Control Hub Rev0.6 — manufacturing candidate",
+        "# USB Power-Control Hub Rev0.7 — manufacturing candidate",
         "",
         "> **State: WIP — MANUFACTURING PROHIBITED.** A candidate set in `manufacturing/working/`:",
         "> never orderable, not a release (CLAUDE.md 2, 3). Written by",

@@ -7,7 +7,7 @@ data-line taps, issue #10); amended 2026-11-19 for the layout revision Rev0.6, D
 mirror-symmetric, issue #13: REQ-MECH-02's pitch figure; no requirement changes).
 
 This file is the authority for **what** the product must do (CLAUDE.md Section 2).
-**How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.6.md`. **How each requirement is
+**How** it is done: `design/circuit/CIRCUIT_DESIGN_Rev0.7.md`. **How each requirement is
 proven:** `requirements/verification.md` — every `REQ-` here has at least one `V-` there.
 
 Status legend:
@@ -15,7 +15,7 @@ Status legend:
 | Status | Meaning |
 |---|---|
 | **Settled** | Traced to a user decision (D-number) or a CLAUDE.md MUST. Change only with the user |
-| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.6 §10, D14–D21 and D23; D23's MCU choice is superseded by D29, D15's hub module by D31 and D33's USB-C module headers by D37, all user decisions). Binding until the user reverts it; the user may revert any one |
+| **Delegated** | Decided by Claude under the user's 2026-11-03 delegation (circuit Rev0.7 §10, D14–D21 and D23; D23's MCU choice is superseded by D29, D15's hub module by D31 and D33's USB-C module headers by D37, all user decisions). Binding until the user reverts it; the user may revert any one |
 | **Proposed** | Written by Claude to fill a gap and **not** covered by the delegation. Becomes Settled when the user accepts it |
 | **Open** | Cannot be written until the named Open Issue (CLAUDE.md Section 11) is resolved |
 | **Withdrawn** | Retired with a reason; the ID is not reused |

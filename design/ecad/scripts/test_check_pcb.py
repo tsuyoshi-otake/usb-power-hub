@@ -33,8 +33,8 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 CHECK = HERE / "check_pcb.py"
 ECAD = HERE.parent
-DOCS = {"doc": ECAD / "PLACEMENT_Rev0.6.md",
-        "capture": ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.6_netlist.md"}
+DOCS = {"doc": ECAD / "PLACEMENT_Rev0.7.md",
+        "capture": ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.7_netlist.md"}
 ORIGIN = (50.0, 122.0)
 
 _spec = importlib.util.spec_from_file_location("sexpr", HERE / "sexpr.py")

@@ -1,10 +1,10 @@
-"""Route the Rev0.6 board from the routing document (issue #6 P4; CLAUDE.md 5.1, 5.3, 5.4).
+"""Route the Rev0.7 board from the routing document (issue #6 P4; CLAUDE.md 5.1, 5.3, 5.4).
 
 A library, not a script. make_pcb.py owns the board file and calls it after placing the parts;
 autoroute.py calls it to build Freerouting's input. Both parse the documents with
 make_pcb.doc_tables and hand this module the tables.
 
-The routed board is built in this order (design/ecad/ROUTING_Rev0.6.md):
+The routed board is built in this order (design/ecad/ROUTING_Rev0.7.md):
 1. `plane()`: In1.Cu becomes a plane layer holding the document's In1 zone (GND).
 2. `apply_rows()`: the hand-drawn tracks and vias of the `route` table and, for both channels,
    the `channel_route` table; channel B is channel A moved by dx, with the placement's
@@ -87,7 +87,7 @@ def channel_b(row, refs, dx):
 def read(tables, refs, dx):
     """The routing document's tables -> {zones, pairs, rows, classes, keepouts, epads}.
 
-    tables: make_pcb.doc_tables of ROUTING_Rev0.6.md; refs: the placement's Ref A -> Ref B
+    tables: make_pcb.doc_tables of ROUTING_Rev0.7.md; refs: the placement's Ref A -> Ref B
     (RS10 -> RS20 among them); dx: the placement's channel offset.
     """
     need = ("zones", "pairs", "route", "channel_route", "epad", "classes", "keepouts", "router_layers",
@@ -471,7 +471,7 @@ def _hole_stub(pad, cu, hs_nets):
     hole's axis (toward the centre of a round hole), ends FAN_HOLE_INSET inside the hole's pad,
     is FAN_HOLE_REACH long at most and keeps the fanout's clearances on F.Cu. The plane joins a
     plated pad solid, so the pad reaches L2 through the hole's wall and needs no via: beside a
-    receptacle's rear shell slot no via fits (ROUTING_Rev0.6.md, GND fanout)."""
+    receptacle's rear shell slot no via fits (ROUTING_Rev0.7.md, GND fanout)."""
     cx, cy = pcbnew.ToMM(pad.GetPosition().x), pcbnew.ToMM(pad.GetPosition().y)
     best = None
     for q in pad.GetParentFootprint().Pads():

@@ -26,8 +26,8 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 CHECK = HERE / "check_schematic.py"
 ECAD = HERE.parent
-DOCS = {"doc": ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.6_netlist.md",
-        "circuit": ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.6.md",
+DOCS = {"doc": ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.7_netlist.md",
+        "circuit": ROOT / "design" / "circuit" / "CIRCUIT_DESIGN_Rev0.7.md",
         "parts": ROOT / "requirements" / "parts.md"}
 
 _spec = importlib.util.spec_from_file_location("sexpr", HERE / "sexpr.py")

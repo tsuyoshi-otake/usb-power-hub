@@ -10,9 +10,9 @@
 	(title_block
 		(title "USB Power-Control Hub")
 		(date "2026-11-04")
-		(rev "Rev0.6")
+		(rev "Rev0.7")
 		(comment 1 "WIP - MANUFACTURING PROHIBITED")
-		(comment 2 "Source: design/circuit/CIRCUIT_DESIGN_Rev0.6.md")
+		(comment 2 "Source: design/circuit/CIRCUIT_DESIGN_Rev0.7.md")
 		(comment 3 "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
 	)
 	(layers
@@ -66794,7 +66794,7 @@
 			)
 		)
 	)
-	(gr_text "Rev0.6"
+	(gr_text "Rev0.7"
 		(at 132.5 106 0)
 		(layer "F.SilkS")
 		(uuid "cb8df27d-9226-5923-ad8a-5a1a9f2b0d1e")

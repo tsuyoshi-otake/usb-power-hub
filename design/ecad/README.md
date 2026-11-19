@@ -13,8 +13,8 @@ not to edit.
 |---|---|
 | `source/` | The KiCad project: `usb-power-hub.kicad_pro` (rules, net classes), `usb-power-hub.kicad_dru` (JLCPCB's hole figures for vias and PTH pads as custom DRC rules, issue #8), the root sheet and six sub-sheets, `usb-power-hub.kicad_pcb` (stackup, outline, placed footprints). |
 | `libraries/` | The project symbols and footprints and `library.json`, the datasheet facts they are checked against (its README). |
-| `PLACEMENT_Rev0.6.md` | Where every part sits on the board, and why (P3), and its silkscreen labels: text, position, size, stroke and leader (P5). |
-| `ROUTING_Rev0.6.md` | The plane, the hand-drawn tracks (USB pairs, Kelvin taps, power trunks), the zones, the router's classes, keepouts, layer preferences and costs, the patch drawn after the router, and why (P4). |
+| `PLACEMENT_Rev0.7.md` | Where every part sits on the board, and why (P3), and its silkscreen labels: text, position, size, stroke and leader (P5). |
+| `ROUTING_Rev0.7.md` | The plane, the hand-drawn tracks (USB pairs, Kelvin taps, power trunks), the zones, the router's classes, keepouts, layer preferences and costs, the patch drawn after the router, and why (P4). |
 | `routing/` | `carried.json`, the tracks and vias of Rev0.5's routing that still stand on this board (written by `carry.py`); the router's session `usb-power-hub.ses` and `autoroute.json`, which records the router input, the jar, the Java runtime and the arguments that produced it. |
 | `scripts/` | The generators, their checkers and the checkers' negative tests; the two independent checks of a candidate set. |
 
@@ -28,10 +28,10 @@ written and checked.
 |---|---|---|---|---|---|
 | 1 | `make_project.py` | `design/experiments/stackup-impedance/stackups.json` | `.kicad_pro`, `.kicad_dru`, a bare `.kicad_pcb` | `make_project.py --check` | `test_make_project.py` |
 | 2 | `make_libraries.py` | `libraries/library.json` | `libraries/usb-power-hub.kicad_sym`, `usb-power-hub.pretty/` | `check_libraries.py` | `test_check_libraries.py` |
-| 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.6_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
-| 4 | `carry.py` | the step-6 inputs up to the GND fanout; Rev0.5's session and patch table, read from Git history at the commit the carry table of `ROUTING_Rev0.6.md` names | `routing/carried.json` | `carry.py --check`; `make_pcb.py`, which refuses a record made for another board or from other sources | `test_carry.py` |
+| 3 | `make_schematic.py` | `design/circuit/CIRCUIT_DESIGN_Rev0.7_netlist.md` (the capture list), the symbols | the seven `.kicad_sch` | ERC, `check_schematic.py` | `test_check_schematic.py` |
+| 4 | `carry.py` | the step-6 inputs up to the GND fanout; Rev0.5's session and patch table, read from Git history at the commit the carry table of `ROUTING_Rev0.7.md` names | `routing/carried.json` | `carry.py --check`; `make_pcb.py`, which refuses a record made for another board or from other sources | `test_carry.py` |
 | 5 | `autoroute.py` | what `make_pcb.py --dsn` writes from the step-6 inputs, the carried record included | `routing/usb-power-hub.ses`, `routing/autoroute.json` | `make_pcb.py`, which refuses a session made from other input | — |
-| 6 | `make_pcb.py` | the schematic's exported netlist, `PLACEMENT_Rev0.6.md`, `ROUTING_Rev0.6.md`, the carried record, the session, the footprints | `.kicad_pcb` | `make_project.py --check`, `check_pcb.py`, `check_routing.py` (each with DRC), `check_silk.py` | `test_check_pcb.py`, `test_check_routing.py`, `test_check_silk.py` |
+| 6 | `make_pcb.py` | the schematic's exported netlist, `PLACEMENT_Rev0.7.md`, `ROUTING_Rev0.7.md`, the carried record, the session, the footprints | `.kicad_pcb` | `make_project.py --check`, `check_pcb.py`, `check_routing.py` (each with DRC), `check_silk.py` | `test_check_pcb.py`, `test_check_routing.py`, `test_check_silk.py` |
 | 7 | `make_outputs.py` | the project in `source/`, `design/ecad/jlcpcb_model_frame.json` | `manufacturing/working/rev0.6/`: Gerber and drill zip, JLCPCB BOM and CPL, hand-solder list, schematic and assembly PDFs, two renders, ERC and DRC reports, `RELEASE_MANIFEST.md` (state `WIP`), `SHA256SUMS.txt` | `check_outputs.py` | `test_check_outputs.py` |
 
 ```sh
@@ -53,9 +53,9 @@ Step 5 needs Freerouting 2.5.0 and a Java runtime, which are not in the reposito
 script refuses any jar or runtime other than the pinned ones (their SHA-256 is in the
 script). It is needed only when its input changes: `make_pcb.py` stops and asks for it when
 the session no longer matches the board it would route. The committed session took about
-5 min on this machine (8 passes, single-threaded; `ROUTING_Rev0.6.md`, *Router*, says why more
+5 min on this machine (8 passes, single-threaded; `ROUTING_Rev0.7.md`, *Router*, says why more
 passes change nothing while the carried copper is fixed). A new record or a new session also
-needs a new patch table (`ROUTING_Rev0.6.md`, *After the router*).
+needs a new patch table (`ROUTING_Rev0.7.md`, *After the router*).
 
 `make_project.py` writes a bare board, so `make_pcb.py` runs after it; until then
 `check_pcb.py` fails, because the board holds no footprints. A re-run of any generator but
@@ -111,7 +111,7 @@ as a plain interpreter), and they are not a pipeline step: run them on a release
 
 | Script | Reads | Checks | Corruptions |
 |---|---|---|---|
-| `independent_check_sets.py` | the Gerber zip, the CPL, the BOM, the hand-solder list, the silkscreen table of `PLACEMENT_Rev0.6.md`, the board | 30 with three fiducials: no Bottom paste, the outline, each fiducial in copper and mask, the CPL's side and bounds, the hand-solder list apart from BOM and CPL, BOM against CPL, the 16 test pads of REQ-MFG-04 | 8 |
+| `independent_check_sets.py` | the Gerber zip, the CPL, the BOM, the hand-solder list, the silkscreen table of `PLACEMENT_Rev0.7.md`, the board | 30 with three fiducials: no Bottom paste, the outline, each fiducial in copper and mask, the CPL's side and bounds, the hand-solder list apart from BOM and CPL, BOM against CPL, the 16 test pads of REQ-MFG-04 | 8 |
 | `independent_check_positions.py` | the Gerber zip, the CPL, the BOM, the hand-solder list, the board, `jlcpcb_model_frame.json`, the previous release's Gerber zip and CPL | 13: the parts and their codes in the three lists, every CPL point and rotation, every Top paste flash, every hit of the two drill files | 16, three of them the previous release's files in the place of this set's |
 
 ```sh
@@ -119,7 +119,7 @@ R=manufacturing/releases/rev0.6/r02/UsbPowerHub_Main_Rev0.6
 P=manufacturing/releases/rev0.5/r02/UsbPowerHub_Main_Rev0.5
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/independent_check_sets.py \
     ${R}_Gerber.zip ${R}_CPL_JLCPCB.csv ${R}_BOM_JLCPCB.csv ${R}_HandSolder.csv \
-    design/ecad/PLACEMENT_Rev0.6.md design/ecad/source/usb-power-hub.kicad_pcb
+    design/ecad/PLACEMENT_Rev0.7.md design/ecad/source/usb-power-hub.kicad_pcb
 "<KiCad 9.0>/bin/python.exe" -I -B design/ecad/scripts/independent_check_positions.py \
     ${R}_Gerber.zip ${R}_CPL_JLCPCB.csv ${R}_BOM_JLCPCB.csv ${R}_HandSolder.csv \
     design/ecad/source/usb-power-hub.kicad_pcb design/ecad/jlcpcb_model_frame.json \
@@ -153,11 +153,11 @@ and records written before that day name them so.
 | Change | Edit | Then run |
 |---|---|---|
 | A part, pin or net | the capture list | steps 3 to 7 |
-| A part's position or rotation | `PLACEMENT_Rev0.6.md` | steps 4 to 7 |
-| A silkscreen label | `PLACEMENT_Rev0.6.md`, *Silkscreen* | steps 6 and 7 (labels are not router input) |
-| A hand-drawn track, a zone, a router class or keepout | `ROUTING_Rev0.6.md` | steps 4 to 7 |
-| A row of the carry table (*Carried from Rev0.5*) | `ROUTING_Rev0.6.md` | steps 4 to 7 |
-| A row of the patch table (*After the router*) | `ROUTING_Rev0.6.md` | steps 6 and 7 (the record and the session stay: the patch is not router input) |
+| A part's position or rotation | `PLACEMENT_Rev0.7.md` | steps 4 to 7 |
+| A silkscreen label | `PLACEMENT_Rev0.7.md`, *Silkscreen* | steps 6 and 7 (labels are not router input) |
+| A hand-drawn track, a zone, a router class or keepout | `ROUTING_Rev0.7.md` | steps 4 to 7 |
+| A row of the carry table (*Carried from Rev0.5*) | `ROUTING_Rev0.7.md` | steps 4 to 7 |
+| A row of the patch table (*After the router*) | `ROUTING_Rev0.7.md` | steps 6 and 7 (the record and the session stay: the patch is not router input) |
 | A part's JLCPCB model rotation or shift | `jlcpcb_model_frame.json` | step 7, then the JLCPCB placement preview |
 | A symbol or footprint | `libraries/library.json`, `make_libraries.py` | steps 2 to 7 |
 | Rules, net classes, stackup, outline | `make_project.py` | step 1, then 4 to 7 |

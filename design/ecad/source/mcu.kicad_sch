@@ -7,9 +7,9 @@
 	(title_block
 		(title "USB Power-Control Hub")
 		(date "2026-11-04")
-		(rev "Rev0.6")
+		(rev "Rev0.7")
 		(comment 1 "WIP - MANUFACTURING PROHIBITED")
-		(comment 2 "Source: design/circuit/CIRCUIT_DESIGN_Rev0.6.md")
+		(comment 2 "Source: design/circuit/CIRCUIT_DESIGN_Rev0.7.md")
 		(comment 3 "Stackup JLC04161H-7628 (D27), leaded HASL (D30)")
 		(comment 4 "Sheet: U1 RP2040, U8 flash, Y1, SWD")
 	)

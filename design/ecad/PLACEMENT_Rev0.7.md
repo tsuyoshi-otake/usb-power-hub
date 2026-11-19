@@ -1,6 +1,6 @@
-# USB Power-Control Hub — Rev0.6 placement
+# USB Power-Control Hub — Rev0.7 placement
 
-> **WIP — MANUFACTURING PROHIBITED.** Where every part of Rev0.6 sits on the
+> **WIP — MANUFACTURING PROHIBITED.** Where every part of Rev0.7 sits on the
 > 100 × 72 mm board (D24), and why, with its silkscreen labels. Issue #6 P3 and P5, reworked
 > for the machine-placed USB-C receptacles of issue #8 (D37) and the data-line taps of issue #10
 > (D38), and for the mirror-symmetric connectors of issue #13 (D39, Rev0.6); placement problems
@@ -30,7 +30,7 @@ here, never in KiCad: the next run of `make_pcb.py` rebuilds the board.
   rotation. `{x}` in a region name is `A` or `B`. The table holds the two front ends.
 - Sixteen parts of each channel sheet are in the common table, because they cannot be 33.8 mm
   from their twin. R139/C114/C115 and R239/C214/C215 are the over-current threshold filters at
-  U30's inputs (Rev0.6 §3.4): U30 is shared, so the two sets sit beside it. The other thirteen
+  U30's inputs (Rev0.7 §3.4): U30 is shared, so the two sets sit beside it. The other thirteen
   are a port's receptacle, its port parts, its button and its LEDs (J2, C116, D2, Q13, R103,
   R104, R109, R110, SW1, D10, D11, R140, R141, and channel B's): since D39 OUT B stands
   65.0 mm from OUT A, so that J3 mirrors J2 about the board's centre line (*Mirrored parts*).
@@ -109,7 +109,7 @@ slots on both sides of it (`library.json`, measured by `check_libraries.py`).
 - The HS pair reaches the pad row through a lane from the corridor (*Keepouts*), so no
   courtyard stands in a lane.
 - A port's own parts stand beside its receptacle: the CC network west of the lane, the port
-  capacitor and the discharge circuit east of it (Rev0.6 §3.1).
+  capacitor and the discharge circuit east of it (Rev0.7 §3.1).
 
 ## Common parts
 
@@ -424,7 +424,7 @@ part. `make_pcb.py` writes each row as a text on F.SilkS, with its leader, after
 | Label | Text | x | y | Rot | Width | Height | Stroke | Leader |
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | title | USB Power-Control Hub | 66 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
-| revision | Rev0.6 | 82.5 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
+| revision | Rev0.7 | 82.5 | 16 | 0 | 1.2 | 1.2 | 0.2 | - |
 | J1 | HOST | 90.4 | 69.5 | 0 | 1 | 1 | 0.17 | - |
 | J2 | OUT A | 9.6 | 3 | 0 | 1 | 1 | 0.17 | - |
 | J3 | OUT B | 90.4 | 3 | 0 | 1 | 1 | 0.17 | - |
@@ -474,7 +474,7 @@ part. `make_pcb.py` writes each row as a text on F.SilkS, with its leader, after
 | Study | Here | Why |
 |---|---|---|
 | R_AFEA / R_AFEB 27 × 31 mm | AFE_A / AFE_B 33.1 × 30.5 mm | the library's courtyards are larger than the study's planning ones (an SOT-23 is 13.8 mm², not 10.3); at 27 mm the channel filled 72 % before routing |
-| J2 / J3 as modules at x 18 / 46 | receptacles at x 17.5 / 82.5 (pitch 65.0 mm) | D37: a receptacle, its origin the body centre, not the module's pin 1. D39: J3 mirrors J2 about x 50 (until Rev0.5 it stood at its own front end, x 51.3, pitch 33.8 mm), so OUT B's port parts are 31.2 mm east of channel B's front end and VBUS_B crosses that distance on L4 (`ROUTING_Rev0.6.md`) |
+| J2 / J3 as modules at x 18 / 46 | receptacles at x 17.5 / 82.5 (pitch 65.0 mm) | D37: a receptacle, its origin the body centre, not the module's pin 1. D39: J3 mirrors J2 about x 50 (until Rev0.5 it stood at its own front end, x 51.3, pitch 33.8 mm), so OUT B's port parts are 31.2 mm east of channel B's front end and VBUS_B crosses that distance on L4 (`ROUTING_Rev0.7.md`) |
 | J1 / J4 as modules at the back edge | receptacles, J1 at x 82.5 and J4 at x 17.5 | D37: 1.06 mm past the back edge, J4 above F1. D39: J1 mirrors J4; it moved 6.5 mm east of Rev0.5's x 76.0, toward the hub strip, and its TVS and soft start (J1F) with it |
 | U7 / U17 at x 55.5 / 65.8, upright | stacked at x 68, rotated 90° | the wider front ends took that space; turned, each ADC's inputs face the front ends |
 | MAU104 at (82, 30), turned | front middle, courtyard (45.5, 0.55)–(65.5, 7.15) | the ADCs took its region, and since D39 OUT B's port parts the front right, where it stood until Rev0.5. Its courtyard is 6.15 mm from R11's in REF, the nearest analog part (the rule is ≥ 6.0 mm, `check_pcb.py`), and 0.21 mm from SW2's: a window 0.39 mm wide in x. In Rev0.5 the nearest analog part was U7 at 11.95 mm, and REF was 32.34 mm away |
@@ -496,4 +496,4 @@ part. `make_pcb.py` writes each row as a text on F.SilkS, with its leader, after
   decouplers of pins 43–45 and 48–50 stand in one column at x 36.2, and the USB pair leaves
   pins 46/47 west through R20/R22, then turns north and east past R23 and R21. P4 moved this
   block outward (*Deviations*) and drew the escapes the router left open
-  (`ROUTING_Rev0.6.md`, *Hand-drawn tracks*).
+  (`ROUTING_Rev0.7.md`, *Hand-drawn tracks*).

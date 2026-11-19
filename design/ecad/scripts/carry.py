@@ -1,4 +1,4 @@
-"""Carry the previous revision's routing onto this revision's board (issue #13; ROUTING_Rev0.6.md,
+"""Carry the previous revision's routing onto this revision's board (issue #13; ROUTING_Rev0.7.md,
 "Carried from Rev0.5").
 
 Run with KiCad's own Python from the repository root, after make_schematic.py and before
