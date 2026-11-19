@@ -804,7 +804,14 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   largest applicable one counts. Switching the wallet's tabs and opening a "Rules" dialog are read only;
   "Get Coupon", "Get All Coupons", "Spin Now" and the social-share icons are not (a share is a public post).
   A JavaScript call that prints hrefs is blocked as "Cookie/query string data": read a link's `href` with
-  `read_page` on its ref.
+  `read_page` on its ref. My Coupons is `/user-center/payments/coupon` (the coupon center's "Check My Coupons >"),
+  20 cards a page: read every page. A card's terms are a popover behind "Details >", opened by a mouse click on
+  the card's own link (a scripted `click()` opens nothing, and a click one row off opens the neighbour's); the
+  coupon center carries the same terms in hidden `role="tooltip"` elements. No page says whether "orders over
+  $N" of an SMT coupon counts the PCB with the PCBA price or the PCBA price alone (#13, 2026-11-19: BF PCBA $12
+  over $50, against PCB $8.00 + PCBA $44.85): only the checkout shows which coupons an order can take, so say
+  "may apply", with both sums. A script that collects every tooltip of a signed-in page also returns the header's
+  account popover: filter on "Coupon Terms" before printing.
 
 ## Printed parts (manifold3d 3.5.4 and trimesh 5.2.0 in `~/tmp/cadvenv`; #11, 2026-11-13)
 

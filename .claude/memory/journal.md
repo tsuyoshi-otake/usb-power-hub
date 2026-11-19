@@ -2124,3 +2124,56 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
 - **Learning.** In `rules.md`: since 2026-11-19 a scripted fetch of an Akizuki product page is refused, and the page
   is read in the browser; where the stock label stands on the page; a `rubric-verifier` cannot repeat a browser read.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-akizuki-basket (#13)
+
+- **Request.** 「先行してこうにゅうするよ」, then 「秋月でカートいれといて」, and after the report 「ほかと一緒に買うからいったんこのままで」.
+  A basket, not an order: ご注文手続きへ was not pressed, nothing was ordered or paid.
+- **Done.** In the user's Chrome, 18:50-18:53 JST. The basket was empty before. After: 100238 MCP3208-CI/P x 4,
+  104132 MAU104 x 2, 108805 10 Ω 1 W (bag of 100) x 1, 109588 0.1 Ω 1 W x 4, 112630 MF-R300 x 2; ご注文小計 ￥4,240,
+  read twice. That is the need of 2 boards, with no spare. The user orders it later, with other goods.
+- **Found.** g100238's page does not say how many ICs a pack holds ("1パック", ￥500; other products on the page say
+  "1パック1個入"). The related-product blocks on that page, whose stock figures the stock record quotes, are no
+  stand-in for the MCP3208: 106675 (ADT7410 module), 113582 (0.1 µF capacitor), 103583 (M3 screws), 100006 (14-pin
+  socket). 注文方法: shipping is computed per order and is free from 11,000 yen; the basket page says an order made
+  without signing in is cash on delivery only, and that a basket is kept 30 days.
+- **Method, as it worked.** On a product page: check the code in `.block-goods-name`, set `input[name="purchase_qty"]`
+  of the pane `pane-goods-right-side`, press that pane's `button.block-add-cart--btn`. The press navigates to the
+  basket, and a script still running then dies ("Inspected target navigated or closed"): press from a `setTimeout`,
+  return, wait with the browser's own wait action, and read the basket in a new call.
+- **Not verified.** Whether a basket reserves stock; the pack's content; the shipping amount; whether the browser is
+  signed in at Akizuki.
+- **Record.** Outside the repository, `~/tmp/usb-power-hub/rev06-gate/evidence/akizuki-cart-2026-11-19.txt`. No
+  document of the release changed: the purchase goes into r01's manifest when it is made.
+- **Commits.** The next entry's. Not pushed.
+
+## 2026-11-19 rev06-coupons (#13)
+
+- **Request.** 「JLCPCBでクーポン使えないかチェック4層基板だっけ?HASLでいいよね」. A check, not a claim: no "Get Coupon", "Get All
+  Coupons", "Get Flash Coupon", "Spin Now" or "Use Now"; nothing saved to the cart, no terms accepted, nothing ordered
+  or paid.
+- **Answered from the repository.** 4 layers (D10; JLC04161H-7628; the quote form read "Detected 4 layer board of
+  72x100mm") and leaded HASL (D30; the quote was read with "HASL(with lead)"). The order the coupons are held
+  against is r01's quote of 2026-11-19: PCB $8.00 + Economic PCBA $44.85 = $52.85 without shipping.
+- **Found (the user's signed-in Chrome, about 18:58-19:09 JST; the four places of the rule).**
+  - My Coupons, Unused: 24. The account now holds the Black Friday warm-up coupons that were only claimable on
+    2026-11-13. For this order: **BF PCBA $12** (SMT; "$12 off for orders over $50", excluding freight; expires
+    2026/11/29; "Valid in certain regions/countries"), JLCONE PCB $5 (PCB; over $2; until 2026/12/14), BF PCBA Parts
+    $10 (JLCPCB Parts; over $50). Used and Expired: nothing usable.
+  - Coupon center, not claimed: PCBA Special Offer $9 and $6 (SMT; orders over $1 excluding freight; until
+    2026/11/30); JLCONE 4-Layer PCB $5 (over $5).
+  - Event page: the sale is live, 18 Nov to 2 Dec (ET). "Exclusive Coupons", limited, no terms shown, not claimed:
+    BF PCBA $15, BF 1-4L PCB $2 and ten more. Flash coupons, reset daily at 10:00 ET, one claim per user: "PCB
+    Coupon: $30 Off $50", "PCBA Coupon: $50 Off $100", "$30 Off $50" (no product named) and six more.
+  - Help article "Coupon Terms and Conditions": one coupon per order; valid only "applied to the qualifying item".
+- **Not verified.** Whether the $50 of BF PCBA $12 counts the PCB with the PCBA price ($52.85, met by $2.85) or the
+  PCBA price alone ($44.85, short by $5.15): no page says, and only the checkout shows which coupons an order can
+  take. Whether a PCB with its assembly is one order or two for coupons. The terms of BF PCBA $15, BF 1-4L PCB $2
+  and the flash "$30 Off $50" (shown only after a claim). Whether the JLCONE coupons work in the browser. Validity
+  for Japan. The time zone of the expiry dates. One read, by me; no independent reader.
+- **Effect, one coupon per order, on $52.85:** $9 gives $43.85, $12 gives $40.85, $15 gives $37.85.
+- **Learning.** In `rules.md`, the coupon rule, updated in place: where My Coupons is and that it has pages; how a
+  card's terms are opened; that the threshold's base is not stated anywhere; that a tooltip sweep of a signed-in
+  page returns the account popover (it did here, in the tool output; nothing of it is in a file).
+- **Record.** Outside the repository, `~/tmp/usb-power-hub/rev06-gate/evidence/jlcpcb-coupons-2026-11-19.txt`.
+- **Commits.** This entry's. Not pushed.
