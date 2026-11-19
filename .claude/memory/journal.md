@@ -2325,3 +2325,7 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   board's bottom face free under J5, which the enclosure's tray covers. Nothing on the board changed; D40 names
   the listing. Chrome's screenshots timed out on that tab after the first; the two images were read from the
   fetch tool's saved files instead.
+- **Follow-up 3 (2026-11-19).** Asked to measure the clamp's row distance and reach when it arrives, the user
+  answered 「まあ、届くよ」 and 「図らなくていいよ」. Decision (user): no measurement before manufacture; J5 stays as
+  drawn (rows 1.60 and 4.14 mm from the edge), and the first board with the clamp on it is the check. D40 records
+  it. Nothing on the board changed.
