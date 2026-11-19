@@ -811,7 +811,10 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   $N" of an SMT coupon counts the PCB with the PCBA price or the PCBA price alone (#13, 2026-11-19: BF PCBA $12
   over $50, against PCB $8.00 + PCBA $44.85): only the checkout shows which coupons an order can take, so say
   "may apply", with both sums. A script that collects every tooltip of a signed-in page also returns the header's
-  account popover: filter on "Coupon Terms" before printing.
+  account popover: filter on "Coupon Terms" before printing. A coupon's name is not its terms: claimed on
+  2026-11-19, "BF PCBA $15" needs an order over $100, and the flash "$30 Off $50" is of type ALL (no product
+  named), over $50, so it outranks the SMT coupons for an order just above $50. A claim shows as the dialog
+  "Coupon Received" (coupon center) or as the button turning to "Coupon Claimed" (event page).
 
 ## Printed parts (manifold3d 3.5.4 and trimesh 5.2.0 in `~/tmp/cadvenv`; #11, 2026-11-13)
 

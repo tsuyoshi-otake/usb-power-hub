@@ -2177,3 +2177,28 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   page returns the account popover (it did here, in the tool output; nothing of it is in a file).
 - **Record.** Outside the repository, `~/tmp/usb-power-hub/rev06-gate/evidence/jlcpcb-coupons-2026-11-19.txt`.
 - **Commits.** This entry's. Not pushed.
+
+## 2026-11-19 rev06-coupons-claimed (#13)
+
+- **Request.** 「取得する」, the answer to "PCBA 用クーポン 3 枚（$15・$9・$30 引き）を、いま取得しますか？". Three claims and
+  no more: not "Get All Coupons", no other "Get Coupon", no "Use Now", nothing saved to the cart, no terms accepted,
+  nothing ordered or paid.
+- **Done (the user's signed-in Chrome, about 20:09-20:12 JST).** PCBA Special Offer $9 (coupon center; dialog "Coupon
+  Received", valid until 2026/11/30), BF PCBA $15 and the flash "$30 Off $50" (event page; the buttons became
+  "Coupon Claimed"). My Coupons, Unused: 27 (24 before).
+- **Found, from each card's "Details >" after the claim.**
+  - "$30 Off $50": type **ALL**, "$30 off for orders over $50", excluding freight, expires 2026/12/04.
+  - BF PCBA $15: SMT, "$15 off for orders over **$100**", expires 2026/12/09: not for this order as quoted.
+  - PCBA Special Offer: SMT, "$9 off for orders over $1", expires 2026/11/30.
+  - BF PCBA $12 (held before): SMT, "$12 off for orders over $50", expires 2026/11/29.
+  None of the four names a product, a layer count or a file source; each says "Valid in certain regions/countries".
+- **Effect on r01's quote (PCB $8.00 + PCBA $44.85 = $52.85 without shipping), one coupon per order.** $30 gives
+  $22.85 if its $50 counts the whole order, which $52.85 meets by $2.85 only (Rev0.5 r02 was quoted at $51.94); $12
+  gives $40.85 on the same condition; $9 gives $43.85 either way. My earlier answer held $15 for the best fixed
+  candidate before its terms could be read: it is not usable here.
+- **Not verified.** What the $50 counts, for the ALL coupon and for the SMT one; validity for Japan; the time zone of
+  the dates; whether a coupon of type ALL can be put on an Economic PCBA order. The checkout shows it, and nothing was
+  saved to the cart. One read, by me.
+- **Learning.** In `rules.md`, the coupon rule: a coupon's name is not its terms, and how a claim shows.
+- **Record.** The same file outside the repository, extended.
+- **Commits.** This entry's. Not pushed.
