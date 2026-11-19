@@ -1543,3 +1543,197 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   not find a sibling module, and a compound command with `rm -rf` is refused here. "Delegated verifiers": the no-delete
   rule now says to read it before writing a rubric's "How to run".
 - **Commits.** `f97c51f` (the enclosure); the commit that adds this entry and the rules follows. Not pushed.
+
+## 2026-11-18 - #11: the print process is FDM (the user's choice; nothing printed)
+
+- **Request.** A new session, opened with the 2026-11-13 report pasted and 「前回どこまでやったっけ?」. The report's open
+  question was the print process (CLAUDE.md §7: chosen before wall and clearance values are frozen). Offered FDM or MJF
+  with FDM recommended; the user answered 「FDM」.
+- **Result.** Recorded in `design/mechanical/ENCLOSURE_Rev0.1.md` (header, §3 intro and E2, §9, §10) and CLAUDE.md (§0, §7,
+  §12). No row of the parameter or height tables changed: E2 had drawn the parts for FDM as the stricter process. E2 now
+  names the process as the user's and the nozzle, layer height and no-support rule as Claude's.
+- **Verification.** `check_enclosure.py` on the committed build after the edit: 96 checks, 0 failed. The manifest's
+  `inputs_sha256` covers the two tables only, so a change of the document's prose leaves the build current (E01 passes
+  without a rebuild). `test_check_enclosure.py`: 72 tests, OK, 74 s. `git status`: CLAUDE.md, the enclosure document and
+  this journal, nothing under `assembly/` or `reports/`. No `python.exe` left running.
+- **Read while establishing the state.** `main` is 25 commits ahead of `origin/main` (everything since `949d944`), so the
+  Rev0.5 board work, the host profiler and the enclosure exist on this machine only. The $12 JLCPCB coupon's date
+  (2026-11-17, US Eastern) has passed; the site was not read again.
+- **Not verified.** Nothing is printed. The FDM material and the printer are not chosen. The lid PCB is not drawn. All of
+  the 2026-11-13 entry's "Not verified" stands, except the print process.
+- **Learning.** None new.
+- **Commits.** Not committed when this entry was written: the user had not asked for a commit in this session.
+
+## 2026-11-18 - #11: the lid PCB drawn (Lid Rev0.1, not ordered); a desk study of moving the USB connectors
+
+- **Request.** 「作図する」, after the FDM answer: draw the enclosure's lid PCB. While it was being verified the user wrote
+  「なんかUSBの位置がアシンメトリーで変だね」 and, offered "keep the positions" (recommended) or "study a re-placement",
+  chose 「再配置を検討」.
+- **Result (lid).** `design/mechanical/LID_Rev0.1.md` (decisions K1-K8, Claude delegated; clearance and legend tables),
+  `make_lid.py`, `lid_spec.py`, `check_lid.py` (L01-L16), `test_check_lid.py`, `make_lid_outputs.py`, and the generated
+  `design/mechanical/lid/usb-power-hub-lid.kicad_pcb` and `.kicad_pro`. A bare 2-layer 1.6 mm board with the main board's
+  100 x 72 mm outline, no part and no net: one copper pour per side, 7 unplated holes (H1-H4 2.3 mm, SW1 and SW2 4.6 mm,
+  SW3 2.0 mm), 2 LED windows (mask openings without copper), a Latin legend 1.0-3.0 mm high. Every position comes from
+  `assembly/UsbPowerHub_Enclosure_Rev0.1_LidInterface.json`; no script holds one. The candidate set in
+  `manufacturing/working/lid-rev0.1/` (7 files) is not tracked. CLAUDE.md (§0, §2, §7, OI-6, §12), README.md,
+  `design/mechanical/README.md` and the enclosure document's prose say the lid is drawn and not ordered.
+- **Failures, causes and fixes.**
+  - The script's zone filler covered an unplated hole and ran to 0.1 mm from the outline. Cause: `ZONE_FILLER` keeps no
+    distance for a pour without a net. Fix: every keep-clear area is drawn (outline band, screw heads, plunger holes,
+    pinhole, windows) and L04 measures the filled copper against each. KiCad's DRC reported 0 violations for the pour at
+    0.1 mm with the rule at 0.3 mm, so the checker measures copper to the outline itself.
+  - The saved board and the plotted Gerbers held CRLF. Fix: the generator writes LF, parsers normalise.
+  - First grading: 8 of 9 criteria passed, C4 failed. The verifier's own faults that the checker did not report, with the
+    checksums written anew: one outline vertex moved inside the bounding box, one region removed from the top
+    silkscreen, a valid PNG of another picture, an 18-byte body behind a PDF header. Cause: L13 read the outline's
+    extents only, and no check read the silkscreen members. Fix: L13 compares the outline's drawn sides with the
+    rectangle's four; new L16 plots the board the checker has just measured (its own two `kicad-cli` calls) and compares
+    all 11 members text for text, creation times apart; L12 wants a zip, a one-page PDF and PNGs at least 1200 px wide.
+    What the drawing and the pictures show stays unchecked: LID §6 says so, and the rubric's C4 names it out of scope
+    (the user was told of that change of the rubric).
+  - A heredoc edit of the test file put a real newline into a string literal (the rules.md heredoc rule, again), and a
+    probe that ended in `~/tmp/lid-probe/` moved the session's working directory, twice.
+- **Verification.** Second grading by a fresh rubric-verifier (sonnet): overall pass, 9 of 9. `check_lid.py` 44 checks, 0
+  failed; with `--outputs` 59, 0 failed; a rebuild of the board and of the set is byte-identical; `test_check_lid.py` 110
+  tests OK in 128 s, with a failing test for every ID L01-L16; 25 faults of the verifier's own (7 in the board, 5 in the
+  interface, 4 in the document, 9 in the set with new checksums), each exit 1 with the expected line; its own read of the
+  drill files (7 hits for 7 holes, 0 plated) and of the outline (0, 0)-(100, 72); KiCad DRC 0 violations; legend
+  heights 1.0-3.0 mm with strokes at or above height / 6; copper 6871.89 mm2 per side (95.44 %), 0.0 mm2 in every
+  keep-clear area, the two sides equal; `check_enclosure.py` 96 checks, 0 failed after the prose edits; no runner
+  process left. The verifier's copies of the board printed 43 lines, the tracked tree 44; which line a copy lacks was
+  not looked into.
+- **The desk study (USB positions).** Block level only: the regions of `design/ecad/PLACEMENT_Rev0.5.md`, typed into a
+  scratch script that was not kept. Nothing under `design/ecad/` changed.
+  - Now: the front pair (OUT A 17.5, OUT B 51.3) is centred 15.6 mm left of the board's centre, the back pair (5V IN
+    17.5, HOST 76.0) 3.25 mm left, the buttons (31.5, 65.3) 1.6 mm left. Regions take 6223 of 7200 mm2.
+  - B, HOST moved 6.5 mm to x 82.5: no block overlaps with PORT_HOST mirrored inside (69.5-92.5). The front stays as it is.
+  - C2, four corners (ports at 17.5 and 82.5 on both edges, buttons at 31.5 and 68.5; port B and its button to the
+    front right, the MAU104 and V12 to the front middle; front ends, ADC, hub and MCU kept): one failure. The front
+    middle is 30.0 mm and REF + 6 mm + MAU needs 31.4, so the MAU104 would stand 4.6 mm from REF. MAU to AFE_B 11.8 mm,
+    the distance it has to the ADC today.
+  - C, channel B's whole front end on the right with the ADC in the middle: the middle column is 973 mm2 and ADC +
+    ADCSUP + HUB need 1024 (+51); the hub strip is 10.55 mm wide against 10.25 mm free. It does not fit on 100 x 72 mm
+    with the present block shapes.
+  - Rows that C2 moves, counted in the placement tables: PORT_{x} 8 and UI_{x} 5 (channel B's), MAU 2, V12 7, REF 6,
+    PORT_HOST 6, J1F 7. The channel table's one `dx` would no longer hold for channel B's port and button rows.
+  - Not studied: a part-level placement, the routing (VBUS_B's longer run from AFE_B to its port, the HS pairs, a new
+    router session and its patch), and noise. The choice is with the user.
+- **Not verified.** JLCPCB has not seen the lid's files; the user has not accepted the legend; a refill in KiCad's editor
+  was not tried; what the PDF and the PNGs show is unchecked; K8's order parameters are from memory; the enclosure is
+  not printed. If a port moves, the lid interface changes and the lid is rebuilt (L01 fails until then).
+- **Learning.** rules.md: "Shell and Python" (the heredoc rule's recurrence; a `cd` that persists); "KiCad 9" (CRLF from
+  `SaveBoard` and `kicad-cli`; a no-net pour keeps no distance; DRC does not measure it against the outline; the polygon
+  calls that work); the zone-filler rule (the lid's fill repeats); "silkscreen and manufacturing outputs" (check an
+  archive against a fresh plot); "Delegated verifiers" (keep a rubric's own file out of its greps).
+- **Commits.** Not committed when this entry was written: the user had not asked for a commit.
+
+## 2026-11-18 - #12: trial C2, a mirror-symmetric connector placement at placement level (nothing routed)
+
+- **Request.** After the desk study above the user chose 「C2 を試し配置」. Issue #12 tracks it. Scope told to the
+  user beforehand: a working copy, placement only, the existing placement check; the tracked board, Rev0.5 r02 and its
+  JLCPCB evidence stay untouched.
+- **Symptom.** The connectors are off the board's centre line (x 50): OUT A / OUT B add up to 68.8, 5V IN / HOST to
+  93.5, the buttons to 96.8, the LEDs to 93.3, where a mirrored pair adds up to 100.
+- **Result.** `design/experiments/usb-symmetry-c2/`: `c2_change.py` (the C2 placement as a change to a copy of
+  `PLACEMENT_Rev0.5.md`: 28 lines replaced, 13 channel pairs removed, 26 rows added), `trial.py` (scratch copy, change,
+  footprint-only board, `check_pcb.py`, tables, picture, `--negative`), `layout_c2.svg`, `README.md`; one line in the
+  root `README.md`. 31 of 304 parts move (PORT_B 8, UI_B 5, MAU 1, V12 6, PORT_HOST 5, J1F 6). `check_pcb.py` on the C2
+  board: 13,690 checks, 0 failed. J3 82.5, J1 82.5, SW2 68.5, D12 and D13 70.25; every pair adds up to 100.
+- **What had to give.** The MAU104 has a window 0.39 mm wide (6.15 mm from R11 in REF against the rule's 6.0 mm, 0.21 mm
+  from SW2's courtyard); UI_B is two rectangles; D5 moves 5.15 mm and 0.65 mm down; thirteen pairs leave the channel
+  table; D12, D13 and their resistors are turned half a turn.
+- **Failures, causes and fixes.**
+  - `make_pcb.py` cannot build a changed placement: it stops at the router session's digest. Fix: the trial calls its
+    functions up to `add_footprint` and saves there. The unchanged document built that way passed 13,676 checks, 0
+    failed, before any change was made.
+  - First C2 run: 13,692 checks, 2 failed, both `silk_overlap` of D5 and J1. Cause: D5, moved 1.35 mm toward J1's axis
+    to stay left of H4's corner block, put its legend bar (x 85.62-85.77, up to y 64.68) on J1's pin-1 mark (x 85.33-
+    86.08, y 64.31-64.91). Fix: D5 0.65 mm down (y 61.8).
+  - The desk study's block-level figures were wrong in three places, each corrected from the built board: "1.4 mm
+    short" (the courtyards leave 0.39 mm), "VBUS_B about 30 mm longer" (+12.0 mm pad to pad; 31.2 mm is the port's
+    move), and "the MAU104 11.8 mm below AFE_B" as the risk (11.93 mm, against 13.88 mm today; the large change is the
+    reference, 32.34 mm to 6.15 mm).
+- **Figures (now to C2).** MAU104 courtyard to the nearest part of REF 32.34 to 6.15 mm, AFE_B 13.88 to 11.93, AFE_A
+  42.60 to 18.35, ADC 11.95 to 12.23, ADCSUP 33.91 to 34.14. Pad to pad, straight line: VBUS_B 14.72 to 26.68 mm, USB
+  pair B 47.05 to 22.25, pair A 77.26 unchanged, the upstream pair 42.37 to 39.77, V5L to the MAU104 46.47 to 57.69,
+  V12F to the front ends 62.00 to 37.83 (A) and 32.39 to 21.41 (B).
+- **Verification.** A fresh rubric-verifier (sonnet), first grading: overall pass, 9 of 9. Its own run of
+  `trial.py --negative` (exit 0; the three negative runs caught: R11 at 5.94 mm, U5 leaving its region, the
+  silkscreen overlap); its own read of the ten positions (sums 100.00000); its own comparison with a copy of the
+  tracked board (304 references, exactly the 31 named parts differ); its own courtyard measurement (U5 to R11 6.1523
+  mm, to SW2 0.2100 mm, 180 analog parts); the README's figures against the run; `git status` and `git diff --stat`
+  empty for `design/ecad`, `design/circuit`, `manufacturing`, `requirements`; two faults of its own (J3 at 83.0: NOT
+  MIRRORED, ok False; SW2 at x 66: 4 failed, `courtyards_overlap` U5 / SW2). Two runs of mine wrote the same board and
+  the same picture byte for byte.
+- **Not verified.** Routing (no track, no zone, no session; the pad-to-pad figures are not track lengths); noise from
+  the MAU104 into the reference, the front ends or VBUS_B; the silkscreen (the trial's document does not update the
+  table); the enclosure and the lid, which would be regenerated; JLCPCB. The picture was looked at once in the
+  built-in browser; no check reads it.
+- **Learning.** rules.md: "KiCad 9" (a placement can be tried without routing), "Design documents" (a block-level
+  "does not fit" is not a part-level one; read a length risk from the pads), "Shell and Python" (looking at an SVG).
+- **Commits.** Not committed when this entry was written: the user had not asked for a commit. The decision is with
+  the user: route C2 as a new PCB revision, or keep Rev0.5 r02.
+
+## 2026-11-19 c2-routing-trial (#12): the C2 placement routed once in a scratch copy, beside the board without its patch
+
+- **Request.** After the placement trial I asked whether to try the routing in a working copy as well. The user
+  answered 「単純作業はDevin SWE-2 Maxを利用して。」. Read as: go on, with the simple work delegated to Devin on
+  SWE-2 Max and reviewed here; it is also a standing rule (rules.md "Devin CLI"). Scope told to the user beforehand:
+  a scratch copy only; the tracked board, Rev0.5 r02 and its JLCPCB evidence stay untouched.
+- **Result.** In `design/experiments/usb-symmetry-c2/`: `c2_routing.py` (the hand-drawn copper of C2 as a change to a
+  copy of `ROUTING_Rev0.5.md`: 16 lines replaced, 7 moved, 9 added, the patch table emptied), `route_trial.py`
+  (stages `base`, `prepare`, `negative`, `route`, `report`), `routed_c2_top.png`, the README's section "Routed"; the
+  experiment's row in the root `README.md`. One Freerouting 2.5.0 run on C2: 41 passes, router input
+  `26db73e3...3a8b1f`, session `d9ddb777...1fa89d` (the session is not kept; the input is reproducible).
+- **Figures (board with the committed session and no patch, to C2 with the new session and no patch).** DRC
+  unconnected 16 to 15; D36 places 11 to 14; the router's own unrouted count 55 to 53; tracks / vias 2215 / 343 to
+  2270 / 344; port A 35.24 mOhm both; port B 37.89 to 38.64 mOhm (limit 40); `check_pcb.py` failed 5 to 11;
+  `check_routing.py` failed 40 to 48 (DRC 5 to 11, DRC unconnected 16 to 15, analog 11 to 14, holes 8 and 8). C2's
+  DRC: 3 `copper_edge_clearance` errors (V_INJ on F.Cu against the outline), 1 `starved_thermal` (L4_GND at U17 pad
+  7), 7 `track_dangling` warnings; the board's: 5 `track_dangling`. Pair B 68.3 to 37.1 mm per conductor, the
+  upstream pair 62.8 / 62.0 to 56.3 / 55.5, pair A 97.0 unchanged. The base copy reproduces CLAUDE.md section 0's
+  "16 connections and 11 D36 places" for the committed session.
+- **The design decision.** The VBUS_B trunk is on L4 and 3.0 mm wide (16.78 mm of trunk becomes 33.39 mm). Around
+  the pair tracks L1 and L3 are closed to other wires (`PAIR_COPLANAR`), so the trunk crosses pair A's line on L4;
+  and the board's port B path has 2.11 mOhm to spare. Pre-route the path weighed 38.65 mOhm, routed 38.64.
+- **Delegation.** Two Devin runs (SWE-2 Max, 17 min and 6 min, exit 0): an inventory of the routing rows the moved
+  parts touch (scratch, not kept), and `c2_routing.py`'s `REPLACE`, `MOVE`, the six J3-end `ADD` lines and
+  `apply()`. Every line was compared with values worked out here; all 16 pairs were equal. The three trunk rows,
+  `route_trial.py`, the README and the rubric are the main session's.
+- **Failures, causes and fixes.**
+  - The first trunk (1.2 mm on L1, two more layer changes) was briefed to Devin before the baseline was run. The
+    baseline then gave port B 37.89 of 40 mOhm and the drawing came to about 46 mOhm. Fix: Devin's eleven trunk
+    rows replaced by three; rule "Settle the design before briefing the rows".
+  - `prepare` printed 208 violations and exited 1: 199 `lib_footprint_issues` (the pre-route copy stands apart from
+    the footprint library) and 9 `via_dangling` (vias the document leaves for the router). Fix: those two types
+    are expected before the router; only other types count.
+  - Docstring and rubric said "one router run is one sample". The router is deterministic (rules.md), so the result
+    belongs to its input. Reworded.
+  - The brief's heading said 17 pairs, its list had 16. Corrected before launch.
+  - The rubric's `grep -i "c2"` on the diff of CLAUDE.md matched `TC2030-NL` in the OI-8 row. Fix: `grep -w`.
+  - README and docstring said "J3 is now 20 mm further"; 20 mm is the new distance. From the rows: 16.78 mm of
+    trunk becomes 33.39 mm. Corrected before the grading.
+  - I took a Devin run for stuck after what `date` showed to be a few minutes.
+- **Verification.** A fresh rubric-verifier (sonnet), first grading: overall pass, 9 of 9, in 4 min 10 s for all
+  of it. Its own runs of `base`, `prepare` (port paths A 35.25, B 38.65 mOhm; DRC 0 beside the two expected types;
+  374 connections for the router) and `negative` (narrow: 80.58 mOhm; slot: `shorting_items`; both caught); its own
+  `make_pcb.py --dsn` on a fresh C2 copy printed the kept run's router input digest, the kept session's SHA-256
+  equals its record, and the digest differs from the tracked one (`7291238c...`); its own `report` on the kept run
+  against every figure of the README's section "Routed"; `git status` and `git diff --stat` empty for
+  `design/ecad`, `design/circuit`, `manufacturing`, `requirements`, before and after; its own Decimal recomputation
+  of Devin's rows (16 `REPLACE` pairs, `MOVE` = lines 340-346, the six J3-end lines, both centrelines: all equal);
+  its own pcbnew read of the kept C2 board (J1 and J3 at x 82.5000, all 51 tracks of the four pair nets on F.Cu,
+  lanes at 81.77 / 82.23 and 82.77 / 83.23); the honesty statements; CR counts 0; the two refusals; and two faults
+  of its own (a J3 lead-in ended on its neighbour: `tracks_crossing`, `clearance`, `solder_mask_bridge`; the trunk
+  cut: `no copper path`, `inf mOhm`).
+- **Not verified.** That a C2 board can be finished: no patch was written, and the 15 open connections, 14 D36
+  places and 4 DRC errors are not shown to be closable, nor the opposite. Another drawing of the hand-drawn rows.
+  Noise from the MAU104 (6.15 mm from the reference); the pairs' impedance and signal quality; the silkscreen; the
+  enclosure and the lid PCB; JLCPCB. The router run itself was not repeated (its input digest was). The render was
+  looked at once; no check reads it.
+- **Learning.** rules.md: "Freerouting 2.5.0" (hold a new session against the board without its patch; check the
+  hand-drawn rows before the router), "Design documents" (a length change is two computed lengths), "Delegated
+  verifiers" (a rubric's grep for a short name needs `-w`), "Devin CLI" (the three rules of this trial).
+- **Commits.** Not committed when this entry was written: the user had not asked for a commit. The decision is with
+  the user: take C2 into a new PCB revision (placement, session, patch, silkscreen, outputs, JLCPCB gate, enclosure,
+  lid), or keep Rev0.5 r02.

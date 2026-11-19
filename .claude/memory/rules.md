@@ -178,7 +178,14 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   wrote `<bs>r` as two real CR bytes before its next assertion failed, so a failing
   assertion does not prove that nothing was written. Re-read this rule before any heredoc
   that writes code or text with a backslash; an edit script written with the Write tool and
-  run by path avoided it for every later edit that day.
+  run by path avoided it for every later edit that day. It recurred on 2026-11-18 (#11): a
+  heredoc edit of `test_check_lid.py` put a real newline into a string literal
+  (`SyntaxError: unterminated string literal`); the Edit tool made every later edit.
+- **A Bash call that ends in another directory moves the session there.** The harness keeps a
+  `cd` when the command succeeds and ends inside a working directory, and `~/tmp` is one. Twice
+  on 2026-11-18 (#11) a probe that ended under `~/tmp/lid-probe/` made the next command's
+  relative paths resolve there. Start every command with `cd <repository>`, and reach other
+  directories by absolute path or in a subshell.
 - **`Path.write_text` on Windows writes CRLF.** An edit script that read LF files with
   `read_text` and saved them with `write_text(s, encoding="utf-8")` left all seven edited
   files CRLF (675 of 675 lines in CLAUDE.md, counted in the bytes on 2026-11-03). Git's
@@ -212,6 +219,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   alone, runs.** Two such commands were denied on 2026-11-13 (#11): one with the path in a
   variable, one followed by `&& cd ...`. `rm -r /c/Users/developer/tmp/<dir>` as its own
   command ran. Do not retry a denied command; delete with one command per explicit path.
+- **To look at a generated SVG, copy it into the repository and open its `file:///` URL with
+  the built-in browser's `navigate`; `screenshot` then works.** The same file under `~/tmp`
+  opened as a static snapshot and `screenshot` was refused ("This tab shows a local file").
+  One try each, 2026-11-18 (#12). This box has no rasteriser: no `magick`, `inkscape` or
+  `rsvg-convert`, and `~/tmp/cadvenv` has no cairosvg, PIL or matplotlib.
 
 ## Design documents
 
@@ -265,6 +277,17 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
 - **Quote the user verbatim, typos included, and quote every message that set the rule.**
   Verified 2026-11-03: the Rev0.3 header had "corrected" 「デカくい」 to 「デカい」 and dropped one
   line of the user's message; an independent verifier caught it.
+- **A block-level "does not fit" is not a part-level one, and a length risk is read from the
+  pads.** Verified 2026-11-18 (#12): with the regions as rectangles, the desk study had
+  trial C2 1.4 mm short (the MAU104 4.6 mm from REF). The courtyards leave a window 0.39 mm
+  wide (6.15 mm from R11, 0.21 mm from SW2) and `check_pcb.py` passes. The same study said
+  "VBUS_B about 30 mm longer": that is how far the port moves (31.2 mm); from the shunt's
+  pad to the receptacle's it is +12.0 mm. It also named AFE_B as the MAU104's new
+  neighbour, and the measured one is the reference (32.3 mm to 6.15 mm). Before a placement
+  is ruled out or its risks are listed, build it and measure. The same slip came back on
+  2026-11-19: a docstring and the README said "J3 is now 20 mm further", which was the new
+  distance; summed from the trunk's rows it is 16.78 mm becoming 33.39 mm. Write a length
+  change as two lengths computed from the rows, never as a remembered difference.
 
 
 ## KiCad 9 (pcbnew from KiCad's own Python)
@@ -326,6 +349,26 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   - Reject CR bytes in the checked tree.
   - To prove a checker on the committed bytes, stage the files and run it on
     `git checkout-index -a --prefix=<dir>/`. That passed, 1941 checks.
+- **`pcbnew.SaveBoard` of a `NewBoard()` writes CRLF on Windows, and so do `kicad-cli`'s Gerber
+  and Excellon files** (#11, 2026-11-18). `make_lid.py` rewrites its two project files with LF,
+  and a parser of a plotted file normalises the line ends first. Verified by: a count of CR
+  bytes in the tracked lid files, 0, by the verifier too.
+- **A script's `ZONE_FILLER` keeps no distance for a pour without a net.** On the lid (one
+  no-net pour per side, #11, 2026-11-18) the fill covered an unplated hole that had no rule
+  area, and ran to 0.1 mm from Edge.Cuts with `min_copper_edge_clearance` at 0.3. Draw every
+  keep-clear area as a rule area or in the zone's outline, and measure the filled copper
+  against each one (`check_lid.py` L04).
+- **`kicad-cli pcb drc` does not measure a no-net pour against the outline.** With that pour
+  0.1 mm from Edge.Cuts and the rule at 0.3 mm, `--severity-all` reported 0 violations; it did
+  report `hole_clearance` and `text_height` in other probes. A checker of a bare board measures
+  copper to the outline itself.
+- **pcbnew 9.0.8 polygon calls that work from Python** (probed 2026-11-18, used by
+  `check_lid.py`). `SHAPE_POLY_SET.BooleanAdd`, `BooleanSubtract` and `BooleanIntersection` take
+  one argument and change the set in place. `Area()` is in nm² (divide by 1e12 for mm²).
+  `Inflate(nm, CORNER_STRATEGY_ROUND_ALL_CORNERS, max_error)` grows a set.
+  `PCB_TEXT.TransformTextToPolySet(ps, 0, max_error, ERROR_OUTSIDE)` gives a text's ink, and
+  `TransformShapeToPolygon(ps, layer, 0, max_error, ERROR_OUTSIDE)` a drawing's. There is no
+  `pcbnew.TransformCircleToPolygon`: build a disc from points.
 - **KiCad's `TL431DBZ` symbol is TI's SOT-23 order (1 K, 2 REF); JSCJ's CJ431 is 1 REF,
   2 CATHODE, 3 ANODE, which is KiCad's `TL432DBZ`** (CJ431 page 1 and the stock symbol, read
   2026-11-04). Never pick a TL431-family symbol by name: compare the pin numbers with the
@@ -347,6 +390,14 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   A corrupted input made `check_schematic.py` die with a KeyError traceback, which also
   exits 1 (2026-11-04, #6 P2). Assert the summary line (`N checks, M failed: FAIL`) and
   the failing item's name.
+- **A placement can be tried without routing: `make_pcb.py`'s own functions up to
+  `add_footprint`, then `check_pcb.py`.** `make_pcb.py` stops at the router session's digest
+  for any changed placement. `design/experiments/usb-symmetry-c2/trial.py` copies
+  `design/ecad`, the capture list and `stackups.json` into a scratch directory (the copied
+  scripts resolve their ROOT to the copy), builds a footprint-only board there and runs the
+  copy's `check_pcb.py`, which judges it in full and only counts the unconnected items.
+  Verified 2026-11-18 (#12): the unchanged document gave 13,676 checks, 0 failed; trial C2
+  13,690, 0 failed; two builds were byte-identical; a run with three negative runs took 26 s.
 
 ## Freerouting 2.5.0 (from autoroute.py)
 
@@ -423,6 +474,19 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   (13 long V_INJ rows along y = 24.2 among them, and 5 U1-pin escapes) left 41 connections
   open against 16. I first read that as noise; the router is deterministic, the DSN diff
   named the rows, and removing them restored the committed input's digest and result.
+- **Hold a new router session against the board with its patch table emptied, and check the
+  hand-drawn rows before the router runs.** (#12, 2026-11-19)
+  `design/experiments/usb-symmetry-c2/route_trial.py` does both in scratch copies. The copy
+  with the patch table emptied and the committed session gave 16 unconnected items and 11
+  D36 places, the figures recorded for that session, so a fresh session (trial C2: 15 and
+  14, plus 4 DRC errors of the router's) is read against the same stage and not against the
+  patched board. Its `prepare` stage builds up to the GND fan-out with `make_pcb.py`'s own
+  functions, runs DRC and weighs the port paths with the copy's `check_port_paths`. Two DRC
+  types are expected there and say nothing: `via_dangling` (vias the document leaves for the
+  router) and `lib_footprint_issues` (a board saved apart from its footprint library; 199
+  of them). It caught a 0.30 mm trunk (80.58 mOhm) and a trunk end run into a shell slot,
+  and a verifier's own two faults, before a half-hour router run; every stage but the
+  router ran inside the verifier's 4 min 10 s.
 
 ## KiCad 9 routing checks
 
@@ -476,6 +540,9 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   Verified by: the 32 runs, `diff` of the two boards, a Gerber member comparison, a pcbnew probe
   (island mode 0 = always remove; both islands touch `J3.S1`), and the verifier's 10 runs (4 ×
   `3205d4c4…`, 6 × `d354d21a…`, the diff exactly the two blocks).
+  A board with one no-net pour per side and no island to remove (the lid, #11, 2026-11-18)
+  filled byte-identically in every build of that session and in both verifier rebuilds, so
+  `make_lid.py` is run again to prove its board, unlike `make_pcb.py`.
 - **Freerouting with the same input repeats its session.** The 17-minute run on input that differed
   only in the via's padstack name gave the old session with that name replaced (56 passes both times).
 - **A slot (an oblong hole) is invisible to both the router's search and KiCad's DRC.** (#8, 2026-11-13)
@@ -494,6 +561,14 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   1.0 mm, 0.2 mm at 1.2 mm. KiCad's stock footprints draw silk at 0.12 mm, so a byte copy
   fails the limit; `make_libraries.py` widens it and drops it on non-polar parts
   (`silk_drop`) whose silk cannot keep 0.15 mm from their pads (#6 P5).
+- **Check a Gerber archive against a fresh plot, not by reading back a few figures.** The lid's
+  first set check read the outline's extents and no silkscreen member. A verifier moved one
+  outline vertex inside the bounding box and removed one region from the top silkscreen, wrote
+  the checksums anew, and both sets passed (2026-11-18, #11). `check_lid.py` L16 now plots the
+  board it has just measured, with its own two `kicad-cli` calls, and compares all 11 members
+  text for text, the creation times apart; L13 compares the outline's drawn sides. The second
+  grading changed nine members one at a time and each failed. The PDF and the PNGs have no
+  such reference: only their type, page count and width are checked.
 - **Measure a label by its ink, not its text box.** `PCB_TEXT.GetEffectiveShape().BBox()`
   is the stroked glyphs; the text box is larger. A leader start measured against the box
   passed check_silk.py and was 0.2 mm short of the glyphs (2026-11-06, #6 P5).
@@ -682,9 +757,24 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   cited neither CLAUDE.md 5.3's "No stubs" nor the RP2040's reset pull-down. A grep of the
   clauses' own words found both gaps a few minutes before the verdict arrived, so one
   grading pass went to what a grep finds.
+- **Keep a rubric's own file out of its greps.** C9 of the lid rubric grepped the repository
+  for a phrase that had to be gone, and the rubric under `.claude/goal-loop/` (ignored by Git,
+  present on disk) held that phrase; the verifier said so (2026-11-18, #11). Exclude
+  `.claude/goal-loop/` and `journal.md` in such a criterion.
+- **A rubric's grep for a short name needs `-w`, and every grep of a rubric is run once
+  before the verifier runs it.** A criterion that the trial "C2" is absent from CLAUDE.md's
+  diff used `grep -i "c2"`, which matched `TC2030-NL` in the OI-8 row (C2765186 and C2040
+  would match as well). `grep -i -w "c2"` printed nothing, and the verifier graded the
+  corrected line (2026-11-19, #12).
 
 ## Devin CLI
 
+- **Simple work goes to Devin on SWE-2 Max.** The user, 2026-11-19, in reply to the C2 trial's
+  report (#12): 「単純作業はDevin SWE-2 Maxを利用して。」. Claude's reading: in this repository,
+  from now on, a task that fits the next rule's "simple" is handed to the Devin CLI with
+  `--model swe-2-max` instead of being done by the main session or a Claude subagent; the
+  review rule below still holds. `devin models` listed `swe-2-max` as "SWE-2 Max [262K
+  context, Free]" on 2026-11-19 (devin 3000.12.57).
 - **Give Devin only simple tasks, and review its output yourself.** The user, 2026-11-04:
   「devinには簡単な作業だけさせてね。君がしっかりレビューしてね」. Simple means bounded,
   mechanical work with an observable result: fetch and tabulate, run a given script,
@@ -697,6 +787,25 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   dangerous --model swe-2-max --respect-workspace-trust false --export <transcript.json>
   --prompt-file <brief.md> -p`. Continue the same session with `-r <session-name>`.
   `devin list` is an interactive TUI, not scriptable output.
+  On 2026-11-19 (#12, devin 3000.12.57) it ran without `--config`, started from a scratch
+  directory under `~/tmp/` as its working directory (a subshell `cd` there), with the brief
+  and copies of its inputs in that directory and nothing else. Two such runs in two
+  directories ran side by side: 17 min for a tabulating script with four outputs, 6 min for a
+  module of 16 exact line pairs with a self-test. Its stdout carries only its remarks and its
+  closing message; `--export` writes the transcript when the run ends.
+- **A brief that gives every value or its arithmetic rule, asks for a self-test and asks what
+  was ambiguous came back right the first time.** (#12, 2026-11-19) The 16 rewritten rows of
+  the routing document equalled the values the main session had worked out by hand, and the
+  row inventory flagged exactly the 20 rows the main session had found by reading, plus 24
+  patch rows and two false positives it named itself (`J1` inside `J1's` and `J1_POWER`: the
+  brief's token rule let a letter follow). Review by recomputing, not by reading the diff
+  alone. Its file-write tool wrote CRLF once; the brief asked for LF, so it converted and
+  said so: keep the LF line in every brief and count the CR bytes yourself.
+- **Settle the design before briefing the rows.** (#12, 2026-11-19) The second brief carried
+  11 trunk rows of a first drawing; the baseline run then showed port B at 37.89 mOhm of its
+  40 mOhm limit, the drawing was estimated at 46 mOhm, and the main session replaced the 11
+  rows with 3 after Devin had copied them. Run the baseline first: the margin decides the
+  design, and the brief should carry only what is settled.
 - **In print mode a denied tool call ends the run without a message.** Deny rules still apply
   under `--permission-mode dangerous`. Read the `--export` transcript to see which call was
   refused. Verified 2026-11-03 with a permission test whose denied `rm` cancelled the run.
