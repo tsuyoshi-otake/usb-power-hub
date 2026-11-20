@@ -120,7 +120,7 @@ copy it in at approval.
 | Part mapping, placement preview | read in JLCONE at the order, as the user reported: 41 parts, 0 substituted, Extended only C2040, C5137013, C2765186; J5's pads free of parts; J2 and J3 not read in detail. "Confirm Parts Placement" is No |
 | Quote and cart | ordered and paid by the user; Rev0.6 r01's cart item was removed by the user |
 | Sourcing | not read on the day of the order |
-| Production file | **open**: "Confirm Production file" is Yes without the "do not confirm automatically" box, so the file is approved by itself 48 hours after JLCPCB prepares it. To read in it: the 12 non-plated holes, the slots, J5, the stackup (`JLCPCB_REVIEW.md` section 8) |
+| Production file | **read on 2026-11-20, not confirmed** (`JLCPCB_REVIEW.md` section 9): the 12 non-plated holes non-plated, the 16 slots plated at 0.60 mm, J5 open with no paste, no stackup named, two 1.152 mm tooling holes added by JLCPCB inside the board, mask green. The order page asks for the confirmation by about 2026-11-24 10:00 JST, "or your order will be produced directly". The user said the board was meant to be black (2026-11-20); open with the user |
 | Everything else below | unchanged |
 
 | Gate | State | Owner |
@@ -163,4 +163,7 @@ copy it in at approval.
   open (2026-11-20).
 - *(order)* The order names no stackup. If JLCPCB's default for this board is not JLC04161H-7628, the USB pairs'
   impedance is not D27's model value; Full Speed is the fallback (OI-26).
-- *(order)* The production file confirms itself 48 hours after JLCPCB prepares it, if nobody reads it first.
+- *(order)* The production file goes to production by itself about 2026-11-24 10:00 JST if nobody confirms it
+  (read 2026-11-20; the 48 hours assumed before were wrong). The mask is green; the user meant black.
+- *(order)* JLCPCB added two 1.152 mm non-plated tooling holes inside the board, about 3.0 mm from H1 and H4
+  (`JLCPCB_REVIEW.md` section 9). The enclosure does not model them.

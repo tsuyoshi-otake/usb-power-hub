@@ -49,7 +49,7 @@ As reported from JLCONE's form with this Gerber.
 | Material type | FR4 TG135 | not in the manifest | recorded |
 | Colour, silkscreen | green, white | no decision recorded them before the order | the order decides them |
 | Outline tolerance | ±0.2 mm | none | recorded |
-| Confirm Production file | **Yes** (+$1.05) | the user's choice of 2026-11-19 on Rev0.6 r01 | match. The box "do not confirm automatically" was **not** ticked: the file is approved by itself 48 hours after JLCPCB has prepared it |
+| Confirm Production file | **Yes** (+$1.05) | the user's choice of 2026-11-19 on Rev0.6 r01 | match. The box "do not confirm automatically" was **not** ticked: the file is approved by itself 48 hours after JLCPCB has prepared it (wrong: the order page gives about 96 hours, section 8) |
 | Assembly | Economic PCBA, Top side, 2 boards, tooling holes added by JLCPCB, parts selected by the customer | D13, REQ-MFG-01 | match |
 | Confirm Parts Placement | **No** | CLAUDE.md 4.2 asks for placement checking | JLCPCB's engineers do not send the placement back for a check |
 | Build time | PCB 3 days, assembly 3-4 days | none | recorded |
@@ -162,10 +162,42 @@ of both items was "Data Preparation": JLCPCB had not yet prepared the production
 
 ## 8. What comes next
 
-1. **The production file** (JLCPCB prepares it; 48 hours after that it is approved by itself). Read in it: the
-   12 non-plated holes not plated; the 16 slots of J1-J4 plated and 0.60 mm wide; J5's eight pads open in the
-   mask with no paste; the legend at J5; the stackup JLCPCB names.
+1. ~~**The production file**~~: read on 2026-11-20 (section 9). It is **not confirmed**: the order page asks
+   for the confirmation "within 94h20m" (read at 11:45 JST, so until about 2026-11-24 10:00 JST), "or your
+   order will be produced directly". Not 48 hours as section 2 assumed.
 2. ~~The amount paid and the coupons used~~: read on 2026-11-20 (section 6); the split of the discount is
    not shown.
 3. The hand-soldered parts from Akizuki (`UsbPowerHub_Main_Rev0.7_HandSolder.csv`).
 4. The enclosure and the lid for the Rev0.7 board.
+
+## 9. The production file (read 2026-11-20)
+
+The order page's PCB item read "Data Preparation" with the action "Confirm Production file". Its dialog shows a
+Top and a Bottom picture, the link "Download Production file", and the choice "Yes, please proceed to
+production" / "Not good, modification needed" with "Submit". **Nothing in the dialog was chosen or submitted.**
+With the user's approval (「読んでいい」, then 「ダウンロードしていい」) the production file was downloaded and
+read in `~/tmp/`, outside this repository, and deleted afterwards; none of it is kept here, because it carries
+the account's order and file numbers.
+
+- The download: `UsbPowerHub_Main_Rev0.7_Gerber_Y41.zip`, 4,669,658 bytes, SHA-256
+  `15ddcb636630bd2ffe6806d66c00ebb5511d27e8e30fbd616e62282f4ebb6a90`. It holds the 15 files of our Gerber zip
+  as uploaded, JLCPCB's JSON of the order's parameters, and the CAM output of "JLCCam Pro" (Gerber per layer
+  and an ODB++ job).
+- Read with scratch scripts that are not kept: the CAM drill layer against our `_PTH.drl` and `_NPTH.drl`
+  (position within 0.02 mm), the tool table of the ODB++ job, the CAM mask and copper at J5, the parameter JSON.
+
+| What | In JLCPCB's CAM | Verdict |
+|---|---|---|
+| The 12 non-plated holes | 8 × 0.65 mm (pegs of J1-J4) and 4 × 2.20 mm (H1-H4) at our positions, tool type `NON_PLATED`, drilled 0.70 and 2.25 mm | as designed; Rev0.6's finding 2 (JLCDFM's viewer showing them as plated) does not reach the CAM |
+| The 16 slots of J1-J4 | 16 routed slots at our positions, `PLATED`, finished 0.60 mm (drilled 0.751 mm) | as designed |
+| The other plated holes | 415 vias 0.30 mm (`VIA`), 36 × 0.80, 4 × 1.00, 2 × 1.10 mm (`PLATED`) at our positions | as designed |
+| **Two holes JLCPCB added** | 2 × 1.152 mm, `NON_PLATED`, at (1.56, 5.84) and (98.44, 66.10) mm, about 3.0 mm from H1 and H4; copper cleared to 1.55 mm on all four layers, bottom mask open 1.35 mm, legend cleared | not in our files: the tooling holes the form says JLCPCB adds for the assembly ("tooling holes added by JLCPCB"), placed inside the board since it has no rails. KiCad finds only the GND pours of L2, L3 and L4 there: no pad, no track and no courtyard within 1.0 mm (H1's and H4's courtyards 1.05 and 1.09 mm away). Accepted as JLCPCB's; the enclosure does not model them |
+| J5's eight pads | open in the top mask, 1.715 mm (copper 1.715 mm after JLCPCB's etch compensation; ours 1.70 mm), pin 1 square; no paste in our `F_Paste` | as designed |
+| The legend at J5 | the picture of our top legend shows `SWD`, `RUN`, `1 SWDIO 3 GND 5 GND 7 SWCLK` and `2 V3V3 4 RUN 6 NC 8 NC` | as designed; the CAM's own legend layer was not read item by item |
+| Stackup | no stackup in the ODB++ job; the parameters name none (`customLaminatedConstructionFlag` false) | as ordered (section 2): JLCPCB's default, not JLC04161H-7628 by name |
+| Mask, legend, finish | mask **green** (绿), legend white (白色), leaded HASL (有铅喷锡), vias plugged with ink (过孔塞油) | as ordered. On 2026-11-20 the user said the board was meant to be **black** (「PCBの色なんだけど黒予定だったな」); no decision recorded black before the order (section 2: "no decision recorded them") |
+| Copper, thickness, impedance | outer 1 oz, inner 0.5 oz, 1.6 mm, impedance test not needed | as ordered |
+
+One more download than approved: the first attempt to open the item's "Production file" link, before the
+user's 「読んでいい」, downloaded the same zip (same SHA-256) into the user's Downloads folder; it and two later
+copies were moved or deleted the same day.

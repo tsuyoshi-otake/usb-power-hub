@@ -2390,3 +2390,20 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   regenerated (two lines change, the ten manufacturing files' hashes do not). No order number, file number,
   SMT number or address is written. Learning: an order page's discount total is not a coupon record; read the
   used-coupon list too, and say when the two do not add up.
+- **Follow-up 10 (2026-11-20): the production file, read; the mask is green, the user meant black.** The user
+  asked Claude to read JLCPCB (「JLCPCB確認して」), to open the confirmation (「読んでいい」) and to download the
+  file (「ダウンロードしていい」). Read: the order page asks for the confirmation "within 94h20m" (about
+  2026-11-24 10:00 JST) or the order is "produced directly" - not the 48 hours on record. The downloaded zip
+  (4,669,658 bytes) holds JLCCam Pro's CAM output and an ODB++ job; scratch scripts in `~/tmp/` compared its
+  drill layer with our PTH/NPTH files: the 12 non-plated holes `NON_PLATED`, the 16 slots `PLATED` at 0.60 mm,
+  415 vias and 42 plated holes at our positions; J5's pads open in the top mask, no paste; no stackup named;
+  mask green, legend white, leaded HASL. New: JLCPCB added two 1.152 mm non-plated tooling holes inside the
+  board, about 3.0 mm from H1 and H4, copper cleared to 1.55 mm; KiCad finds only GND pours within 1.0 mm.
+  Nothing in the dialog was chosen or submitted. Mid-task the user said the board was meant to be black
+  (「PCBの色なんだけど黒予定だったな」); nothing recorded black before the order. Written to r01's
+  `JLCPCB_REVIEW.md` section 9, the manifest and CLAUDE.md section 0; `SHA256SUMS.txt` regenerated (two lines).
+  Mistakes: the first attempt on the item's "Production file" link, before the user's approval, downloaded the
+  zip into Downloads (the link is a download, not a viewer), and a second click doubled it; all three copies
+  were moved or deleted. A checksum command once wrote a stray file outside the repository; deleted. Learning:
+  on JLCPCB's order page "Production file" is a download link; check what a link does before following it, and
+  read deadlines from the page, not from an earlier assumption.
