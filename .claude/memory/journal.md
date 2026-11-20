@@ -2407,3 +2407,14 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   were moved or deleted. A checksum command once wrote a stray file outside the repository; deleted. Learning:
   on JLCPCB's order page "Production file" is a download link; check what a link does before following it, and
   read deadlines from the page, not from an earlier assumption.
+- **Follow-up 11 (2026-11-20): asked JLCPCB for a black mask.** The user asked whether a reorder is needed
+  (「あーもしかして発注しなおしになるの?」) and told Claude to ask support (「サポートに問い合わせてよ」).
+  JLCPCB's help pages say nothing on changing a parameter after payment. Claude sent the draft the user had
+  seen, unchanged, in JLCPCB's Live Chat at 12:16:08 JST: change the mask from green to black with white
+  legend, hold production until then, and say whether it is possible, the extra cost, the build time, and
+  whether Economic PCBA still applies; it offers to pay any difference. One copy is in the chat history. No
+  reply in the next minute. The widget closed its panel on each send, and its first send (12:02) never
+  reached the history, because the tab was in the background: Chrome does not render that chat while its tab
+  is hidden, so the user had to bring it to the front. Learning: before sending in a web chat, have its tab in
+  the front, then read the sent message back from the chat's own history; a closed panel is not a sent
+  message.
