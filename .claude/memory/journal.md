@@ -2418,3 +2418,12 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   is hidden, so the user had to bring it to the front. Learning: before sending in a web chat, have its tab in
   the front, then read the sent message back from the chat's own history; a closed panel is not a sent
   message.
+- **Follow-up 12 (2026-11-20): the black-mask request sent again, and its read-back.** At 12:47 the chat
+  history no longer showed the 12:16 message, and neither the chat nor the account's Messages page held a
+  reply. On the user's 「送り直して」, with the tab in front, Claude opened a new chat (PCB, agent online) and
+  sent the same text, unchanged. The panel closed again on the send. Read back from "View Chat History": the
+  message stands there at 2026-11-20 12:56:45, after the agent's greeting of 12:56, with no reply under it,
+  and the widget offers only "Start the chat again". So the message is in JLCPCB's chat log; that an agent read
+  it is not shown. Nothing in the order or the production-file dialog was changed. Learning: this widget ends
+  the session on the send itself, so a reply, if any, has to be looked for in the chat history and in the
+  account's Messages, not in an open chat.
