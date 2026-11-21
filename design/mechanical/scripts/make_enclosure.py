@@ -4,9 +4,9 @@ Run with the CAD venv's Python (manifold3d, numpy), from the repository root:
 
     ~/tmp/cadvenv/Scripts/python.exe -I -B design/mechanical/scripts/make_enclosure.py
 
-It reads   design/mechanical/ENCLOSURE_Rev0.4.md   (the params and heights tables)
+It reads   design/mechanical/ENCLOSURE_Rev0.5.md   (the params and heights tables)
            design/mechanical/reference/board_interface_Rev0.7.json
-and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.4_Tray.stl, _Frame.stl,
+and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.5_Tray.stl, _Frame.stl,
            _Plunger.stl, _Cover.stl (each in its print orientation), _LidInterface.json,
            _Manifest.json
 then draws the pictures (render_enclosure.py, about 20 s) and runs check_enclosure.py.
@@ -62,8 +62,8 @@ def geometry(p, heights, board):
     g.z_pcb = -g.t                       # the board's bottom face
     g.z_floor = g.z_pcb - p.standoff     # the floor's top face
     g.z_bottom = g.z_floor - p.floor
-    g.z_top = p.cavity_h                 # the frame's top face, the lid's underside
-    g.z_lid = p.cavity_h + p.lid_t
+    g.z_top = p.cavity_h                 # the lid's seat in the frame, the lid's underside
+    g.z_lid = p.cavity_h + p.lid_t       # the lid's top face, and the top of the wall round it
     g.holes = spec.mounting_holes(board)
     if len(g.holes) < 3:
         raise ValueError("fewer than 3 mounting holes on the board")
@@ -230,9 +230,13 @@ def build_tray(p, g):
 
 
 def build_frame(p, g):
-    body = shell(p, g, p.seam_gap, g.z_top, "top")
-    cavity = S.box(g.xi0, g.yi0, -1.0, g.xi1, g.yi1, g.z_top + 1.0)
-    frame = body - cavity
+    # the wall goes on up round the lid, as high as the lid is thick (E12): the lid lies in
+    # a pocket, rim_clear from the wall, and its top face is flush with the wall's
+    body = shell(p, g, p.seam_gap, g.z_lid, "top")
+    cavity = S.box(g.xi0, g.yi0, -1.0, g.xi1, g.yi1, g.z_top)
+    k = p.rim_clear
+    pocket = S.box(g.bx0 - k, g.by0 - k, g.z_top, g.bx1 + k, g.by1 + k, g.z_lid + 1.0)
+    frame = body - cavity - pocket
     flange = (S.box(g.xi0 - JOIN, g.yi0 - JOIN, g.z_top - p.flange_t,
                     g.xi1 + JOIN, g.yi1 + JOIN, g.z_top)
               - S.box(g.bx0 + p.lid_overlap, g.by0 + p.lid_overlap, g.z_top - p.flange_t - 1.0,
@@ -363,14 +367,28 @@ def derived(p, g, heights, board, solids):
     far, far_ref = max((min(math.hypot(board["by_ref"][q.ref]["x"] - hx,
                                        board["by_ref"][q.ref]["y"] - hy) for _r, hx, hy in g.holes),
                         q.ref) for q in g.ports)
+    # the lid's seat: the frame's faces that look up at the seat's level. Turned over for
+    # printing they hang lid_t above the bed, and are what the print supports (E12)
+    tri = S.triangles(solids["Frame"])
+    n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    at_seat = (np.abs(tri[:, :, 2] - g.z_top).max(axis=1) < 1e-3) & (n[:, 2] > 0)
+    seat = float(n[at_seat, 2].sum()) / 2
     return [
         ("outer_x", g.xo1 - g.xo0, "mm", "Outer width (along the port edges)."),
         ("outer_y", g.yo1 - g.yo0, "mm", "Outer depth (front to back)."),
-        ("outer_z", g.z_lid - g.z_bottom, "mm", "Height, tray's underside to the lid's top face."),
-        ("printed_z", g.z_top - g.z_bottom, "mm", "Height without the lid."),
+        ("outer_z", g.z_lid - g.z_bottom, "mm",
+         "Height, tray's underside to the top of the wall round the lid, which is the lid's "
+         "top face."),
         ("tray_z", p.lip_h - g.z_bottom, "mm", "The tray's print height."),
-        ("frame_z", g.z_top, "mm", "The frame's print height."),
-        ("lid_margin", g.bx0 - g.xo0, "mm", "Frame's top face left free around the lid."),
+        ("frame_z", g.z_lid, "mm", "The frame's print height."),
+        ("rim_h", g.z_lid - g.z_top, "mm",
+         "Height of the wall round the lid above the lid's seat: the lid's thickness."),
+        ("rim_gap", p.rim_clear, "mm", "Gap between the lid's edge and the wall round it."),
+        ("rim_wall", (g.bx0 - p.rim_clear) - g.xo0, "mm",
+         "Thickness of the wall round the lid, below its chamfer."),
+        ("frame_support_area", seat / 100.0, "cm2",
+         "The lid's seat, which hangs above the bed when the frame is printed: the area "
+         "that needs support material."),
         ("web_t", web, "mm", "Web between an overmould pocket and the cavity."),
         ("face_inset", min(abs(q.y_out - q.y_face) for q in g.ports), "mm",
          "A receptacle's face inside the wall's outer face."),
@@ -378,8 +396,9 @@ def derived(p, g, heights, board, solids):
          f"The receptacle farthest from a screw ({far_ref}) to its nearest mounting hole."),
         ("clamp_opening_w", g.clamp.x1 - g.clamp.x0, "mm",
          f"Width of the clamp's opening in the back wall, centred on the SWD land ({g.clamp.ref})."),
-        ("clamp_bridge_h", g.z_top - p.clamp_up, "mm",
-         "Height of the frame's wall that is left above the clamp's opening."),
+        ("clamp_bridge_h", g.z_lid - p.clamp_up, "mm",
+         "Height of the frame's wall that is left above the clamp's opening, up to the "
+         "wall's top."),
         ("lid_clearance_min", p.cavity_h - tall_h, "mm",
          f"Tallest part ({tall_ref}, {tall_h:g} mm) to the lid's underside."),
         ("bottom_engagement", head_top + p.bottom_screw_len, "mm",
@@ -443,13 +462,14 @@ def main():
               "Plunger": build_plunger(p, g, g.buttons[0]), "Cover": build_cover(p, g)}
     back = {  # print frame -> assembly frame
         "Tray": [[[1, 0, 0, g.xo0], [0, 1, 0, g.yo0], [0, 0, 1, g.z_bottom]]],
-        "Frame": [[[1, 0, 0, g.xo0], [0, -1, 0, g.yo1], [0, 0, -1, g.z_top]]],
+        "Frame": [[[1, 0, 0, g.xo0], [0, -1, 0, g.yo1], [0, 0, -1, g.z_lid]]],
         "Plunger": [[[1, 0, 0, b.x], [0, -1, 0, b.y], [0, 0, -1, g.z_cap]] for b in g.buttons],
         "Cover": [[[1, 0, 0, g.cover.x0 - p.cover_catch], [0, 1, 0, g.cover.y_tip],
                    [0, 0, 1, g.cover.z0]]],
     }
     how = {"Tray": "as modelled, the floor on the bed",
-           "Frame": "turned over, its top face on the bed",
+           "Frame": "turned over, the top of the wall round the lid on the bed; support "
+                    "under the lid's seat",
            "Plunger": "turned over, the cap on the bed",
            "Cover": "as modelled, the foot on the bed"}
 
@@ -461,7 +481,7 @@ def main():
             return 1
         volumes[name] = man.volume()
         tri = S.apply(S.triangles(man), S.inverse(back[name][0]))
-        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.4 {name}")
+        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.5 {name}")
         file = f"{spec.PREFIX}{name}.stl"
         (args.out / file).write_bytes(data)
         lo, hi = tri.reshape(-1, 3).min(axis=0), tri.reshape(-1, 3).max(axis=0)
@@ -482,11 +502,11 @@ def main():
     rows = derived(p, g, heights, board, solids)
     manifest = {
         "schema": 1,
-        "about": "Enclosure Rev0.4, written by design/mechanical/scripts/make_enclosure.py. "
+        "about": "Enclosure Rev0.5, written by design/mechanical/scripts/make_enclosure.py. "
                  "Do not edit.",
         "state": "WIP",
-        "revision": "Rev0.4",
-        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.4.md", "inputs_sha256": digest},
+        "revision": "Rev0.5",
+        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.5.md", "inputs_sha256": digest},
         "overrides": overrides,
         "board_interface": {
             "path": "design/mechanical/reference/board_interface_Rev0.7.json",

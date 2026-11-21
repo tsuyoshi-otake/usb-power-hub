@@ -1,11 +1,11 @@
 {
  "schema": 1,
- "about": "Enclosure Rev0.4, written by design/mechanical/scripts/make_enclosure.py. Do not edit.",
+ "about": "Enclosure Rev0.5, written by design/mechanical/scripts/make_enclosure.py. Do not edit.",
  "state": "WIP",
- "revision": "Rev0.4",
+ "revision": "Rev0.5",
  "document": {
-  "path": "design/mechanical/ENCLOSURE_Rev0.4.md",
-  "inputs_sha256": "04e3804e2dd53ad23211bfbc009e01300a6e1402e72482273e88f0ffb96f9739"
+  "path": "design/mechanical/ENCLOSURE_Rev0.5.md",
+  "inputs_sha256": "642aa32d21591024abdf08bac2267cce3e5c89f811c8d5c4f3f09aea5a6d2995"
  },
  "overrides": {},
  "board_interface": {
@@ -17,8 +17,8 @@
  "pieces": [
   {
    "name": "Tray",
-   "file": "UsbPowerHub_Enclosure_Rev0.4_Tray.stl",
-   "sha256": "73e8a9f6c9af047c810a155b5f60a031454135a407825010c6e835d60bf40842",
+   "file": "UsbPowerHub_Enclosure_Rev0.5_Tray.stl",
+   "sha256": "c1ad16c61f920cbd5a2c31213560dd4af31d33002d01705185cfacd2ea3032fc",
    "triangles": 3090,
    "volume_mm3": 19933.98,
    "print_size": [
@@ -53,16 +53,16 @@
   },
   {
    "name": "Frame",
-   "file": "UsbPowerHub_Enclosure_Rev0.4_Frame.stl",
-   "sha256": "df2dec08582b843b071893ae603abc974d79489bbf482db47d4b41e524209336",
-   "triangles": 4972,
-   "volume_mm3": 17713.42,
+   "file": "UsbPowerHub_Enclosure_Rev0.5_Frame.stl",
+   "sha256": "8741752a2bbcebf7ee2a94a770810e07bf008df1d89c22eba34ba9233a1ef12d",
+   "triangles": 4934,
+   "volume_mm3": 18844.53,
    "print_size": [
     104.8,
     76.8,
-    19.0
+    20.6
    ],
-   "print": "turned over, its top face on the bed",
+   "print": "turned over, the top of the wall round the lid on the bed; support under the lid's seat",
    "quantity": 1,
    "to_assembly": [
     [
@@ -82,15 +82,15 @@
       0,
       0,
       -1,
-      19.0
+      20.6
      ]
     ]
    ]
   },
   {
    "name": "Plunger",
-   "file": "UsbPowerHub_Enclosure_Rev0.4_Plunger.stl",
-   "sha256": "48bdcf878871fe8eddf0c20697ef2b249364daf67f626e4f0f10c0cb1965e95a",
+   "file": "UsbPowerHub_Enclosure_Rev0.5_Plunger.stl",
+   "sha256": "6e8fb354413c069a8d927180d6b96da1de796541ed5f2a677aa67980bc542ac7",
    "triangles": 892,
    "volume_mm3": 171.56,
    "print_size": [
@@ -145,8 +145,8 @@
   },
   {
    "name": "Cover",
-   "file": "UsbPowerHub_Enclosure_Rev0.4_Cover.stl",
-   "sha256": "b29efb3043d3cc7b94c2cc7eb4049298437307e52f7a3161787ec700514494c2",
+   "file": "UsbPowerHub_Enclosure_Rev0.5_Cover.stl",
+   "sha256": "04965501ab477311921d8c0e4d4209239fb2325d5c0fdd0f4f0d937cd09b283b",
    "triangles": 128,
    "volume_mm3": 818.13,
    "print_size": [
@@ -181,22 +181,24 @@
   }
  ],
  "lid_interface": {
-  "file": "UsbPowerHub_Enclosure_Rev0.4_LidInterface.json",
+  "file": "UsbPowerHub_Enclosure_Rev0.5_LidInterface.json",
   "sha256": "40c40712764905ff87601bf8ed42b3ef5def7cc5c918743976c6d9843612fa53"
  },
  "derived": {
   "outer_x": 104.8,
   "outer_y": 76.8,
   "outer_z": 27.7,
-  "printed_z": 26.1,
   "tray_z": 7.9,
-  "frame_z": 19.0,
-  "lid_margin": 2.4,
+  "frame_z": 20.6,
+  "rim_h": 1.6,
+  "rim_gap": 0.4,
+  "rim_wall": 2.0,
+  "frame_support_area": 6.2838,
   "web_t": 0.56,
   "face_inset": 1.34,
   "port_to_screw_max": 14.0279,
   "clamp_opening_w": 18.0,
-  "clamp_bridge_h": 7.0,
+  "clamp_bridge_h": 8.6,
   "lid_clearance_min": 0.7,
   "bottom_engagement": 3.1,
   "lid_engagement": 3.4,
@@ -206,7 +208,7 @@
   "cover_gap_min": 0.1414,
   "cover_strain": 0.831,
   "tray_volume": 19.934,
-  "frame_volume": 17.7134,
+  "frame_volume": 18.8445,
   "plunger_volume": 0.1716,
   "cover_volume": 0.8181
  },

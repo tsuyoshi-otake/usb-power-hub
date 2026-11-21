@@ -213,7 +213,7 @@ class CheckEnclosure(unittest.TestCase):
     # E01 -------------------------------------------------------------------------------------
     def test_no_manifest(self):
         self.assertFailsWith(variant(edit=lambda out: (out / spec.MANIFEST).unlink()),
-                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.4_Manifest.json")
+                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.5_Manifest.json")
 
     def test_piece_not_in_the_manifest(self):
         def edit(out):
@@ -239,11 +239,11 @@ class CheckEnclosure(unittest.TestCase):
             raw[200] ^= 1
             f.write_bytes(bytes(raw))
         self.assertFailsWith(variant(edit=edit),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.4_Tray.stl: SHA-256 differs")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.5_Tray.stl: SHA-256 differs")
 
     def test_piece_missing(self):
         self.assertFailsWith(variant(edit=lambda out: (out / f"{spec.PREFIX}Plunger.stl").unlink()),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.4_Plunger.stl: missing")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.5_Plunger.stl: missing")
 
     def test_document_value_changed_after_the_build(self):
         self.assertFailsWith(variant(doc=table_value("params", "gap", "0.5")),
@@ -298,6 +298,31 @@ class CheckEnclosure(unittest.TestCase):
     def test_piece_above_the_bed(self):
         self.assertFailsWith(variant(edit=rewrite_stl("Tray", lifted)),
                              "FAIL E04 Tray: lowest point z 1.000")
+
+    def test_unchanged_frame_hangs_only_at_the_lids_seat(self):
+        rc, out = variant()
+        self.assertRegex(out, r"PASS E04 Frame: the only faces that hang are the lid's seat, "
+                              r"1\.6 mm above the bed: 628 mm2 to support")
+
+    def test_frame_face_that_hangs_beside_the_lids_seat(self):
+        # a ledge on the back wall's inner face, 11 mm above the board: turned over for
+        # printing it hangs 9.6 mm above the bed, and it is not the lid's seat
+        ledge = reshaped(lambda man: man + S.box(60.0, 70.4, 10.0, 66.0, 72.6, 11.0))
+        rc, out = variant(edit=rewrite_stl("Frame", ledge))
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E04 Frame: 1[0-9]\.\d mm2 of faces steeper than 45 degrees "
+                              r"hang in the air in the print orientation, the lid's seat "
+                              r"\(628\.\d mm2 at 1\.6 mm above the bed\) not counted")
+
+    def test_seat_is_no_excuse_for_another_piece(self):
+        # the tray has no seat: a flat face 1.6 mm above its bed, over a hole in the floor,
+        # is a hanging face
+        shelf = reshaped(lambda man: man + S.box(40.0, 30.0, -5.5, 50.0, 40.0, -4.5)
+                         - S.box(42.0, 32.0, -7.2, 48.0, 38.0, -5.5))
+        rc, out = variant(edit=rewrite_stl("Tray", shelf))
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E04 Tray: \d+\.\d mm2 of faces steeper than 45 degrees hang "
+                              r"in the air in the print orientation\n")
 
     # E05 -------------------------------------------------------------------------------------
     def test_cavity_lower_than_the_tallest_part(self):
@@ -517,6 +542,12 @@ class CheckEnclosure(unittest.TestCase):
             lid["underside_above_board"] = 18.0
         self.assertFailsWith(variant(edit=rewrite_lid(change)), "FAIL E13 ", "lid underside at 18 mm")
 
+    def test_lid_above_its_seat(self):
+        def change(lid):
+            lid["underside_above_board"] = 19.5
+        self.assertFailsWith(variant(edit=rewrite_lid(change)), "FAIL E13 ",
+                             "lid underside at 19.5 mm, the frame's seat at 19.00 mm")
+
     # E14 -------------------------------------------------------------------------------------
     def test_no_seam_gap(self):
         self.assertFailsWith(variant("seam_gap=0"), "FAIL E14 ", "smallest gap 0.000 mm, want 0.2 mm")
@@ -547,7 +578,7 @@ class CheckEnclosure(unittest.TestCase):
     def test_window_lower_than_the_upper_jaw(self):
         rc, out = variant("clamp_up=4")
         self.assertFailsWith((rc, out), "FAIL E17 J5: 0.00 mm3 of the tray and ",
-                             "clamp_bridge_h 7.0 (built: 15.00)")
+                             "clamp_bridge_h 8.6 (built: 16.60)")
 
     def test_no_wall_left_above_the_opening(self):
         rc, out = variant("clamp_up=17")
@@ -662,7 +693,71 @@ class CheckEnclosure(unittest.TestCase):
         self.assertRegex(out, r"FAIL E06 TPX pad '1' at \(44\.5, 70\.4\): \d+\.\d\d mm3 of the "
                               r"Cover within 2\.5 mm below its hole")
 
+    # E19 -------------------------------------------------------------------------------------
+    def test_lid_tight_in_its_pocket(self):
+        rc, out = variant("rim_clear=0.1")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E19 [1-9]\d*\.\d\d mm3 of the frame within 0\.3 mm of the "
+                              r"lid's edge or over the lid \(want 0\); the lid's edge is 0\.10 mm "
+                              r"from the wall, want 0\.3 \.\. 0\.6 mm")
+
+    def test_lid_loose_in_its_pocket(self):
+        self.assertFailsWith(variant("rim_clear=0.9"),
+                             "FAIL E19 0.00 mm3 of the frame within 0.3 mm of the lid's edge or "
+                             "over the lid (want 0); the lid's edge is 0.90 mm from the wall, "
+                             "want 0.3 .. 0.6 mm")
+
+    def test_lid_thinner_than_the_wall_is_high(self):
+        def change(lid):
+            lid["thickness"] = 1.0
+        self.assertFailsWith(variant(edit=rewrite_lid(change)),
+                             "FAIL E19 the wall round the lid ends 20.60 mm above the board and "
+                             "the lid's top face is at 20.00 mm: the wall stands 0.60 mm proud")
+
+    def test_lid_thicker_than_the_wall_is_high(self):
+        def change(lid):
+            lid["thickness"] = 2.0
+        self.assertFailsWith(variant(edit=rewrite_lid(change)),
+                             "FAIL E19 the wall round the lid ends 20.60 mm above the board and "
+                             "the lid's top face is at 21.00 mm: the lid stands 0.40 mm proud")
+
+    def test_frame_without_the_wall_round_the_lid(self):
+        # the frame as it was until Rev0.4: it ends at the lid's seat
+        cut = reshaped(lambda man: man ^ S.box(-10.0, -10.0, -1.0, 110.0, 82.0, 19.0))
+        self.assertFailsWith(variant(edit=rewrite_stl("Frame", cut)),
+                             "FAIL E03 Frame: box",
+                             "FAIL E19 the wall round the lid ends 19.00 mm above the board and "
+                             "the lid's top face is at 20.60 mm: the lid stands 1.60 mm proud",
+                             "the lid's edge is 3.00 mm from the wall, want 0.3 .. 0.6 mm",
+                             "FAIL E19 inf mm3 of the wall round the lid is missing")
+
+    def test_frame_that_laps_over_the_lid(self):
+        # a tab on the front wall's top that reaches 1.0 mm over the lid, 0.1 mm above it:
+        # the lid lies free and cannot be lifted out
+        tab = reshaped(lambda man: man + S.box(40.0, -1.6, 20.3, 46.0, -0.5, 21.2)
+                       + S.box(40.0, -1.6, 20.7, 46.0, 1.0, 21.2))
+        rc, out = variant(edit=rewrite_stl("Frame", tab))
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E19 [1-9]\d*\.\d\d mm3 of the frame within 0\.3 mm of the "
+                              r"lid's edge or over the lid \(want 0\)")
+        self.assertIn("PASS E13 the lid has the board's outline and lies on its seat", out)
+
+    def test_notch_in_the_wall_round_the_lid(self):
+        # a slot 1 mm wide through the front wall, from 0.3 mm above the seat to the top
+        notch = reshaped(lambda man: man - S.box(60.0, -3.0, 19.3, 61.0, -0.2, 21.0))
+        rc, out = variant(edit=rewrite_stl("Frame", notch))
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E19 [1-9]\.\d\d mm3 of the wall round the lid is missing "
+                              r"between the gap and the outline")
+        self.assertIn("PASS E19 the wall round the lid ends flush with the lid's top face", out)
+
     # E15 -------------------------------------------------------------------------------------
+    def test_seat_wider_than_the_document_says(self):
+        rc, out = variant("lid_overlap=1.5")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E15 derived figures differ: frame_support_area 6\.28 "
+                              r"\(built: [78]\.\d\d\)")
+
     def test_cover_figure_edited(self):
         self.assertFailsWith(variant(doc=table_value("derived", "cover_engage", "0.50")),
                              "FAIL E15 derived figures differ: cover_engage 0.5 (built: 0.40)")
@@ -698,7 +793,7 @@ class CheckEnclosure(unittest.TestCase):
         here = spec.source_tag(spec.ASSEMBLY / spec.MANIFEST)      # the repository's build
         self.assertFailsWith(variant("plunger_proud=1.2", pictures=lambda out, pic: picture(pic, here)),
                              "FAIL E16 1 of 1 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.4_Assembled.png): run render_enclosure.py")
+                             "(UsbPowerHub_Enclosure_Rev0.5_Assembled.png): run render_enclosure.py")
 
     def test_picture_that_names_no_build(self):
         def pictures(out, pic):
@@ -706,7 +801,7 @@ class CheckEnclosure(unittest.TestCase):
             picture(pic, spec.source_tag(out / spec.MANIFEST))
         self.assertFailsWith(variant(pictures=pictures),
                              "FAIL E16 1 of 2 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.4_Open.png)")
+                             "(UsbPowerHub_Enclosure_Rev0.5_Open.png)")
 
     def test_no_pictures(self):
         self.assertFailsWith(variant(pictures=lambda out, pic: None),

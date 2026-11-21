@@ -1,4 +1,4 @@
-# Enclosure Rev0.4 — printed tray, frame and cover under a PCB lid (issues #11, #13 and #14)
+# Enclosure Rev0.5 — printed tray, frame and cover, a PCB lid let into the frame (issues #11, #13 and #14)
 
 > **WIP — NOT PRINTED, NOT ORDERED.** This is a first design on paper for the Rev0.7 board
 > (100 × 72 mm), which is ordered since 2026-11-20 and not yet delivered. Nothing has been
@@ -8,6 +8,17 @@
 > The print process is FDM (the user's choice, 2026-11-18; E2), and every printed piece is
 > matte black (the user's, 2026-11-21; E2). The filament's material and the printer
 > are not chosen, and the values stay provisional until the first print.
+>
+> **Rev0.5 against Rev0.4 (2026-11-21, issue #14).** The frame's wall goes on up round the
+> lid, as high as the lid is thick, so that the lid lies in a pocket and its edge is no
+> longer seen (E12). The user asked for it on a rendered picture of the unit, in which the
+> lid lay on the frame and showed 1.6 mm of bare PCB edge all round: 「ここのPCBぶぶんは筐体に
+> 収めないと」, and then, of the forms offered, 「ふたと同じ高さの壁で囲う」 (2026-11-21). The
+> outer size is the same, 104.8 × 76.8 × 27.7 mm: the wall's top is where the lid's top face
+> was. One thing is given up: the frame is now printed on support material, 1.6 mm high,
+> under the lid's seat (E2 and E3 as amended). The tray, the plungers, the cover and the
+> lid's interface are Rev0.4's. Enclosure Rev0.4 was never printed; its files are in Git
+> history, at commit `d06cdea`.
 >
 > **Rev0.4 against Rev0.3 (2026-11-21, issue #14).** One piece is new: a printed cover for
 > the clamp's opening (E11), after the user saw the opening in a picture of the finished unit
@@ -42,15 +53,16 @@ Five printed pieces, one PCB and sixteen pieces of hardware:
 | Piece | Made by | What it does |
 |---|---|---|
 | Tray | printed, floor on the bed | Floor and the walls up to the board's top face. Four corner bosses carry the board; a rib under each receptacle carries the board's edge. |
-| Frame | printed, upside down (its top face on the bed) | The walls above the board. Four corner posts clamp the board onto the bosses and carry the lid. Two towers guide the button plungers and hold a light well over each port's two LEDs; a tube guides a paperclip to SW3. A tower's column, which holds the plunger, starts 11.0 mm above the board; its light well and the tube come down to 2.2 mm. |
+| Frame | printed, upside down (the top of its wall on the bed), with support under the lid's seat (E12) | The walls above the board, carried on round the lid up to the lid's top face. Four corner posts clamp the board onto the bosses and carry the lid. Two towers guide the button plungers and hold a light well over each port's two LEDs; a tube guides a paperclip to SW3. A tower's column, which holds the plunger, starts 11.0 mm above the board; its light well and the tube come down to 2.2 mm. |
 | Plunger × 2 | printed, cap on the bed | Carries a finger's push through the lid to SW1 and SW2. |
 | Cover | printed, as it sits, its foot on the bed | Closes the SWD clamp's opening while the clamp is off: a slab in the back wall's opening and a foot in the floor's. Two spring fingers at the foot's sides click into notches of the tray's floor. |
-| Lid | PCB, 100 × 72 × 1.6 mm, the main board's outline and hole positions | The top panel and its legend. Lies on the frame. This document writes its interface (outline, holes, windows, port positions); the board itself is `LID_Rev0.2.md`, drawn from that interface and not ordered. |
+| Lid | PCB, 100 × 72 × 1.6 mm, the main board's outline and hole positions | The top panel and its legend. Lies in the frame, on its seat, 0.4 mm inside the wall, its top face flush with the wall's top (E12). This document writes its interface (outline, holes, windows, port positions); the board itself is `LID_Rev0.2.md`, drawn from that interface and not ordered. |
 | Hardware | bought | 8 heat-set M2 inserts, 4 countersunk M2 × 10 screws (bottom), 4 pan-head M2 × 5 screws (lid). |
 
 The seam between tray and frame is at the board's top face. That puts every port opening in
-a notch that is open towards the seam, so no piece needs support material in its print
-orientation (checked: E04).
+a notch that is open towards the seam, so no opening needs support material in its piece's
+print orientation. One face does since Rev0.5: the lid's seat in the frame, which hangs
+1.6 mm above the bed (E12). No other face of any piece hangs (checked: E04).
 
 ## 2. Frames and sources
 
@@ -73,13 +85,14 @@ orientation (checked: E04).
 All made by Claude under the 2026-11-03 delegation while answering the user's request
 「筐体もデザインして」 (2026-11-13), except the print process in E2, which the user chose on
 2026-11-18. E8's amendment is Claude's too, made on 2026-11-19 for the Rev0.6 board
-(issue #13). Each is provisional and the user may revert any one.
+(issue #13). E11 and E12 answer requests of the user's (2026-11-21); their rows say what
+is the user's in them. Each is provisional and the user may revert any one.
 
 | ID | Decision | Why | Rejected |
 |---|---|---|---|
 | E1 | Tray + frame + PCB lid, seam at the board's top face. | CLAUDE.md §1 fixes "3D-printed tub + a second PCB used as the top panel". The board carries its receptacles on its edges, 1.06 mm past the outline, so it cannot be lowered into a one-piece tub with closed port holes. With the seam at the board's top face the board drops into the tray, and the frame comes down over the receptacles. | A one-piece tub with slots open to the rim (the lid would have to close the slots: a PCB cannot). A tub split at the ports' centre line (the frame would then print with overhangs). |
-| E2 | Printed by FDM (**user**, 2026-11-18: the choice 「FDM」, offered with MJF, FDM recommended). 0.4 mm nozzle, 0.2 mm layers, no support material (Claude). Colour: matte black for all five printed pieces, the plungers included (**user**, 2026-11-21: 「全部黒だよマット」, on a picture of the unit with a white case). The four lid screws, the only ones seen from above, are black too (Claude's reading of 「全部」). | CLAUDE.md §7 wants the process chosen before wall and clearance values are frozen. The colour changes no value in §4. The parts were drawn for FDM from the start, as the stricter process (no overhang, 0.3–0.4 mm clearances), so the choice changes no value in §4. The first print is a fit check, and a changed opening or clearance is printed again. | MJF (offered, not chosen): its walls and clearances would have been reviewed before freezing. Freezing the values before the user chose. |
-| E3 | The lid is 100 × 72 mm, the main board's outline, and lies **on** the frame's top face inside a 2.4 mm margin. | It stays in the 100 × 100 mm price tier the main board was sized for (D24), and a seat recessed into the frame would be an overhang in the frame's print orientation. | A lid as large as the frame's outline (104.8 × 76.8 mm, outside the tier). A recessed seat. |
+| E2 | Printed by FDM (**user**, 2026-11-18: the choice 「FDM」, offered with MJF, FDM recommended). 0.4 mm nozzle, 0.2 mm layers, no support material (Claude); since Rev0.5 the frame is the exception, with support under the lid's seat only (E12). Colour: matte black for all five printed pieces, the plungers included (**user**, 2026-11-21: 「全部黒だよマット」, on a picture of the unit with a white case). The four lid screws, the only ones seen from above, are black too (Claude's reading of 「全部」). | CLAUDE.md §7 wants the process chosen before wall and clearance values are frozen. The colour changes no value in §4. The parts were drawn for FDM from the start, as the stricter process (no overhang, 0.3–0.4 mm clearances), so the choice changes no value in §4. The first print is a fit check, and a changed opening or clearance is printed again. | MJF (offered, not chosen): its walls and clearances would have been reviewed before freezing. Freezing the values before the user chose. |
+| E3 | The lid is 100 × 72 mm, the main board's outline. Until Rev0.4 it lay **on** the frame's top face inside a 2.4 mm margin; since Rev0.5 that face is a seat inside the wall (E12). | It stays in the 100 × 100 mm price tier the main board was sized for (D24). Until Rev0.4: a seat recessed into the frame would be an overhang in the frame's print orientation. That is still so, and E12 accepts it. | A lid as large as the frame's outline (104.8 × 76.8 mm, outside the tier). A recessed seat: rejected until Rev0.4, taken in Rev0.5 at the user's request (E12). |
 | E4 | Fastening: four countersunk M2 × 10 from below, through the tray's bosses and the board's holes H1–H4 into heat-set inserts in the posts' feet; the lid by four pan-head M2 × 5 into inserts in the posts' tops. | REQ-MECH-04 and D21 call for heat-set M2 inserts at the four corners. Posts and bosses clamp the board itself (OI-5: "the PCB itself is not clamped" in the mockup). A countersink prints without support on the bed side; a counterbore's flat ceiling does not. | One long screw through lid, post and board (M2 × 30 is not a stock length). Self-tapping screws into plastic (thread engagement, REQ-MECH-04). |
 | E5 | A 0.2 mm designed gap at the seam, with a 45° ridge on the tray's wall inside a chamfer on the frame's. | The posts must land on the board before the walls meet, or the board is not clamped. The ridge closes the line of sight through the gap. | A butt seam (a 0.2 mm slit at the board's level all round). |
 | E6 | Each port opening is a hole for the receptacle's shell behind a pocket for the plug's overmould (15.0 × 8.0 mm), whose floor is 0.1 mm behind the receptacle's face. | The receptacle's face is 1.34 mm inside the wall's outer face. Without the pocket an overmould would meet the wall before the plug seats (REQ-MECH-05). The pocket lets any overmould up to 14.0 × 7.0 mm reach the receptacle itself. | Thinning the whole wall to 0.7 mm. Moving the receptacles (a board change). |
@@ -87,8 +100,9 @@ All made by Claude under the 2026-11-03 delegation while answering the user's re
 | E8 | Buttons by loose printed plungers, captive under the lid; LEDs through one light well per port to a window of bare FR-4 in the lid; SW3 through a 2.0 mm pinhole and a guide tube. | SW1, SW2 and SW3 are 1.5 mm tall and the lid is 19 mm above the board. A plunger needs no part to buy; bare FR-4 passes an LED's light and needs no light pipe; REQ-BOOT-02 names the pinhole. | Flexures in the lid (the lid is a PCB). Bought light pipes (D13: few part types). |
 | E8, amended in Rev0.2 | A button's column starts 11.0 mm above the board (`btn_bottom`) instead of 2.2 mm, in 1.9 mm of wall (`btn_wall`; 1.5 mm in Rev0.1). The light wells and the tube still come down to 2.2 mm (`ui_bottom`). | On the Rev0.6 board SW2 stands 2.955 mm from the courtyard of the MAU104 (U5, 10.2 mm tall). Rev0.1's column reached 3.2 mm to each side of its button from 2.2 mm up, so it stood 0.245 mm inside that courtyard: E05 failed with 13.60 mm³ of the frame in U5's envelope. A column that starts above the converter clears it whatever its width. That let the wall grow to leave 0.8 mm round the counterbore, two perimeters of the nozzle; Rev0.1 left 0.4 mm there and no check measured it. Both towers are built alike. The cost: the bore guides a plunger over 4.7 mm instead of 13.5 mm (§10). | A column narrowed beside the converter (1.2 mm of wall, 0.35 mm from the body of a hand-soldered part). A thinner plunger (a 2.0 mm shaft, printed 20 mm long). Moving U5 or SW2 (a change of the board that D39 has just placed). |
 | E9 | No vents. | About 1 W in a 104.8 × 76.8 mm box. Not calculated: an estimate from the board's supply current, and the first unit is measured. | Slots in the tray's floor or the walls (dust, and light from the LEDs). E10's opening is not a vent; it is the one place where dust enters and light leaves while its cover (E11) is off. |
-| E10 (Rev0.3, Claude, 2026-11-20) | An opening for the SWD clamp, centred on J5: 18.0 mm wide (`clamp_w` + 2 × `clamp_clear`), through the back wall of the tray and of the frame up to 12.0 mm above the board (`clamp_up`), and through the tray's floor from 8.0 mm inside the board's back edge (`clamp_reach`). 7.0 mm of the frame's wall stays above it, under the lid's edge. | D40: the user debugs through SWD with a spring-pin clamp that grips the board's edge from above and below (「SWD経由で君にデバッグまで自動化して開発したいからさ。」), so the clamp must reach J5 with the unit closed. The clamp is 16.5 mm wide (user, 2026-11-20); its drawing is not known, so the opening does not depend on the jaws' thickness: below the board it is open down to the desk, 5.5 mm, and the unit can be lifted. Both cuts are open towards the seam or the bed, so no piece gains an overhang (E04). | SWD only with the frame and tray off (the unit could not be debugged as it is used). A window in the frame alone (the tray's wall and floor stand in the lower jaw's way). A door or plug for the opening (a fifth printed piece; the first print shows whether dust or light matters): rejected in Rev0.3, added in Rev0.4 at the user's request (E11). |
+| E10 (Rev0.3, Claude, 2026-11-20) | An opening for the SWD clamp, centred on J5: 18.0 mm wide (`clamp_w` + 2 × `clamp_clear`), through the back wall of the tray and of the frame up to 12.0 mm above the board (`clamp_up`), and through the tray's floor from 8.0 mm inside the board's back edge (`clamp_reach`). 8.6 mm of the frame's wall stays above it, up to the wall's top (7.0 mm until Rev0.4, when the wall ended under the lid's edge). | D40: the user debugs through SWD with a spring-pin clamp that grips the board's edge from above and below (「SWD経由で君にデバッグまで自動化して開発したいからさ。」), so the clamp must reach J5 with the unit closed. The clamp is 16.5 mm wide (user, 2026-11-20); its drawing is not known, so the opening does not depend on the jaws' thickness: below the board it is open down to the desk, 5.5 mm, and the unit can be lifted. Both cuts are open towards the seam or the bed, so no piece gains an overhang (E04). | SWD only with the frame and tray off (the unit could not be debugged as it is used). A window in the frame alone (the tray's wall and floor stand in the lower jaw's way). A door or plug for the opening (a fifth printed piece; the first print shows whether dust or light matters): rejected in Rev0.3, added in Rev0.4 at the user's request (E11). |
 | E11 (Rev0.4, the request the **user**'s, 2026-11-21: 「蓋欲しいよ」; the shape Claude's) | A loose printed cover for E10's opening, pushed in from the back. A slab fills the wall's opening, flush with the wall, with `cover_clear` round it; a foot fills the floor's opening. At each side of the foot a finger 0.8 mm wide, free of the foot's plate over its whole length, carries a 45° detent that stands 0.4 mm behind the side of the floor's opening, in a notch of the tray's floor. A 45° wedge on the slab's inner face reaches 0.6 mm over the board's back edge. A slot of 8 × 3 mm through the foot takes a fingernail. | The opening is 18.0 × 19.1 mm in the back wall and shows the board; the user wants it closed when the clamp is off. What holds the cover: the floor's end stops it inwards after 0.2 mm, the detents hold it against being drawn out, the frame's wall above stops it upwards after 0.2 mm, and with the unit lifted it drops 0.4 mm until the wedge lies on the board's edge. The wedge's gap is twice the inward play, so a push on the cover ends on the tray and not on the board. The cover prints as it sits, with no support: the wedge's underside is at 45°, and the fingers lie flat, so their layers run along them. The slot is open through the foot because a blind recess would be a bridge on the bed side (E04). | A cover held by friction alone (nothing to check, and the first print decides the fit). A cover that slides in from below (it falls out when the unit is lifted). A flat ledge over the board instead of the wedge (an overhang, E04). Rails in the sides of the wall's opening (they cut the wall that E17 keeps whole at each side). A hinged door (a pin or a living hinge, in a wall 2.0 mm thick). |
+| E12 (Rev0.5, 2026-11-21; the request and the form the **user**'s: on a rendered picture of the unit, the lid's edge marked in red, 「ここのPCBぶぶんは筐体に収めないと」, then 「ふたと同じ高さの壁で囲う」; the construction Claude's) | The frame's wall goes on up round the lid by the lid's thickness (`lid_t`, 1.6 mm). It keeps the wall's 2.0 mm and its outer face; its inner face stands `rim_clear` (0.4 mm) from the lid's edge; its top is flush with the lid's top face and carries the chamfer that the frame's top edge had. The lid lies in the pocket this makes, on the seat that was the frame's top face (flange, posts, towers, light wells, tube). The wall is one piece with the frame. The frame is printed turned over as before, now standing on the wall's top, and the lid's seat, 6.28 cm², is printed on support material 1.6 mm high. With the screws out the lid has no edge to grip: the unit is turned over and the lid falls into the hand. | With the lid lying on the frame, 1.6 mm of the PCB's routed edge showed all round the top of the unit, bare laminate on a matte black case; the user saw it in the pictures and wants it inside the case. As high as the lid: the user's words. One piece with the frame: a separate ring would be 2.0 × 1.6 mm in section and 355 mm round, with a seam all round where the edge showed before. Turned over with support: every face that needs it is 1.6 mm above the bed with nothing below it, so the support stands on the bed, is 8 layers high and is reached from the open side; the lid then covers the faces it leaves. The outer size does not change. | A frame that laps over the lid's edge (offered to the user, not chosen: it covers the lid's outer 0.8 mm and holds the lid only with the frame's own screws). A separate ring, glued on (offered, not chosen). The frame printed the right way up (the towers would hang 11.0 mm and the light wells 2.2 mm above the bed, inside the cavity: more support, and harder to remove). A 45° face from the seat out to the wall's top instead of support (the gap round the lid would be 2.0 mm wide at the top). A wall higher than the lid, to guard the legend (not what the user said). A notch in the wall for a fingernail (the edge would show again there). |
 
 ## 4. Parameters
 
@@ -113,6 +127,8 @@ soldered part, or a demand the checker makes on the design. All in mm, except
 | `lip_clear` | 0.3 | Horizontal clearance between the ridge and the frame. | design |
 | `lid_overlap` | 0.8 | Width of the frame's flange under the lid's edge. | design |
 | `flange_t` | 1.2 | Thickness of that flange. | design |
+| `rim_clear` | 0.4 | Gap between the lid's edge and the wall that stands round it (E12). Equal to `gap`, so the wall's inner face runs straight up from the cavity. | design |
+| `rim_clear_min` | 0.3 | Gap round the lid that the checker demands: ± 0.2 mm on the lid's outline (JLCPCB's routing tolerance, from memory, not read on this day) and as much on a printed pocket. | world |
 | `boss_reach` | 3.0 | A tray boss reaches this far past its hole's centre. | design |
 | `post_reach` | 3.2 | A frame post reaches this far past its hole's centre. | design |
 | `screw_clear_d` | 2.3 | Screw hole through the tray's bosses. | design |
@@ -235,16 +251,18 @@ Written by `make_enclosure.py --derived` and compared with the built files by
 |---|---:|---|---|
 | `outer_x` | 104.80 | mm | Outer width (along the port edges). |
 | `outer_y` | 76.80 | mm | Outer depth (front to back). |
-| `outer_z` | 27.70 | mm | Height, tray's underside to the lid's top face. |
-| `printed_z` | 26.10 | mm | Height without the lid. |
+| `outer_z` | 27.70 | mm | Height, tray's underside to the top of the wall round the lid, which is the lid's top face. |
 | `tray_z` | 7.90 | mm | The tray's print height. |
-| `frame_z` | 19.00 | mm | The frame's print height. |
-| `lid_margin` | 2.40 | mm | Frame's top face left free around the lid. |
+| `frame_z` | 20.60 | mm | The frame's print height. |
+| `rim_h` | 1.60 | mm | Height of the wall round the lid above the lid's seat: the lid's thickness. |
+| `rim_gap` | 0.40 | mm | Gap between the lid's edge and the wall round it. |
+| `rim_wall` | 2.00 | mm | Thickness of the wall round the lid, below its chamfer. |
+| `frame_support_area` | 6.28 | cm2 | The lid's seat, which hangs above the bed when the frame is printed: the area that needs support material. |
 | `web_t` | 0.56 | mm | Web between an overmould pocket and the cavity. |
 | `face_inset` | 1.34 | mm | A receptacle's face inside the wall's outer face. |
 | `port_to_screw_max` | 14.03 | mm | The receptacle farthest from a screw (J4) to its nearest mounting hole. |
 | `clamp_opening_w` | 18.00 | mm | Width of the clamp's opening in the back wall, centred on the SWD land (J5). |
-| `clamp_bridge_h` | 7.00 | mm | Height of the frame's wall that is left above the clamp's opening. |
+| `clamp_bridge_h` | 8.60 | mm | Height of the frame's wall that is left above the clamp's opening, up to the wall's top. |
 | `lid_clearance_min` | 0.70 | mm | Tallest part (F1, 18.3 mm) to the lid's underside. |
 | `bottom_engagement` | 3.10 | mm | Bottom screw's thread above the board's top face, in the post's insert. |
 | `lid_engagement` | 3.40 | mm | Lid screw's thread below the lid, in the post's insert. |
@@ -254,7 +272,7 @@ Written by `make_enclosure.py --derived` and compared with the built files by
 | `cover_gap_min` | 0.14 | mm | Smallest gap between the cover at rest and the tray or the frame. |
 | `cover_strain` | 0.83 | % | Strain at a finger's root while its detent passes the opening's side (1.5 x width x deflection / length squared). |
 | `tray_volume` | 19.93 | cm3 | Solid volume of the tray. |
-| `frame_volume` | 17.71 | cm3 | Solid volume of the frame. |
+| `frame_volume` | 18.84 | cm3 | Solid volume of the frame. |
 | `plunger_volume` | 0.17 | cm3 | Solid volume of one plunger. |
 | `cover_volume` | 0.82 | cm3 | Solid volume of the cover. |
 <!-- derived:end -->
@@ -269,8 +287,8 @@ from the board interface and §4–§5:
 |---|---|---|
 | E01 | The files are the ones the manifest names; they were built from this document's tables and from the interface of the tracked board. | CLAUDE.md §7 (one source) |
 | E02 | Each STL is one closed, consistently wound body. | — |
-| E03 | Outer size: board + 2 × (gap + wall), and the height from §4. Nothing of tray, frame or cover stands outside that outline and its `corner_r` corners. | — |
-| E04 | In its print orientation each piece stands on the bed and has no face steeper than 45° that hangs in the air. | E2 |
+| E03 | Outer size: board + 2 × (gap + wall), and the height from §4; the frame ends at the lid's top face. Nothing of tray, frame or cover stands outside that outline and its `corner_r` corners. | — |
+| E04 | In its print orientation each piece stands on the bed and has no face steeper than 45° that hangs in the air. One exception, in the frame only: flat faces at the lid's thickness above the bed, which are the lid's seat; their area is reported as what the print supports (§6, `frame_support_area`). | E2, E12 |
 | E05 | No printed piece and no lid enters any part's courtyard below the part's height + `part_margin`. | — |
 | E06 | The tray and the cover clear every through-hole lead by `tht_stub`. | — |
 | E07 | The board lies on four bosses, is clamped by four posts, and has a rib under every receptacle; every edge with a receptacle has two mounting points. | REQ-MECH-03 |
@@ -279,12 +297,13 @@ from the board interface and §4–§5:
 | E10 | Each plunger stands on its switch, moves the switch's travel without touching anything, cannot leave through the lid, and stands proud of it. Its bore, from the column's underside to the cone, and its counterbore each have `btn_wall_min` of plastic all round. | E8 |
 | E11 | Each LED has a free path to a window in the lid, inside a closed well. | — |
 | E12 | A paperclip wire reaches SW3 through the lid, inside a tube no wider than the actuator allows. | REQ-BOOT-02 (design input only) |
-| E13 | The lid has the board's outline and lies on the frame's top face without entering it; its outer 0.5 mm lies on the frame all round, and it lies on every post. | E3 |
+| E13 | The lid has the board's outline and lies on its seat, the top of what the frame has inside that outline, without entering the frame; its outer 0.5 mm lies on the frame all round, and it lies on every post. | E3 |
 | E14 | Tray and frame do not touch: the smallest gap is `seam_gap`. The outer 0.3 mm of both walls is whole all round the seam, outside the port pockets and the clamp's opening. | E5 |
 | E15 | §6's figures are the built files' figures. | — |
 | E16 | Every picture in `reports/` names the build it was drawn from, and it is this one. | — |
 | E17 | The SWD land is at the back edge, inside the opening's width. A box `clamp_w` wide with `clamp_clear` at each side, from `clamp_reach` inside the board's edge outwards and from below the tray up to `clamp_up`, holds no plastic of tray or frame. 1.0 mm of whole wall stands at each side of the opening in both pieces, and 3.0 mm of whole wall above it in the frame. | E10, D40 (design input only) |
 | E18 | The cover at rest touches neither tray, frame, board nor lid, with at least 0.7 × `cover_clear` everywhere (a 45° face). It fills the wall's opening, flush with the wall, with gaps of 0.05 to 0.6 mm round it; its foot closes at least 65 % of the floor's opening, and the fingernail's slot is free from below. Pulled 1.0 mm outwards, each detent meets the tray's floor, and it stands at least `cover_clear` + 0.1 mm behind the opening's side. Each finger is whole, has room to bend by that much and 0.1 mm more, and the strain at its root is below `cover_strain_max`. With its detents cut off, the cover slides 12 mm out through the wall and touches nothing. Pushed in 0.3 mm it is in the tray's floor and not in the board; dropped 0.7 mm it is in the board (it cannot fall out), and hanging on the board its underside is still above the tray's; raised 0.5 mm it is in the frame. | E11 |
+| E19 | The frame ends flush with the lid's top face. The lid's edge is at least `rim_clear_min` and at most 0.6 mm from the frame above the seat, and a box `rim_clear_min` wider than the lid on every side, from the seat up to 10 mm above the unit, holds no plastic: nothing stands over the lid, and it lifts straight out. Between that gap and the outline, from the seat up to the chamfer, the wall is whole all round (less than 0.05 mm³ missing). | E12 |
 
 It cannot see:
 
@@ -293,7 +312,11 @@ It cannot see:
 - **Whether a `world` value is right.** A cable's real overmould, the insert that is bought,
   a part's real height where §5 says `assumed`, the lid's real thickness (JLCPCB: ± 10 %).
 - **The print.** Shrinkage, elephant's foot, sagging bridges, a 0.56 mm web that a slicer
-  drops, a 2.0 mm vertical bore that closes up. Clearances are nominal.
+  drops, a 2.0 mm vertical bore that closes up. Clearances are nominal. E04 counts the area
+  under the lid's seat that a print supports; it knows nothing of the support itself, of
+  how it comes off, or of the face it leaves for the lid to lie on.
+- **The lid's fit in its pocket.** E19 has the nominal gap, 0.4 mm. The real one is a routed
+  PCB outline in a printed pocket whose mouth is the print's first layer (§10).
 - **Strength and stiffness.** Whether the posts hold an insert under a screw's pull, whether
   the walls bow, whether a rib or a hole's edge really takes a plug's force (OI-33).
 - **Light.** How bright an LED is through 1.6 mm of bare FR-4, and what leaks between the
@@ -325,11 +348,15 @@ from memory; each is set again from the bought part's data sheet before printing
 
 ## 9. Printing and assembly
 
-Printing (FDM, E2): tray as modelled, floor on the bed; frame turned over, its top face on
-the bed; plungers cap down; the cover as it sits, its foot and the slab's lower edge on the
-bed. The STL files are already in these orientations. No support
-material, no brim needed by the design; 0.2 mm layers, 3 perimeters. The filament is matte
-black (E2); its material is not chosen (§10).
+Printing (FDM, E2): tray as modelled, floor on the bed; frame turned over, the top of the
+wall round the lid on the bed; plungers cap down; the cover as it sits, its foot and the
+slab's lower edge on the bed. The STL files are already in these orientations. No brim
+needed by the design; 0.2 mm layers, 3 perimeters. No support material for the tray, the
+plungers and the cover. The frame is sliced with support **from the bed only**: it then
+stands under the lid's seat alone, 1.6 mm (8 layers) high over 6.28 cm², inside the wall
+(E12, E04). Support "everywhere" would also fill the bores and the port notches and is not
+wanted. The support is broken out from the open side before the inserts go in. The filament
+is matte black (E2); its material is not chosen (§10).
 
 Assembly:
 
@@ -339,10 +366,16 @@ Assembly:
 3. Lower the frame over the board; the shells pass into the frame's notches.
 4. Turn the stack over and drive the four countersunk screws through the tray.
 5. Drop a plunger, shaft first, into each tower.
-6. Lay the lid on the frame, caps through their holes, and drive the four lid screws.
+6. Lay the lid into the frame's pocket, caps through their holes, and drive the four lid
+   screws. Its top face is then level with the wall's top.
 
 7. Push the cover into the opening in the back wall, foot first along the desk, until its
    two fingers click and its face is flush with the wall.
+
+To take the lid off: the four lid screws out, a hand over the lid, the unit turned over.
+The lid has no edge to grip and falls into the hand, and the two plungers follow it. A lid
+that sticks is pushed out from inside, after the bottom screws, the tray and the board are
+off. Not tried (§10).
 
 SWD (J5) is reached with the unit closed: lift the unit, hook a fingernail into the slot in
 the cover's foot and draw the cover out backwards; the clamp then enters the opening in the
@@ -351,10 +384,21 @@ back wall (E10) and grips the board's edge, its pins on J5's eight pads. Not tri
 ## 10. Not verified
 
 - Nothing is printed. No fit, no cable, no screw has been tried.
+- **The wall round the lid (E12) is drawn, not printed.** Four things wait for a print.
+  The support under the lid's seat: whether it comes off clean from a face 1.2 mm wide along
+  the walls, and how flat it leaves the seat (the lid is drawn down onto the four posts by
+  its screws, and a rough flange under its edge may leave a gap that light shows through).
+  The pocket's mouth: it is the print's first layer, and an elephant's foot narrows it; the
+  gap is 0.4 mm a side, and JLCPCB's tolerance on a routed outline is taken as ± 0.2 mm
+  from memory, not read on this day. Flushness: the lid's thickness is 1.6 mm ± 10 %
+  (§7), so its top face can stand 0.16 mm above or below the wall's top, and the seat's
+  finish adds to that. And taking the lid off by turning the unit over (§9), which lets
+  the plungers fall out. The wall's top face is 1.4 mm wide beside its 0.6 mm chamfer, and
+  the whole frame stands on it while it prints (4.92 cm² on the bed, measured by E04).
 - E2 fixes the process (FDM) and the colour (matte black) only. The material (PLA, PETG or
   another) and the printer are not chosen, and no filament is bought.
 - The lid PCB (its own revision, Gerber set and release, CLAUDE.md §7) is drawn as Lid Rev0.2
-  (`LID_Rev0.2.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.4_LidInterface.json`, which this
+  (`LID_Rev0.2.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.5_LidInterface.json`, which this
   document fixes. It is not ordered and has no release; what is not verified of it is in its
   own §8. A change here that moves a hole, a window or a port needs the lid built again.
 - **The clamp's opening (E10) is drawn for a clamp nobody here has seen.** Its width,

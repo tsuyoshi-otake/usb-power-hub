@@ -1,10 +1,17 @@
 # Lid PCB Rev0.2 — the enclosure's top panel (issues #11 and #13)
 
-> **WIP — MANUFACTURING PROHIBITED. NOT ORDERED.** The lid of the enclosure Rev0.4
-> (`ENCLOSURE_Rev0.4.md`, E3 and E8), which is drawn for the Rev0.7 main board, as a KiCad
+> **WIP — MANUFACTURING PROHIBITED. NOT ORDERED.** The lid of the enclosure Rev0.5
+> (`ENCLOSURE_Rev0.5.md`, E3, E8 and E12), which is drawn for the Rev0.7 main board, as a KiCad
 > board. Nothing is ordered, no release exists, and JLCPCB has not seen the files. The legend
 > is a first proposal: the user has not seen it on a board. Its solder mask is matte black
 > and its legend white (K7; the user's, 2026-11-21).
+>
+> **Enclosure Rev0.5 (2026-11-21, issue #14) changes where the lid lies, not the lid.** The
+> frame's wall now goes on up round the lid, as high as the lid is thick, at the user's
+> request (the enclosure's E12): the lid lies in a pocket, 0.4 mm from the wall all round,
+> its top face flush with the wall's top, and its edge is no longer seen. The interface file
+> has a new name and the same content, so the board built from it differs from the one before
+> in one line of its title block. What this asks of the lid is in §8.
 >
 > **Rev0.2 against Rev0.1 (2026-11-19, issue #13).** The main board's connectors stand
 > mirror-symmetric since Rev0.6 (D39), and the lid follows through the interface: HOST moved
@@ -16,8 +23,9 @@
 
 ## 1. What it is
 
-A bare 2-layer FR-4 board, 100 × 72 × 1.6 mm, with no part and no net. It lies on the
-enclosure's frame, held by four pan-head M2 screws, and does four things:
+A bare 2-layer FR-4 board, 100 × 72 × 1.6 mm, with no part and no net. It lies in the
+enclosure's frame, on a seat inside a wall as high as the lid is thick (the enclosure's E12),
+held by four pan-head M2 screws, and does five things:
 
 | Feature | How |
 |---|---|
@@ -29,7 +37,7 @@ enclosure's frame, held by four pan-head M2 screws, and does four things:
 
 ## 2. Sources
 
-- **The interface.** `assembly/UsbPowerHub_Enclosure_Rev0.4_LidInterface.json`, which
+- **The interface.** `assembly/UsbPowerHub_Enclosure_Rev0.5_LidInterface.json`, which
   `make_enclosure.py` writes from the enclosure document and the main board: the outline, the
   thickness, the seven holes, the two windows and the four ports' positions. No script holds a
   value of it, and this document names its sizes only to describe the board (§1, §7): the
@@ -56,7 +64,7 @@ Each is provisional and the user may revert any one.
 | K4 | All seven holes are unplated. | They are mechanical. | — |
 | K5 | A window is an opening in the solder mask on both sides, exactly the interface's rectangle, with no copper and no silkscreen in it. | E8: bare FR-4 passes an LED's light. | A drilled window (dust), a light pipe (D13: few part types). |
 | K6 | Legend on the top: the product name, `Lid Rev0.2`, a label and an arrow for each port, a ring round each button hole, `BOOT` at the pinhole. Port labels are 3.0 mm high. | CLAUDE.md §6: product name, revision and port labels, Latin, at least 1.0 mm. HOST and 5V IN are the same receptacle on one edge and can be swapped (the 2026-11-13 answer on the ports' positions), so their labels are large and each has an arrow at its port. A button stands 14 mm from its port's arrow, towards the lid's middle, and 51 mm from the other port's. | Kanji (CLAUDE.md §6). A label for the LEDs (two colours in one window; the manual explains them). |
-| K7 | Solder mask matte black (**user**, 2026-11-21: 「全部黒だよマット」, on a picture of the unit), silkscreen white (Claude: the legend is read on black). The finish is not chosen. | The lid is the unit's top face, and the user wants the whole unit matte black (`ENCLOSURE_Rev0.4.md`, E2). No copper is bare, so any finish does. Not read on JLCPCB's order form: whether it offers a matte black mask for a 2-layer board; if it does not, glossy black is the nearest, and the user decides at the order. The windows (K5) stay bare FR-4, and the board's routed edge shows the laminate's own colour. | Green, as the main board (its Economic 4-layer order took green only). |
+| K7 | Solder mask matte black (**user**, 2026-11-21: 「全部黒だよマット」, on a picture of the unit), silkscreen white (Claude: the legend is read on black). The finish is not chosen. | The lid is the unit's top face, and the user wants the whole unit matte black (`ENCLOSURE_Rev0.5.md`, E2). No copper is bare, so any finish does. Not read on JLCPCB's order form: whether it offers a matte black mask for a 2-layer board; if it does not, glossy black is the nearest, and the user decides at the order. The windows (K5) stay bare FR-4, and the board's routed edge shows the laminate's own colour. | Green, as the main board (its Economic 4-layer order took green only). |
 | K8 | The bottom silkscreen carries the board's name and the text `JLCJLCJLCJLC`. | JLCPCB prints its order number on a board. From memory, not read in this session: with the form's "specify a location" option it prints the number in place of that text. On the bottom it is inside the case. Without the option the text is only a hidden line of letters. | An order number on the top face. |
 
 ## 4. Parameters
@@ -207,10 +215,16 @@ the main board; that figure was not read again for these files.
 - Nothing is ordered and JLCPCB has not seen the files: no DFM, no quote for this board.
 - K8's order-number option is from memory. Without it the bottom carries a line of letters,
   and JLCPCB puts its number where it chooses, possibly on the top.
+- **The lid in its pocket (the enclosure's E12).** The pocket leaves 0.4 mm round the
+  lid's outline, which is a rectangle with square corners, as the pocket is. JLCPCB's
+  tolerance on a routed outline is taken as ± 0.2 mm, from memory, not read on this day, and
+  the pocket is a first FDM print's. A lid that is 0.16 mm thicker or thinner than 1.6 mm
+  (± 10 %) stands that much above or below the wall's top. The panel's break-off tabs, if
+  JLCPCB leaves any on the outline, would have to be filed off. None of it is tried.
 - The enclosure is not printed, so no lid has lain on a frame: the hole positions follow the
   interface, and the interface follows the enclosure's parameters, which the first print may
   change.
 - The LEDs' light through the windows, and what the copper stops (§6).
 - A pan head's real diameter. `keepout_d` is the enclosure's `lid_head_keepout_d`, from
-  memory (`ENCLOSURE_Rev0.4.md` §8).
+  memory (`ENCLOSURE_Rev0.5.md` §8).
 - JLCPCB's thickness tolerance (± 10 %) against the plungers' 0.5 mm of play.

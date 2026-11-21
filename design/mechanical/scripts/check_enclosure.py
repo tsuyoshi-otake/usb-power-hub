@@ -6,13 +6,15 @@ Run with the CAD venv's Python (manifold3d, numpy, trimesh), from the repository
 
 It reads the STL files as written, puts each back into the assembly frame with the
 manifest's matrix, and tests them with probes built here from the board interface and the
-document's tables: it does not import make_enclosure.py. Checks E01 to E18 are listed in
-ENCLOSURE_Rev0.4.md, section 7, with what they prove. Exit status 0 means no FAIL line.
+document's tables: it does not import make_enclosure.py. Checks E01 to E19 are listed in
+ENCLOSURE_Rev0.5.md, section 7, with what they prove. Exit status 0 means no FAIL line.
 
 What it cannot see (the document, section 7): whether a `world` value in the tables is
 right (a cable's overmould, the insert, an assumed part height), the print itself
-(shrinkage, sag, a thin web the slicer drops), strength, light, heat, the cover's fit (E18
-moves a rigid cover: it bends no finger and knows no friction), the unit in the
+(shrinkage, sag, a thin web the slicer drops, the support under the lid's seat and the
+face it leaves), strength, light, heat, the cover's fit (E18 moves a rigid cover: it bends
+no finger and knows no friction), the lid's fit in its pocket (E19 knows the nominal gap,
+not the real outline of a routed board in a printed pocket), the unit in the
 hand, and what a picture shows (E16 reads only the build a picture names).
 V-MECH-01 and V-BOOT-01 stay open whatever this prints.
 
@@ -58,6 +60,7 @@ PROBE = 30.0    # mm: the length of back wall, centred on the SWD land, that E15
 PIECES = ["Tray", "Frame", "Plunger", "Cover"]
 COVER_GAP = 0.6    # mm: the widest gap allowed round the cover in the wall's opening
 COVER_FLOOR = 0.65  # the share of the floor's opening that the cover's foot must close
+LID_GAP = 0.6      # mm: the widest gap allowed between the lid's edge and the wall round it
 
 
 class Report:
@@ -194,7 +197,7 @@ def main():
                 f"{name}: box {[round(v, 3) for v in got]}, want {[round(v, 3) for v in want]}")
 
     box_is("Tray", tray, [xo0, yo0, z_bottom, xo1, yo1, p.lip_h])
-    box_is("Frame", frame, [xo0, yo0, 0.0, xo1, yo1, z_top])
+    box_is("Frame", frame, [xo0, yo0, 0.0, xo1, yo1, z_lid])
 
     def outline(shrink, za, zb):
         """The outer outline with its round corners, `shrink` inside it, as a prism."""
@@ -202,15 +205,20 @@ def main():
         return S.Manifold.batch_hull([S.cyl(cx, cy, za, zb, r - shrink)
                                       for cx in (xo0 + r, xo1 - r) for cy in (yo0 + r, yo1 - r)])
 
-    space = (S.box(xo0 - 5, yo0 - 5, z_bottom - 1, xo1 + 5, yo1 + 5, z_top + 1)
-             - outline(0.0, z_bottom - 2, z_top + 2))
+    space = (S.box(xo0 - 5, yo0 - 5, z_bottom - 1, xo1 + 5, yo1 + 5, z_lid + 1)
+             - outline(0.0, z_bottom - 2, z_lid + 2))
     for sname, solid in (("Tray", tray), ("Frame", frame), ("Cover", cover)):
         v = vol(solid, space)
         R.check(v <= TOL, "E03", f"{sname}: nothing outside the outline and its {p.corner_r:g} mm corners",
                 f"{sname}: {v:.3f} mm3 outside the outline and its {p.corner_r:g} mm corners")
 
-    # ---- E04 printable without support --------------------------------------------------------
+    # ---- E04 printable: no support, but under the lid's seat ----------------------------------
+    # The frame is printed with the top of the wall round the lid on the bed (E12). The lid's
+    # seat then hangs above the bed by the lid's thickness and is printed on support; no
+    # other face of the frame, and no face of another piece, may hang.
     bed_min = {"Tray": 200.0, "Frame": 200.0, "Plunger": 5.0, "Cover": 100.0}
+    seat_h = {"Frame": lid_if["thickness"]}
+    supported = {}
     for name, tri in printed.items():
         n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
         area = np.linalg.norm(n, axis=1) / 2
@@ -218,14 +226,28 @@ def main():
         zmin = tri[:, :, 2].min()
         on_bed = (tri[:, :, 2].max(axis=1) < zmin + 1e-3)
         bed = float(area[on_bed & (nz < -0.99)].sum())
-        hang = float(area[(nz < OVERHANG) & ~on_bed].sum())
+        hanging = (nz < OVERHANG) & ~on_bed
+        if name in seat_h:      # flat faces at the seat's level, looking down at the bed
+            at_seat = (np.abs(tri[:, :, 2] - seat_h[name]).max(axis=1) < 1e-3) & (nz < -0.99)
+        else:
+            at_seat = np.zeros(len(tri), dtype=bool)
+        hang = float(area[hanging & ~at_seat].sum())
+        supported[name] = float(area[hanging & at_seat].sum())
         R.check(abs(zmin) <= 1e-3 and bed >= bed_min[name], "E04",
                 f"{name}: stands on the bed on {bed:.0f} mm2",
                 f"{name}: lowest point z {zmin:.3f}, {bed:.1f} mm2 on the bed, "
                 f"want 0 and >= {bed_min[name]:.0f} mm2")
-        R.check(hang <= 0.5, "E04", f"{name}: no face steeper than 45 degrees hangs in the air",
-                f"{name}: {hang:.1f} mm2 of faces steeper than 45 degrees hang in the air "
-                "in the print orientation")
+        if name in seat_h:
+            R.check(hang <= 0.5 and supported[name] > 0, "E04",
+                    f"{name}: the only faces that hang are the lid's seat, {seat_h[name]:g} mm "
+                    f"above the bed: {supported[name]:.0f} mm2 to support",
+                    f"{name}: {hang:.1f} mm2 of faces steeper than 45 degrees hang in the air "
+                    f"in the print orientation, the lid's seat ({supported[name]:.1f} mm2 at "
+                    f"{seat_h[name]:g} mm above the bed) not counted")
+        else:
+            R.check(hang <= 0.5, "E04", f"{name}: no face steeper than 45 degrees hangs in the air",
+                    f"{name}: {hang:.1f} mm2 of faces steeper than 45 degrees hang in the air "
+                    "in the print orientation")
 
     # ---- E05 the parts ------------------------------------------------------------------------
     usb = {r["ref"]: r for r in spec.receptacles(board)}
@@ -487,13 +509,18 @@ def main():
                 f"{'present' if (b['x'], b['y']) in lid_pin else 'missing'}")
 
     # ---- E13 the lid --------------------------------------------------------------------------
+    # the lid's seat: the top of what the frame has inside the lid's outline, below the lid's
+    # top face. What stands over the lid, and the wall round it, are E19's.
     v = vol(lid, frame)
-    fz = S.bbox(frame)[5]
+    zs = lid_if["underside_above_board"]
+    lid_top = zs + lid_if["thickness"]
+    under_lid = frame ^ S.box(lo["x0"], lo["y0"], 0.0, lo["x1"], lo["y1"], lid_top)
+    fz = S.bbox(under_lid)[5] if under_lid.volume() > 0 else 0.0
     same = [lo["x0"], lo["y0"], lo["x1"], lo["y1"]] == [bx0, by0, bx1, by1]
-    R.check(v <= TOL and abs(lid_if["underside_above_board"] - fz) <= 0.01 and same, "E13",
-            "the lid has the board's outline and lies on the frame's top face",
+    R.check(v <= TOL and abs(zs - fz) <= 0.01 and same, "E13",
+            "the lid has the board's outline and lies on its seat in the frame",
             f"{v:.2f} mm3 of the lid inside the frame; lid underside at "
-            f"{lid_if['underside_above_board']:g} mm, frame top at {fz:.2f} mm; outline "
+            f"{zs:g} mm, the frame's seat at {fz:.2f} mm; outline "
             f"{'the' if same else 'not the'} board's")
     under = S.box(lo["x0"], lo["y0"], fz - SLAB, lo["x1"], lo["y1"], fz)
     seat = vol(frame, under) / SLAB
@@ -684,8 +711,45 @@ def main():
             f"Cover: raised {k - 0.05:g} mm it shares mm3 with {told(raised)} (want 0); raised "
             f"{k + 0.3:g} mm it shares {lifted['frame']:.2f} mm3 with the frame (want > 0.05)")
 
-    # ---- E15 the document's derived figures ---------------------------------------------------
+    # ---- E19 the wall round the lid -----------------------------------------------------------
     tb, fb, pb = S.bbox(tray), S.bbox(frame), S.bbox(plungers[0])
+    R.check(abs(fb[5] - lid_top) <= 0.01, "E19",
+            f"the wall round the lid ends flush with the lid's top face, {fb[5] - fz:.2f} mm "
+            "above the lid's seat",
+            f"the wall round the lid ends {fb[5]:.2f} mm above the board and the lid's top face "
+            f"is at {lid_top:.2f} mm: the {'wall' if fb[5] > lid_top else 'lid'} stands "
+            f"{abs(fb[5] - lid_top):.2f} mm proud")
+    plate = S.box(lo["x0"], lo["y0"], zs, lo["x1"], lo["y1"], lid_top)   # the lid without holes
+    above = frame ^ S.box(xo0 - 5, yo0 - 5, fz + 0.05, xo1 + 5, yo1 + 5, max(fb[5], lid_top) + 5)
+    rim_gap = plate.min_gap(above, 3.0) if above.volume() > 0 else 3.0
+    k = p.rim_clear_min - 0.02
+    way = S.box(lo["x0"] - k, lo["y0"] - k, zs + 0.02, lo["x1"] + k, lo["y1"] + k,
+                max(fb[5], lid_top) + 10.0)
+    v = vol(way, frame)
+    R.check(v <= TOL and p.rim_clear_min - 0.005 <= rim_gap <= LID_GAP + 0.005, "E19",
+            f"the lid lies in its pocket {rim_gap:.2f} mm from the wall and lifts straight "
+            "out: nothing of the frame stands over it",
+            f"{v:.2f} mm3 of the frame within {p.rim_clear_min:g} mm of the lid's edge or over "
+            f"the lid (want 0); the lid's edge is {rim_gap:.2f} mm from the wall, want "
+            f"{p.rim_clear_min:g} .. {LID_GAP:g} mm")
+    # the wall itself, from the gap outwards, below its chamfer: whole all round
+    za, zb = fz + 0.02, fb[5] - p.edge_chamfer - 0.02
+    g = min(max(rim_gap, 0.0), LID_GAP) + 0.02
+    if zb - za > 0.1:
+        ring = outline(0.02, za, zb) - S.box(lo["x0"] - g, lo["y0"] - g, za - 1.0,
+                                             lo["x1"] + g, lo["y1"] + g, zb + 1.0)
+        missing = ring.volume() - vol(ring, frame)
+        rim_wall = vol(frame, S.box(xo0 - 1.0, (yo0 + yo1) / 2 - 0.1, za, lo["x0"], (yo0 + yo1) / 2 + 0.1,
+                                    za + 0.2)) / 0.04
+    else:
+        missing, rim_wall = float("inf"), 0.0
+    R.check(missing <= 0.05, "E19",
+            f"the wall round the lid is whole all round, {rim_wall:.2f} mm thick below its chamfer",
+            f"{missing:.2f} mm3 of the wall round the lid is missing between the gap and the "
+            f"outline, {za:.2f} .. {zb:.2f} mm above the board (want 0); it is {rim_wall:.2f} mm "
+            "thick at the middle of the left side")
+
+    # ---- E15 the document's derived figures ---------------------------------------------------
 
     def face_inset(ref, r):
         y = board["by_ref"][ref]["y"]
@@ -707,22 +771,24 @@ def main():
         """Height of the frame's back wall in a sliver up the middle of the opening."""
         ym = (yi1 + yo1) / 2
         return vol(frame, S.box(land["x"] - 0.1, ym - 0.1, 0.0, land["x"] + 0.1, ym + 0.1,
-                                z_top)) / 0.04
+                                fb[5])) / 0.04
 
     measured = {
         "outer_x": max(tb[3], fb[3]) - min(tb[0], fb[0]),
         "outer_y": max(tb[4], fb[4]) - min(tb[1], fb[1]),
-        "outer_z": fb[5] + lid_if["thickness"] - tb[2],
-        "printed_z": fb[5] - tb[2],
+        "outer_z": max(fb[5], lid_top) - tb[2],
         "tray_z": float(np.ptp(printed["Tray"][:, :, 2])),
         "frame_z": float(np.ptp(printed["Frame"][:, :, 2])),
-        "lid_margin": lo["x0"] - min(tb[0], fb[0]),
+        "rim_h": fb[5] - fz,
+        "rim_gap": rim_gap,
+        "rim_wall": rim_wall,
+        "frame_support_area": supported["Frame"] / 100,
         "web_t": min(r["web"] for r in usb.values()),
         "face_inset": min(face_inset(ref, r) for ref, r in usb.items()),
         "port_to_screw_max": max(to_screw(ref) for ref in usb),
         "clamp_opening_w": free_along_back_wall(3.0, 3.2),
         "clamp_bridge_h": wall_above_opening(),
-        "lid_clearance_min": fb[5] - tallest[0],
+        "lid_clearance_min": fz - tallest[0],
         "bottom_engagement": e_bottom,
         "lid_engagement": e_lid,
         "plunger_len": pb[5] - pb[2],
