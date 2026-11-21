@@ -31,7 +31,7 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > ("Specify Stackup" stayed No), the stock was not read on the day, and the open issues of Section 11
 > stand. "Confirm Production file" is Yes. The production file was read on 2026-11-20 and is not
 > confirmed (`JLCPCB_REVIEW.md` §9): holes, slots and J5 as designed, no stackup named, two tooling
-> holes added by JLCPCB, the mask **green**, though the user meant black (2026-11-20). Unconfirmed, it
+> holes added by JLCPCB, the mask **green** (the user meant black, but JLCPCB takes only green on an Economic 4-layer order, and the user kept green on 2026-11-21). Unconfirmed, it
 > goes to production by itself about 2026-11-24 10:00 JST. Nothing has been built or measured.** After the
 > user's 「2.54で端にしてねこんなので挟むから。SWD経由で君にデバッグまで自動化して開発したいからさ。」
 > (with a picture of two spring-pin clamps), J5, the SWD land, is eight bare pads, 1.7 mm at

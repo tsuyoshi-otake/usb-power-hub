@@ -2439,3 +2439,16 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   free black change, or ask support to withdraw it and build green. Learning: read the account's messages
   before an irreversible step on an order, even when the step looked settled a minute before; a change made
   through support may show only there, not in the order's parameters.
+- **Follow-up 14 (2026-11-21): the mask stays green; JLCPCB cannot make this order black.** Asked to check
+  whether the board would be black (「黒で製造されるのか再確認してよ」), Claude read the order details: the
+  tracking shows the 2026-11-20 17:11:25 supplement, and the item still reads "PCB Color: Green". On
+  「君がチャットで確認して」 Claude opened the chat and, before sending anything, read the history: the user's
+  own chat of 2026-11-20, about 17:03-17:30 JST, transferred to a second agent, who first raised the $0.00
+  black supplement, then answered after checking that an Economic 4-layer order supports green solder mask only
+  and cannot change to black; the user answered that it stays green, and the agent said production waits for
+  the confirmation of the production file. So the 17:11 message is the abandoned first step, and the order is
+  green. Nothing was sent, since the question was already answered. The production file is still not
+  confirmed. Recorded in r01's `JLCPCB_REVIEW.md` section 9, the manifest's residual risk and CLAUDE.md
+  section 0; `SHA256SUMS.txt` regenerated (12 OK). Correction to Follow-up 13: "two answers on record" was
+  two steps of one conversation, read out of order. Learning: before writing to support, read the whole chat
+  history first; the user may already have had the conversation.

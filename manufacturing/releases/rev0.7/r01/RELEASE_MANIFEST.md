@@ -164,6 +164,6 @@ copy it in at approval.
 - *(order)* The order names no stackup. If JLCPCB's default for this board is not JLC04161H-7628, the USB pairs'
   impedance is not D27's model value; Full Speed is the fallback (OI-26).
 - *(order)* The production file goes to production by itself about 2026-11-24 10:00 JST if nobody confirms it
-  (read 2026-11-20; the 48 hours assumed before were wrong). The mask is green; the user meant black.
+  (read 2026-11-20; the 48 hours assumed before were wrong). The mask is green: the user meant black, but JLCPCB answered on 2026-11-20 that an Economic 4-layer order takes green only, and the user kept green (2026-11-21).
 - *(order)* JLCPCB added two 1.152 mm non-plated tooling holes inside the board, about 3.0 mm from H1 and H4
   (`JLCPCB_REVIEW.md` section 9). The enclosure does not model them.
