@@ -2529,3 +2529,42 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   with its top face on the bed, so a rim in one piece with the frame puts every lid seat 1.6 mm above the
   bed, in the air, and needs support there (E2 says none); a separate ring avoids that and needs glue or
   the lid's screws. The user chooses.
+- **Follow-up 21 (2026-11-21): Enclosure Rev0.5, the lid inside a wall as high as itself; README with
+  pictures.** *Symptom.* Follow-up 20: the lid's bare edge shows all round. Asked how to enclose it, the
+  user answered 「ふたと同じ高さの壁で囲う」 (the flush rim, mock-up A, in the user's own words), and during
+  the work 「README.mdとか更新してレンダリングの画像も乗せて説明かいといて」, 「リポジトリのURLちょうだい」
+  and 「最新にしといてね」. *Design (E12).* The frame's wall goes on up by `lid_t` (z 19.0 to 20.6), same
+  outer face, 2.0 mm thick; the lid lies in a pocket `rim_clear` 0.4 mm from it (the checker demands
+  `rim_clear_min` 0.3: the routed outline's tolerance, from memory, not read at JLCPCB), on the seat that
+  was the frame's top face, flush with the wall's top. Outer size unchanged. The frame still prints turned
+  over, now on the wall's top (492 mm2), so the seat (628.39 mm2) hangs 1.6 mm above the bed and is printed
+  on support "from the bed only": E2 and E3 amended, CLAUDE.md section 7 too. The rim's height is `lid_t`
+  by construction, with no parameter of its own. Tray, plunger, cover: Rev0.4's solids (STL header only);
+  lid interface unchanged; lid board one title-block line. *Checker.* E19 new (flush, gap and nothing over
+  the lid, wall whole), E04 excuses the frame's seat and nothing else, E13 measures the seat below the
+  lid's top face; 124 checks, 114 tests (12 new). *Faults on the way.* (1) E13 first took a tab lapping
+  over the lid for the seat (the highest frame face inside the lid's outline): the new test
+  `test_frame_that_laps_over_the_lid` failed on its `PASS E13` assertion; the measurement is now clipped
+  at the lid's top. (2) `frame_support_area` in mm2 would have sat on E15's 0.0051 comparison step; it is
+  in cm2. (3) Two process faults: a document-edit script sent through a bash heredoc died with
+  "unexpected EOF while looking for matching" a quote, and a bare `python - <<'EOF'` with nothing in it
+  hung for 120 s until stopped; both edits were then made with Write/Edit and a script run by path.
+  (4) Not diagnosed: one `make_enclosure.py` run, about a minute after Blender had read the STL files,
+  died with `OSError: [Errno 22] Invalid argument` opening `..._Frame.stl` for writing; seconds later the
+  file opened for writing and the next run passed with unchanged checksums. No holder was found.
+  *Pictures.* `design/mechanical/scripts/render_unit.py` (Blender 5.x; the copy of follow-up 18's script
+  without its mock-up and colour options, the revision from `enclosure_spec.py`, the lid's GLB exported
+  through `--kicad-cli` into a temporary directory) writes four 1920 x 1080 JPEG files into `reports/`
+  (about 110 kB each, about 1 min in all). They are not byte-reproducible and no checker reads them
+  (`check_enclosure.py` globs `PREFIX*.png` only). Their JPEG comments hold Blender's date, camera name
+  and render time, no path and no host name (read with `strings`). The 2560 x 1440 PNG files for the
+  user's post are in `~/tmp/usb-power-hub/twitter-render/` (kept for the user; the old script and the two
+  mock-ups are deleted). *README.* The status block said "MANUFACTURING PROHIBITED ... nothing ordered"
+  and "keep it private", both false since 2026-11-20; it now says Rev0.7 r01 is ORDERED, nothing built,
+  public under MIT, shows the hero picture and has a section "What it looks like". J4 is `5V IN` there, as
+  on the board and the lid (it said `PWR IN`). *Verification.* An independent rubric-verifier on the
+  uncommitted tree, 12 criteria, all pass, with its own measurement of the frame (top 20.60, pocket 0.40
+  wider than the lid, seat 628.39 mm2, wall 2.00) and a render into a scratch directory. *Not known before
+  a print:* how the support comes off, the lid's fit in a printed pocket, flushness, turning the unit over
+  to take the lid out (document section 10). *Commits.* `8ad5649`, then this entry's; pushed at the
+  user's 「最新にしといてね」.

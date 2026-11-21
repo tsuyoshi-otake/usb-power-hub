@@ -177,6 +177,11 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   quoted-heredoc form ran every non-ASCII edit of this session correctly. It recurred on
   2026-11-13 (#11): a `-c` filter holding a regex with brackets and backslashes failed with
   "unterminated character set", and the same filter written to a file ran.
+  Since 2026-11-21 (#14) the heredoc form is out too: write the script with the Write tool and
+  run it by path with the venv's or KiCad's interpreter. On that day a document-edit script
+  sent through a heredoc died in bash ("unexpected EOF while looking for matching" a quote)
+  before Python saw it, and a bare `python - <<'EOF'` left in a command hung for 120 s until
+  it was stopped. A one-line `-c` with one kind of quote is still fine.
 - **In that heredoc, a doubled backslash arrives as one.** A Python literal written as
   `"<bs><bs>n"` reached Python as `"<bs>n"` and put a real newline into the generated file
   (SyntaxError, 2026-11-03). Build a literal backslash with `chr(92)`, or write the script with
@@ -921,6 +926,23 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   (0.09 mm3 shared at 0.3 mm), not on the tray. A sloped stop's gap is at least twice the play
   in the direction that closes it (`cover_ledge_gap` 0.4), and the check pushes the piece that
   way and names what it meets first.
+- **Measure a seat only up to the top of the part that lies on it.** (#14, 2026-11-21) E13 took
+  "the highest face of the frame inside the lid's outline" for the lid's seat. With a wall
+  round the lid, a tab lapping over the lid became that face, and the seat check passed on it
+  (`test_frame_that_laps_over_the_lid` failed on its `PASS E13` assertion). The measurement is
+  now the top of `frame ^ box(lid outline, 0 .. lid top)`; what stands over the lid is E19's.
+- **A piece printed top-down that gets a rim round its top face needs support under that
+  face: say so in the print decision and let the checker excuse exactly that area.** (#14)
+  The frame stands on the rim's top, so the lid's seat hangs 1.6 mm above the bed. E04 excuses
+  flat downward faces at `lid_t` above the bed on the Frame only and reports their area
+  (628 mm2); `test_seat_is_no_excuse_for_another_piece` and
+  `test_frame_face_that_hangs_beside_the_lids_seat` hold the excuse narrow.
+- **A file whose name does not match the checker's glob is not checked: name the gap.** (#14)
+  `check_enclosure.py` reads `PREFIX*.png` in `reports/`; `render_unit.py` writes
+  `PREFIX…Render<Shot>.jpg` there, which Blender does not reproduce byte for byte. The
+  mechanical README's step 10 says "Checked by: nothing". Before publishing such a picture,
+  read its metadata (`strings` on the first 2 kB): Blender 5.2's JPEG holds date, camera name
+  and render time, no path and no host name.
 - **A generator that refuses a parameter turns an old negative test into a crash.** Rev0.4's
   `geometry()` raises when the cover's foot would be too short, and
   `test_floor_under_the_lower_jaw` built `clamp_reach=3`. Before adding a `raise` on a
