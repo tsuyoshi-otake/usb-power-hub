@@ -2427,3 +2427,15 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   it is not shown. Nothing in the order or the production-file dialog was changed. Learning: this widget ends
   the session on the send itself, so a reply, if any, has to be looked for in the chat history and in the
   account's Messages, not in an open chat.
+- **Follow-up 13 (2026-11-21): production not confirmed, because JLCPCB had already taken the black mask.**
+  The user decided on green and asked Claude to confirm the production file if nothing stood in the way
+  (「緑で進めることにした問題がないなら製造に進んでほしい」). The confirmation dialog still shows green
+  previews with "Yes, please proceed to production" preselected, and its deadline reads 69h36m. Before
+  submitting, Claude read a new account message of 2026-11-20 17:11:25 from "System": an additional charge of
+  $0.00, "PCB supplement of the Engineering fee: change the solder mask color from Green to Black, with white
+  silkscreen", marked paid. So the user's chat request of 2026-11-20 reached an agent. The PCB item's product
+  details still read "PCB Color: Green", and the dialog's previews are green. The order holds two answers to
+  one question, so nothing was submitted; the dialog was closed without a choice. The user decides: keep the
+  free black change, or ask support to withdraw it and build green. Learning: read the account's messages
+  before an irreversible step on an order, even when the step looked settled a minute before; a change made
+  through support may show only there, not in the order's parameters.
