@@ -29,10 +29,10 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > overwritten: any change is a new release number or a new revision (Section 2). The order went out
 > with gates open: JLCDFM never ran on Rev0.7, the stackup JLC04161H-7628 was not named on the order
 > ("Specify Stackup" stayed No), the stock was not read on the day, and the open issues of Section 11
-> stand. "Confirm Production file" is Yes. The production file was read on 2026-11-20 and is not
-> confirmed (`JLCPCB_REVIEW.md` §9): holes, slots and J5 as designed, no stackup named, two tooling
-> holes added by JLCPCB, the mask **green** (the user meant black, but JLCPCB takes only green on an Economic 4-layer order, and the user kept green on 2026-11-21). Unconfirmed, it
-> goes to production by itself about 2026-11-24 10:00 JST. Nothing has been built or measured.** After the
+> stand. "Confirm Production file" is Yes. The production file was read on 2026-11-20 and
+> confirmed on 2026-11-21 (`JLCPCB_REVIEW.md` §9): holes, slots and J5 as designed, no stackup named, two tooling
+> holes added by JLCPCB, the mask **green** (the user meant black, but JLCPCB takes only green on an Economic 4-layer order, and the user kept green on 2026-11-21). The user had it
+> confirmed on 2026-11-21 (「製造に進めて」), about 12:38 JST. Nothing has been built or measured.** After the
 > user's 「2.54で端にしてねこんなので挟むから。SWD経由で君にデバッグまで自動化して開発したいからさ。」
 > (with a picture of two spring-pin clamps), J5, the SWD land, is eight bare pads, 1.7 mm at
 > 2.54 mm pitch, 1.6 mm inside the back edge: 1 SWDIO, 3 and 5 GND, 7 SWCLK in the edge row, 2 V3V3,

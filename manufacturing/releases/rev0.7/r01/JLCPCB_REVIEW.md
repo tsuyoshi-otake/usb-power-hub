@@ -162,7 +162,7 @@ of both items was "Data Preparation": JLCPCB had not yet prepared the production
 
 ## 8. What comes next
 
-1. ~~**The production file**~~: read on 2026-11-20 (section 9). It is **not confirmed**: the order page asks
+1. ~~**The production file**~~: read on 2026-11-20 (section 9) and **confirmed on 2026-11-21** ("Yes, please proceed to production", submitted by Claude at the user's 「製造に進めて」; the order's tracking reads "<file number> manufacturing data finished." (the number is account data and is not written here) at 12:38:45 JST). Before that it was not confirmed: the order page asked
    for the confirmation "within 94h20m" (read at 11:45 JST, so until about 2026-11-24 10:00 JST), "or your
    order will be produced directly". Not 48 hours as section 2 assumed.
 2. ~~The amount paid and the coupons used~~: read on 2026-11-20 (section 6); the split of the discount is
@@ -174,7 +174,7 @@ of both items was "Data Preparation": JLCPCB had not yet prepared the production
 
 The order page's PCB item read "Data Preparation" with the action "Confirm Production file". Its dialog shows a
 Top and a Bottom picture, the link "Download Production file", and the choice "Yes, please proceed to
-production" / "Not good, modification needed" with "Submit". **Nothing in the dialog was chosen or submitted.**
+production" / "Not good, modification needed" with "Submit". Nothing in the dialog was chosen or submitted on 2026-11-20. **On 2026-11-21 the dialog showed the same green previews, and "Yes, please proceed to production" was submitted** (the user: 「製造に進めて」, after JLCPCB had answered that an Economic 4-layer order takes green mask only). The button now reads "Production file Confirmed".
 With the user's approval (「読んでいい」, then 「ダウンロードしていい」) the production file was downloaded and
 read in `~/tmp/`, outside this repository, and deleted afterwards; none of it is kept here, because it carries
 the account's order and file numbers.

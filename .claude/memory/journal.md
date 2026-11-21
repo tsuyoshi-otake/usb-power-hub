@@ -2452,3 +2452,11 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   section 0; `SHA256SUMS.txt` regenerated (12 OK). Correction to Follow-up 13: "two answers on record" was
   two steps of one conversation, read out of order. Learning: before writing to support, read the whole chat
   history first; the user may already have had the conversation.
+- **Follow-up 15 (2026-11-21): the production file confirmed.** On the user's 「製造に進めて」 Claude opened the
+  order's confirmation dialog: the same green Top and Bottom previews as on 2026-11-20, "Yes, please proceed to
+  production" selected. Claude submitted it. The item's button now reads "Production file Confirmed", the
+  countdown banner is gone, and the order's tracking adds "<file number> manufacturing data finished." (the number is account data and is not written here) at
+  2026-11-21 12:38:45 JST. Parameters unchanged: green mask, white legend, leaded HASL, no stackup named. The
+  order went on with the gates of the manifest's *Open gates* still open (JLCDFM never run on Rev0.7, no
+  stackup named). Recorded in r01's `JLCPCB_REVIEW.md` (section 8 item 1, section 9), the manifest and
+  CLAUDE.md section 0; `SHA256SUMS.txt` regenerated.
