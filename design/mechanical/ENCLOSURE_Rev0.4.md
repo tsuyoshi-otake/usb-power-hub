@@ -5,7 +5,8 @@
 > printed and no cable has been tried in an opening. The lid
 > PCB is drawn from this document's interface (`LID_Rev0.2.md`) and is not
 > ordered. Every dimension here is a parameter that the first print may change.
-> The print process is FDM (the user's choice, 2026-11-18; E2). Its material and the printer
+> The print process is FDM (the user's choice, 2026-11-18; E2), and every printed piece is
+> matte black (the user's, 2026-11-21; E2). The filament's material and the printer
 > are not chosen, and the values stay provisional until the first print.
 >
 > **Rev0.4 against Rev0.3 (2026-11-21, issue #14).** One piece is new: a printed cover for
@@ -77,7 +78,7 @@ All made by Claude under the 2026-11-03 delegation while answering the user's re
 | ID | Decision | Why | Rejected |
 |---|---|---|---|
 | E1 | Tray + frame + PCB lid, seam at the board's top face. | CLAUDE.md §1 fixes "3D-printed tub + a second PCB used as the top panel". The board carries its receptacles on its edges, 1.06 mm past the outline, so it cannot be lowered into a one-piece tub with closed port holes. With the seam at the board's top face the board drops into the tray, and the frame comes down over the receptacles. | A one-piece tub with slots open to the rim (the lid would have to close the slots: a PCB cannot). A tub split at the ports' centre line (the frame would then print with overhangs). |
-| E2 | Printed by FDM (**user**, 2026-11-18: the choice 「FDM」, offered with MJF, FDM recommended). 0.4 mm nozzle, 0.2 mm layers, no support material (Claude). | CLAUDE.md §7 wants the process chosen before wall and clearance values are frozen. The parts were drawn for FDM from the start, as the stricter process (no overhang, 0.3–0.4 mm clearances), so the choice changes no value in §4. The first print is a fit check, and a changed opening or clearance is printed again. | MJF (offered, not chosen): its walls and clearances would have been reviewed before freezing. Freezing the values before the user chose. |
+| E2 | Printed by FDM (**user**, 2026-11-18: the choice 「FDM」, offered with MJF, FDM recommended). 0.4 mm nozzle, 0.2 mm layers, no support material (Claude). Colour: matte black for all five printed pieces, the plungers included (**user**, 2026-11-21: 「全部黒だよマット」, on a picture of the unit with a white case). The four lid screws, the only ones seen from above, are black too (Claude's reading of 「全部」). | CLAUDE.md §7 wants the process chosen before wall and clearance values are frozen. The colour changes no value in §4. The parts were drawn for FDM from the start, as the stricter process (no overhang, 0.3–0.4 mm clearances), so the choice changes no value in §4. The first print is a fit check, and a changed opening or clearance is printed again. | MJF (offered, not chosen): its walls and clearances would have been reviewed before freezing. Freezing the values before the user chose. |
 | E3 | The lid is 100 × 72 mm, the main board's outline, and lies **on** the frame's top face inside a 2.4 mm margin. | It stays in the 100 × 100 mm price tier the main board was sized for (D24), and a seat recessed into the frame would be an overhang in the frame's print orientation. | A lid as large as the frame's outline (104.8 × 76.8 mm, outside the tier). A recessed seat. |
 | E4 | Fastening: four countersunk M2 × 10 from below, through the tray's bosses and the board's holes H1–H4 into heat-set inserts in the posts' feet; the lid by four pan-head M2 × 5 into inserts in the posts' tops. | REQ-MECH-04 and D21 call for heat-set M2 inserts at the four corners. Posts and bosses clamp the board itself (OI-5: "the PCB itself is not clamped" in the mockup). A countersink prints without support on the bed side; a counterbore's flat ceiling does not. | One long screw through lid, post and board (M2 × 30 is not a stock length). Self-tapping screws into plastic (thread engagement, REQ-MECH-04). |
 | E5 | A 0.2 mm designed gap at the seam, with a 45° ridge on the tray's wall inside a chamfer on the frame's. | The posts must land on the board before the walls meet, or the board is not clamped. The ridge closes the line of sight through the gap. | A butt seam (a 0.2 mm slit at the board's level all round). |
@@ -320,15 +321,15 @@ from memory; each is set again from the bought part's data sheet before printing
 |---:|---|---|---|
 | 8 | Heat-set insert M2, brass, for a 3.2 mm hole, 3–4 mm long | Post feet (4) and post tops (4) | `insert_hole_d`, `insert_hole_depth` |
 | 4 | Countersunk screw M2 × 10 (90° head, 4.0 mm) | Tray → board → post feet | `csk_d`, `csk_head_d`, `bottom_screw_len` |
-| 4 | Pan-head screw M2 × 5 | Lid → post tops | `lid_screw_len`, `lid_head_keepout_d` |
+| 4 | Pan-head screw M2 × 5, black (E2) | Lid → post tops | `lid_screw_len`, `lid_head_keepout_d` |
 
 ## 9. Printing and assembly
 
 Printing (FDM, E2): tray as modelled, floor on the bed; frame turned over, its top face on
 the bed; plungers cap down; the cover as it sits, its foot and the slab's lower edge on the
 bed. The STL files are already in these orientations. No support
-material, no brim needed by the design; 0.2 mm layers, 3 perimeters. The material is not
-chosen (§10).
+material, no brim needed by the design; 0.2 mm layers, 3 perimeters. The filament is matte
+black (E2); its material is not chosen (§10).
 
 Assembly:
 
@@ -350,7 +351,8 @@ back wall (E10) and grips the board's edge, its pins on J5's eight pads. Not tri
 ## 10. Not verified
 
 - Nothing is printed. No fit, no cable, no screw has been tried.
-- E2 fixes the process (FDM) only. The material and the printer are not chosen.
+- E2 fixes the process (FDM) and the colour (matte black) only. The material (PLA, PETG or
+  another) and the printer are not chosen, and no filament is bought.
 - The lid PCB (its own revision, Gerber set and release, CLAUDE.md §7) is drawn as Lid Rev0.2
   (`LID_Rev0.2.md`) from `assembly/UsbPowerHub_Enclosure_Rev0.4_LidInterface.json`, which this
   document fixes. It is not ordered and has no release; what is not verified of it is in its

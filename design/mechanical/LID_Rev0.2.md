@@ -3,7 +3,8 @@
 > **WIP — MANUFACTURING PROHIBITED. NOT ORDERED.** The lid of the enclosure Rev0.4
 > (`ENCLOSURE_Rev0.4.md`, E3 and E8), which is drawn for the Rev0.7 main board, as a KiCad
 > board. Nothing is ordered, no release exists, and JLCPCB has not seen the files. The legend
-> is a first proposal: the user has not seen it on a board.
+> is a first proposal: the user has not seen it on a board. Its solder mask is matte black
+> and its legend white (K7; the user's, 2026-11-21).
 >
 > **Rev0.2 against Rev0.1 (2026-11-19, issue #13).** The main board's connectors stand
 > mirror-symmetric since Rev0.6 (D39), and the lid follows through the interface: HOST moved
@@ -55,7 +56,7 @@ Each is provisional and the user may revert any one.
 | K4 | All seven holes are unplated. | They are mechanical. | — |
 | K5 | A window is an opening in the solder mask on both sides, exactly the interface's rectangle, with no copper and no silkscreen in it. | E8: bare FR-4 passes an LED's light. | A drilled window (dust), a light pipe (D13: few part types). |
 | K6 | Legend on the top: the product name, `Lid Rev0.2`, a label and an arrow for each port, a ring round each button hole, `BOOT` at the pinhole. Port labels are 3.0 mm high. | CLAUDE.md §6: product name, revision and port labels, Latin, at least 1.0 mm. HOST and 5V IN are the same receptacle on one edge and can be swapped (the 2026-11-13 answer on the ports' positions), so their labels are large and each has an arrow at its port. A button stands 14 mm from its port's arrow, towards the lid's middle, and 51 mm from the other port's. | Kanji (CLAUDE.md §6). A label for the LEDs (two colours in one window; the manual explains them). |
-| K7 | Finish, solder mask and silkscreen colours are not chosen here. | No copper is bare, so any finish does. The colours are the user's (the main board's are not decided either). | — |
+| K7 | Solder mask matte black (**user**, 2026-11-21: 「全部黒だよマット」, on a picture of the unit), silkscreen white (Claude: the legend is read on black). The finish is not chosen. | The lid is the unit's top face, and the user wants the whole unit matte black (`ENCLOSURE_Rev0.4.md`, E2). No copper is bare, so any finish does. Not read on JLCPCB's order form: whether it offers a matte black mask for a 2-layer board; if it does not, glossy black is the nearest, and the user decides at the order. The windows (K5) stay bare FR-4, and the board's routed edge shows the laminate's own colour. | Green, as the main board (its Economic 4-layer order took green only). |
 | K8 | The bottom silkscreen carries the board's name and the text `JLCJLCJLCJLC`. | JLCPCB prints its order number on a board. From memory, not read in this session: with the form's "specify a location" option it prints the number in place of that text. On the bottom it is inside the case. Without the option the text is only a hidden line of letters. | An order number on the top face. |
 
 ## 4. Parameters
@@ -190,7 +191,8 @@ bytes. No release exists.
 | Layers, thickness, copper | 2, 1.6 mm, 1 oz | K1 |
 | Holes | 7, all unplated, from 2.0 to 4.6 mm; no plated hole and no slot | the interface; K4 |
 | Impedance control, stackup | none, not named | K1 |
-| Finish, mask colour, silkscreen colour | not chosen | K7 |
+| Mask colour, silkscreen colour | matte black (glossy black if matte is not offered: the user decides), white | K7 (user, 2026-11-21) |
+| Finish | not chosen | K7 |
 | Order number | "specify a location", if the form offers it | K8 (from memory) |
 
 `design/experiments/cost-estimate/README.md` puts the lid at $4.00 when it is ordered with

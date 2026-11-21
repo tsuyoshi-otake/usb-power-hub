@@ -2510,3 +2510,22 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   with the lights low (light x5 turned it grey); a glossy coat on the mask mirrors a softbox into a white
   lid. *Process fault.* One edit of the script went through a Python heredoc again, against the session's
   rule; the later ones used the Edit tool.
+- **Follow-up 19 (2026-11-21): matte black written into the documents.** Asked whether 「全部黒だよマット」
+  should go into the design documents, the user answered 「書き込んで」. `ENCLOSURE_Rev0.4.md` E2: all five
+  printed pieces matte black (user); the four lid screws black (Claude's reading of 「全部」); head note, §8,
+  §9 and §10 follow; the material and the printer stay open. `LID_Rev0.2.md` K7: solder mask matte black
+  (user), silkscreen white (Claude), finish not chosen; the order table's row split in two. CLAUDE.md
+  section 0 follows. Not read: whether JLCPCB offers a matte black mask for a 2-layer board (K7 says so and
+  names glossy black as the nearest). No value of either document's parameter tables changed: the rebuilt
+  enclosure and lid files are byte-identical (`git status` shows the three documents only), 121 and 44
+  checks pass, and the negative tests pass (102 and 110). No revision number changed: a colour is not a
+  dimension, and nothing is printed or ordered. *Commits.* This entry's. Not pushed.
+- **Follow-up 20 (2026-11-21): the lid's edge shows; the user wants the board inside the case.** On the
+  close-up the user drew a line along the lid's edge and wrote 「ここのPCBぶぶんは筐体に収めないと」: the lid
+  PCB lies on the frame, so its routed edge (bare laminate) is seen all round. Not designed yet. Two
+  mock-ups were rendered (not design data): A, a rim as high as the lid, 0.3 mm from its edge, flush with
+  its top; B, a bezel 0.8 mm higher with a lip over the lid's border and an ear under each screw, which
+  covers the port arrows' tips (`arrow_tip` 0.8 mm). Found while thinking it through: the frame prints
+  with its top face on the bed, so a rim in one piece with the frame puts every lid seat 1.6 mm above the
+  bed, in the air, and needs support there (E2 says none); a separate ring avoids that and needs glue or
+  the lid's screws. The user chooses.

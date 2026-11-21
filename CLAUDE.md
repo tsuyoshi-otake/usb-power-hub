@@ -176,7 +176,9 @@ unless a documented tradeoff proves otherwise. **MAY** = optional.
 > `make_enclosure.py`, and checked by `check_enclosure.py` (`design/mechanical/README.md`).
 > **Nothing is printed and no cable has been tried in an opening**;
 > 20 of the 24 part heights it clears are assumed. The print process is FDM (user,
-> 2026-11-18; Section 7); its material is not chosen. OI-1 and OI-5 stay open.
+> 2026-11-18; Section 7) and its colour matte black, as the lid's solder mask (user,
+> 2026-11-21: 「全部黒だよマット」; Enclosure E2, Lid K7); its material is not chosen. OI-1 and
+> OI-5 stay open.
 >
 > The lid PCB is drawn (issue #11, 2026-11-18, after the user's 「作図する」; built again on
 > 2026-11-20 from Enclosure Rev0.3's interface and on 2026-11-21 from Rev0.4's, each time the same
