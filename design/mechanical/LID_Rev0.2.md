@@ -1,7 +1,7 @@
 # Lid PCB Rev0.2 — the enclosure's top panel (issues #11 and #13)
 
-> **WIP — MANUFACTURING PROHIBITED. NOT ORDERED.** The lid of the enclosure Rev0.3
-> (`ENCLOSURE_Rev0.3.md`, E3 and E8), which is drawn for the Rev0.7 main board, as a KiCad
+> **WIP — MANUFACTURING PROHIBITED. NOT ORDERED.** The lid of the enclosure Rev0.4
+> (`ENCLOSURE_Rev0.4.md`, E3 and E8), which is drawn for the Rev0.7 main board, as a KiCad
 > board. Nothing is ordered, no release exists, and JLCPCB has not seen the files. The legend
 > is a first proposal: the user has not seen it on a board.
 >
@@ -28,7 +28,7 @@ enclosure's frame, held by four pan-head M2 screws, and does four things:
 
 ## 2. Sources
 
-- **The interface.** `assembly/UsbPowerHub_Enclosure_Rev0.3_LidInterface.json`, which
+- **The interface.** `assembly/UsbPowerHub_Enclosure_Rev0.4_LidInterface.json`, which
   `make_enclosure.py` writes from the enclosure document and the main board: the outline, the
   thickness, the seven holes, the two windows and the four ports' positions. No script holds a
   value of it, and this document names its sizes only to describe the board (§1, §7): the
@@ -210,5 +210,5 @@ the main board; that figure was not read again for these files.
   change.
 - The LEDs' light through the windows, and what the copper stops (§6).
 - A pan head's real diameter. `keepout_d` is the enclosure's `lid_head_keepout_d`, from
-  memory (`ENCLOSURE_Rev0.3.md` §8).
+  memory (`ENCLOSURE_Rev0.4.md` §8).
 - JLCPCB's thickness tolerance (± 10 %) against the plungers' 0.5 mm of play.

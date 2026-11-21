@@ -2,7 +2,7 @@
 
 Shared by make_lid.py, check_lid.py and make_lid_outputs.py, so that a value has one home:
 - design/mechanical/LID_Rev0.2.md holds the lid's own choices (its parameter and legend tables);
-- design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.3_LidInterface.json, which
+- design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.4_LidInterface.json, which
   make_enclosure.py writes, holds the outline, the holes, the windows and the ports.
 Pure Python: no pcbnew here, so the tables can be read by any interpreter.
 """
@@ -14,7 +14,7 @@ import re
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 MECH = ROOT / "design" / "mechanical"
 DOC = MECH / "LID_Rev0.2.md"
-INTERFACE = MECH / "assembly" / "UsbPowerHub_Enclosure_Rev0.3_LidInterface.json"
+INTERFACE = MECH / "assembly" / "UsbPowerHub_Enclosure_Rev0.4_LidInterface.json"
 SOURCE = MECH / "lid"                      # the KiCad project make_lid.py writes
 WORKING = ROOT / "manufacturing" / "working" / "lid-rev0.2"
 NICK = "usb-power-hub-lid"

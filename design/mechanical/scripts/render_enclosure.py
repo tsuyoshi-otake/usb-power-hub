@@ -1,4 +1,4 @@
-"""Draw the enclosure from its STL files: assembled, open, exploded, back and front.
+"""Draw the enclosure from its STL files: assembled, open, exploded, back, front, the cover.
 
 Run with the CAD venv's Python, from the repository root:
 
@@ -6,7 +6,7 @@ Run with the CAD venv's Python, from the repository root:
 
 It reads   the manifest, the STL files and the lid interface in design/mechanical/assembly,
            the board interface and the document's tables
-and writes design/mechanical/reports/UsbPowerHub_Enclosure_Rev0.3_<View>.png
+and writes design/mechanical/reports/UsbPowerHub_Enclosure_Rev0.4_<View>.png
 
 The pictures are for looking at and prove nothing. Each carries, in a PNG text chunk, the
 SHA-256 of the manifest it was drawn from; the checker reads that and nothing else of a
@@ -43,6 +43,7 @@ S = _load("enclosure_solid")
 
 PRINTED = (196, 200, 206)
 PLUNGER = (236, 150, 48)
+COVER = (150, 158, 170)
 BOARD = (30, 108, 70)
 LID = (26, 78, 58)
 WINDOW = (214, 200, 120)
@@ -57,8 +58,8 @@ class Scene:
     def __init__(self):
         self.tri, self.col, self.obj, self.n = [], [], [], 0
 
-    def add(self, tri, colour, dz=0.0):
-        tri = np.asarray(tri, dtype=np.float64) + np.array([0.0, 0.0, dz])
+    def add(self, tri, colour, dz=0.0, dy=0.0):
+        tri = np.asarray(tri, dtype=np.float64) + np.array([0.0, dy, dz])
         self.tri.append(tri)
         self.col.append(np.tile(np.array(colour, dtype=np.float64), (len(tri), 1)))
         self.obj.append(np.full(len(tri), self.n))
@@ -218,6 +219,7 @@ def views(d):
         s = Scene()
         s.add(d.pieces["Tray"][0], PRINTED)
         s.add(d.pieces["Frame"][0], PRINTED)
+        s.add(d.pieces["Cover"][0], COVER)
         add_board(s, d, 0.0)
         for tri in d.pieces["Plunger"]:
             s.add(tri, PLUNGER)
@@ -228,6 +230,7 @@ def views(d):
         s = Scene()
         s.add(d.pieces["Tray"][0], PRINTED)
         s.add(d.pieces["Frame"][0], PRINTED)
+        s.add(d.pieces["Cover"][0], COVER)
         add_board(s, d, 0.0)
         for tri in d.pieces["Plunger"]:
             s.add(tri, PLUNGER)
@@ -236,6 +239,7 @@ def views(d):
     def exploded():
         s = Scene()
         s.add(d.pieces["Tray"][0], PRINTED)
+        s.add(d.pieces["Cover"][0], COVER, dy=16.0)      # drawn out of the back wall
         add_board(s, d, 16.0)
         s.add(d.pieces["Frame"][0], PRINTED, 44.0)
         for tri in d.pieces["Plunger"]:
@@ -254,6 +258,19 @@ def views(d):
         s.add(d.pieces["Frame"][0], PRINTED)
         return s
 
+    def cover_alone():
+        s = Scene()
+        s.add(d.pieces["Cover"][0], COVER)
+        return s
+
+    def cover_drawn():
+        s = Scene()
+        s.add(d.pieces["Tray"][0], PRINTED)
+        s.add(d.pieces["Frame"][0], PRINTED)
+        s.add(d.pieces["Cover"][0], COVER, dy=12.0)      # drawn out, as it goes in
+        add_board(s, d, 0.0)
+        return s
+
     return [
         ("Assembled", assembled(), -62, 32, 1500, 950),
         ("Back", assembled(), 118, 32, 1500, 950),
@@ -262,6 +279,10 @@ def views(d):
         ("Front", assembled(), -90, 8, 1600, 560),
         ("TrayBoard", tray_and_board(), -62, 42, 1500, 1000),
         ("FrameUnderside", frame_below(), -62, -38, 1500, 950),
+        ("BackUnderside", assembled(), 118, -32, 1500, 950),
+        ("CoverDrawn", cover_drawn(), 118, 32, 1500, 950),
+        ("Cover", cover_alone(), -118, 28, 1100, 900),
+        ("CoverUnderside", cover_alone(), 62, -42, 1100, 900),
     ]
 
 

@@ -2460,3 +2460,38 @@ JLCPCB gate on the real files, assemble a release candidate, order nothing. Rubr
   order went on with the gates of the manifest's *Open gates* still open (JLCDFM never run on Rev0.7, no
   stackup named). Recorded in r01's `JLCPCB_REVIEW.md` (section 8 item 1, section 9), the manifest and
   CLAUDE.md section 0; `SHA256SUMS.txt` regenerated.
+- **Follow-up 16 (2026-11-21): Enclosure Rev0.4, a cover for the clamp's opening.** On a picture of the
+  finished unit the user asked 「これ蓋ないの?」 and then 「蓋欲しいよ」: Rev0.3's opening for the SWD clamp (E10)
+  stood open in the back wall and the floor. *Fix.* `ENCLOSURE_Rev0.4.md`, decision E11, a fifth printed piece
+  "Cover": a slab in the wall's opening, flush with the wall, and a foot in the floor's, held by two spring
+  fingers (0.8 mm wide, 0.6 mm detents, 0.4 mm behind the opening's sides) in notches of the tray's floor and
+  by a 45° wedge over the board's back edge; a fingernail slot draws it out. Eleven `cover_*` parameters, check
+  E18 (9 checks), 20 negative tests, four new pictures. Frame, Plunger and the lid interface are Rev0.3's byte
+  for byte (STL after the header; the JSON whole); the tray has the two notches. The lid board is Lid Rev0.2
+  with one title-block line changed. *Symptom on the way.* The first checker run failed E18: pushed in 0.3 mm,
+  the cover shared 0.09 mm3 with the board. *Root cause.* The wedge's face stands at 45°, so an inward push of
+  d lowers the wedge's clearance over the board's corner by d; with `cover_ledge_gap` 0.2 and an inward play of
+  0.2 the push ended on the board, not on the end of the floor's opening. *Fix.* `cover_ledge_gap` 0.4 (twice
+  the inward play), `cover_lift` 0.6. *Verification.* `make_enclosure.py --derived`: 121 checks, 0 failed;
+  `test_check_enclosure.py` 102 tests OK; `check_lid.py` 44 checks, `test_check_lid.py` 110 tests OK;
+  the independent verifier passed C1-C9 of `.claude/goal-loop/enclosure-rev04-cover/rubric.md`, with its own
+  measurement of the cover in the assembly (bounding box, 0 mm3 shared at rest). *Not verified:* nothing is
+  printed, so the cover's fit, the fingers' strength over repeated
+  use and the force to draw it are unknown; the clamp's drawing is still not known. *Learning.* In `rules.md`,
+  *Printed parts*: a 45° stop couples the play across it to its gap; a generator that refuses a parameter turns
+  an old negative test into a crash, so read the tests that set that parameter. *Process fault.* One edit
+  script was written through a heredoc against the session's rule (it worked; removed); the later ones were
+  files. *Commits.* This entry's. Not pushed.
+- **Follow-up 17 (2026-11-21): a JLCPCB file number in an unpushed commit, removed.** *Symptom.* Reading this
+  journal's tail for its format, Claude found the production file's number quoted inside the tracking line of
+  Follow-up 15 and in r01's `JLCPCB_REVIEW.md` (section 8 item 1), both written by commit `c5bed22`, against
+  the user's rule that no order, file or SMT number goes into the repository. *Root cause.* The tracking line
+  was copied whole from the order page as evidence; the number is its first word and was not read as account
+  data. The commit was not scanned for it. *Fix.* Both places now read "<file number> manufacturing data
+  finished." with a note; r01's `SHA256SUMS.txt` regenerated (12 OK); `c5bed22` amended with those three paths
+  only (`git commit --amend --only`), which left the staged Rev0.4 work in the index: the commit is `560dd11`.
+  It had not been pushed (`main` was 6 ahead of `origin/main`). *Verification.* `git grep` on the tree and
+  `git log --all -S<the number>` find nothing; the old commit is reachable only from the local reflog.
+  *Learning.* In `rules.md`, *JLCPCB quote ... and the account*: a line quoted from an order page is scanned
+  for numbers before it is written, and the staged diff is grepped before a commit that records JLCPCB
+  evidence.

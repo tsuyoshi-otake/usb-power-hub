@@ -7,7 +7,7 @@ make_enclosure.py (which writes the lid's interface):
         [--doc FILE] [--interface FILE] [--out DIR] [--no-check]
 
 Inputs: the lid document's parameter and legend tables (design/mechanical/LID_Rev0.2.md) and
-the lid's interface (assembly/UsbPowerHub_Enclosure_Rev0.3_LidInterface.json): outline, holes,
+the lid's interface (assembly/UsbPowerHub_Enclosure_Rev0.4_LidInterface.json): outline, holes,
 windows, ports. No position is typed here.
 Output: usb-power-hub-lid.kicad_pcb and .kicad_pro in --out (default design/mechanical/lid),
 rebuilt from nothing on every run:
@@ -227,7 +227,7 @@ def build(pcb_path, params, legend, interface, digest):
     tb.SetDate(DATE)
     for i, c in enumerate(("WIP - MANUFACTURING PROHIBITED",
                            "Source: design/mechanical/LID_Rev0.2.md",
-                           "Interface: UsbPowerHub_Enclosure_Rev0.3_LidInterface.json",
+                           "Interface: UsbPowerHub_Enclosure_Rev0.4_LidInterface.json",
                            spec.DIGEST_TAG + digest)):
         tb.SetComment(i, c)
     for hole in interface["holes"]:

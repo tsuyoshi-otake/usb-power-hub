@@ -6,12 +6,13 @@ Run with the CAD venv's Python (manifold3d, numpy, trimesh), from the repository
 
 It reads the STL files as written, puts each back into the assembly frame with the
 manifest's matrix, and tests them with probes built here from the board interface and the
-document's tables: it does not import make_enclosure.py. Checks E01 to E17 are listed in
-ENCLOSURE_Rev0.3.md, section 7, with what they prove. Exit status 0 means no FAIL line.
+document's tables: it does not import make_enclosure.py. Checks E01 to E18 are listed in
+ENCLOSURE_Rev0.4.md, section 7, with what they prove. Exit status 0 means no FAIL line.
 
 What it cannot see (the document, section 7): whether a `world` value in the tables is
 right (a cable's overmould, the insert, an assumed part height), the print itself
-(shrinkage, sag, a thin web the slicer drops), strength, light, heat, the unit in the
+(shrinkage, sag, a thin web the slicer drops), strength, light, heat, the cover's fit (E18
+moves a rigid cover: it bends no finger and knows no friction), the unit in the
 hand, and what a picture shows (E16 reads only the build a picture names).
 V-MECH-01 and V-BOOT-01 stay open whatever this prints.
 
@@ -54,6 +55,9 @@ EDGE = 0.5      # mm: the width of the lid's edge that must lie on the frame all
 SIDE = 1.0      # mm: whole wall demanded at each side of the clamp's opening
 BRIDGE = 3.0    # mm: whole wall demanded above the clamp's opening, under the lid's edge
 PROBE = 30.0    # mm: the length of back wall, centred on the SWD land, that E15 measures
+PIECES = ["Tray", "Frame", "Plunger", "Cover"]
+COVER_GAP = 0.6    # mm: the widest gap allowed round the cover in the wall's opening
+COVER_FLOOR = 0.65  # the share of the floor's opening that the cover's foot must close
 
 
 class Report:
@@ -126,8 +130,8 @@ def main():
         return 1
     manifest = json.loads(mpath.read_text(encoding="ascii"))
     names = [q["name"] for q in manifest["pieces"]]
-    stop = not R.check(names == ["Tray", "Frame", "Plunger"], "E01", "pieces: Tray, Frame, Plunger",
-                       f"pieces {names}, want Tray, Frame, Plunger")
+    stop = not R.check(names == PIECES, "E01", f"pieces: {', '.join(PIECES)}",
+                       f"pieces {names}, want {', '.join(PIECES)}")
     for q in manifest["pieces"] + [dict(manifest["lid_interface"], name="LidInterface")]:
         f = args.dir / q["file"]
         if not f.is_file():
@@ -173,7 +177,7 @@ def main():
 
     asm = {q["name"]: [S.to_manifold(S.apply(printed[q["name"]], m)) for m in q["to_assembly"]]
            for q in manifest["pieces"]}
-    tray, frame, plungers = asm["Tray"][0], asm["Frame"][0], asm["Plunger"]
+    tray, frame, plungers, cover = asm["Tray"][0], asm["Frame"][0], asm["Plunger"], asm["Cover"][0]
     lid_if = json.loads((args.dir / manifest["lid_interface"]["file"]).read_text(encoding="ascii"))
     lo = lid_if["outline"]
     lid = S.box(lo["x0"], lo["y0"], lid_if["underside_above_board"], lo["x1"], lo["y1"],
@@ -200,13 +204,13 @@ def main():
 
     space = (S.box(xo0 - 5, yo0 - 5, z_bottom - 1, xo1 + 5, yo1 + 5, z_top + 1)
              - outline(0.0, z_bottom - 2, z_top + 2))
-    for sname, solid in (("Tray", tray), ("Frame", frame)):
+    for sname, solid in (("Tray", tray), ("Frame", frame), ("Cover", cover)):
         v = vol(solid, space)
         R.check(v <= TOL, "E03", f"{sname}: nothing outside the outline and its {p.corner_r:g} mm corners",
                 f"{sname}: {v:.3f} mm3 outside the outline and its {p.corner_r:g} mm corners")
 
     # ---- E04 printable without support --------------------------------------------------------
-    bed_min = {"Tray": 200.0, "Frame": 200.0, "Plunger": 5.0}
+    bed_min = {"Tray": 200.0, "Frame": 200.0, "Plunger": 5.0, "Cover": 100.0}
     for name, tri in printed.items():
         n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
         area = np.linalg.norm(n, axis=1) / 2
@@ -247,7 +251,7 @@ def main():
         envelopes.append((fp["ref"], h, env))
     every = S.union([e for _r, _h, e in envelopes])
     bad = 0
-    for sname, solid in (("Tray", tray), ("Frame", frame), ("Lid", lid)):
+    for sname, solid in (("Tray", tray), ("Frame", frame), ("Lid", lid), ("Cover", cover)):
         if vol(every, solid) > TOL:
             for ref, h, env in envelopes:
                 v = vol(env, solid)
@@ -256,7 +260,7 @@ def main():
                     R.fail("E05", f"{ref}: {v:.2f} mm3 of the {sname} inside its envelope "
                            f"(height {h:g} mm + {p.part_margin:g} mm)")
     if not bad:
-        R.ok("E05", f"{len(envelopes)} parts clear of tray, frame and lid; the tallest "
+        R.ok("E05", f"{len(envelopes)} parts clear of tray, frame, lid and cover; the tallest "
              f"({tallest[1]}, {tallest[0]:g} mm) is {z_top - tallest[0]:.2f} mm under the lid")
 
     # ---- E06 the leads under the board --------------------------------------------------------
@@ -268,15 +272,18 @@ def main():
         r = max(hole["drill"]) / 2 + (0.5 if hole["plated"] else 0.2)
         stubs.append((hole, S.cyl(hole["x"], hole["y"], -t - p.tht_stub, -t, r)))
     bad = 0
-    if vol(S.union([s for _h, s in stubs]), tray) > TOL:
-        for hole, stub in stubs:
-            v = vol(stub, tray)
-            if v > TOL:
-                bad += 1
-                R.fail("E06", f"{hole['ref']} pad '{hole['pad']}' at ({hole['x']}, {hole['y']}): "
-                       f"{v:.2f} mm3 of the Tray within {p.tht_stub:g} mm below its hole")
+    for sname, solid in (("Tray", tray), ("Cover", cover)):
+        if vol(S.union([s for _h, s in stubs]), solid) > TOL:
+            for hole, stub in stubs:
+                v = vol(stub, solid)
+                if v > TOL:
+                    bad += 1
+                    R.fail("E06", f"{hole['ref']} pad '{hole['pad']}' at ({hole['x']}, "
+                           f"{hole['y']}): {v:.2f} mm3 of the {sname} within {p.tht_stub:g} mm "
+                           "below its hole")
     if not bad:
-        R.ok("E06", f"{len(stubs)} holes: the tray clears {p.tht_stub:g} mm of lead below each")
+        R.ok("E06", f"{len(stubs)} holes: tray and cover clear {p.tht_stub:g} mm of lead "
+             "below each")
 
     # ---- E07 how the board is held ------------------------------------------------------------
     pcb = S.box(bx0, by0, -t, bx1, by1, 0.0)
@@ -563,6 +570,120 @@ def main():
             f"Frame: {100 * whole:.1f} % of the {BRIDGE:g} mm of wall above the opening is "
             "plastic, want 100")
 
+    # ---- E18 the cover of the clamp's opening -------------------------------------------------
+    k = p.cover_clear
+    z_floor = -t - p.standoff
+    y_in = by1 - p.clamp_reach                      # where the floor's opening ends
+    y_tip = y_in + k                                # the foot's end, as the document sizes it
+    others = (("tray", tray), ("frame", frame), ("board", pcb), ("lid", lid))
+
+    def meets(man):
+        return {n: vol(man, solid) for n, solid in others}
+
+    def told(found):
+        return ", ".join(f"{n} {v:.2f}" for n, v in found.items())
+
+    rest = meets(cover)
+    cover_gap = min(cover.min_gap(solid, 2.0) for _n, solid in others[:3])
+    R.check(max(rest.values()) <= TOL and cover_gap >= 0.7 * k, "E18",
+            f"Cover: at rest it touches nothing; the smallest gap is {cover_gap:.2f} mm",
+            f"Cover: at rest it shares mm3 with {told(rest)}; smallest gap {cover_gap:.3f} mm, "
+            f"want >= {0.7 * k:.2f} mm (cover_clear on a 45 degree face)")
+
+    in_wall = cover ^ S.box(cx0 - 5.0, yi1, z_bottom - 5.0, cx1 + 5.0, yo1 + 5.0, z_top)
+    wb = S.bbox(in_wall) if in_wall.volume() > 0 else [0.0] * 6
+    gaps = {"left": wb[0] - cx0, "right": cx1 - wb[3], "top": p.clamp_up - wb[5],
+            "bottom": wb[2] - z_bottom}
+    plug = S.box(cx0 + k + 0.02, yi1 + 0.02, z_bottom + max(p.cover_lift, p.edge_chamfer) + 0.02,
+                 cx1 - k - 0.02, yo1 - 0.02, p.clamp_up - k - 0.02)
+    whole = vol(plug, cover) / plug.volume()
+    R.check(whole >= 0.995 and all(0.05 <= v <= COVER_GAP + 0.005 for v in gaps.values())
+            and abs(wb[4] - yo1) <= 0.01, "E18",
+            f"Cover: it fills the wall's opening, flush with the wall, with gaps of "
+            f"{min(gaps.values()):.2f} .. {max(gaps.values()):.2f} mm round it",
+            f"Cover: {100 * whole:.1f} % of the wall's opening is plastic (want 100); gaps "
+            + ", ".join(f"{n} {v:.2f}" for n, v in gaps.items())
+            + f" mm (want 0.05 .. {COVER_GAP:g}); outer face at y {wb[4]:.2f}, wall at {yo1:.2f}")
+
+    zc = (z_bottom + p.cover_lift + z_floor) / 2
+    sheet = S.box(cx0, y_in, zc - SLAB / 2, cx1, yi1, zc + SLAB / 2)
+    closed = vol(cover, sheet) / sheet.volume()
+    ym = (y_tip + yi1) / 2
+    nail = S.box(land["x"] - p.cover_pull_w / 2 + 0.02, ym - p.cover_pull_l / 2 + 0.02,
+                 z_bottom - 1.0, land["x"] + p.cover_pull_w / 2 - 0.02,
+                 ym + p.cover_pull_l / 2 - 0.02, z_floor + 1.0)
+    v = vol(nail, cover) + vol(nail, tray)
+    R.check(closed >= COVER_FLOOR and v <= TOL, "E18",
+            f"Cover: its foot closes {100 * closed:.0f} % of the floor's opening, and a slot of "
+            f"{p.cover_pull_w:g} x {p.cover_pull_l:g} mm through it takes a fingernail from below",
+            f"Cover: its foot closes {100 * closed:.1f} % of the floor's opening (want >= "
+            f"{100 * COVER_FLOOR:g}); {v:.2f} mm3 in the fingernail's slot of "
+            f"{p.cover_pull_w:g} x {p.cover_pull_l:g} mm (want 0)")
+
+    # the detents: a finger at each side of the foot, its 45 degree point in a notch of the floor
+    cb = S.bbox(cover)
+    engage = {"left": cx0 - cb[0], "right": cb[3] - cx1}
+    pulled = cover.translate([0.0, 1.0, 0.0]) ^ tray
+    held = {"left": vol(pulled, S.box(cx0 - 5.0, y_in - 5.0, z_bottom - 5.0, land["x"], yo1 + 5.0, 5.0)),
+            "right": vol(pulled, S.box(land["x"], y_in - 5.0, z_bottom - 5.0, cx1 + 5.0, yo1 + 5.0, 5.0))}
+    R.check(min(held.values()) > 0.05 and min(engage.values()) >= k + 0.1, "E18",
+            f"Cover: pulled 1.0 mm outwards, each finger's detent meets the tray's floor; it "
+            f"stands {min(engage.values()):.2f} mm behind the opening's side",
+            f"Cover: pulled 1.0 mm outwards it meets the tray by {told(held)} mm3 (want > 0.05 "
+            f"at each side); detents {told(engage)} mm behind the opening's sides (want >= "
+            f"{k + 0.1:g})")
+    need = max(engage.values()) + 0.1               # what a finger bends by, and 0.1 mm more
+    zf0 = z_bottom + p.cover_lift
+    flex, finger = {}, {}
+    for side, face, sgn in (("left", cx0 + k, 1.0), ("right", cx1 - k, -1.0)):
+        xa, xb = sorted((face + sgn * (p.cover_arm_w + 0.02), face + sgn * (p.cover_arm_w + need)))
+        flex[side] = vol(cover, S.box(xa, y_tip - 0.5, zf0 - 1.0, xb, yi1 - 0.5, z_floor + 1.0))
+        xa, xb = sorted((face + sgn * 0.02, face + sgn * (p.cover_arm_w - 0.02)))
+        arm = S.box(xa, y_tip + 2 * p.cover_catch + 0.1, zf0 + 0.02, xb, yi1 - 0.02, z_floor - 0.02)
+        finger[side] = vol(arm, cover) / arm.volume()
+    length = yi1 - (y_tip + p.cover_catch)          # a finger's root to its detent's point
+    strain = 150.0 * p.cover_arm_w * min(engage.values()) / length ** 2
+    R.check(max(flex.values()) <= TOL and min(finger.values()) >= 0.995
+            and strain <= p.cover_strain_max, "E18",
+            f"Cover: each finger is {p.cover_arm_w:g} mm of plastic with {need:.2f} mm of room "
+            f"to bend into; {strain:.2f} % of strain at its root",
+            f"Cover: {told(flex)} mm3 in the {need:.2f} mm a finger bends into (want 0); "
+            f"fingers {told({n: 100 * v for n, v in finger.items()})} % plastic (want 100); "
+            f"strain {strain:.2f} %, want <= {p.cover_strain_max:g}")
+    bent = cover ^ S.box(cx0 + k - 0.01, y_in - 5.0, z_bottom - 5.0, cx1 - k + 0.01, yo1 + 5.0, z_top)
+    way = {}
+    for dy in (0.5, 1.0, 2.0, 4.0, 8.0, 12.0):
+        for n, v in meets(bent.translate([0.0, dy, 0.0])).items():
+            way[n] = max(way.get(n, 0.0), v)
+    R.check(max(way.values()) <= TOL, "E18",
+            "Cover: without its detents it slides out through the wall, 12 mm, touching nothing",
+            f"Cover: without its detents it meets, on its way out, mm3 of {told(way)}")
+
+    # the stops: the floor's end inwards, the board's edge downwards, the frame upwards
+    pushed = meets(cover.translate([0.0, -(k + 0.1), 0.0]))
+    R.check(pushed["tray"] > 0.05 and pushed["board"] <= TOL, "E18",
+            f"Cover: pushed in {k + 0.1:g} mm it stands on the end of the floor's opening and "
+            "has not reached the board",
+            f"Cover: pushed in {k + 0.1:g} mm it shares mm3 with {told(pushed)}; want the tray "
+            "> 0.05 and the board 0")
+    e = p.cover_ledge_gap
+    hung = meets(cover.translate([0.0, 0.0, -(e - 0.05)]))
+    fallen = meets(cover.translate([0.0, 0.0, -(e + 0.3)]))
+    low = cb[2] - e - z_bottom
+    R.check(max(hung.values()) <= TOL and fallen["board"] > 0.02 and low >= 0.1, "E18",
+            f"Cover: it drops {e:g} mm onto the board's back edge and no further; its underside "
+            f"is then {low:.2f} mm above the tray's",
+            f"Cover: dropped {e - 0.05:g} mm it shares mm3 with {told(hung)} (want 0); dropped "
+            f"{e + 0.3:g} mm it shares {fallen['board']:.3f} mm3 with the board (want > 0.02: "
+            f"it must not fall out); hanging on the board its underside is {low:.2f} mm above "
+            "the tray's (want >= 0.1)")
+    raised = meets(cover.translate([0.0, 0.0, k - 0.05]))
+    lifted = meets(cover.translate([0.0, 0.0, k + 0.3]))
+    R.check(max(raised.values()) <= TOL and lifted["frame"] > 0.05, "E18",
+            f"Cover: pushed up, the frame stops it after {k:g} mm",
+            f"Cover: raised {k - 0.05:g} mm it shares mm3 with {told(raised)} (want 0); raised "
+            f"{k + 0.3:g} mm it shares {lifted['frame']:.2f} mm3 with the frame (want > 0.05)")
+
     # ---- E15 the document's derived figures ---------------------------------------------------
     tb, fb, pb = S.bbox(tray), S.bbox(frame), S.bbox(plungers[0])
 
@@ -605,9 +726,14 @@ def main():
         "bottom_engagement": e_bottom,
         "lid_engagement": e_lid,
         "plunger_len": pb[5] - pb[2],
+        "cover_z": float(np.ptp(printed["Cover"][:, :, 2])),
+        "cover_engage": min(engage.values()),
+        "cover_gap_min": cover.min_gap(tray + frame, 2.0),
+        "cover_strain": strain,
         "tray_volume": tray.volume() / 1000,
         "frame_volume": frame.volume() / 1000,
         "plunger_volume": plungers[0].volume() / 1000,
+        "cover_volume": cover.volume() / 1000,
     }
     try:
         doc = spec.load_derived(args.doc)

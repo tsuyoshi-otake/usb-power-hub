@@ -852,6 +852,15 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   2026-11-19, "BF PCBA $15" needs an order over $100, and the flash "$30 Off $50" is of type ALL (no product
   named), over $50, so it outranks the SMT coupons for an order just above $50. A claim shows as the dialog
   "Coupon Received" (coupon center) or as the button turning to "Coupon Claimed" (event page).
+- **A line quoted from an order page is scanned for numbers before it is written.** The
+  tracking line "... manufacturing data finished." begins with the production file's number;
+  quoted whole as evidence, it put account data into `JLCPCB_REVIEW.md` and the journal
+  (commit `c5bed22`, 2026-11-21, found before any push and amended away). Before a commit that
+  records JLCPCB evidence, grep the staged diff for letter-digit runs
+  (`git diff --cached | grep -nE '^\+.*[A-Z][0-9]{2}-[0-9]{5,}|[A-Z]{1,3}[0-9]{8,}'`), and
+  write `<file number>` in a quoted line instead. An unpushed leak is removed with
+  `git commit --amend --only -- <paths>`, which leaves other staged work in the index; prove it
+  with `git log --all -S<string>`.
 
 ## Printed parts (manifold3d 3.5.4 and trimesh 5.2.0 in `~/tmp/cadvenv`; #11, 2026-11-13)
 
@@ -906,6 +915,17 @@ turns out wrong. The append-only log is [`journal.md`](journal.md).
   the counterbore's 1.1 mm step). Rev0.2 demands `btn_wall_min` 0.8 mm with two E10 probes
   per button; `btn_wall=1.5` now fails with `87.7 % of the 0.8 mm ring around the plunger's
   counterbore is plastic`.
+- **A 45° stop couples the play across it to its gap.** The cover's wedge hangs over the board's
+  back edge; pushed inwards by d, its sloped face comes d nearer the board's corner. With a gap of
+  0.2 mm and an inward play of 0.2 mm, E18's first run found the push ending on the board
+  (0.09 mm3 shared at 0.3 mm), not on the tray. A sloped stop's gap is at least twice the play
+  in the direction that closes it (`cover_ledge_gap` 0.4), and the check pushes the piece that
+  way and names what it meets first.
+- **A generator that refuses a parameter turns an old negative test into a crash.** Rev0.4's
+  `geometry()` raises when the cover's foot would be too short, and
+  `test_floor_under_the_lower_jaw` built `clamp_reach=3`. Before adding a `raise` on a
+  parameter, grep the tests for that parameter and move their values inside the new range
+  (6.5 there), keeping the fault they were written for.
 
 ## Delegated verifiers
 

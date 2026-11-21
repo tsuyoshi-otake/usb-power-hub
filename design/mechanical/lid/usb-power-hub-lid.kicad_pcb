@@ -13,7 +13,7 @@
 		(rev "Rev0.2")
 		(comment 1 "WIP - MANUFACTURING PROHIBITED")
 		(comment 2 "Source: design/mechanical/LID_Rev0.2.md")
-		(comment 3 "Interface: UsbPowerHub_Enclosure_Rev0.3_LidInterface.json")
+		(comment 3 "Interface: UsbPowerHub_Enclosure_Rev0.4_LidInterface.json")
 		(comment 4 "inputs sha256 2566976d1e3e0ff31c1ea6444bfba57d22d800d35fade3c6273c2af4b35dee7d")
 	)
 	(layers

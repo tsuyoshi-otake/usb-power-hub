@@ -140,7 +140,7 @@ def manifest(board, files, drc, sources):
         "- Light: how much of an LED's light the bare FR-4 window passes, and how much shows through",
         "  the solder mask beside the copper, is seen only on a built lid.",
         "- JLCPCB has not seen the files: no JLCDFM run, no quote, colours and finish not chosen.",
-        "- The enclosure the lid closes is not printed (ENCLOSURE_Rev0.3.md): the holes' positions",
+        "- The enclosure the lid closes is not printed (ENCLOSURE_Rev0.4.md): the holes' positions",
         "  are the enclosure's drawing, not a measured part.",
         "",
     ]

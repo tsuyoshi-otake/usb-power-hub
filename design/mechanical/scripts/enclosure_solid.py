@@ -58,6 +58,11 @@ def slot_y(cx, cz, w, h, r, ya, yb):
     return Manifold.batch_hull(parts)
 
 
+def hull(points):
+    """The convex hull of points (x, y, z)."""
+    return Manifold.hull_points(np.array(list(points), dtype=np.float64))
+
+
 def union(parts):
     out = Manifold()
     for part in parts:

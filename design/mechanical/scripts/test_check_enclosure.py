@@ -10,7 +10,7 @@ Each test builds the enclosure into a temporary directory, with one parameter ov
 on it in a new process. The unchanged build must pass; every corruption must fail and be
 named in the output. The repository's files are never modified. A test that edits a built
 file also corrects its SHA-256 in the manifest, so that only the check under test fails.
-The whole run takes about 1.5 min.
+The whole run takes about 2 min.
 """
 import hashlib
 import importlib.util
@@ -151,6 +151,21 @@ def lifted(tri, back):
     return tri + np.array([0, 0, 1.0]), compose(back, [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -1.0]])
 
 
+def reshaped(change):
+    """A corruption of a piece's shape: change(solid in the assembly frame) -> solid."""
+    def edit(tri, back):
+        man = change(S.to_manifold(S.apply(tri, back[0])))
+        return S.apply(S.triangles(man), S.inverse(back[0])), back
+    return edit
+
+
+def shifted(dx=0.0, dy=0.0, dz=0.0):
+    """A corruption of a piece's place: the STL as built, its to_assembly matrix moved."""
+    def edit(tri, back):
+        return tri, [[row[:3] + [row[3] + d] for row, d in zip(m, (dx, dy, dz))] for m in back]
+    return edit
+
+
 def one_triangle_less(tri, back):
     return tri[1:], back
 
@@ -198,7 +213,7 @@ class CheckEnclosure(unittest.TestCase):
     # E01 -------------------------------------------------------------------------------------
     def test_no_manifest(self):
         self.assertFailsWith(variant(edit=lambda out: (out / spec.MANIFEST).unlink()),
-                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.3_Manifest.json")
+                             "FAIL E01 no manifest UsbPowerHub_Enclosure_Rev0.4_Manifest.json")
 
     def test_piece_not_in_the_manifest(self):
         def edit(out):
@@ -206,8 +221,16 @@ class CheckEnclosure(unittest.TestCase):
             manifest["pieces"] = manifest["pieces"][:2]
             save_manifest(path, manifest)
         self.assertFailsWith(variant(edit=edit),
-                             "FAIL E01 pieces ['Tray', 'Frame'], want Tray, Frame, Plunger",
+                             "FAIL E01 pieces ['Tray', 'Frame'], want Tray, Frame, Plunger, Cover",
                              "enclosure check: stopped")
+
+    def test_cover_not_in_the_manifest(self):
+        def edit(out):
+            path, manifest = manifest_of(out)
+            manifest["pieces"] = manifest["pieces"][:3]
+            save_manifest(path, manifest)
+        self.assertFailsWith(variant(edit=edit), "FAIL E01 pieces ['Tray', 'Frame', 'Plunger'], "
+                             "want Tray, Frame, Plunger, Cover", "enclosure check: stopped")
 
     def test_stl_edited_after_the_build(self):
         def edit(out):
@@ -216,11 +239,11 @@ class CheckEnclosure(unittest.TestCase):
             raw[200] ^= 1
             f.write_bytes(bytes(raw))
         self.assertFailsWith(variant(edit=edit),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.3_Tray.stl: SHA-256 differs")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.4_Tray.stl: SHA-256 differs")
 
     def test_piece_missing(self):
         self.assertFailsWith(variant(edit=lambda out: (out / f"{spec.PREFIX}Plunger.stl").unlink()),
-                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.3_Plunger.stl: missing")
+                             "FAIL E01 UsbPowerHub_Enclosure_Rev0.4_Plunger.stl: missing")
 
     def test_document_value_changed_after_the_build(self):
         self.assertFailsWith(variant(doc=table_value("params", "gap", "0.5")),
@@ -268,6 +291,10 @@ class CheckEnclosure(unittest.TestCase):
         self.assertFailsWith(variant(edit=rewrite_stl("Frame", turned_over)),
                              "FAIL E04 Frame: ", "mm2 of faces steeper than 45 degrees hang in the air")
 
+    def test_cover_printed_the_other_way_up(self):
+        self.assertFailsWith(variant(edit=rewrite_stl("Cover", turned_over)),
+                             "FAIL E04 Cover: ", "mm2 of faces steeper than 45 degrees hang in the air")
+
     def test_piece_above_the_bed(self):
         self.assertFailsWith(variant(edit=rewrite_stl("Tray", lifted)),
                              "FAIL E04 Tray: lowest point z 1.000")
@@ -288,6 +315,12 @@ class CheckEnclosure(unittest.TestCase):
         self.assertRegex(out, r"FAIL E05 U5: \d+\.\d\d mm3 of the Frame inside its envelope "
                               r"\(height 10\.2 mm \+ 0\.3 mm\)")
         self.assertNotIn("FAIL E05 SW", out)
+
+    def test_part_under_the_covers_wedge(self):
+        # C3 moved to the back edge, under the wedge that reaches over the board
+        rc, out = variant(interface=moved("C3", dy=4.0))
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E05 C3: \d+\.\d\d mm3 of the Cover inside its envelope")
 
     def test_part_without_a_height(self):
         name = "Fuse_Bourns_MF-R300_Style2_P5.10mm"
@@ -507,7 +540,8 @@ class CheckEnclosure(unittest.TestCase):
         self.assertIn("PASS E17 J5: the SWD land is at the back edge", out)
 
     def test_floor_under_the_lower_jaw(self):
-        rc, out = variant("clamp_reach=3")
+        # 6.5 and not less: the generator refuses a floor opening too short for the cover's foot
+        rc, out = variant("clamp_reach=6.5")
         self.assertFailsWith((rc, out), "FAIL E17 J5: ", "mm3 of the tray and 0.00 mm3 of the frame")
 
     def test_window_lower_than_the_upper_jaw(self):
@@ -539,7 +573,100 @@ class CheckEnclosure(unittest.TestCase):
         # the seam's exemption is the document's opening and no wider
         self.assertFailsWith(variant("clamp_clear=2.5"), "FAIL E14 Tray: ", "FAIL E14 Frame: ")
 
+    # E18 -------------------------------------------------------------------------------------
+    def test_cover_without_clearance(self):
+        self.assertFailsWith(variant("cover_clear=0"), "FAIL E18 Cover: at rest it shares mm3 with ",
+                             "smallest gap 0.000 mm, want >= 0.14 mm")
+
+    def test_cover_loose_in_the_wall(self):
+        self.assertFailsWith(variant("cover_clear=0.7"), "FAIL E18 Cover: ",
+                             "gaps left 0.70, right 0.70, top 0.70, bottom 0.60 mm (want 0.05 .. 0.6)")
+
+    def test_cover_proud_of_the_wall(self):
+        self.assertFailsWith(variant(edit=rewrite_stl("Cover", shifted(dy=0.5))),
+                             "FAIL E03 Cover: ", "mm3 outside the outline and its 2 mm corners",
+                             "outer face at y 74.90, wall at 74.40")
+
+    def test_cover_shorter_than_the_opening(self):
+        cut = reshaped(lambda man: man ^ S.box(0.0, 0.0, -20.0, 100.0, 100.0, 10.8))
+        self.assertFailsWith(variant(edit=rewrite_stl("Cover", cut)), "FAIL E18 Cover: ", "top 1.20",
+                             "raised 0.5 mm it shares 0.00 mm3 with the frame (want > 0.05)")
+
+    def test_detents_that_do_not_reach_the_floor(self):
+        self.assertFailsWith(variant("cover_catch=0.2"), "FAIL E18 Cover: pulled 1.0 mm outwards "
+                             "it meets the tray by left 0.00, right 0.00 mm3")
+
+    def test_no_room_for_a_finger_to_bend(self):
+        rc, out = variant("cover_slit=0.2")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E18 Cover: left [1-9]\.\d\d, right [1-9]\.\d\d mm3 in the "
+                              r"0\.50 mm a finger bends into \(want 0\)")
+
+    def test_finger_thinner_than_the_document_says(self):
+        rc, out = variant("cover_arm_w=0.3")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E18 Cover: .* fingers left \d\d\.\d\d, right \d\d\.\d\d "
+                              r"% plastic \(want 100\)")
+
+    def test_finger_bent_too_far(self):
+        self.assertFailsWith(variant("cover_catch=1.2"), "FAIL E18 Cover: ",
+                             "strain 2.08 %, want <= 1.5")
+
+    def test_cover_without_its_wedge(self):
+        self.assertFailsWith(variant("cover_ledge=0"), "FAIL E18 Cover: ",
+                             "dropped 0.7 mm it shares 0.000 mm3 with the board (want > 0.02")
+
+    def test_wedge_that_a_push_drives_into_the_board(self):
+        rc, out = variant("cover_ledge_gap=0.1")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E18 Cover: pushed in 0\.3 mm it shares mm3 with tray \d+\.\d\d, "
+                              r"frame 0\.00, board 0\.[0-9]*[1-9]")
+
+    def test_cover_that_hangs_below_the_tray(self):
+        self.assertFailsWith(variant("cover_lift=0.4"), "FAIL E18 Cover: ",
+                             "hanging on the board its underside is 0.00 mm above the tray's")
+
+    def test_foot_that_does_not_reach_the_floors_end(self):
+        cut = reshaped(lambda man: man ^ S.box(0.0, 65.4, -20.0, 100.0, 100.0, 30.0))
+        self.assertFailsWith(variant(edit=rewrite_stl("Cover", cut)),
+                             "FAIL E18 Cover: pushed in 0.3 mm it shares mm3 with tray 0.00")
+
+    def test_no_slot_for_a_fingernail(self):
+        rc, out = variant("cover_pull_l=0.5")
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E18 Cover: .*; [1-9]\d*\.\d\d mm3 in the fingernail's slot "
+                              r"of 8 x 3 mm \(want 0\)")
+
+    def test_foot_that_leaves_the_floor_open(self):
+        self.assertFailsWith(variant("cover_pull_l=5"), "FAIL E18 Cover: its foot closes 60.6 % of "
+                             "the floor's opening (want >= 65)")
+
+    def test_cover_that_cannot_leave_through_the_wall(self):
+        # a lump on the inner face, above the opening's top: free at rest, held by the frame
+        lump = reshaped(lambda man: man + S.box(40.0, 71.6, 11.0, 49.0, 72.6, 11.6)
+                        + S.box(40.0, 71.6, 11.0, 49.0, 72.2, 14.0))
+        rc, out = variant(edit=rewrite_stl("Cover", lump))
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E18 Cover: without its detents it meets, on its way out, mm3 "
+                              r"of tray 0\.00, frame [1-9]\d*\.\d\d")
+        self.assertIn("PASS E18 Cover: at rest it touches nothing", out)
+
+    def test_lead_over_the_covers_foot(self):
+        # a foot 2 mm too thick, under a through-hole that the real board does not have there
+        def hole(board):
+            board["holes"].append({"ref": "TPX", "pad": "1", "x": 44.5, "y": 70.4,
+                                   "drill": [1.0, 1.0], "plated": True})
+        lump = reshaped(lambda man: man + S.box(42.0, 70.0, -5.6, 47.0, 71.0, -3.1))
+        rc, out = variant(edit=rewrite_stl("Cover", lump), interface=as_json(hole))
+        self.assertEqual(rc, 1, out)
+        self.assertRegex(out, r"FAIL E06 TPX pad '1' at \(44\.5, 70\.4\): \d+\.\d\d mm3 of the "
+                              r"Cover within 2\.5 mm below its hole")
+
     # E15 -------------------------------------------------------------------------------------
+    def test_cover_figure_edited(self):
+        self.assertFailsWith(variant(doc=table_value("derived", "cover_engage", "0.50")),
+                             "FAIL E15 derived figures differ: cover_engage 0.5 (built: 0.40)")
+
     def test_derived_figure_edited(self):
         rc, out = variant(doc=table_value("derived", "outer_z", "27.00"))
         self.assertFailsWith((rc, out), "FAIL E15 derived figures differ: outer_z 27.0 (built: 27.70)")
@@ -571,7 +698,7 @@ class CheckEnclosure(unittest.TestCase):
         here = spec.source_tag(spec.ASSEMBLY / spec.MANIFEST)      # the repository's build
         self.assertFailsWith(variant("plunger_proud=1.2", pictures=lambda out, pic: picture(pic, here)),
                              "FAIL E16 1 of 1 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.3_Assembled.png): run render_enclosure.py")
+                             "(UsbPowerHub_Enclosure_Rev0.4_Assembled.png): run render_enclosure.py")
 
     def test_picture_that_names_no_build(self):
         def pictures(out, pic):
@@ -579,7 +706,7 @@ class CheckEnclosure(unittest.TestCase):
             picture(pic, spec.source_tag(out / spec.MANIFEST))
         self.assertFailsWith(variant(pictures=pictures),
                              "FAIL E16 1 of 2 pictures were not drawn from these files "
-                             "(UsbPowerHub_Enclosure_Rev0.3_Open.png)")
+                             "(UsbPowerHub_Enclosure_Rev0.4_Open.png)")
 
     def test_no_pictures(self):
         self.assertFailsWith(variant(pictures=lambda out, pic: None),

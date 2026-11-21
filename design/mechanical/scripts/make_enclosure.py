@@ -4,10 +4,11 @@ Run with the CAD venv's Python (manifold3d, numpy), from the repository root:
 
     ~/tmp/cadvenv/Scripts/python.exe -I -B design/mechanical/scripts/make_enclosure.py
 
-It reads   design/mechanical/ENCLOSURE_Rev0.3.md   (the params and heights tables)
+It reads   design/mechanical/ENCLOSURE_Rev0.4.md   (the params and heights tables)
            design/mechanical/reference/board_interface_Rev0.7.json
-and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.3_Tray.stl, _Frame.stl,
-           _Plunger.stl (each in its print orientation), _LidInterface.json, _Manifest.json
+and writes design/mechanical/assembly/UsbPowerHub_Enclosure_Rev0.4_Tray.stl, _Frame.stl,
+           _Plunger.stl, _Cover.stl (each in its print orientation), _LidInterface.json,
+           _Manifest.json
 then draws the pictures (render_enclosure.py, about 20 s) and runs check_enclosure.py.
 Exit status 0 means written, drawn and checked.
 
@@ -120,6 +121,21 @@ def geometry(p, heights, board):
     if g.by1 - land["courtyard"][3] > 1.0:
         raise ValueError(f"{land['ref']}: the SWD land is not at the back edge")
 
+    # the cover of that opening (E11), at rest: a slab in the wall, a foot in the floor
+    k = p.cover_clear
+    g.cover = SimpleNamespace(
+        x0=g.clamp.x0 + k, x1=g.clamp.x1 - k, cx=land["x"],
+        z0=g.z_bottom + p.cover_lift, z1=p.clamp_up - k,
+        y_tip=g.clamp.y_in + k)                          # the foot's end, in the floor
+    v = g.cover
+    v.plate_x0 = v.x0 + p.cover_arm_w + p.cover_slit     # the foot's plate, between the slits
+    v.plate_x1 = v.x1 - p.cover_arm_w - p.cover_slit
+    v.finger_len = g.yi1 - (v.y_tip + p.cover_catch)     # a finger's root to its detent's point
+    if v.plate_x1 - v.plate_x0 < p.cover_pull_w + 2.0:
+        raise ValueError("the cover's foot is too narrow for its fingers, slits and pull slot")
+    if g.yi1 - v.y_tip < p.cover_pull_l + 2.0 + 2 * p.cover_catch:
+        raise ValueError("the cover's foot is too short for its detents and pull slot")
+
     # the plunger, at rest on its switch
     g.cone_h = (p.plunger_collar_d - p.plunger_cap_d) / 2
     g.z_cap = g.z_lid + p.plunger_proud              # the cap's top
@@ -173,6 +189,22 @@ def clamp_cutter(p, g):
     return S.box(c.x0, c.y_in, g.z_bottom - 1.0, c.x1, g.yo1 + 1.0, p.clamp_up)
 
 
+def cover_detents(p, g, shift, z0, z1):
+    """The 45 degree detents at the ends of the cover's two fingers, `shift` further out.
+
+    With shift = 0 they are the cover's; with shift = cover_clear they are the notches that
+    the tray's floor has for them, open towards the clamp's opening.
+    """
+    v, h = g.cover, p.cover_catch
+    out = []
+    for face, s in ((v.x0, -1.0), (v.x1, 1.0)):          # a finger's outer face, outwards
+        x = face + s * shift
+        plan = [(x - s * 0.4, v.y_tip), (x, v.y_tip), (x + s * h, v.y_tip + h),
+                (x, v.y_tip + 2 * h), (x - s * 0.4, v.y_tip + 2 * h)]
+        out.append(S.hull([(px, py, z) for z in (z0, z1) for px, py in plan]))
+    return S.union(out)
+
+
 def build_tray(p, g):
     body = shell(p, g, g.z_bottom, 0.0, "bottom")
     grow = p.lip_h + p.lip_top
@@ -193,7 +225,8 @@ def build_tray(p, g):
         tray = tray - S.cyl(hx, hy, g.z_bottom - 1.0, g.z_pcb + 1.0, p.screw_clear_d / 2)
         tray = tray - S.cyl(hx, hy, g.z_bottom - 0.5, g.z_bottom + sink,
                             p.csk_d / 2 + 0.5, p.screw_clear_d / 2)
-    return tray - port_cutters(p, g) - clamp_cutter(p, g)
+    notches = cover_detents(p, g, p.cover_clear, g.z_bottom - 1.0, g.z_floor + 0.5)
+    return tray - port_cutters(p, g) - clamp_cutter(p, g) - notches
 
 
 def build_frame(p, g):
@@ -265,6 +298,29 @@ def build_plunger(p, g, b):
     ])
 
 
+def build_cover(p, g):
+    """The cover of the clamp's opening (E11), at rest in the assembly frame."""
+    v = g.cover
+    ym = (v.y_tip + g.yi1) / 2
+    cc = max(p.edge_chamfer - p.cover_lift, 0.0)         # the tray's bottom chamfer, carried on
+    slab = S.hull([(x, y, z) for x in (v.x0, v.x1) for y, z in (
+        (g.yi1, v.z0), (g.yo1 - cc, v.z0), (g.yo1, v.z0 + cc), (g.yo1, v.z1), (g.yi1, v.z1))])
+    # the wedge over the board's back edge: its 45 degree face is the down-stop
+    low = p.cover_ledge_gap - (g.yi1 - g.by1)
+    top = p.cover_ledge_gap + p.cover_ledge + p.cover_ledge_h
+    wedge = S.hull([(x, y, z) for x in (v.x0, v.x1) for y, z in (
+        (g.yi1 + JOIN, low), (g.yi1, low),
+        (g.by1 - p.cover_ledge, p.cover_ledge_gap + p.cover_ledge),
+        (g.by1 - p.cover_ledge, top), (g.yi1 + JOIN, top))])
+    plate = (S.box(v.plate_x0, v.y_tip, v.z0, v.plate_x1, g.yi1 + JOIN, g.z_floor)
+             - S.box(v.cx - p.cover_pull_w / 2, ym - p.cover_pull_l / 2, v.z0 - 1.0,
+                     v.cx + p.cover_pull_w / 2, ym + p.cover_pull_l / 2, g.z_floor + 1.0))
+    fingers = [S.box(v.x0, v.y_tip, v.z0, v.x0 + p.cover_arm_w, g.yi1 + JOIN, g.z_floor),
+               S.box(v.x1 - p.cover_arm_w, v.y_tip, v.z0, v.x1, g.yi1 + JOIN, g.z_floor)]
+    return S.union([slab, wedge, plate] + fingers
+                   + [cover_detents(p, g, 0.0, v.z0, g.z_floor)])
+
+
 def lid_interface(p, g, board):
     holes = [{"ref": ref, "kind": "screw", "x": hx, "y": hy, "d": p.lid_screw_d,
               "keepout_d": p.lid_head_keepout_d} for ref, hx, hy in g.holes]
@@ -297,7 +353,9 @@ def lid_interface(p, g, board):
 
 
 # ---- figures for the document ----------------------------------------------------------------
-def derived(p, g, heights, board, volumes):
+def derived(p, g, heights, board, solids):
+    volumes = {name: man.volume() for name, man in solids.items()}
+    engage = p.cover_catch - p.cover_clear
     tall_h, tall_ref = max((heights[spec.footprint_name(f)], f["ref"])
                            for f in board["footprints"])
     head_top = g.z_bottom + (p.csk_d - p.csk_head_d) / 2
@@ -329,9 +387,18 @@ def derived(p, g, heights, board, volumes):
         ("lid_engagement", p.lid_screw_len - p.lid_t, "mm",
          "Lid screw's thread below the lid, in the post's insert."),
         ("plunger_len", g.z_cap - g.buttons[0].h, "mm", "Plunger length."),
+        ("cover_z", g.cover.z1 - g.cover.z0, "mm", "The cover's print height."),
+        ("cover_engage", engage, "mm",
+         "A detent of the cover behind the side of the opening in the tray's floor."),
+        ("cover_gap_min", solids["Cover"].min_gap(solids["Tray"] + solids["Frame"], 2.0), "mm",
+         "Smallest gap between the cover at rest and the tray or the frame."),
+        ("cover_strain", 150.0 * p.cover_arm_w * engage / g.cover.finger_len ** 2, "%",
+         "Strain at a finger's root while its detent passes the opening's side "
+         "(1.5 x width x deflection / length squared)."),
         ("tray_volume", volumes["Tray"] / 1000.0, "cm3", "Solid volume of the tray."),
         ("frame_volume", volumes["Frame"] / 1000.0, "cm3", "Solid volume of the frame."),
         ("plunger_volume", volumes["Plunger"] / 1000.0, "cm3", "Solid volume of one plunger."),
+        ("cover_volume", volumes["Cover"] / 1000.0, "cm3", "Solid volume of the cover."),
     ]
 
 
@@ -373,15 +440,18 @@ def main():
     g = geometry(p, heights, board)
 
     solids = {"Tray": build_tray(p, g), "Frame": build_frame(p, g),
-              "Plunger": build_plunger(p, g, g.buttons[0])}
+              "Plunger": build_plunger(p, g, g.buttons[0]), "Cover": build_cover(p, g)}
     back = {  # print frame -> assembly frame
         "Tray": [[[1, 0, 0, g.xo0], [0, 1, 0, g.yo0], [0, 0, 1, g.z_bottom]]],
         "Frame": [[[1, 0, 0, g.xo0], [0, -1, 0, g.yo1], [0, 0, -1, g.z_top]]],
         "Plunger": [[[1, 0, 0, b.x], [0, -1, 0, b.y], [0, 0, -1, g.z_cap]] for b in g.buttons],
+        "Cover": [[[1, 0, 0, g.cover.x0 - p.cover_catch], [0, 1, 0, g.cover.y_tip],
+                   [0, 0, 1, g.cover.z0]]],
     }
     how = {"Tray": "as modelled, the floor on the bed",
            "Frame": "turned over, its top face on the bed",
-           "Plunger": "turned over, the cap on the bed"}
+           "Plunger": "turned over, the cap on the bed",
+           "Cover": "as modelled, the foot on the bed"}
 
     args.out.mkdir(parents=True, exist_ok=True)
     pieces, volumes = [], {}
@@ -391,7 +461,7 @@ def main():
             return 1
         volumes[name] = man.volume()
         tri = S.apply(S.triangles(man), S.inverse(back[name][0]))
-        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.3 {name}")
+        data = S.stl_bytes(tri, f"UsbPowerHub Enclosure Rev0.4 {name}")
         file = f"{spec.PREFIX}{name}.stl"
         (args.out / file).write_bytes(data)
         lo, hi = tri.reshape(-1, 3).min(axis=0), tri.reshape(-1, 3).max(axis=0)
@@ -409,14 +479,14 @@ def main():
     lid_file = f"{spec.PREFIX}LidInterface.json"
     (args.out / lid_file).write_bytes(lid_text.encode("ascii"))
 
-    rows = derived(p, g, heights, board, volumes)
+    rows = derived(p, g, heights, board, solids)
     manifest = {
         "schema": 1,
-        "about": "Enclosure Rev0.3, written by design/mechanical/scripts/make_enclosure.py. "
+        "about": "Enclosure Rev0.4, written by design/mechanical/scripts/make_enclosure.py. "
                  "Do not edit.",
         "state": "WIP",
-        "revision": "Rev0.3",
-        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.3.md", "inputs_sha256": digest},
+        "revision": "Rev0.4",
+        "document": {"path": "design/mechanical/ENCLOSURE_Rev0.4.md", "inputs_sha256": digest},
         "overrides": overrides,
         "board_interface": {
             "path": "design/mechanical/reference/board_interface_Rev0.7.json",
